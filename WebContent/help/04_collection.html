@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Field Collections &amp; Isolations</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.0  (Linux)">
+	<META NAME="AUTHOR" CONTENT="George Chlipala">
+	<META NAME="CREATED" CONTENT="20080421;12543200">
+	<META NAME="CHANGEDBY" CONTENT="George Chlipala">
+	<META NAME="CHANGED" CONTENT="20091029;18411800">
+	<META NAME="KEYWORDS" CONTENT="field collection,isolation,latitude,longitude,geographic data,location">
+	<META NAME="MODULE" CONTENT="collection">
+	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<H2>Field Collections &amp; Isolations</H2>
+<HR WIDTH='90%' ALIGN='LEFT'/>
+<P>While strains can be acquired from other collections, often a researcher will want to isolate novel strains from material collected in the field.  The CYANOS database can manage information about field collections, e.g. collector and geographic coordinates, as well as isolations, e.g. media, type and parent collection/isolation.  The CYANOS database can also link isolations and strains, which allows one to ultimately link a collection in the field with a strain and its data.</P>
+<P><B><A NAME='toc'>Table of Contents</A></B>
+<OL>
+<LI><A HREF='#collection'>Field Collections</A>
+<OL>
+<LI><A HREF='#locations'>Location and Geographic Data</A></LI>
+<LI><A HREF='#add_collection'>Adding Field Collection Data</A>
+<OL>
+<LI><A HREF='#add_collection_web'>by Web Form</A></LI>
+<LI><A HREF='#add_collection_upload'>Spreadsheet Upload</A></LI>
+</OL></LI>
+</OL></LI>
+<LI><A HREF='#isolation'>Isolations</A>
+<OL>
+<LI><A HREF='#add_isolation'>Adding Isolation Data</A>
+<OL>
+<LI><A HREF='#add_isolation_web'>by Web Form</A></LI>
+<LI><A HREF='#add_isolation_upload'>Spreadsheet Upload</A></LI>
+</OL></LI>
+<LI><A HREF='#linking'>Linking Isolation and Strain Records</A></LI>
+</OL></LI>
+<LI><A HREF='#roles'>Required Roles</A></LI>
+</OL>
+</P>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<P ALIGN='CENTER'><H2><A NAME='collection'>Field Collections</A></H2></P>
+
+A typical field collection record will contain a date, collector's name, location, and a brief description of the collection.  The CYANOS database will allow the management of those parameters as well as geographic coordinates and an associated project code.  The &quot;Collection ID&quot; for any collection can consist of any combination of letters and numbers, e.g. UIC 2008-GC23 or 17453.05, however, it must be unique.
+
+<H2><A NAME='locations'>Location and Geographic Data</A></H2>
+
+<P>Location information in the CYANOS database is handled using four fields: Name, Coordinates (latitude and longitude), and Precision.</P>
+<P><IMG SRC="collection01.png" NAME="graphics5" ALIGN=LEFT BORDER=0></P><BR CLEAR='LEFT'>
+<P>The &quot;Name&quot; field is intended to hold the name or brief description of the location, e.g. Pacific Ocean, San Diego, CA or Burnham Park, Chicago, IL.  The &quot;Coordinates&quot; fields hold the latitude and longitude data of the collection site.  The CYANOS database can parse coordinate data in a variety of formats.  The following are accepted formats.  For all examples, the same location is used.</P>
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR><TH></TH><TH>Format</TH><TH>Examples</TH></TR>
+<TR><TD>Signed Decimal Degrees</TD><TD>DD.DDDD (negative for S/W)</TD><TD>44.9050 or -86.0635</TD></TR>
+<TR><TD>Hemisphere, Decimal Degrees</TD><TD>H DD.DDDD</TD><TD>N 44.9050 or W 86.0635</TD></TR>
+<TR><TD>Degrees, Minutes</TD><TD>H DD MM.MMM'</TD><TD>N 44 54.301' or W 86 3.808'</TD></TR>
+<TR><TD>Degrees, Minutes, Seconds</TD><TD>H DD MM' SS&quot;</TD><TD>N 45 54' 18&quot; or W 86 3' 49&quot;</TD></TR>
+</TABLE>
+<P>By default, the CYANOS will display coordinate data using the H DD MM.MMM' format.  In addition to the coordinates, the precision of the coordinates can be recorded.  This value is not used by the database but stored for future reference, e.g. to aid in recollection.</P>
+<P>If the CYANOS web interface is properly configured with a Google API Key (see the Installation Guide for configuration details) and the collection record has valid coordinates then the &quot;Show map&quot; feature will be enabled.  If one clicks the &quot;Show map&quot; button, the web interface will build a map of the collection area along with markers for nearby collections.</P>
+<P><IMG SRC="collection02.png" NAME="graphics5" ALIGN=LEFT BORDER=0></P><BR CLEAR='LEFT'>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='add_collection'>Adding Field Collection Data</A></H2>
+<P>Field collection data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
+
+<H3><A NAME='add_collection_web'>by Web Form</A></H3>
+<OL>
+<LI>Select <B>Add New Collection</B> from the <B>Collection</B> menu.</LI>
+<LI>Enter information into the <I>Add a New Collection</I> form.
+<P><IMG SRC="collection03.png" NAME="graphics7" ALIGN=LEFT BORDER=0></P></LI>
+<BR CLEAR='LEFT'>
+<LI>Click the <B><SPAN CLASS='exampleButton'>Create</SPAN></B> Button.</LI>
+</OL>
+
+<H3><A NAME='add_collection_upload'>Spreadsheet Upload</A></H3>
+
+<P>Often multiple field collections are made as part of a collection trip, thus creating a spreadsheet is typically more useful than the web form.  As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
+Collections</B>.  The format of the spreadsheet should be as follows.</P>
+<TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
+<TR BGCOLOR="#e6e6e6">
+<TH WIDTH='11%'>Collection ID</TH>
+<TH WIDTH='11%'>Date</TH>
+<TH WIDTH='11%'>Collected by</TH>
+<TH WIDTH='11%'>Location Name</TH>
+<TH WIDTH='11%'>Latitude</TH>
+<TH WIDTH='11%'>Longitude</TH>
+<TH WIDTH='11%'>Lat/Long</TH>
+<TH WIDTH='11%'>Precision</TH>
+<TH WIDTH='11%'>Notes</TH>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+</TABLE>
+<P>For each entry, only the &quot;Collection ID&quot; is required, although the collection date will be set to a default value, i.e. January 1, 1900, if not present in the spreadsheet.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<P ALIGN='CENTER'><H2><A NAME='isolation'>Isolations</A></H2></P>
+
+<P>The isolation information stored allows one to keep track of isolation work as well as connect strains with collections. 
+Isolation records can contain the following parameters: date, type, media, parent material, and notes. As with field collections, isolation IDs can consist of any combination of alphanumeric characters and must be unique.  This isolation ID is important to connect strain records with isolation and collection information.</P>
+
+<H2><A NAME='add_isolation'>Adding Isolation Data</A></H2>
+<P>As with field collection data, isolation data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
+
+<H3><A NAME='add_isolation_web'>by Web Form</A></H3>
+<OL>
+<LI>Locate the parent field collection record.</LI>
+<LI>Click the <B><SPAN CLASS='exampleButton'>Add an Isolation</SPAN></B> button at the bottom of the <I>Isolation List</I>.
+<P><IMG SRC="isolation01.png" NAME="graphics8" ALIGN=CENTER BORDER=0></P></LI>
+<LI>Enter information into the <I>Add an Isolation</I> subform.
+<P><IMG SRC="isolation02.png" NAME="graphics9" ALIGN=CENTER BORDER=0></P></LI>
+<LI>Click the <B><SPAN CLASS='exampleButton'>Add</SPAN></B> Button.</LI>
+</OL>
+
+<H3><A NAME='add_isolation_upload'>Spreadsheet Upload</A></H3>
+<P>As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
+Isolations</B>.  The format of the spreadsheet should be as follows.</P>
+
+<TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
+<TR BGCOLOR="#e6e6e6">
+<TH WIDTH='12%'>Isolation ID</TH>
+<TH WIDTH='12%'>Collection ID</TH>
+<TH WIDTH='12%'>Date</TH>
+<TH WIDTH='12%'>Parent</TH>
+<TH WIDTH='12%'>Type</TH>
+<TH WIDTH='12%'>Media</TH>
+<TH WIDTH='12%'>Notes</TH>
+<TH WIDTH='12%'>Project Code</TH>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+</TABLE>
+<P>For each entry, the &quot;Isolation ID&quot; and &quot;Parent&quot;
+are required, although the isolation date will be set to a default
+value, i.e. January 1, 1900, if not present in the spreadsheet.  The
+&quot;Parent&quot; value should be either the isolation ID of the
+parent isolation or the collection ID, if this isolation was made
+directly from the field collected material.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='linking'>Linking Isolation and Strain Records</A></H2>
+<P>Ultimately, an isolation should be linked to a strain in the collection. Since the strain will be linked to chemical and bioassay data, the isolation link allows one to associate bioassay and compound information with collection data, e.g. collection date and geographic location.  To link a strain with an isolation record, the culture source of the strain should be set to the isolation ID of the parent isolation.  The following figure shows a strain record with a culture source that does not corresponds to an isolation ID.</P>
+<P><IMG SRC="isolation03.png" NAME="graphics10" ALIGN=CENTER BORDER=0></P>
+<P>Once the culture source properly set to an isolation ID, the CYANOS database should be able to link the strain record with the isolation and collection information.</P>
+<P><IMG SRC="isolation04.png" NAME="graphics11" ALIGN=CENTER BORDER=0></P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='roles'>Required Roles</A></H2>
+<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Actions in
+italics utilize global level permissions only.</P>
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
+<TR VALIGN=TOP><TD>Add a new field collection</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a field collection</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new isolation</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify an isolation</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+</TABLE>
+<A HREF='#toc'>Return to table of contents</A>
+
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+</BODY>
+</HTML>

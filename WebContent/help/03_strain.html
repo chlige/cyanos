@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Strain &amp; Species Management</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.0  (Linux)">
+	<META NAME="AUTHOR" CONTENT="George Chlipala">
+	<META NAME="CREATED" CONTENT="20080421;12543200">
+	<META NAME="CHANGEDBY" CONTENT="George Chlipala">
+	<META NAME="CHANGED" CONTENT="20091029;18411800">
+	<META NAME="KEYWORDS" CONTENT="strain,add strain,delete strain,modify strain,taxonomy">
+	<META NAME="MODULE" CONTENT="strain">
+	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<H2>Strain &amp; Species Management</H2>
+<HR WIDTH='90%' ALIGN='LEFT'/>
+<P>Basic strain and species information can be managed in the CYANOS database.  Allowed attributes include strain ID, culture source, date added, date removed, removal reason, culture status, Latin binomial, default
+media, project code and notes.</P>
+<P><B><A NAME='toc'>Table of Contents</A></B>
+<OL>
+<LI><A HREF='#add'>Adding a Strain</A></LI>
+<LI><A HREF='#view'>Viewing and Modifying a Strain</A></LI>
+<LI><A HREF='#photos'>Managing Photos</A></LI>
+<LI><A HREF='#taxa'>Taxonomic Data</A></LI>
+<LI><A HREF='#roles'>Required Roles</A></LI>
+</OL>
+</P>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='add'>Adding a Strain</A></H2>
+<OL>
+<LI><P>Select <B>Add New</B> from the <B>Strain</B> menu.<BR/>
+<IMG SRC="strain01.png" NAME="graphics1" ALIGN=CENTER BORDER=0></P></LI>
+<LI><P>Enter information into the <I>Add Strain</I> form.<BR/>
+<IMG SRC="strain02.png" NAME="graphics2" ALIGN=CENTER WIDTH=90% BORDER=0></P></LI>
+<LI><P>Click the <B><SPAN CLASS='exampleButton'>Add Strain</SPAN></B> Button.<BR/>
+<IMG SRC="strain03.png" NAME="graphics3" ALIGN=CENTER WIDTH=90% BORDER=0></P></LI>
+</OL>
+<P>The strain is now added to the database and can be viewed on the master strain list.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='view'>Viewing and Modifying a Strain</A></H2>
+<P>Strain information can be accessed from various strain links within the CYANOS website as well as the strain search form that is presented on the main page and accessible via the menu <B>Strain</B> &gt; <B>Search</B>.  An example of this list is seen in the following figure.</P>
+<IMG SRC="strain04.png" NAME="graphics18" ALIGN=CENTER BORDER=0>
+<P>Clicking on a strain, whether from the search list or a strain link within CYANOS, will  present the details of that strain.  An example strain page is seen in the following figure.</P>
+<IMG SRC="strain05.png" NAME="graphics19" ALIGN=CENTER BORDER=0>
+<P>The top part of the page displays the attributes of the strain.  If the user has permission to modify the strain, the <B><SPAN CLASS='exampleButton'>Edit Values</SPAN></B> button will be available and the user can click that button to
+display an editable form to change the strains attributes.</P>
+<P>The lower part of the page has sections that list records associated to the strain.  Each of these sections can be opened or closed by clicking on the green triangle to the left of the section title.  For example, if a user clicked on <I>Inoculations &amp; Field Collections</I>, the section would open to reveal a listing of inoculations or field
+collections associated with this strain.</P>
+<IMG SRC="strain06.png" NAME="graphics20" ALIGN=CENTER BORDER=0>
+<P>Once the user is finished with a particular section it can be collapsed by clicking on the green triangle again.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='taxa'>Taxonomic Data</A></H2>
+<P>Taxonomic information can be stored in the <FONT FACE="Courier, monospace">taxonomic</FONT> table of the CYANOS database.  This information can be tied to individual strains using the genus of a strain record.  The CYANOS web interface will automatically retrieve and present this information, if available.  A <B>Taxa Browser</B> is available via the <B>Strain</B> menu as well as the taxonomy links provided on the <I>Strain Information</I> page (see below).  The <B>Taxa Browser</B> allows one to navigate strains based upon taxonomic data.</P>
+<P><IMG SRC="strain07.png" NAME="graphics21" ALIGN=CENTER BORDER=0></P>
+<P>Information on the setup and management of the <FONT FACE="Courier, monospace">taxonomic</FONT> table can be found in the Developers' Guide.  Changes to this table should only be required when there is a revision in the taxonomic
+hierarchy while changes in strain identification only need to happen to the strain record and the resulting taxonomy will link based upon the genus.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+
+<H2><A NAME='photos'>Managing Photos</A></H2>
+<P>In addition to the basic attributes of a strain, the strain record can also link picture files stored on the server.  The list of current pictures linked to a strain can be viewed in the <B>Photos</B> section in the strains information page.</P>
+<P><IMG SRC="strain08.png" NAME="strain08" ALIGN=CENTER BORDER=0></P>
+<P>New photos can be linked to the strain using the <I>CYANOS File Manager</I> applet.  This applet it opened by clicking on the<B><SPAN CLASS='exampleButton'>Add Photos</SPAN></B> button.
+<P><IMG SRC="strain09.png" NAME="strain09" ALIGN=CENTER BORDER=0></P>
+<P>On the left hand side of the <I>CYANOS File Manager</I> applet is a hierarchical list of the file folders available.  Click on a folder to view the a list of files present in the selected folder and use the twisty to the left of the folder icon to view subfolders of a particular folder.  In the file listing view, select a file to view a preview in the preview pane to the right of the file listing.</P>
+<P>To link a photo, click the link checkbox for the photo and double click in the Description cell to add a description for the photo.  Then click the <B><SPAN CLASS='exampleButton'>Update</SPAN></B> button to commit the changes to the database.  Photos can be unlinked by simply unchecking the appropriate "Linked" checkbox then clicking the <B><SPAN CLASS='exampleButton'>Update</SPAN></B> button.  When one is finished managing photos for a strain, click the <B><SPAN CLASS='exampleButton'>Close</SPAN></B> button to close the CYANOS File Manager.</P>
+
+<P>The <I>CYANOS File Manager</I> can also be used to upload new files to the server.  Use the <B><SPAN CLASS='exampleButton'>Upload a new file</SPAN></B> to open the upload dialog.  While this method can be useful in adding a new file to the server, this method is not properly tuned for performance and it is recommended that basic file management, i.e. add and delete, should be performed using a standard file sharing service, e.g. Windows Networking (SMB/CIFS) or SFTP.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='roles'>Required Roles</A></H2>
+<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Actions in
+italics utilize global level permissions only.</P>
+<TABLE WIDTH='80%' BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
+<TR VALIGN=TOP><TD>Add a new strain</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a strain</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Manage photos</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Delete a strain</TD><TD ALIGN='CENTER'>culture(Delete)</TD></TR>
+</TABLE>
+<A HREF='#toc'>Return to table of contents</A>
+
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+</BODY>
+</HTML>

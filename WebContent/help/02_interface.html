@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Interface Concepts and Use</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.0  (Linux)">
+	<META NAME="AUTHOR" CONTENT="George Chlipala">
+	<META NAME="CREATED" CONTENT="20080421;12543200">
+	<META NAME="CHANGEDBY" CONTENT="George Chlipala">
+	<META NAME="CHANGED" CONTENT="20091029;18411800">
+	<META NAME="KEYWORDS" CONTENT="interface,web,accounts,login,project,spreadsheet,upload,basic features,use">
+	<META NAME="MODULE" CONTENT="main">
+	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<H2>Interface Concepts and Use</H2>
+<HR WIDTH='90%' ALIGN='LEFT'/>
+<P>The web based interface is the primary tool for the management of
+data in the CYANOS database.  This interface was designed to work
+with W3C compliant web browsers, e.g. Mozilla Firefox, Opera and
+Apple Safari.  No additional software is needed to access the web
+interface.</P>
+<P><B><A NAME='toc'>Table of Contents</A></B>
+<OL>
+<LI><A HREF='#web'>Web Interface</A></LI>
+<LI><A HREF='#menu'>Menu Bar</A></LI>
+<LI><A HREF='#project'>Project Information</A></LI>
+<LI><A HREF='#upload'>Spreadsheet Upload</A></LI>
+<LI><A HREF='#users'>User Accounts</A></LI>
+<LI><A HREF='#roles'>Required Roles</A></LI>
+</OL>
+</P>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='web'>Web Interface</A></H2>
+<P>Data in the CYANOS database can be managed through the use of webpage forms or through the upload of Microsoft Excel XML or OpenOffice.org spreadsheets.  In addition, data files can be linked to samples, separations and bioassays.  For these data files, any binary or text format is acceptable thus, one could link the proprietary raw data, e.g. a Bruker FID or Agilent Chemstation datafile, or a standard representation, such as a PDF report or PNG/BMP graphic.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='menu'>Menu Bar</A></H2>
+<P>All pages in the CYANOS web interface have a menu bar at the top to allow quick access to the different pages within the application.</P>
+
+<IMG SRC="interface01.png" NAME="graphics17" ALIGN=CENTER BORDER=0>
+<P>The available menus and sub-menus will depend on the access rights of the user, so it is possible that certain menu items may be missing due to access restrictions.</P>
+<P>In addition to the basic menus, there menu bar should contain the <IMG SRC='interface02.png' ALIGN=ABSMIDDLE BORDER=0> menu.  This menu will allow one to access a variety of help pages that explain the use of CYANOS.  The typical help menu will contain the following menu items.</P>
+<OL>
+<LI><B>Help Contents</B> - Table of contents of all available help files.</LI>
+<LI><B>Find a Topic</B> - Use a simple find feature to search a topic list.</LI>
+<LI><B>Search Help Pages</B> - Use a more comprehensive search to find help pages, based upon content of the help pages.</LI>
+</OL>
+
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='project'>Project Information</A></H2>
+<P>The CYANOS database has the ability to group resources by project. Projects can be created in the <I>Project Manager</I> interface, which is accessed from the menu <B>Cyanos</B> &gt; <B>Manage Projects</B>.  From this interface, one can create new projects or modify the description of existing projects.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='upload'>Spreadsheet Upload</A></H2>
+<P>Some tasks, e.g. adding bioassay data, require the entry of large amounts of data.  To facilitate these tasks, a spreadsheet upload feature was created.  The upload functions of the CYANOS database allow one to upload a spreadsheet to the web interface then have the interface parse the data and update the database accordingly.  Currently the allowed spreadsheet formats are:</P>
+<UL>
+<LI><P>Microsoft Excel XML (Office version 2003 or higher)</P>
+<LI><P>OpenOffice.org (version 2.0 or higher)</P>
+</UL>
+<P> Currently the following upload modules are included with the CYANOS web interface.  All upload modules, including custom modules, can be accessed from the upload page via the menu path <B>Cyanos</B> &gt; <B>Upload Data</B>.</P>
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TH>Upload Module</TH><TH>Alternate Menu Path</TH><TH>Description</TH></TR>
+<TR VALIGN=TOP><TD><I>Bioassay</I></TD><TD><B>Bioassays</B> &gt; <B>Upload Data</B></TD><TD>Upload bioassay data.</TD></TR>
+<TR VALIGN=TOP><TD><I>Sample Library</I></TD><TD><B>Samples</B> &gt; <B>Upload Data</B></TD><TD>Create new library samples.</TD></TR>
+<TR VALIGN=TOP><TD><I>Sample Move</I></TD><TD><B>Samples</B> &gt; <B>Upload Data</B></TD><TD>Upload sample location data.</TD></TR>
+<TR VALIGN=TOP><TD><I>Extract</I></TD><TD><B>Samples</B> &gt; <B>Upload Data</B></TD><TD>Create extract records.</TD></TR>
+<TR VALIGN=TOP><TD><I>Fraction</I></TD><TD><B>Separations</B> &gt; <B>Upload New</B></TD><TD>Upload separation data.</TD></TR>
+<TR VALIGN=TOP><TD><I>Field Collection</I></TD><TD><B>Collections</B> &gt; <B>Upload Collections</B></TD><TD>Upload field collection data.</TD></TR>
+<TR VALIGN=TOP><TD><I>Isolation</I></TD><TD><B>Collections</B> &gt; <B>Upload Isolations</B></TD><TD>Upload field isolation data.</TD></TR>
+</TABLE>
+<P>In addition to these modules, it is possible to add custom upload modules to the CYANOS web interface.  Details on developing and installing custom upload modules can be found in the Developer's Guide.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='users'>User Accounts</A></H2>
+<P>User accounts can be created for each user that will access CYANOS.  Administrators can add, modify, or delete users via the User Administration page (<B>Cyanos</B> &gt;<B>Manage Users</B>).  All users have a defined user ID and password.  In addition, the full name and email address of the user can be stored.  <B>Note:</B> CYANOS utilizes email for password resets as well as the initial setup of an user account.</P>
+<P>User accounts will also have a list of associated roles and permissions, which can be either global or project specific.  The roles defined in CYANOS are &quot;admin&quot;, &quot;culture&quot;, &quot;sample&quot;, &quot;assay&quot;, and &quot;project&quot;.  For each role, the permissions of read (R), write (W), create (C), and delete (D) can be assigned to further refine access rights.</P>
+
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TH>Role</TH><TH>Objects</TH></TR>
+<TR VALIGN=TOP><TD>admin</TD><TD>User accounts, CYANOS configuration</TD></TR>
+<TR VALIGN=TOP><TD>culture</TD><TD>Strains, Field Collections, Isolations, Inoculations, Cryopreservations, Harvests</TD></TR>
+<TR VALIGN=TOP><TD>sample</TD><TD>Samples, Sample Collections, Separations, Compounds</TD></TR>
+<TR VALIGN=TOP><TD>assay</TD><TD>Bioassays</TD></TR>
+<TR VALIGN=TOP><TD>project</TD><TD>Projects</TD></TR>
+</TABLE>
+
+The roles and permissions in CYANOS
+are additive, that is project specific roles and permissions add to,
+rather than substitute, the user's set of global roles and
+permissions.  For objects that are not assigned to a project, the
+&quot;Null Project&quot; roles and permissions will be used in
+combination with the global roles to determine access.  
+</P>
+<P>For example, a user has been assigned the roles listed in the following table.
+<TABLE BORDER=1 ALIGN='LEFT'>
+<TR VALIGN=TOP ALIGN='CENTER'><TH>Role</TH><TD>Global</TD><TD>Project A</TD><TD>Project B</TD></TR>
+<TR VALIGN=TOP ALIGN='CENTER'><TD>culture</TD><TD>R,W</TD><TD>R,W,C,D</TD><TD></TD></TR>
+<TR VALIGN=TOP ALIGN='CENTER'><TD>sample</TD><TD>R</TD><TD></TD><TD>W</TD></TR>
+<TR VALIGN=TOP ALIGN='CENTER'><TD>assay</TD><TD>R,W</TD><TD></TD><TD>R</TD></TR>
+</TABLE><BR CLEAR='LEFT'/>
+</P>
+<P>For objects part of Project A, the user would have the roles culture(RWCD), sample(R), and bioassay(RW).  In Project B, the user would have the roles culture(RW), sample(RW), and bioassay(RW).  Throughout this guide, required permissions for
+various CYANOS actions will be listed to help administrators properly assign roles.   The following section lists roles required to manage users, application configuration, and projects.</P>
+<P>For object that are not assigned to a project or objects that cannot be assigned to a project, the "Null Project" has been defined to allow access to these resources without having to allow glocal access.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='roles'>Required Roles</A></H2>
+<P>Required permissions listed in this
+table denote the role and permission bit, in parenthesis.  Actions in
+italics utilize global level permissions only.</P>
+
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TH>Action</TH><TH>Required Permission</TH></TR>
+<TR VALIGN=TOP><TD>Add a new user</TD><TD>admin(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a user</TD><TD>admin(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Delete a user</TD><TD>admin(Delete)</TD></TR>
+<TR VALIGN=TOP><TD>Modify CYANOS configuration</TD><TD>admin(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add news</TD><TD>admin(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a project</TD><TD>project(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a project</TD><TD>project(Write)</TD></TR>
+</TABLE>
+<A HREF='#toc'>Return to table of contents</A>
+
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+</BODY>
+</HTML>

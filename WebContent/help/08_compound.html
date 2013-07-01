@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Compound Information</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.0  (Linux)">
+	<META NAME="AUTHOR" CONTENT="George Chlipala">
+	<META NAME="CREATED" CONTENT="20080421;12543200">
+	<META NAME="CHANGEDBY" CONTENT="George Chlipala">
+	<META NAME="CHANGED" CONTENT="20091029;18411800">
+	<META NAME="KEYWORDS" CONTENT="compound,dereplication,ms,nmr,mass spec">
+	<META NAME="MODULE" CONTENT="compound">
+	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<H2>Compound Information</H2>
+<HR WIDTH='90%' ALIGN='LEFT'/>
+
+<B><A NAME='toc'>Table of Contents</A></B>
+<OL>
+<LI><A HREF='#add_compound'>Add a new compound</A></LI>
+<LI><A HREF='#modify_compound'>Modify a compound record</A></LI>
+<LI><A HREF='#roles'>Required Roles</A></LI> 
+</OL>
+</P>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<H2><A NAME='add_compound'>Add a new compound</A></H2>
+<OL>
+<LI><P>Select <B>Add Compound</B> from the <B>Samples</B> menu.<BR/>
+<IMG SRC="compound01.png" NAME="compound01" ALIGN=CENTER BORDER=0></P></LI>
+<LI><P>Enter information into the <I>Add Compound</I> form.  CYANOS will calculate the formula, associated formula weight, and monoisotopic mass from an uploaded chemical structure file, either in MDL or CML format.<BR/>
+<IMG SRC="compound02.png" NAME="compound02" ALIGN=CENTER BORDER=0></P></LI>
+<LI><P>Click the <B><SPAN CLASS='exampleButton'>Add</SPAN></B> Button.<BR/>
+</OL>
+<P>The compound is now added to the database and can be viewed on the compound list, which can be viewed via the menu <B>Samples</B> &gt; <B>View Compounds</B>.</P>
+
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='modify_compound'>Modify a compound record</A></H2>
+<P>Compound information can be accessed from various compound links within the CYANOS website as well as the compound list, which can be viewed via the menu <B>Samples</B> &gt; <B>View Compounds</B>. Click on the name of a compound to view the information page for that compound.</P>
+<P><IMG SRC="compound03.png" NAME="compound03" ALIGN=CENTER BORDER=0></P>
+<P>The top part of the page displays the attributes of the compound.  If the user has permission to modify the compound, the <B><SPAN CLASS='exampleButton'>Edit Values</SPAN></B> button will be available and the user can click that button to display an editable form to change the compound's attributes.</P>
+<P><IMG SRC="compound04.png" NAME="compound04" ALIGN=CENTER BORDER=0></P>
+<P>If the compound record does not contain MDL data, an upload field will be available to select a MDL file to upload when the <B><SPAN CLASS='exampleButton'>Update</SPAN></B> button is clicked.</P>
+<P><IMG SRC="compound05.png" NAME="compound05" ALIGN=CENTER BORDER=0></P>
+<P>If one includes an MDL upload, CYANOS will calculate the formula, formula weight, monoisotopic mass, and SMILES string of the compound from the uploaded MDL file and will disregard the values from the HTML form. <B>Please Note:</B> this behavior cannot be overridden.</P>
+<P>One can clear the existing MDL data for a compound by clicking on the <B><SPAN CLASS='exampleButton'>Clear MDL Data</SPAN></B> button. <B>Please Note:</B> clearing the MDL data will ONLY delete the assoicated MDL data and will NOT clear the values of the formula, formula weight, monoisotopic mass, and SMILES string.</P>
+<P>If the compound record contains a chemical structure, i.e. MDL data, the compound form will display a 2D representation of the structure of the compound as well as options to download the MDL data, via <B><SPAN CLASS='exampleButton'>Export Structure</SPAN></B>, or generate additional images via <B><SPAN CLASS='exampleButton'>Generate</SPAN></B></P>
+<P><IMG SRC="compound06.png" NAME="compound06" ALIGN=CENTER BORDER=0></P>
+<P>The lower part of the page has sections that list records associated to the compound.  Each of these sections can be opened or closed by clicking on the green triangle to the left of the section title.  For example, if a user clicked on <I>Samples</I>, the section would open to reveal a listing of samples that are instances of this compound.</P>
+
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='roles'>Required Roles</A></H2>
+<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Compound records lack project information thus, access would need to be granted either globally or for the "Null Project"</P>
+<TABLE WIDTH='80%' BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
+<TR VALIGN=TOP><TD>Add a new compound record</TD><TD ALIGN='CENTER'>sample(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a compound record</TD><TD ALIGN='CENTER'>sample(Write)</TD></TR>
+</TABLE>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+</BODY>
+</HTML>

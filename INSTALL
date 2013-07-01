@@ -1,0 +1,116 @@
+CYANOS Data Management System
+By: George Chlipala
+
+The CYANOS database system was developed to facilitate data management and 
+mining for natural product drug discovery efforts. The code for this system 
+is freely available and has been released under the Illinois Open Source license.
+
+REQUIREMENTS:
+
+	Apache Tomcat v5.5 (http://tomcat.apache.org)
+	MySQL v5.0 and JDBC connector (http://www.mysql.com)
+	JavaMail (http://java.sun.com/products/javamail/)
+	
+  The following files may be included in the WAR file.
+	Apache Commons Fileupload v1.2 (http://commons.apache.org/fileupload)
+	CDK v1.0.4  (v1.2.x will NOT work!) (http://cdk.sourceforge.net)
+	
+   Also, included in the WAR file.
+	Apache Lucene v3.0.0	
+	Jericho HTML Parser v3.1
+
+INSTALLATION INSTRUCTIONS:
+
+     1. Create the CYANOS database in MySQL.  Refer to the MySQL documentation 
+	for details on how to create a database. Typically, the following 
+	command would be able to create the database "cyanos"
+
+	# mysqladmin create cyanos
+
+     2. Setup the CYANOS schema in MySQL.  Connect to the database
+	created in the previous step and execute the "cyanos_mysql.sql"
+	file.  This file has the necessary SQL commands to create the
+	CYANOS schema.  The command can be executed as follows.  
+	Please refer to MySQL documentation for more details on
+	using the mysql command-line tool.
+
+	# mysql cyanos < cyanos_mysql.sql
+
+	Also, it is strongly suggested to define a SQL account for 
+	the web application to access the database.
+	This SQL account should be allowed the following on cyanos.*
+	
+     	    SELECT, INSERT, UPDATE, DELETE, EXECUTE.
+
+	Refer to MySQL documentation for details on user administration.
+
+     3. Deploy the WAR file in a Tomcat server.  
+	
+	Offline deployment:
+		While the Tomcat server is stopped, copy the included 
+		"cyanos.war" file to the webapps directory of the 
+		installed Tomcat Application Server.  
+		
+		For UNIX systems, this is typically /usr/share/tomcat/webapps 
+		and Windows systems, C:\Program Files\Apache Software Foundation\Tomcat 5.5\webapps
+
+		Start the Tomcat server to complete deployment.
+
+	Online deployment:
+		Use the Tomcat manager (i.e., http://<server>:8080/manager/html) 
+		to deploy the application.
+
+     4. Configure the CYANOS web application
+	These steps can be performed using the Tomcat Administration Tool 
+	(http://<server>:8080/admin) or by customizing the <Context> 
+	definition within the Tomcat configuration files.  An example 
+	configuration can be found in the file "cyanos_example.xml"
+
+	A. Define the CYANOS JDBC/JNDI resource.  The JNDI Datasource should
+	   have the following parameters. The username and password should match
+	   the SQL account created in step 2.
+
+		name: jdbc/CyanosDB
+		url: jdbc:mysql://<db server>:3306/<database>?autoReconnect=true
+		max active connections: 100 or more
+			
+	B. Define the User Realm for authentication. Create the Tomcat Realm 
+	   using the previously defined JNDI datasource.	
+	
+	   	type: DataSourceRealm
+		name: jdbc/CyanosDB
+		digest alogrithm: SHA
+		role name column: role
+		user credential column: password
+		user name column: user
+		user role table: roles
+		user table: users
+
+	C. Define a Javamail session. The SMTP host should be a host that 
+	   will accept outgoing mail from the application server.
+	
+		name: mail/Session
+
+	D. Create the application config environmental entry.  The CYANOS
+	   application requires an additional configuration file to store
+	   important settings for the interal working of the application.
+	   This configuration file should NOT exist at the time of the 
+	   initial installation, however the Tomcat server process should be 
+	   able to create, read, and write the file. 
+
+		name: cyanosAppConfig
+		type: java.lang.String
+		value: <location of the cyanos application configuration file>
+
+
+	Once these configuration steps are complete, be sure to restart the 
+	application to allow these settings to become active.
+
+     5. Access the CYANOS web application to perform the initial setup.
+	The application should be available at http://<server>/cyanos 
+	Although, this may change depending on the local configuration.
+
+VERSION HISTORY:
+
+	* June 1, 2010, George Chlipala, v1.0
+	- Initial release
