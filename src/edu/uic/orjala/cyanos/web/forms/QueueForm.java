@@ -3,7 +3,6 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,9 +10,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
-import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.Queue;
 import edu.uic.orjala.cyanos.web.QueueItem;
@@ -196,7 +196,7 @@ public class QueueForm extends BaseForm {
 	public String addToQueue() {
 		try {			
 			String type = this.getFormValue("queue_type");
-			CyanosConfig myConf = myWrapper.getAppConfig();
+			AppConfig myConf = myWrapper.getAppConfig();
 			String queueName = this.getFormValue("queue");
 			
 			if ( myConf.isQueueSingle(type))
@@ -208,16 +208,14 @@ public class QueueForm extends BaseForm {
 			return this.message(SUCCESS_TAG, "<B>Adding item to queue.</B></P><P ALIGN='CENTER'><BUTTON TYPE=BUTTON onClick='window.close();'>Close Window</BUTTON></P>");
 		} catch (DataException e) {
 			return this.handleException(e);
-		} catch (SQLException e) {
-			return this.handleException(e);
 		}
 	}
 	
-	public String addForm() {
+	public String addForm() throws ConfigException {
 		if ( ! ( this.hasFormValue("id") && this.hasFormValue("class")))
 			return "<P ALIGN='CENTER'><B><FONT COLOR='RED'>ERROR:</FONT> Calling link must specifiy an item to add to the queue.</B></P>";
 		
-		CyanosConfig myConf = myWrapper.getAppConfig();
+		AppConfig myConf = myWrapper.getAppConfig();
 
 		Form myForm = new Form();
 		myForm.setAttribute("METHOD", "POST");

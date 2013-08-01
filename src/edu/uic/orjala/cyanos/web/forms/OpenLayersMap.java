@@ -10,9 +10,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import edu.uic.orjala.cyanos.Collection;
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
+import edu.uic.orjala.cyanos.web.servlet.CollectionServlet;
 
 /**
  * @author George Chlipala
@@ -34,7 +37,7 @@ public class OpenLayersMap extends CyanosMap {
 	public OpenLayersMap(CyanosWrapper callingServlet, Collection cols, int width, int height, double latitude, double longitude, long zoom) {
 		super(callingServlet, cols, width, height, latitude, longitude, zoom);
 	}
-
+	
 	/**
 	 * Create the HTML code (including Javascript) for the map.
 	 *
@@ -57,10 +60,14 @@ public class OpenLayersMap extends CyanosMap {
 	 * Create the HTML code (including Javascript) for the map. This will build the code using the Google Map API.
 	 *
 	 * @param markers makers to map
+	 * @throws ConfigException 
 	 */
-	private String collectionMap(Map<String,List<String>> markers) {
+	private String collectionMap(Map<String,List<String>> markers) throws ConfigException {
 		StringBuffer output = new StringBuffer();
 		output.append("<SCRIPT TYPE='text/javascript'>\n//<![CDATA[\n");
+/*		
+ * 		REPLACED WITH KML INTERFACE
+ * 
 		StringBuffer markerScript = new StringBuffer();
 		markerScript.append("function addCollectionMarkers(map) {\n");
 		markerScript.append(" markers = new OpenLayers.Layer.Markers(\"Collections\");\n");
@@ -72,29 +79,92 @@ public class OpenLayersMap extends CyanosMap {
 		}
 		markerScript.append("}\n");
 		output.append(markerScript);
+	*/
 		output.append(this.buildMapSetup());
 		output.append("//]]>\n</SCRIPT>\n");
 		return output.toString();
 	}
 	
-	private String buildMapSetup() {
+	private String buildMapSetup() throws ConfigException {
 		StringBuffer output = new StringBuffer();
-		output.append("function setupMap(canvas) { \n var map = new OpenLayers.Map(canvas);\n");
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
+		output.append("function setupMap(canvas) { var map = setupOLMap(canvas);\n var layer;\n");
+		AppConfig myConf = this.myWrapper.getAppConfig();
 		Map<String,String> layers = myConf.getMapServerLayers();
+		
+		if ( myConf.getMapParameter(AppConfig.MAP_OSM_LAYER) != null ) {
+			output.append("addOSMLayers(map);\n");
+		}
+
+		if ( myConf.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) {
+			output.append("addNASALayers(map);\n");
+		}
+
 		Set<String> keys = new TreeSet<String>(layers.keySet());
 		Iterator<String> keyIter = keys.iterator();
 		while ( keyIter.hasNext() ) {
 			String layerName = keyIter.next();
 			String layerURL = layers.get(layerName);
+			if ( layerURL == null ) continue;
 			output.append(String.format(" layer = new OpenLayers.Layer.Mapserver( \"%s\", \"%s\", {}, {gutter: 15});\n", layerName, layerURL));
+			output.append(" layer.setIsBaseLayer(true); layer.setVisibility(false);\n");
 			output.append(" map.addLayer(layer);\n");
 		}	
-		output.append(" addCollectionMarkers(map);\n");
-		output.append(String.format(" map.setCenter(new OpenLayers.LonLat(%.4f, %.4f), %d);\n", this.longCenter, this.latCenter, this.zoomLevel));
-		output.append(" map.addControl( new OpenLayers.Control.LayerSwitcher() );\n");
-		output.append(" canvas.innerHTML = '';\n");
-		output.append(" map.render(canvas);\n");
+		String googleMapKey = myConf.getGoogleMapKey();
+		if ( googleMapKey != null) {
+			output.append(" addGoogleLayers(map);");
+		}
+		output.append(" addCollectionLayer(map, \"");
+		output.append(CollectionServlet.getKMLURL(myWrapper.getRequest()));
+		output.append("\");\n");
+		
+		if ( this.longCenter > -1000.0f && this.latCenter > -1000.0f ) {
+			output.append(String.format(" map.setCenter(new OpenLayers.LonLat(%.4f, %.4f), %d);\n", this.longCenter, this.latCenter, this.zoomLevel));			
+		} else {
+			double maxLong = -200; double minLong = 200;
+			double maxLat = -100; double minLat = 100;
+
+			try {
+				this.colList.beforeFirst();
+				while ( colList.next() ) {
+					Float latitude = colList.getLatitudeFloat();
+					Float longitude = colList.getLongitudeFloat();
+					if ( latitude == null || longitude == null ) continue;
+					if ( longitude > maxLong )
+						maxLong = longitude.doubleValue();
+					if ( longitude < minLong )
+						minLong = longitude.doubleValue();
+					if ( latitude > maxLat ) 
+						maxLat = latitude.doubleValue();
+					if ( latitude < minLat ) 
+						minLat = latitude.doubleValue();
+				}
+				this.longCenter = ((maxLong - minLong) / 2) + minLong;
+				this.latCenter = ((maxLat - minLat) / 2) + minLat;
+				if ( (maxLong - minLong) < (360.0 / 256) ) {
+					double half = (360 / 512);
+					maxLong = this.longCenter + half;
+					minLong = this.longCenter - half;
+				}
+				
+				if ( (maxLat - minLat) < (180.0 / 256) ) {
+					double half = (180.0 / 512);
+					maxLat = this.latCenter + half;
+					minLat = this.latCenter - half;
+				}
+				
+//				output.append(String.format(" map.setCenter(new OpenLayers.LonLat(%.4f, %.4f));\n", this.longCenter, this.latCenter));
+//				output.append(String.format(" var defaultBounds = new OpenLayers.Bounds(%.4f, %.4f, %.4f, %.4f);\n", minLong, minLat, maxLong, maxLat));				
+//				output.append(" map.setCenter(defaultBounds.getCenterLonLat(), 10);\n");
+				output.append(String.format(" setMapBounds(new OpenLayers.Bounds(%.4f, %.4f, %.4f, %.4f));\n", minLong, minLat, maxLong, maxLat));				
+			} catch (DataException e) {
+				e.printStackTrace();
+				output.append(" map.setCenter(new OpenLayers.LonLat(0, 0), 1);\n");
+			}
+		}
+
+		
+		
+	//	output.append(" map.render(canvas);\n");
 		output.append("}\n");
 		
 		

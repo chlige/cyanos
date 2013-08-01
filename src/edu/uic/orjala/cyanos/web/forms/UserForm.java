@@ -395,7 +395,7 @@ public class UserForm extends BaseForm {
 		String output = null;
 		try {
 			Div messageDiv = new Div();
-			aUser.resetPassword(this.myWrapper.getMailSession());
+			SQLUser.resetPassword((SQLUser)aUser, this.myWrapper.getMailSession());
 			messageDiv.addItem("<P ALIGN='CENTER'><B><FONT COLOR='green'>SUCCESS:</FONT> Password reset.</B></P>");
 			messageDiv.setClass("messages");	
 			output = messageDiv.toString();
@@ -485,8 +485,7 @@ public class UserForm extends BaseForm {
 		String output = null;
 		try {
 			Div messageDiv = new Div();
-			User aUser = new SQLUser(this.getSQLDataSource(), userID);
-			aUser.resetPassword(this.myWrapper.getMailSession());
+			SQLUser.resetPassword(new SQLUser(this.getSQLDataSource(), userID), this.myWrapper.getMailSession());
 			messageDiv.addItem("<P ALIGN='CENTER'><B><FONT COLOR='green'>SUCCESS:</FONT> Password reset.</B></P>");
 			messageDiv.setClass("messages");		
 		} catch (DataException e) {

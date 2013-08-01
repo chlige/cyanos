@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import edu.uic.orjala.cyanos.AssayData;
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Harvest;
+import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Project;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Sample;
@@ -26,6 +28,7 @@ import edu.uic.orjala.cyanos.sql.SQLSampleCollection;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
+import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.html.Div;
 import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.Image;
@@ -43,6 +46,7 @@ import edu.uic.orjala.cyanos.web.html.TableRow;
  */
 public class SampleForm extends BaseForm {
 
+	public static final String ACTION_INTERLACE_COLS = "interlaceCols";
 	public static final String EXTRACT_PROTOCOL = "extract protocol";
 	public static String[] EXTRACT_PROTOCOL_KEYS = {"type", "solvent"};
 
@@ -54,6 +58,9 @@ public class SampleForm extends BaseForm {
 	public static final String TXN_DIV_ID = "sampleTxn";
 	public static final String TXN_DIV_TITLE = "Balance Sheet";
 	public static final String DATA_FORM = "dataForm";
+	
+	public static final String INTERLACE_DIV_ID = ACTION_INTERLACE_COLS;
+	public static final String INTERLACE_DIV_TITLE = "Interlace Sample Collections";
 	
 	public SampleForm(CyanosWrapper aWrapper) {
 		super(aWrapper);
@@ -160,7 +167,7 @@ public class SampleForm extends BaseForm {
 					else 
 						myCell.addItem(String.format("<A HREF='%s/sample?col=%s'>%s</A>", contextPath, aSample.getCollectionID(), aSample.getCollectionID()));				
 					myCell.addItem(aSample.getLocation());
-					myCell.addItem(formatAmount("%.2f %s", aSample.accountBalance(), aSample.getBaseUnit()));
+					myCell.addItem(formatAmount(aSample.accountBalance(), aSample.getBaseUnit()));
 					myCell.addItem(shortenString(aSample.getNotes(), 15));
 					if ( aSample.isRemoved() )
 						myCell.setClass("removed");
@@ -184,6 +191,7 @@ public class SampleForm extends BaseForm {
 		return output.toString();
 	}
 
+	/*
 	public Div assayDiv(Sample aSample) {
 		return this.collapsableDiv("sampleassayinfo", "Assay Data", this.assayContent(aSample));
 	}
@@ -191,7 +199,8 @@ public class SampleForm extends BaseForm {
 	public String assayTable(Sample aSample) {
 		return "<P ALIGN='CENTER'><FONT SIZE='+1'><B>Assay Data</B></FONT></P>" + this.assayContent(aSample);
 	}
-		
+	*/
+	/*
 	public String assayContent(Sample aSample) {
 		TableRow myRow = new TableRow();
 		Table myTable = new Table();
@@ -224,7 +233,8 @@ public class SampleForm extends BaseForm {
 		myTable.setAttribute("ALIGN", "CENTER");
 		return myTable.toString();
 	}
-
+	*/
+	/*
 	protected String assayRows(Sample aSample) {
 		StringBuffer output = new StringBuffer();
 		try {
@@ -281,7 +291,7 @@ public class SampleForm extends BaseForm {
 		}
 		return output.toString();
 	}
-
+*/
 	private String sampleText(Sample aSample) {
 		StringBuffer output = new StringBuffer();
 		TableCell myCell;
@@ -297,15 +307,29 @@ public class SampleForm extends BaseForm {
 			myCell.addItem(this.getFormValue("id"));
 			tableRow.addCell(myCell);
 
+			myCell = new TableCell("Parent Material:");
+			Material parent = aSample.getParentMaterial();
+			myCell.addItem("<a href='material?id=" + parent.getID() + "'>" + parent.getLabel() + " " + parent.getID() + "</a>");
+			tableRow.addCell(myCell);
+
 			
 			myCell = new TableCell("Sample Label:");
-			myCell.addItem(this.formatStringHTML(aSample.getName()));
+			myCell.addItem(formatStringHTML(aSample.getName()));
 			tableRow.addItem(myCell);
 
-			Strain aStrain = new SQLStrain(this.getSQLDataSource(), aSample.getCultureID());
+			Strain aStrain = parent.getCulture();
 			myCell = new TableCell("Culture ID:");
 			myCell.addItem("<A HREF='strain?id=" + aStrain.getID() + 
 					"'>" + aStrain.getID() + " " + aStrain.getName() + "</A>");
+			tableRow.addItem(myCell);
+
+			SampleCollection myCol = aSample.getCollection();
+			myCell = new TableCell("Collection:");
+			if ( myCol != null )
+				myCell.addItem("<A HREF='?col=" + myCol.getID() + "'>" + myCol.getName() + "</A>");
+			else 
+				myCell.addItem("<A HREF='?col=" + aSample.getCollectionID() + "'>" + aSample.getCollectionID() + "</A>");
+
 			tableRow.addItem(myCell);
 
 			if ( aSample.getLocation() != null ) {
@@ -327,7 +351,11 @@ public class SampleForm extends BaseForm {
 			tableRow.addItem(myCell);
 
 			myCell = new TableCell("Concentration (mg/ml):");
-			myCell.addItem(formatAmount("%.1f %s", aSample.getConcentration(), "mg/ml"));
+			BigDecimal conc = aSample.getConcentration();
+			if ( conc == null || conc.equals(BigDecimal.ZERO) ) 				
+				myCell.addItem("Neat");
+			else
+				myCell.addItem(formatAmount(aSample.getConcentration(), "mg/ml"));
 			tableRow.addItem(myCell);
 
 			myCell = new TableCell("Project:");
@@ -340,7 +368,7 @@ public class SampleForm extends BaseForm {
 			tableRow.addItem(myCell);		
 
 			myCell = new TableCell("Notes:");
-			myCell.addItem(this.formatStringHTML(aSample.getNotes()));
+			myCell.addItem(formatStringHTML(aSample.getNotes()));
 			tableRow.addItem(myCell);
 
 			if ( aSample.isExtract() ) {
@@ -376,12 +404,18 @@ public class SampleForm extends BaseForm {
 			myCell = new TableCell("Serial Number:");
 			myCell.addItem(this.getFormValue("id"));
 			tableRow.addCell(myCell);
+			
+			myCell = new TableCell("Parent Material:");
+			Material parent = aSample.getParentMaterial();
+			myCell.addItem("<a href='material?id=" + parent.getID() + "'>" + parent.getLabel() + " " + parent.getID() + "</a>");
+			tableRow.addCell(myCell);
+
 
 			myCell = new TableCell("Sample Label:");
 			myCell.addItem("<TEXTAREA NAME='label' COLS='20' ROWS='2'>" + aSample.getName() + "</TEXTAREA>");
 			tableRow.addItem(myCell);
 
-			Strain aStrain = new SQLStrain(this.getSQLDataSource(), aSample.getCultureID());
+			Strain aStrain = parent.getCulture();
 			myCell = new TableCell("Culture ID:");
 			myCell.addItem("<A HREF='strain?id=" + aStrain.getID() + 
 					"'>" + aStrain.getID() + " " + aStrain.getName() + "</A>");
@@ -412,7 +446,7 @@ public class SampleForm extends BaseForm {
 
 			myCell = new TableCell("Concentration (mg/ml):");
 			myCell.addItem("<INPUT TYPE='text' NAME='conc' VALUE='" + 
-					formatAmount("%.1f %s", aSample.getConcentration(), "mg/ml") + "'/> (0 for neat)");
+					formatAmount(aSample.getConcentration(), "mg/ml") + "'/> (0 for neat)");
 			tableRow.addItem(myCell);
 
 
@@ -470,13 +504,13 @@ public class SampleForm extends BaseForm {
 				aSample.setNotes(this.getFormValue("notes"));
 			if ( this.hasFormValue("unit") )
 				aSample.setBaseUnit(this.getFormValue("unit"));
-			if ( this.hasFormValue("extractType") )
+/*			if ( this.hasFormValue("extractType") )
 				aSample.setExtractType(this.getFormValue("extractType"));
 			if ( this.hasFormValue("extractSolvent") )
 				aSample.setExtractSolvent(this.getFormValue("extractSolvent"));
+*/
 			if ( this.hasFormValue("conc")) {
-				float newConc = parseAmount(this.getFormValue("conc"), "mg/ml");
-				aSample.setConcentration(newConc);				}
+				aSample.setConcentration(parseAmount(this.getFormValue("conc"), "mg/ml"));				}
 			if ( this.hasFormValue("project") && (! this.getFormValue("project").equals(aSample.getProjectID())) )
 				aSample.setProjectID(this.getFormValue("project"));
 			aSample.refresh();
@@ -557,14 +591,15 @@ public class SampleForm extends BaseForm {
 		output.append(sampleDiv.toString());
 
 		try {
-			if ( aSample.isCompound() ) {
+			/*
+			if ( aSample.hasCompounds() ) {
 				output.append(this.compoundModule(aSample));
 			} else if ( isActive && (! aSample.isLibrarySample()) ) {
 				output.append(String.format("<P ALIGN='CENTER'><INPUT TYPE='BUTTON' NAME='makeCompound' VALUE='Add Compound Information' onClick='compoundForm(\"%s\");'/></P>", aSample.getID()));
-			} else if ( aSample.isLibrarySample() && aSample.getLibrarySource().isCompound() ) {
+			} else if ( aSample.isLibrarySample() && aSample.getLibrarySource().hasCompounds() ) {
 				output.append( this.compoundModule(aSample.getLibrarySource()) );
 			}
-			
+			*/
 			if ( aSample.isLibrarySample() && (! aSample.isSelfLibrarySource()) ) {
 				Sample source = aSample.getLibrarySource();
 				output.append(String.format("<DIV CLASS='pageModule'><P CLASS='moduleText'>Library Source: <A HREF='sample?id=%s'>%s</A></P></DIV>", source.getID(), source.getName()));
@@ -615,19 +650,19 @@ public class SampleForm extends BaseForm {
 			SimpleDateFormat myDf = this.dateFormat();
 			SampleAccount txnAccount = aSample.getAccount();
 			txnAccount.beforeFirst();
-			float balance = 0.0f;
+			BigDecimal balance = BigDecimal.ZERO;
 			String scale = aSample.getBaseUnit();
-			String posFormat = "%.2f %s";
-			String negFormat = "<FONT COLOR='RED'>(" + posFormat + ")</FONT>";
+			BigDecimal conc = aSample.getConcentration();
+			if ( conc == null || conc.equals(BigDecimal.ZERO)) conc = BigDecimal.ONE;
 			while (txnAccount.next()) {
 				boolean isVoid = txnAccount.isVoid();
 				myCell = new TableCell(myDf.format(txnAccount.getDate()));
 				if ( isVoid ) {
 					myCell.addItem(String.format("<FONT CLASS='voidNote'>Transaction voided on %s by %s</FONT><BR/>%s", this.formatDate(txnAccount.getVoidDate()), txnAccount.getVoidUserID(), txnAccount.getNotes()));
 				} else {
-					myCell.addItem(this.formatStringHTML(txnAccount.getNotes()));
+					myCell.addItem(formatStringHTML(txnAccount.getNotes()));
 				}
-				Class refClass = txnAccount.getTransactionReferenceClass();
+				Class<?> refClass = txnAccount.getTransactionReferenceClass();
 				String parentID = txnAccount.getTransactionReferenceID();
 				if ( isVoid || parentID == null || refClass == null )
 					myCell.addItem("");
@@ -637,25 +672,32 @@ public class SampleForm extends BaseForm {
 					myCell.addItem(String.format("<A HREF='separation?id=%s'>Separation #%s</A>", parentID, parentID));
 				} else if ( refClass.equals(Harvest.class) ) {
 					myCell.addItem(String.format("<A HREF='harvest?id=%s'>Harvest #%s</A>", parentID, parentID));
+				} else if ( refClass.equals(Assay.class) ) {
+					myCell.addItem(String.format("<A HREF='assay?id=%s'>Assay %s</A>", parentID, parentID));
 				} else {
 					myCell.addItem("UNKNOWN");
 				}
+				BigDecimal amount = txnAccount.getAmount().divide(conc);
 				if ( isVoid ) {
-					myCell.addItem(formatAmount(posFormat, txnAccount.getAmount(), scale));	
+					myCell.addItem(formatAmount(amount, scale));	
 					myCell.setClass("voided");
-					myCell.addItem("");
+					myCell.addItem("-");
 				} else {
-					if ( txnAccount.getAmount() < 0 )
-						myCell.addItem(formatAmount(negFormat, txnAccount.getAmount() * -1.0f, scale));					
+					if ( txnAccount.getAmount().signum() < 0 )
+						myCell.addItem("<FONT COLOR='RED'>(" + formatAmount(amount.negate(), scale) );					
 					else
-						myCell.addItem(formatAmount(posFormat, txnAccount.getAmount(), scale));
+						myCell.addItem(formatAmount(amount, scale));
 
-					balance = balance + txnAccount.getAmount();
-					myCell.addItem(formatAmount("<B>%.2f %s", balance, scale));
+					balance = balance.add(txnAccount.getAmount());
+					myCell.addItem("<B>" + formatAmount(balance.divide(conc), scale) + "</B>");
+				//	if ( aSample.isAllowed(Role.DELETE) ) {
+				//		myCell.addItem("Void Txn");
+				//	}
 				}
+								
 				aRow.addItem(myCell);
 			}
-			aRow.addItem(formatAmount("<TH COLSPAN='4' ALIGN='RIGHT' CLASS='footer'>Final Balance:</TH><TH CLASS='footer'>%.2f %s</TH>", aSample.accountBalance(), scale));
+			aRow.addItem("<TH COLSPAN='4' ALIGN='RIGHT' CLASS='footer'>Final Balance:</TH><TH CLASS='footer'>" + formatAmount(aSample.accountBalance().divide(conc), scale) + "</TH>");
 			Table myTable = new Table(aRow);
 			myTable.setAttribute("ALIGN", "CENTER");
 			myTable.setAttribute("WIDTH", "80%");
@@ -681,11 +723,14 @@ public class SampleForm extends BaseForm {
 		moduleDiv.setClass("pageModule");
 
 		try {
-			TableRow tableRow = new TableRow();
-			Compound myCompound = aSample.getCompound();
-			tableRow.addItem("<TD>Compound ID:</TD><TD>" + myCompound.getID() +  "</TD>");
-			tableRow.addItem("<TD>Formula:</TD><TD>" + myCompound.getHTMLFormula() +  "</TD>");
-			tableRow.addItem("<TD COLSPAN=2><A HREF=\"compound?id=" + myCompound.getID() + "\"/>View Compound</A></TD>");
+			String[] headers = {"Compound ID", "Formula"};
+			TableRow tableRow = new TableRow(new TableHeader(headers));
+			Compound myCompound = aSample.getCompounds();
+			while ( myCompound.next() ) {
+				TableCell aRow = new TableCell(String.format("<A HREF=\"compound?id=%s\"/>%s</A>", myCompound.getID(), myCompound.getID()));
+				aRow.addItem(myCompound.getHTMLFormula());
+				tableRow.addItem(aRow);
+			}
 			Table myTable = new Table(tableRow);
 			myTable.setClass("species");
 			myTable.setAttribute("align", "center");
@@ -725,7 +770,7 @@ public class SampleForm extends BaseForm {
 					kidCell.addItem(String.format("<A HREF='%s/sample?col=%s'>%s</A>",  this.myWrapper.getContextPath(), samples.getCollectionID(), samples.getCollectionID()));				
 				kidCell.addItem(String.format("<A HREF='sample?col=%s'>%s</A>", aCol.getID(), aCol.getName()));
 				kidCell.addItem(df.format(samples.getDate()));
-				kidCell.addItem(formatAmount("%.2f %s", samples.accountBalance(), samples.getBaseUnit()));
+				kidCell.addItem(formatAmount(samples.accountBalance(), samples.getBaseUnit()));
 				TableRow kidRow = new TableRow(kidCell);
 				kidRow.setAttribute("align", "center");
 				if ( oddRow ) {
@@ -790,13 +835,14 @@ public class SampleForm extends BaseForm {
 
 		if ( this.hasFormValue("col") && (! this.getFormValue("col").equals("")) ) {
 			try {
-				SampleCollection myCol = new SQLSampleCollection(this.getSQLDataSource(), this.getFormValue("col"));
+				SampleCollection myCol = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("col"));
 				output.append(this.showCollection(myCol));
 			} catch (DataException e ) {
 				e.printStackTrace();
-				output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>SQL FAILURE:</FONT> " + e.getMessage() + "</B></P>");
+				output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT> " + e.getMessage() + "</B></P>");
 			}
 		} else {			
+			output.append(this.loadableDiv(INTERLACE_DIV_ID, INTERLACE_DIV_TITLE));
 			try {
 				List<String> orphans = SQLSampleCollection.orphanedCollections(this.getSQLDataSource());				
 				if ( orphans.size() > 0 ) {
@@ -813,11 +859,138 @@ public class SampleForm extends BaseForm {
 			} catch (DataException e ) {
 				this.handleException(e);
 			}
-			
 		}
 		return output.toString();
 	}
 	
+	public String interlaceCollections() {
+		if ( this.hasFormValue(ACTION_INTERLACE_COLS) ) {
+			return exportInterlace();
+		}	
+		
+		StringBuffer output = new StringBuffer();
+
+		output.append("<P STYLE='margin-left:2cm; margin-right:2cm;'>Use this form to generate a list of samples from four source collections that are interlaced into a single collection, e.g. 4 x 96 well plates to a 384 well plate.</P>");
+		output.append("<P><B>NOTE:</B> This will NOT create a new sample collection.  It will only generate a spreadsheet that can be used to either move or create a daughter plate.</P>");
+		
+		try {
+			Popup collectionPopup = this.sampleCollectionPopup();
+			
+			TableRow myRow = new TableRow(this.makeFormTextRow("Destination ID:", "destID"));
+			TableCell myCell = new TableCell("Sources:");
+			
+			String[] colors = { "#FFFF90", "#90FF90", "cyan", "#FF9090" };				
+			Table sourceTable = new Table();
+
+			for ( int i = 0; i < colors.length; i++ ) {
+				String formValue = String.format("source%d", i + 1);
+				if ( this.hasFormValue(formValue) ) 
+					collectionPopup.setDefault(this.getFormValue(formValue));
+				collectionPopup.setName(formValue);
+				sourceTable.addItem(String.format("<TR><TD BGCOLOR='%s'>Plate %d: %s</TD></TR>", colors[i], i + 1, collectionPopup.toString() ));
+			}
+			sourceTable.setAttribute("ALIGN", "LEFT");
+			Image sourceImg = this.getImage("bywell.png");
+			sourceImg.setAttribute("VALIGN", "MIDDLE");
+			myCell.addItem(sourceTable.toString().concat(sourceImg.toString()));			
+			myRow.addItem(myCell);
+			
+			myRow.addItem(new TableRow(this.makeFormTextRow("Amount:", "amount")));
+			myRow.addItem("<TD COLSPAN='2' ALIGN='CENTER'><INPUT TYPE=SUBMIT NAME='interlaceCols' VALUE='Export'/><INPUT TYPE=RESET /></TD>");
+
+			Table myTable = new Table(myRow);
+			myTable.setAttribute("STYLE", "margin-left:2cm;");
+			Form myForm = new Form(myTable);
+			myForm.setPost();
+			output.append(myForm.toString());
+		} catch (DataException e) {
+			output.append(this.handleException(e));
+		}
+		return output.toString();
+	}
+	
+	public String exportInterlace() {
+		try {
+			
+			SampleCollection source1 = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("source1"));
+			SampleCollection source2 = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("source2"));
+			SampleCollection source3 = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("source3"));
+			SampleCollection source4 = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("source4"));		
+			
+			/*
+			 * Source, Source location, Strain ID, Sample ID, label, dest ID, dest loc, amount
+			 */
+			Sheet output = new Sheet(7, 384);
+			output.firstRow();
+			output.addCell("Source");
+			output.addCell("Source location");
+			output.addCell("Strain ID");
+			output.addCell("Sample ID");
+			output.addCell("Label");
+			output.addCell("Destination");
+			output.addCell("Dest. location");
+			output.addCell("Amount");
+			output.nextRow();
+			
+			String amount = this.getFormValue("amount");
+			String destID = this.getFormValue("destID");
+
+			
+			/*
+			 * 1 | 2
+			 * --+--
+			 * 3 | 4
+			 */
+
+			SampleCollection dest = SQLSampleCollection.load(this.getSQLDataSource(), destID);
+			try {
+				dest.setLength(16);
+			} catch (DataException ignore) {
+				
+			}
+
+			try {
+				dest.setWidth(24);
+			} catch (DataException ignore) {
+				
+			}
+
+			for ( int c = 0; c < 12; c++ ) {
+				for ( int r = 0; r < 8; r++ ) {
+					this.addInterlaceLine(output, source1, dest, amount, r + 1, c + 1, (2 * r) + 1, (2 * c) + 1);
+					this.addInterlaceLine(output, source2, dest, amount, r + 1, c + 1, (2 * r) + 1, (2 * c) + 2);
+					this.addInterlaceLine(output, source3, dest, amount, r + 1, c + 1, (2 * r) + 2, (2 * c) + 1);
+					this.addInterlaceLine(output, source4, dest, amount, r + 1, c + 1, (2 * r) + 2, (2 * c) + 2);
+				}
+			}
+			
+			return output.asCSV();
+		} catch (DataException e) {
+			return "ERROR: ".concat(e.getMessage());
+		}
+	}
+	
+	private void addInterlaceLine(Sheet output, SampleCollection source, SampleCollection dest, String amount, int fromRow, int fromCol, int toRow, int toCol) {		
+		try {
+			source.gotoLocation(fromRow, fromCol);
+			Sample sample = source.getCurrentSample();
+			if ( sample != null ) {
+				output.addCell(source.getID());
+				output.addCell(source.currentLocation());
+				output.addCell(sample.getCultureID());
+				output.addCell(sample.getID());
+				output.addCell(sample.getName());
+				output.addCell(dest.getID());
+				dest.gotoLocation(toRow, toCol);
+				output.addCell(dest.currentLocation());
+				output.addCell(amount);
+			}
+		} catch (DataException e) {
+			output.addCell("ERROR: ".concat(e.getLocalizedMessage()));
+		}
+		output.nextRow();
+	}
+
 	public String showCollection(SampleCollection myCol) {	
 		try {
 			if ( myCol.isLoaded()) { 
@@ -841,10 +1014,10 @@ public class SampleForm extends BaseForm {
 			boolean box = ( myCol.getWidth() > 0 && myCol.getLength() > 0 );
 			TableCell vialHead;
 			if ( box ) {
-				String[] vialHeaders = {"Name", "Strain", "Date", "Location", "Type", "Balance", "Notes"};
+				String[] vialHeaders = {"Name", "Parent Material", "Strain", "Date", "Location", "Type", "Balance", "Notes"};
 				vialHead = new TableHeader(vialHeaders);
 			} else {
-				String[] vialHeaders = {"Name", "Strain", "Date", "Type", "Balance", "Notes"};
+				String[] vialHeaders = {"Name", "Parent Material", "Strain", "Date", "Type", "Balance", "Notes"};
 				vialHead = new TableHeader(vialHeaders);
 			}
 
@@ -863,7 +1036,9 @@ public class SampleForm extends BaseForm {
 				while (aSample.next()) {			
 					TableCell myCell = new TableCell();
 					myCell.addItem("<A HREF='?id=" + aSample.getID() + "'>" + aSample.getName() + "</A>");	
-					Strain aStrain = new SQLStrain(this.getSQLDataSource(), aSample.getCultureID());
+					Material parent = aSample.getParentMaterial();
+					myCell.addItem("<A HREF='material?id=" + parent.getID() + "'>" + parent.getLabel() + "</A>");	
+					Strain aStrain = parent.getCulture();
 					if ( aStrain.first() )
 						myCell.addItem(String.format("<A HREF='strain?id=%s'>%s <I>%s</I></A>", aStrain.getID(), aStrain.getID(), aStrain.getName()));
 					else 
@@ -872,7 +1047,7 @@ public class SampleForm extends BaseForm {
 					if ( box ) 
 					myCell.addItem(aSample.getLocation());
 					myCell.addItem("");
-					myCell.addItem(formatAmount("%.2f %s", aSample.accountBalance(), aSample.getBaseUnit()));
+					myCell.addItem(formatAmount(aSample.accountBalance(), aSample.getBaseUnit()));
 					myCell.addItem(shortenString(aSample.getNotes(), 15));
 					TableRow aRow = new TableRow(myCell);
 					aRow.setClass(curClass);
@@ -909,15 +1084,10 @@ public class SampleForm extends BaseForm {
 				thisRow.setAttribute("VALIGN", "TOP");
 				while ( myCol.nextColumn() ) {
 					Sample aSample = myCol.getCurrentSample();
-					if ( aSample == null ) {
-						Image anImage = this.getImage("empty.png");
-						anImage.setAttribute("BORDER", "0");
-						thisRow.addItem(anImage);
-					} else { 
-						Image anImage = this.getImage("filled.png");
-						anImage.setAttribute("BORDER", "0");						
-						thisRow.addItem(String.format("<A HREF='sample?id=%s'>%s</A>", aSample.getID(), anImage.toString()));
-					}
+					if ( aSample == null ) 
+						thisRow.addItem("<IMG SRC='empty.png' BORDER=0>");
+					else 
+						thisRow.addItem(String.format("<A HREF='sample?id=%s'><IMG SRC='filled.png' BORDER=0></A>", aSample.getID()));
 				}					
 				row.addItem(String.format("<TH WIDTH=3>%s</TH>%s", myCol.currentRowAlpha(), thisRow.toString()));
 			}
@@ -1085,7 +1255,7 @@ public class SampleForm extends BaseForm {
 	
 		if ( this.hasFormValue("col") ) {
 			try {
-				SampleCollection aCol = new SQLSampleCollection(this.getSQLDataSource(), this.getFormValue("col"));
+				SampleCollection aCol = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("col"));
 				aCol.first();
 				if ( aCol.getWidth() > 0 && aCol.getLength() > 0 ) 
 					tableRow.addItem(this.makeFormTextRow("Name:", "label") + "<TD ROWSPAN='9'>" + this.boxForm(aCol, "location") + "</TD>");
@@ -1217,13 +1387,14 @@ public class SampleForm extends BaseForm {
 		}
 	}
 	
+	@Deprecated
 	public String addSample() {
 		if ( this.hasFormValue("addSample")) {
 			Paragraph aParagraph = new Paragraph("Adding a new sample...<BR/>");
 			aParagraph.setAlign("CENTER");
 			try {
 				if ( this.hasFormValue("col")) {
-					SampleCollection aCol = new SQLSampleCollection(this.getSQLDataSource(), this.getFormValue("col"));
+					SampleCollection aCol = SQLSampleCollection.load(this.getSQLDataSource(), this.getFormValue("col"));
 					aCol.first();
 					List<String> missingParms = new ArrayList<String>();
 					boolean isBox = ( aCol.getWidth() > 0 && aCol.getLength() > 0 );
@@ -1234,7 +1405,7 @@ public class SampleForm extends BaseForm {
 					if ( ! this.hasFormValue("culture_id")) missingParms.add("Culture ID");
 					if ( missingParms.size() > 0 ) {
 						aParagraph.addItem("<B><FONT COLOR='red'>FAILED</FONT><BR/>The following parameters are missing</B><BR/>");
-						ListIterator anEnum = missingParms.listIterator();
+						ListIterator<String> anEnum = missingParms.listIterator();
 						while ( anEnum.hasNext() ) {
 							aParagraph.addItem((String)anEnum.next());
 							aParagraph.addItem("<BR/>");

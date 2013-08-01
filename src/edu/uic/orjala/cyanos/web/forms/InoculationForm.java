@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +35,7 @@ import edu.uic.orjala.cyanos.web.html.TableRow;
  */
 public class InoculationForm extends BaseForm {
 
+	public static final String LS_CULTURE_ID = "cultureid";
 	private List<List<String>> myResults = null;
 	
 	/**
@@ -43,6 +45,29 @@ public class InoculationForm extends BaseForm {
 		super(aWrapper);
 	}
 
+	public String lsCultureID() {
+		try {
+			String field = this.getFormValue("livesearch");
+			String[] likeColumns = { SQLStrain.ID_COLUMN };
+			String[] likeValues = { String.format("%s%%", this.getFormValue(field)) };
+			Strain strains = SQLStrain.strainsLike(getSQLDataSource(), likeColumns, likeValues, SQLStrain.ID_COLUMN, SQLStrain.ASCENDING_SORT);
+			
+			StringBuffer output = new StringBuffer();
+			if ( strains.first() ) {
+				strains.beforeFirst();
+				while ( strains.next() ) {
+					output.append(String.format("<A onClick='setLS(\"%s\",\"%s\",\"%s\")'>%s</A><BR>", field, strains.getID(), this.getFormValue("div"), strains.getID()));
+				}
+				return output.toString();
+			} else {
+				return "No suggestions.";
+			}
+		} catch (DataException e) {
+			return this.handleException(e);
+		}
+
+	}
+	
 	public String inoculationList(Inoc anInoc) {
 		StringBuffer output = new StringBuffer();
 		output.append("<P ALIGN=CENTER><FONT SIZE=+2>Inoculations</FONT><P>");
@@ -295,7 +320,7 @@ public class InoculationForm extends BaseForm {
 					while ( possibles.next() ) {
 						if ( possibles.getID().equals(thisInoc) ) continue;
 						String date = myDf.format(possibles.getDate());
-						posPop.addItemWithLabel(possibles.getID(), String.format("%s (%d ml)", date, (possibles.getVolume() * 1000)));
+						posPop.addItemWithLabel(possibles.getID(), String.format("%s (%s)", date, BaseForm.formatAmount(possibles.getVolume(), "mL")));
 					}
 					parentForm.addItem(posPop);
 					parentForm.addItem("<INPUT TYPE='SUBMIT' NAME='linkInoc' VALUE='Link Parent'/><INPUT TYPE='RESET'/><INPUT TYPE='SUBMIT' NAME='cancel' VALUE='Cancel'/>");
@@ -347,8 +372,8 @@ public class InoculationForm extends BaseForm {
 				kids.beforeFirst();
 				while ( kids.next() ) {
 					aList.addItem("<A HREF='?id=" + kids.getID() + "'>" +
-							myFormat.format(kids.getDate()) + formatAmount(" (%.0f %s ", kids.getVolume(), "mL") + 
-							kids.getMedia() + ")</A>" + this.listKids(kids));
+							myFormat.format(kids.getDate()) + " (" + formatAmount(kids.getVolume(), "mL") + 
+							" " + kids.getMedia() + ")</A>" + this.listKids(kids));
 				}
 				output = aList.toString(); 
 			}
@@ -418,20 +443,22 @@ public class InoculationForm extends BaseForm {
 			projectPop.setName("project" + thisRow.toString());
 
 			String defaultMedia = new String();
-
-			if ( this.hasFormValue("cultureid" + thisRow.toString()) ) {
-				myCell.addItem("<INPUT TYPE='TEXT' NAME='cultureid" + thisRow.toString() + 
-						"' VALUE='" + this.getFormValue("cultureid" + thisRow.toString()) + 
-				"' onChange='checkStrain(this)' SIZE=10/>");
+			String cidField = String.format("cultureid%d", thisRow);
+			
+			if ( this.hasFormValue(cidField) ) {
+				String cultureID = this.getFormValue(cidField);
+				myCell.addItem(InoculationForm.livesearch(cidField, cultureID, cidField, String.format("div_cultureid%d", thisRow)));
 				try {
-					Inoc possibleParents = SQLInoc.viableInocsForStrain(this.getSQLDataSource(), this.getFormValue("cultureid" + thisRow.toString()));
+					Inoc possibleParents = SQLInoc.viableInocsForStrain(this.getSQLDataSource(), cultureID);
 					if ( possibleParents != null ){
 						possibleParents.beforeFirst();
 						SimpleDateFormat myFormat = this.dateFormat();
 						while ( possibleParents.next() ) {
-							String myLabel = new String( myFormat.format(possibleParents.getDate()) +
-									formatAmount(" (%.0f %s)", possibleParents.getVolume(), "mL"));
-							parentPop.addItemWithLabel(possibleParents.getID(), myLabel);
+							StringBuffer myLabel = new StringBuffer(myFormat.format(possibleParents.getDate()));
+							myLabel.append(" (");
+							myLabel.append(formatAmount(possibleParents.getVolume(), "mL"));
+							myLabel.append(")");
+							parentPop.addItemWithLabel(possibleParents.getID(), myLabel.toString());
 						}
 					}
 				} catch (DataException e) {
@@ -439,13 +466,13 @@ public class InoculationForm extends BaseForm {
 					parentPop.addItemWithLabel("", "SQL ERROR");
 				}
 				try {
-					Strain aStrain = new SQLStrain(this.getSQLDataSource(), this.getFormValue("cultureid" + thisRow.toString()));
+					Strain aStrain = SQLStrain.load(this.getSQLDataSource(), cultureID);
 					if ( aStrain.first() ) {
 						defaultMedia = aStrain.getDefaultMedia();
 						String defaultProject = "";
 						String parent = this.getFormValue("parent" + thisRow.toString());
 						if ( parent != null && (! parent.equals("")) ) {
-							Inoc myParent = new SQLInoc(this.getSQLDataSource(), this.getFormValue("parent" + thisRow.toString()));
+							Inoc myParent = SQLInoc.load(this.getSQLDataSource(), this.getFormValue("parent" + thisRow.toString()));
 							defaultProject = myParent.getProjectID();
 						} else {
 							defaultProject = aStrain.getProjectID();
@@ -458,7 +485,7 @@ public class InoculationForm extends BaseForm {
 				}
 			} else {
 				defaultMedia = new String();
-				myCell.addItem("<INPUT TYPE='TEXT' NAME='cultureid" + thisRow.toString() + "' onChange='checkStrain(this)' SIZE=10/>");
+				myCell.addItem(InoculationForm.livesearch(cidField, "", cidField, String.format("div_cultureid%d", thisRow)));
 			}
 			// myCell.addItem(strainPop.toString());
 			Image calImage = this.getImage("calendar.png");
@@ -566,7 +593,7 @@ public class InoculationForm extends BaseForm {
 		for (int i = 0; i < inocs.length; i++ ) {
 			TableCell myCell = new TableCell("Updating Inoculation: <A HREF='../inoc?id=" + inocs[i] + "'>" + inocs[i] + "</A>");
 			try {
-				Inoc myInoc = new SQLInoc(this.getSQLDataSource(), inocs[i]);
+				Inoc myInoc = SQLInoc.load(this.getSQLDataSource(), inocs[i]);
 				myInoc.setFate(Inoc.FATE_DEAD);
 				myInoc.setRemovedDate(rmDate);
 				myCell.addItem("<FONT COLOR='green'><B>Updated</B></FONT>");
@@ -620,17 +647,17 @@ public class InoculationForm extends BaseForm {
 				String parentID = this.getFormValue("parent" + thisRow.toString());
 				String date = this.getFormValue("date" + thisRow.toString());
 				String media = this.getFormValue("media" + thisRow.toString());
-				float volume = parseAmount(this.getFormValue("volume" + thisRow.toString()));
+				BigDecimal volume = parseAmount(this.getFormValue("volume" + thisRow.toString()));
 				String notes = this.getFormValue("notes" + thisRow.toString());
 				String projectCode = this.getFormValue("project" + thisRow.toString());
 				boolean stock = "yes".equals(this.getFormValue("stock" + thisRow.toString()));
 				try {
 					if ( this.hasFormValue("inheritProj" + thisRow.toString()) ) {
 						if ( parentID != null && (! parentID.equals("")) ) {
-							Inoc myParent = new SQLInoc(this.getSQLDataSource(), parentID);
+							Inoc myParent = SQLInoc.load(this.getSQLDataSource(), parentID);
 							projectCode = myParent.getProjectID();
 						} else {
-							Strain aStrain = new SQLStrain(this.getSQLDataSource(), cultureID);
+							Strain aStrain = SQLStrain.load(this.getSQLDataSource(), cultureID);
 							projectCode = aStrain.getProjectID();
 						}
 					}
@@ -653,7 +680,7 @@ public class InoculationForm extends BaseForm {
 						resultRow.add(cultureID);
 						resultRow.add(parentID);
 						resultRow.add(date);
-						resultRow.add(anInoc.getVolumeString(1.0f));
+						resultRow.add(SQLInoc.autoFormatAmount(anInoc.getVolume(), SQLInoc.VOLUME_TYPE));
 						resultRow.add(anInoc.getMedia());
 						resultRow.add(anInoc.getProjectID());
 						resultRow.add(anInoc.getNotes());

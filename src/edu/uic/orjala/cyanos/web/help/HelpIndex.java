@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -64,6 +65,12 @@ public class HelpIndex {
 	 */
 	public final static String PATH_FIELD = "path";
 	/**
+	 * The Lucene field used to store the name of the help file.
+	 */
+	public final static String FILENAME_FIELD = "filename";
+	
+	
+	/**
 	 * The Lucene field used to store the associated CYANOS servelet module of the help file.  
 	 * The module can be denoted using the following META tag syntax.<BR>
 	 * 
@@ -90,7 +97,7 @@ public class HelpIndex {
 	 * @throws IOException
 	 */
 	public static IndexSearcher searcher(File aPath) throws CorruptIndexException, IOException {
-		return new IndexSearcher(openIndex(aPath), true);
+		return new IndexSearcher(reader(aPath));
 	}
 
 	/**
@@ -102,7 +109,7 @@ public class HelpIndex {
 	 * @throws IOException
 	 */
 	public static IndexSearcher searcher(String aPath) throws CorruptIndexException, IOException {
-		return new IndexSearcher(openIndex(aPath), true);
+		return new IndexSearcher(reader(aPath));
 	}
 
 	/**
@@ -114,7 +121,7 @@ public class HelpIndex {
 	 * @throws IOException
 	 */
 	public static IndexReader reader(File aPath) throws CorruptIndexException, IOException {
-		return IndexReader.open(openIndex(aPath), true);
+		return IndexReader.open(openIndex(aPath));
 	}
 
 	/**
@@ -126,7 +133,7 @@ public class HelpIndex {
 	 * @throws IOException
 	 */
 	public static IndexReader reader(String aPath) throws CorruptIndexException, IOException {
-		return IndexReader.open(openIndex(aPath), true);
+		return IndexReader.open(openIndex(aPath));
 	}
 	
 	/**
@@ -145,8 +152,7 @@ public class HelpIndex {
 			if ( ! customDir.exists() ) {
 				customDir.mkdir();
 			} 
-			rebuildIndex(aPath);
-			
+			rebuildIndex(aPath);		
 		}
 	}
 	
@@ -190,13 +196,14 @@ public class HelpIndex {
 	 * @throws SAXException
 	 */
 	public static void rebuildIndex(File aPath) throws CorruptIndexException, LockObtainFailedException, IOException {
-
-		IndexWriter aWriter = new IndexWriter(openIndex(aPath), new StandardAnalyzer(Version.LUCENE_CURRENT), true,
-                new IndexWriter.MaxFieldLength(1000000));
+		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new StandardAnalyzer(Version.LUCENE_36));
+		config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+		IndexWriter aWriter = new IndexWriter(openIndex(aPath), config);
 		indexDirectory(aPath, null, aWriter);
 		File customDir = new File(aPath, CUSTOM_HELP_DIR);
-		indexDirectory(customDir, CUSTOM_HELP_DIR, aWriter);
-		aWriter.optimize();
+		if ( customDir.exists() ) {
+			indexDirectory(customDir, CUSTOM_HELP_DIR, aWriter);
+		}
 		aWriter.close();
 	}
 	

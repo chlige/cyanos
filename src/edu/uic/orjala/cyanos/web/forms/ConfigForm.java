@@ -3,11 +3,17 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,18 +21,18 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
-import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 import edu.uic.orjala.cyanos.web.html.Paragraph;
@@ -44,20 +50,90 @@ import edu.uic.orjala.cyanos.web.html.TableRow;
 public class ConfigForm extends BaseForm {
 
 	/**
+	 * @author George Chlipala
+	 *
+	 */
+	public class CustomJarFilter implements FileFilter {
+
+		long lastModified;
+		
+		/**
+		 * 
+		 */
+		public CustomJarFilter(File parentFile) {
+			lastModified = parentFile.lastModified();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.io.FileFilter#accept(java.io.File)
+		 */
+		public boolean accept(File arg0) {
+			System.out.format("PARENT: %d %s: %d\n", lastModified, arg0.getName(), arg0.lastModified());
+			return arg0.lastModified() > lastModified;
+		}
+
+	}
+
+	public static final String DOWNLOAD_CONFIG_ACTION = "downloadConfig";
+	public static final String REVERT_CONFIG_ACTION = "revertConfig";
+	public static final String APP_CONFIG_ATTR = "app-config";
+	private final AppConfig myConfig;
+	private File jarDir;
+	/**
 	 * 
 	 */
 	public ConfigForm(CyanosWrapper callingServlet) {
 		super(callingServlet);
+		myConfig = (AppConfig) callingServlet.getSession().getAttribute(APP_CONFIG_ATTR);
 	}
 
+	public void setJarDir(File aFile) {
+		jarDir = aFile;
+	}
+	
+	private String basicForm() {
+		StringBuffer output = new StringBuffer();
+		output.append("<P ALIGN='CENTER'><FONT SIZE='+1'><B>Configuration</B></FONT></P>");
+
+		if ( this.myWrapper.hasUpload("xmlFile") ) {
+			FileUpload file = this.myWrapper.getUpload("xmlFile");
+			try {
+				myConfig.loadXML(file.getStream());
+			} catch (ConfigException e) {
+				output.append(this.handleException(e));
+			} catch (IOException e) {
+				output.append(this.handleException(e));
+			}
+			this.myWrapper.getSession().setAttribute(APP_CONFIG_ATTR, myConfig);
+		} 	
+		
+		Form myForm = new Form();
+		myForm.setAttribute("METHOD", "POST");		
+		myForm.addItem("<P ALIGN='CENTER'><BUTTON TYPE='SUBMIT' NAME='downloadConfig'>Download configuration</BUTTON></P>");
+		myForm.addItem("<P ALIGN='CENTER'><BUTTON TYPE='SUBMIT' NAME='revertConfig'>Revert to saved configuration</BUTTON></P>");
+		output.append(myForm.toString());
+
+		myForm = new Form();
+		myForm.setAttribute("METHOD", "POST");
+		myForm.setAttribute("ACTION", this.myWrapper.getRequestURI());
+		myForm.setAttribute("ENCTYPE", "multipart/form-data");
+		if ( this.hasFormValue("form") )
+			myForm.addItem(String.format("<INPUT TYPE='HIDDEN' NAME='form' VALUE='%s'/>", this.getFormValue("form")));	
+
+		myForm.addItem("<P ALIGN='CENTER'><BR/><B>File to upload (XML configuration):</B><INPUT TYPE='FILE' NAME='xmlFile' SIZE=25/><BUTTON TYPE='SUBMIT'>Upload XML File</BUTTON></P>");
+		output.append(myForm.toString());
+		
+		
+		return output.toString();
+	}
+
+	/*
 	public String datasourceForm() {
 		Form myForm = new Form("<P ALIGN='CENTER'><FONT SIZE='+1'><B>Datasources</B></FONT></P>");
 		myForm.setAttribute("METHOD", "POST");
 		if ( this.hasFormValue("form") )
 			myForm.addItem(String.format("<INPUT TYPE='HIDDEN' NAME='form' VALUE='%s'/>", this.getFormValue("form")));
 
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
-		
 		if ( this.hasFormValue("updateAction") ) {
 			myConfig.setDataSource(this.getFormValue("dataJdbc"));
 			myConfig.setUserDB(this.getFormValue("userJdbc"));
@@ -107,6 +183,7 @@ public class ConfigForm extends BaseForm {
 		return myForm.toString();
 
 	}
+	*/
 	
 	public String urlTemplateForm() {
 		Form myForm = new Form("<P ALIGN='CENTER'><FONT SIZE='+1'><B>URL Templates</B></FONT></P>");
@@ -116,7 +193,6 @@ public class ConfigForm extends BaseForm {
 				"<BR> Example: <CODE>http://chem.state.edu/display?cas_id=!CAS_ID!</CODE> - Hypothetical display of a substance (index by CAS ID).<BR/>" +
 				"<CODE>http://chem.state.edu/search?mass=!AVG_MASS!&diff=0.5</CODE> - Hyptothetical search based on mass.</P>");
 
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
 		if ( this.hasFormValue("updateAction") ) {
 			
 		}
@@ -158,67 +234,145 @@ public class ConfigForm extends BaseForm {
 
 		myForm.addItem("<P ALIGN='CENTER'>Classes specified should be fully qualified, e.g. <CODE>java.lang.String</CODE> not <CODE>String</CODE>, and implement the appropriate interface.<BR/>In addition, the compiled class files should be located in the CLASSPATH of the Tomcat Application Server.</P>");
 
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
 		if ( this.hasFormValue("updateAction") ) {
-			myConfig.clearModules();
-			if ( this.hasFormValue("new.class") && this.getFormValue("new.class").length() > 0 ) {
-				myConfig.addClassForModuleType(this.getFormValue("new.type"), this.getFormValue("new.class"));
-			}
-			if ( this.hasFormValue("row") ) {
-				String[] rows = this.getFormValues("row");
-				for ( int i = 0; i < rows.length; i++ ) {
-					if ( this.getFormValue(String.format("class_%s", rows[i])).length() > 0 ) {
-						myConfig.addClassForModuleType(this.getFormValue(String.format("type_%s", rows[i])), this.getFormValue(String.format("class_%s", rows[i])));
+			if ( this.hasFormValue("new:class") ) {
+				String[] classes = this.getFormValues("new:class");
+				for ( int i = 0; i < classes.length; i++ ) {					
+					String fieldName = String.format("class:%s", classes[i]);
+					String classType = this.getFormValue(fieldName);
+					if ( classType.length() > 0 ) {
+						myConfig.addClassForModuleType(classType, classes[i]);
+						myConfig.addClassForJar(classes[i], this.getFormValue("lib-jar"));
+					}
+				}
+			} 
+			
+			if ( this.hasFormValue("del:class")  ) {
+				String[] classes = this.getFormValues("del:class");
+				for ( int i = 0; i < classes.length; i++ ) {					
+					String fieldName = String.format("class:%s", classes[i]);
+					if ( this.getFormValue(fieldName).length() > 0 ) {
+						myConfig.removeClassForModuleType(this.getFormValue(fieldName), classes[i]);
 					}
 				}
 			}
 		}
 		
-		Popup typePop = new Popup();
-		typePop.addItemWithLabel(AppConfig.DEREPLICATION_MODULE, "Dereplication");
-		typePop.addItemWithLabel(AppConfig.UPLOAD_MODULE, "Upload");
-		
-		TableRow aRow = new TableRow("<TH>Module Type</TH><TH>Java Class</TH>");
-		int row = 1;
-		
+		TableRow aRow = new TableRow("<TH>Module Type</TH><TH>Java Class</TH><TH>Remove</TH>");
+
 		String[] types = { AppConfig.DEREPLICATION_MODULE, AppConfig.UPLOAD_MODULE };
+		String[] typeLabels = { "Dereplication", "Upload" };
+		
+		boolean haveItems = false;
 		
 		for ( int i = 0; i < types.length; i++ ) {
-			typePop.setDefault(types[i]);
 			List<String> aList = myConfig.classesForModuleType(types[i]);
 			if ( aList != null ) {
-				ListIterator anIter = aList.listIterator();
+				ListIterator<String> anIter = aList.listIterator();
+				haveItems = aList.size() > 0;
 				while ( anIter.hasNext() ) {
-					String aClass = (String)anIter.next();
-					typePop.setName(String.format("type_%d",row));
-					TableCell myCell = new TableCell(String.format("<INPUT TYPE='HIDDEN' NAME='row' VALUE='%d' />%s", row, typePop.toString()));
-					myCell.addItem(String.format("<INPUT TYPE='TEXT' SIZE='35' NAME='class_%d' VALUE=\"%s\"/>", row, aClass));
+					String aClass = anIter.next();
+					TableCell myCell = new TableCell(typeLabels[i]);
+					myCell.addItem(aClass);
+					myCell.addItem(String.format("<INPUT TYPE='HIDDEN' NAME='class:%s' VALUE='%s'><INPUT TYPE='CHECKBOX' NAME='del:class' VALUE=\"%s\">", aClass, types[i], aClass));
 					aRow.addItem(myCell);
-					row++;
 				}
 			}
 		}
-		typePop.setName("new.type");
-		aRow.addItem("<TD COLSPAN=3 ALIGN='CENTER'><B>New Module</B></TD>");
-		aRow.addItem("<TD>" + typePop.toString() + "</TD><TD><INPUT TYPE='TEXT' SIZE='35' NAME='new.class'/></TD>");
-
-		
-		Table myTable = new Table(aRow);
-		myTable.setClass("species");
-		myTable.setAttribute("align", "center");
-		myForm.addItem(myTable);
-
+		if ( haveItems ) {
+			Table myTable = new Table(aRow);
+			myTable.setClass("species");
+			myTable.setAttribute("align", "center");
+			myForm.addItem(myTable);			
+		}
 		myForm.addItem("<P ALIGN='CENTER'><INPUT TYPE='SUBMIT' NAME='updateAction' VALUE='Update'/><INPUT TYPE='RESET'/></P>");
 		myForm.setAttribute("METHOD", "POST");
+
+		if ( this.hasFormValue("jar") ) {
+			Popup typePop = new Popup();
+			typePop.addItem("");
+			typePop.addItemWithLabel(AppConfig.DEREPLICATION_MODULE, "Dereplication");
+			typePop.addItemWithLabel(AppConfig.UPLOAD_MODULE, "Upload");
+
+			myForm.addItem("<P><H3>New Modules</H3>");
+			
+			myForm.addItem("Select modules to add to CYANOS.  You only need to select the Java class for the module and not any of the supporting classes that may be present in the JAR file.");
+			myForm.addItem("The supporting classes will load automatically with the module class.");
+			myForm.addHiddenValue("lib-jar", this.getFormValue("jar"));
+			aRow = new TableRow("<TH>Module Type</TH><TH>Java Class</TH>");
+			
+			try {				
+				JarFile jar = new JarFile(new File(jarDir, this.getFormValue("jar")));
+				for ( Enumeration<JarEntry> anEnum = jar.entries(); anEnum.hasMoreElements(); ) {
+					JarEntry entry = anEnum.nextElement();
+					if ( entry.getName().endsWith(".class") ) {
+						String name = entry.getName().replaceAll("/", "\\.");
+						name = name.substring(0, name.length() - 6);
+
+						StringBuffer cell = new StringBuffer("<TD>");
+						typePop.setName(String.format("class:%s", name));
+						cell.append(typePop.toString());
+						cell.append(String.format("</TD><TD><INPUT TYPE='HIDDEN' NAME='new:class' VALUE='%s'>%s</TD>", name, name));
+						aRow.addItem(cell.toString());
+					}
+				}
+			} catch (IOException e) {
+				myForm.addItem(this.handleException(e));
+			}	
+			
+			Table myTable = new Table(aRow);
+			myTable.setClass("species");
+			myTable.setAttribute("align", "center");
+			myForm.addItem(myTable);			
+			myForm.addItem("<P ALIGN='CENTER'><INPUT TYPE='SUBMIT' NAME='updateAction' VALUE='Update'/><INPUT TYPE='RESET'/></P>");
+
+		}
+		
+		if ( this.hasFormValue("uploadJar") ) {
+			FileUpload fileItem = this.myWrapper.getUpload("jarDir");
+			if ( this.jarDir.exists() && (! this.hasFormValue("overwrite")) ) {
+				myForm.setAttribute("ENCTYPE", "multipart/form-data");
+				myForm.addItem("File already exists.  Upload again and select overwrite to continue.<BR/><B>JAR file to upload:</B> ");
+				myForm.addItem("<INPUT TYPE='FILE' NAME='jarDir' SIZE=25/>");
+				myForm.addHiddenValue("form", "modules");
+				myForm.addItem("<BUTTON TYPE='SUBMIT' NAME='uploadJar'>Upload </BUTTON><BR>Overwrite existing file: <INPUT TYPE='CHECKBOX' NAME='overwrite'></P>");				
+			} else {
+				try {
+					FileOutputStream jarOut = new FileOutputStream(jarDir);
+					int c = -1;
+					InputStream fileIn = fileItem.getStream();
+					while ( (c = fileIn.read()) > 0 ) {
+						jarOut.write(c);
+					}
+					fileIn.close();
+					jarOut.close();
+				} catch (IOException e) {
+					myForm.addItem(this.handleException(e));
+				}
+			}
+		}
+
+		File parentFile = new File(this.jarDir, "cyanos.jar");
+		myForm.addItem("<P><H3>JAR Files</H3>");
+		myForm.addItem("JAR files with custom Java classes should be placed in the folder</P><P style='margin-left: 10px'><CODE>");
+		myForm.addItem(this.jarDir.getAbsolutePath());
+		myForm.addItem("</CODE></P><P>on the Web Application Server.<UL>");
+		File[] files = this.jarDir.listFiles(new CustomJarFilter(parentFile));
+		
+		for ( int i = 0; i < files.length; i++ ) {
+			String name = files[i].getName();
+			myForm.addItem(String.format("<LI><A HREF='?form=modules&jar=%s'>%s</A></LI>", name, name));
+		}
+		
+		myForm.addItem("</UL></P>");
+
 		return myForm.toString();
 	}
 
 	public String mappingForm() {
 		Form myForm = new Form("<P ALIGN='CENTER'><FONT SIZE='+1'><B>Mapping Configuration</B></FONT></P>");
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
 
 		if ( this.hasFormValue("updateAction") ) {
-			myConfig.setGoogleMapKey(this.getFormValue("googleMapKey"));
 			if ( this.hasFormValue("delLayer") ) {
 				String[] layers = this.getFormValues("delLayer");
 				for ( int i = 0; i <  layers.length; i++ ) {
@@ -228,12 +382,26 @@ public class ConfigForm extends BaseForm {
 			if ( ! this.getFormValue("mapName").equals("") ) {
 				myConfig.addMapServerLayer(this.getFormValue("mapName"), this.getFormValue("mapURL"));
 			}
+			if ( this.hasFormValue("enableOSM") ) {
+				myConfig.setMapParameter(AppConfig.MAP_OSM_LAYER, "1");
+			} else {
+				myConfig.removeMapParameter(AppConfig.MAP_OSM_LAYER);
+			}
+			
+			if ( this.hasFormValue("enableNASA") ) {
+				myConfig.setMapParameter(AppConfig.MAP_NASA_LAYER, "1");
+			} else {
+				myConfig.removeMapParameter(AppConfig.MAP_NASA_LAYER);
+			}
+			
+			String googleMapKey = this.getFormValue("googleMapKey");
+			if ( googleMapKey != null && googleMapKey.length() > 0 ) {
+				myConfig.setGoogleMapKey(googleMapKey);
+			} else {
+				myConfig.removeMapParameter(AppConfig.PARAM_GOOGLE_MAP_KEY);
+			}
+			this.myWrapper.getSession().setAttribute(APP_CONFIG_ATTR, myConfig);
 		}
-		
-		myForm.addItem("<P ALIGN='CENTER'><B>Mapserver Layers</B>");
-		myForm.addItem("<BR>Link to a MapServer service.  MapServer source code/binaries can be downloaded at <A HREF='http://mapserver.org/'>http://mapserver.org/</A>");
-		myForm.addItem("<BR>New Layer: (Name)<INPUT TYPE='TEXT' NAME='mapName' SIZE=25 /> (URL)<INPUT TYPE='TEXT' NAME='mapURL' SIZE=75 />");
-		myForm.addItem("<BR><B>Existing layers</B>");
 		
 		Map<String,String> layers = myConfig.getMapServerLayers();
 		Set<String> keys = new TreeSet<String>(layers.keySet());
@@ -242,6 +410,10 @@ public class ConfigForm extends BaseForm {
 		header.addItem("URL");
 		header.addItem("Delete");
 		TableRow aRow = new TableRow(header);
+		
+		boolean enableOSM = ("1".equals(myConfig.getMapParameter(AppConfig.MAP_OSM_LAYER)));
+		boolean enableNASA = ("1".equals(myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER)));
+		
 		while ( keyIter.hasNext() ) {
 			String aKey = keyIter.next();
 			TableCell aCell = new TableCell(aKey);
@@ -252,14 +424,38 @@ public class ConfigForm extends BaseForm {
 		Table aTable = new Table(aRow);
 		aTable.setClass("species");
 		aTable.setAttribute("ALIGN","CENTER");
-		myForm.addItem(aTable);
-
-		myForm.addItem(String.format("<P ALIGN='CENTER'><B>Google Maps</B><BR>API Key: <INPUT TYPE='TEXT' NAME='googleMapKey' VALUE='%s' SIZE=100 />", 
-				myConfig.getGoogleMapKey()));
-		myForm.addItem("<BR>Acquire a Map API key at <A HREF='http://code.google.com/apis/maps/signup.html'>http://code.google.com/apis/maps/signup.html</A>");
-
 		
+		myForm.addItem("<HR WIDTH='70%'><P ALIGN='CENTER'><B>OpenLayers Mapping</B>");
+		
+		myForm.addItem("<P>CYANOS utilizes the OpenLayers mapping system to display maps (<A HREF='http://openlayers.org'>openlayers.org</A>).  This mapping system allows one to customize the maps that can be displayed, also called layers. By default, CYANOS will enable the OpenStree maps terrain layer.</P>");
+		
+		try {
+			if ( ! myConfig.configExists() ) 
+				enableOSM = true;			
+		} catch (ConfigException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		myForm.addItem(String.format("<P><INPUT TYPE='CHECKBOX' NAME='enableOSM' %s/>Enable OpenStreet Terrain map.</P>", (enableOSM ? "CHECKED" : "")));
+		myForm.addItem(String.format("<P><INPUT TYPE='CHECKBOX' NAME='enableNASA' %s/>Enable NASA BlueMarble map.</P>", (enableNASA ? "CHECKED" : "")));
+
+		String googleMapKey = myConfig.getGoogleMapKey();
+
+		myForm.addItem(String.format("<P>Google Maps API Key: <INPUT TYPE='TEXT' NAME='googleMapKey' VALUE='%s' SIZE=100 />", 
+				( googleMapKey != null ? googleMapKey : "") ));
+		myForm.addItem("<BR>You can acquire a Map API key at <A HREF='http://code.google.com/apis/maps/signup.html'>http://code.google.com/apis/maps/signup.html</A></P>");
+
+		myForm.addItem("<BR>Link to an additional MapServer services.  MapServer source code/binaries can be downloaded at <A HREF='http://mapserver.org/'>http://mapserver.org/</A>");
+		myForm.addItem("<BR>New Layer: (Name)<INPUT TYPE='TEXT' NAME='mapName' SIZE=25 /> (URL)<INPUT TYPE='TEXT' NAME='mapURL' SIZE=75 />");
+	
+		if ( layers.size() > 0 ) {
+			myForm.addItem("<BR><B>Existing layers</B>");
+			myForm.addItem(aTable);			
+		}
+
 		myForm.addItem("<P ALIGN='CENTER'><INPUT TYPE='SUBMIT' NAME='updateAction' VALUE='Update'/><INPUT TYPE='RESET'/></P>");
+
 		myForm.setAttribute("METHOD", "POST");
 		return myForm.toString();
 
@@ -269,8 +465,6 @@ public class ConfigForm extends BaseForm {
 		Form myForm = new Form("<P ALIGN='CENTER'><FONT SIZE='+1'><B>File Paths</B></FONT></P>");
 		
 		TableRow aRow = new TableRow("<TH>Object Class</TH><TH>File Type</TH><TH>Directory</TH>");
-		
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
 		
 		if ( this.hasFormValue("updateAction")) {
 			myConfig.clearFilePaths();
@@ -287,17 +481,18 @@ public class ConfigForm extends BaseForm {
 					}
 				}
 			}
+			this.myWrapper.getSession().setAttribute(APP_CONFIG_ATTR, myConfig);
 		}
 
-		Map fileTypeMap = myConfig.getFilePathMap();
-		Iterator classIter = fileTypeMap.keySet().iterator();
+		Map<String, Map<String, String>> fileTypeMap = myConfig.getFilePathMap();
+		Iterator<String> classIter = fileTypeMap.keySet().iterator();
 		int row = 1;
 		while ( classIter.hasNext() ) {
-			String aClass = (String)classIter.next();
-			Map classMap = (Map) fileTypeMap.get(aClass);
-			Iterator typeIter = classMap.keySet().iterator();
+			String aClass = classIter.next();
+			Map<String, String> classMap =  fileTypeMap.get(aClass);
+			Iterator<String> typeIter = classMap.keySet().iterator();
 			while ( typeIter.hasNext() ) {
-				String aType = (String) typeIter.next();
+				String aType = typeIter.next();
 				TableCell myCell = new TableCell(String.format("<INPUT TYPE='HIDDEN' NAME='row' VALUE='%d'/><INPUT TYPE='TEXT' NAME='%d_class' VALUE=\"%s\"/>", row, row, aClass));
 				myCell.addItem(String.format("<INPUT TYPE='TEXT' NAME='%d_type' VALUE=\"%s\"/>", row, aType));
 				myCell.addItem(String.format("<INPUT TYPE='TEXT' NAME='%d_path' VALUE=\"%s\"/>", row, (String)classMap.get(aType)));
@@ -323,7 +518,6 @@ public class ConfigForm extends BaseForm {
 		Form myForm = new Form("<P ALIGN='CENTER'><FONT SIZE='+1'><B>Work Queues</B></FONT></P>");
 		myForm.setAttribute("METHOD", "POST");
 		TableRow aRow = new TableRow("<TH>Type</TH><TH>Source</TH><TD></TD>");
-		CyanosConfig myConfig = this.myWrapper.getAppConfig();
 
 		if ( this.hasFormValue("updateAction") ) {
 			for ( int i = 0; i < AppConfig.QUEUE_TYPES.length; i++ ) {
@@ -337,8 +531,10 @@ public class ConfigForm extends BaseForm {
 					}
 				}
 			}
+			this.myWrapper.getSession().setAttribute(APP_CONFIG_ATTR, myConfig);
 		}
-		
+
+
 		Map<String,String> queueTypeMap = new HashMap<String,String>();
 		queueTypeMap.put("user", "User");
 		queueTypeMap.put("inoculation", "Growth");
@@ -421,7 +617,6 @@ public class ConfigForm extends BaseForm {
 				foundTables.add(aResult.getString("TABLE_NAME").toLowerCase());
 			}
 
-			CyanosConfig myConfig = this.myWrapper.getAppConfig();
 			String[] tables = myConfig.tableList();
 			myCell = new TableCell();
 			for ( int i=0; i < tables.length; i++ ) {
@@ -465,8 +660,6 @@ public class ConfigForm extends BaseForm {
 	public String manageConfig() throws NamingException {
 		StringBuffer output = new StringBuffer();
 		
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
-		
 		Paragraph head = new Paragraph();
 		head.setAlign("CENTER");
 		StyledText title = new StyledText("Application Configuration");
@@ -477,22 +670,24 @@ public class ConfigForm extends BaseForm {
 		
 		if ( this.hasFormValue("saveFile") ) {
 			try {
-				myConf.writeConfig();
+				myConfig.writeConfig();
 				output.append("<DIV CLASS='messages'><P><B><FONT COLOR='green'>Configuration saved!</FONT><BR>Restart application to ensure changes take effect.</B></P></DIV>");
 			} catch (Exception e) {
 				output.append(this.handleException(e));
 			}
 		} else if ( this.hasFormValue("reloadFile")) {
 			try {
-				myConf.loadConfig();
+				myConfig.loadConfig();
 				output.append("<DIV CLASS='messages'><P><B><FONT COLOR='green'>Configuration reloaded!</FONT></B></P></DIV>");
 			} catch (Exception e) {
 				output.append(this.handleException(e));
 			}
  		} 
 				
-		String[] forms = { "jdbc", "filepaths", "queues", "maps", "modules" };
-		String[] labels = { "Datasources", "File Paths", "Work Queues", "Maps", "Modules" };
+//		String[] forms = { "jdbc", "filepaths", "queues", "maps", "modules" };
+//		String[] labels = { "Datasources", "File Paths", "Work Queues", "Maps", "Modules" };
+		String[] forms = { "savereload", "filepaths", "queues", "maps", "modules" };
+		String[] labels = { "Basic", "File Paths", "Work Queues", "Maps", "Modules" };
 		String myContent = "";
 
 		HtmlList aList = new HtmlList();
@@ -503,7 +698,7 @@ public class ConfigForm extends BaseForm {
 		for ( int i = 0; i < forms.length; i++ ) {
 			if ( forms[i].equals(thisForm) ) {
 				switch (i) {
-				case 0: myContent = this.datasourceForm(); break;
+				case 0: myContent = this.basicForm(); break;
 				case 1: myContent = this.filepathsForm(); break;
 				case 2: myContent = this.queueForm(); break;
 				case 3: myContent = this.mappingForm(); break;
@@ -515,9 +710,13 @@ public class ConfigForm extends BaseForm {
 			}
 		}		
 		
-		if ( myConf.isUnsaved() ) {
+		if ( myConfig.isUnsaved() ) {
  			output.append("<DIV CLASS='messages'><P><FORM METHOD='POST'><B>Changes not saved to configuration file!</B> <BUTTON TYPE='SUBMIT' NAME='saveFile'>Save</BUTTON><BUTTON TYPE='SUBMIT' NAME='reloadFile'>Revert</BUTTON></FORM></P></DIV>");
-		}
+		} else if (	myConfig.getDate() != null && myConfig.getDate().compareTo(((AppConfig)this.myWrapper.getAppConfig()).getDate()) != 0 ) {
+			output.append("<DIV CLASS='messages'><P><B>Saved configuration different than running configuration.<BR>Restart application to ensure changes take effect.</B></P></DIV>"); 			
+ 		}
+		
+		output.append("<DIV ID='setupPanel'>");
 		
 		output.append("<DIV ID='sideNav'>");
 		output.append(aList.toString());
@@ -525,10 +724,11 @@ public class ConfigForm extends BaseForm {
 		
 		output.append("<DIV ID='mainPanel'>");
 		output.append(myContent);
-		output.append("</DIV>");
+		output.append("</DIV></DIV>");
 		
 		return output.toString();
 	}
+
 	
 
 }

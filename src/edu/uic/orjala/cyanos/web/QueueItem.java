@@ -81,7 +81,7 @@ public class QueueItem extends SQLObject {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.sql.SQLObject#fetchRecord()
 	 */
-	@Override
+	
 	protected void fetchRecord() throws DataException {
 		// TODO Auto-generated method stub
 	}

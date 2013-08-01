@@ -3,16 +3,26 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import edu.uic.orjala.cyanos.Collection;
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Project;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.sql.SQLCollection;
+import edu.uic.orjala.cyanos.sql.SQLData;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
-import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.html.Div;
 import edu.uic.orjala.cyanos.web.html.Form;
@@ -25,10 +35,66 @@ import edu.uic.orjala.cyanos.web.html.TableHeader;
 import edu.uic.orjala.cyanos.web.html.TableRow;
 
 /**
- * @author gchlip2
+ * @author George Chlipala
  *
  */
 public class CollectionForm extends BaseForm {
+
+	protected class CollectionMarker {
+		private int count;
+		private final StringBuffer description = new StringBuffer();
+		private final String requestURI;
+		private final DateFormat dateFormat;
+		private final double latitude;
+		private final double longitude;
+		
+		protected CollectionMarker(double latitude, double longitude, String url, DateFormat format) {
+			this.requestURI = url;
+			this.dateFormat = format;
+			this.latitude = latitude;
+			this.longitude = longitude;
+		}
+		
+		protected void addCollection(Collection col) throws DataException {
+			count++;
+			description.append(String.format("<P><A HREF='%s?col=%s&showMap=true' CLASS='map'>%s</A> - %s By: %s<BR/></P>", 
+						requestURI, col.getID(), col.getID(), dateFormat.format(col.getDate()), col.getCollector()));
+		}
+		
+		protected String getName() {
+			return String.format("%d collections", count);
+		}
+		
+		protected String getDescription() {
+			return this.description.toString();
+		}
+		
+		protected void writePlacemark(XMLStreamWriter writer, String styleURL) throws XMLStreamException {		
+			writer.writeStartElement("Placemark");
+			
+			writer.writeStartElement("name");
+			writer.writeCData(this.getName());
+			writer.writeEndElement();
+
+			writer.writeStartElement("description");
+			writer.writeCData(this.getDescription());
+			writer.writeEndElement();
+			
+			writer.writeStartElement("styleUrl");
+			writer.writeCData(styleURL);
+			writer.writeEndElement();			
+			
+			writer.writeStartElement("Point");
+			writer.writeStartElement("coordinates");
+			writer.writeCData(String.format("%.4f, %.4f", longitude, latitude));
+			writer.writeEndElement();
+			writer.writeEndElement();
+
+			writer.writeEndElement();
+		}
+		
+		
+	}
 
 	private static final String COLLECTION_DIV_ID = "collection";
 	
@@ -246,16 +312,16 @@ public class CollectionForm extends BaseForm {
 			if ( hasLocation ) {
 				float thisLat = latFloat.floatValue();
 				float thisLong = longFloat.floatValue();
-				float latRange = 180.0f / 1024.0f;
-				float longRange = 360.0f / 1024.0f;
+				float latRange = 180.0f / 256.0f;
+				float longRange = 360.0f / 256.0f;
 				float maxLat = thisLat + latRange; float minLat = thisLat - latRange;
 				float maxLong = thisLong + longRange; float minLong = thisLong - longRange;
 				Collection nearList = SQLCollection.collectionsLoacted(this.getSQLDataSource(), minLat, maxLat, minLong, maxLong);
 				
 				CyanosMap aMap = this.getMap(nearList);
 				aMap.setDIVSize(400, 300);
-				aMap.setMapCenter(thisLat, thisLong);
-				aMap.setMapZoom(10);				
+//				aMap.setMapCenter(thisLat, thisLong);
+//				aMap.setMapZoom(10);				
 				return aMap.mapDiv();
 			}
 			return new Div();
@@ -291,14 +357,14 @@ public class CollectionForm extends BaseForm {
 			coords.addItem(String.format("Precision (m): %d m<BR/>", aCollection.getPrecision()));
 			coords.setAttribute("STYLE", "margin-left: 10px;");
 			tableRow.addItem("<TD COLSPAN='2' ALIGN='LEFT'><B><I>Location</B></I><BR/>" + coords.toString());
-			tableRow.addItem(new TableCell(new String[]{"Notes:", this.formatStringHTML(aCollection.getNotes())}));
+			tableRow.addItem(new TableCell(new String[]{"Notes:", formatStringHTML(aCollection.getNotes())}));
 			
 			Table myTable = new Table(tableRow);
 			Div textDiv = new Div(myTable);
 			myTable.setAttribute("class","list");
 			myTable.setAttribute("align","center");
 	
-			CyanosConfig myConf = this.myWrapper.getAppConfig();
+			AppConfig myConf = this.myWrapper.getAppConfig();
 
 			if ( myConf.canMap() ) {
 				myCell = new TableCell(textDiv);
@@ -418,19 +484,182 @@ public class CollectionForm extends BaseForm {
 			return this.handleException(e);
 		}
 	}
+
+	private CyanosMap getMap(Collection aCol) throws ConfigException {
+		return new OpenLayersMap(this.myWrapper, aCol);
+	}
 	
-	private boolean showOLMap() {
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
-		Map<String,String> layers = myConf.getMapServerLayers();
-		return (layers.size() > 0);
+	public static Popup collectionPop(SQLData data) throws DataException {
+		Collection allCols = SQLCollection.collections(data);
+		Popup aPop = new Popup();
+		aPop.addItem("");
+		allCols.beforeFirst();
+		while ( allCols.next() ) {
+			aPop.addItem(allCols.getID());
+		}
+		return aPop;
+	}
+	
+	public void printKML(boolean combine) throws XMLStreamException, IOException, DataException {
+		Collection colList = this.getCollectionList();
+		if ( colList != null ) {
+			this.printKML(colList, combine);
+		}
+	}
+	
+	public void printKML() throws XMLStreamException, IOException, DataException {
+		this.printKML(false);
+	}
+	
+	public void printKML(Collection aCol, boolean combine) throws XMLStreamException, IOException, DataException {
+		XMLOutputFactory xof = XMLOutputFactory.newInstance();
+		XMLStreamWriter writer = xof.createXMLStreamWriter(this.myWrapper.getWriter());
+		writer.writeStartDocument("UTF-8", "1.0");
+		writer.writeStartElement("kml");
+		writer.writeAttribute("xmlns", "http://www.opengis.net/kml/2.2");
+		writer.writeStartElement("Document");
+		
+		writer.writeStartElement("Style");
+		writer.writeAttribute("id", "collectionMark");
+		writer.writeStartElement("IconStyle");
+		writer.writeStartElement("Icon");
+		writer.writeStartElement("href");
+		HttpServletRequest req = this.myWrapper.getRequest();
+		writer.writeCharacters(String.format("%s://%s:%d%s/images/map_icons/A.png", req.getScheme(), req.getServerName(), 
+				req.getServerPort(), req.getContextPath()));
+		writer.writeEndElement();
+		writer.writeEndElement();
+		writer.writeEndElement();
+		writer.writeEndElement();
+		
+		
+		if ( combine ) {
+			Map<String, CollectionMarker> markers = this.buildMapMarkers(aCol);
+			for ( CollectionMarker marker: markers.values() ) {
+				marker.writePlacemark(writer, "#collectionMark");
+			}
+		} else {
+			this.writeCollectionsKML(aCol, writer, "#collectionMark");
+		}
+		
+		writer.writeEndElement();
+		writer.writeEndElement();
+		writer.writeEndDocument();
+		writer.flush();
+		writer.close();
+	}
+	
+	private Map<String,CollectionMarker> buildMapMarkers(Collection aCol) throws DataException {
+		Map<String,CollectionMarker> retVal = new HashMap<String,CollectionMarker>();
+		String url = this.myWrapper.getRequest().getRequestURL().toString();
+		url = url.replace("collection.kml", "collection");
+		if ( aCol != null && aCol.first() ) {
+			aCol.beforeFirst();
+			SimpleDateFormat myFormat = this.dateFormat();
+			while ( aCol.next() ) {
+				Float latFloat = aCol.getLatitudeFloat();
+				Float longFloat = aCol.getLongitudeFloat();
+				if ( (latFloat == null) || (longFloat == null) ) continue;
+				double thisLat = latFloat.doubleValue();
+				double thisLong = aCol.getLongitudeFloat();
+				String key = String.format("%.4f, %.4f", thisLong, thisLat);
+				if ( ! retVal.containsKey(key) ) 
+					retVal.put(key, new CollectionMarker(thisLat, thisLong, url, myFormat));
+				CollectionMarker marker = retVal.get(key);
+				marker.addCollection(aCol);
+			}
+		}
+		return retVal;
+	}
+	
+	private void writeCollectionsKML(Collection cols, XMLStreamWriter writer, String styleURL) throws DataException, XMLStreamException {
+		if ( cols != null && cols.first() ) {
+			String url = this.myWrapper.getRequest().getRequestURL().toString();
+			url = url.replace("collection.kml", "collection");
+			cols.beforeFirst();
+			SimpleDateFormat myFormat = this.dateFormat();
+			while ( cols.next() ) {
+				Float latFloat = cols.getLatitudeFloat();
+				Float longFloat = cols.getLongitudeFloat();
+				if ( (latFloat == null) || (longFloat == null) ) continue;
+				double thisLat = latFloat.doubleValue();
+				double thisLong = cols.getLongitudeFloat();
+	
+				writer.writeStartElement("Placemark");
+				
+				writer.writeStartElement("name");
+				writer.writeCharacters(cols.getID());
+				writer.writeEndElement();
+
+				writer.writeStartElement("description");
+				writer.writeCharacters(getKMLDescription(cols, url, myFormat));
+				writer.writeEndElement();
+
+				writer.writeStartElement("styleUrl");
+				if ( cols.getID().equals(this.getFormValue("col")))		
+					writer.writeCharacters("#focusMark");
+				else 
+					writer.writeCharacters(styleURL);
+				writer.writeEndElement();			
+				
+
+				writer.writeStartElement("Point");
+				writer.writeStartElement("coordinates");
+				writer.writeCharacters(String.format("%.4f, %.4f", thisLong, thisLat));
+				writer.writeEndElement();
+				writer.writeEndElement();
+
+				writer.writeEndElement();
+				
+			}
+		}
+	}
+	
+	public Collection getCollectionList() throws DataException {
+		Collection colList = null;
+		if ( this.hasFormValue("col") ) {
+			Float maxLat = null , minLat = null, maxLong = null, minLong = null;
+			if ( this.hasFormValue("minLat") && this.hasFormValue("maxLat") && this.hasFormValue("minLong") && this.hasFormValue("maxLong") ) {
+				minLat = Float.parseFloat(this.getFormValue("minLat"));
+				maxLat = Float.parseFloat(this.getFormValue("maxLat"));
+				minLong = Float.parseFloat(this.getFormValue("minLong"));
+				maxLong = Float.parseFloat(this.getFormValue("maxLong"));
+			} else {
+				Collection center = SQLCollection.load(this.getSQLDataSource(), this.getFormValue("col"));
+				Float latFloat = center.getLatitudeFloat();
+				Float longFloat = center.getLongitudeFloat();
+				boolean hasLocation = ( (latFloat != null) && (longFloat != null) );
+				if ( hasLocation ) {
+					float thisLat = latFloat.floatValue();
+					float thisLong = longFloat.floatValue();
+					float latRange = 180.0f / 1024.0f;
+					float longRange = 360.0f / 1024.0f;
+					maxLat = thisLat + latRange; 
+					minLat = thisLat - latRange;
+					maxLong = thisLong + longRange;
+					minLong = thisLong - longRange;
+				}
+			}
+			if ( maxLat != null )
+				colList = SQLCollection.collectionsLoacted(this.getSQLDataSource(), minLat, maxLat, minLong, maxLong);
+		} else {
+			if ( this.hasFormValue("query") && ( ! this.getFormValue("query").equals("") ) ) {
+				String query = this.getFormValue("query");
+				if ( query.matches("\\\\*") ) query = query.replaceAll("\\\\*", "%");
+				else query = "%" + query + "%";
+				String[] columns = { this.getFormValue("field") };
+				String[] values = { query };
+				colList = SQLCollection.collectionsLike(this.getSQLDataSource(), columns, values, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
+			} else {
+				colList = SQLCollection.collections(this.getSQLDataSource());
+			}
+		}
+		return colList;
 	}
 
-	private CyanosMap getMap(Collection aCol) {
-		if ( this.showOLMap() ) {
-			return new OpenLayersMap(this.myWrapper, aCol);
-		} else {
-			return new GoogleMap(this.myWrapper, aCol);
-		}		
+	protected static String getKMLDescription(Collection col, String url, DateFormat dateFormat) throws DataException {
+		return String.format("<P><A HREF='%s?col=%s&showMap=true' CLASS='map'>%s</A> - %s By: %s<BR/></P>", 
+				url, col.getID(), col.getID(), dateFormat.format(col.getDate()), col.getCollector());
 	}
-	
+
 }

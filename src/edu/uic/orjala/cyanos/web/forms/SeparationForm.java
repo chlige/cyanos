@@ -3,18 +3,20 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ListIterator;
 
+import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Project;
 import edu.uic.orjala.cyanos.Role;
-import edu.uic.orjala.cyanos.Sample;
-import edu.uic.orjala.cyanos.SampleCollection;
 import edu.uic.orjala.cyanos.Separation;
+import edu.uic.orjala.cyanos.Separation.SeparationTemplate;
 import edu.uic.orjala.cyanos.Strain;
-import edu.uic.orjala.cyanos.Separation.SeparationProtocol;
+import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
@@ -38,6 +40,8 @@ public class SeparationForm extends BaseForm {
 	public static final String DIV_TITLE = "Separations";
 	public static final String DIV_ID = "sepInfo";
 	public static final String DATA_FORM = "dataForm";
+
+	public static final String COMPOUND_FORM_ID = "compoundform";
 
 	/**
 	 * @param callingServlet
@@ -239,10 +243,10 @@ public class SeparationForm extends BaseForm {
 				myRow.addItem("<TD>Project:</TD><TD>NONE</TD>");
 			}
 			myRow.addItem(String.format("<TD>Date:</TD><TD>%s</TD>", this.formatDate(thisSep.getDate())));
-			myRow.addItem(String.format("<TD>Stationary Phase:</TD><TD>%s</TD>", this.formatStringHTML(thisSep.getStationaryPhase())));
-			myRow.addItem(String.format("<TD>Mobile Phase:</TD><TD>%s</TD>", this.formatStringHTML(thisSep.getMobilePhase())));
-			myRow.addItem(String.format("<TD>Method:</TD><TD>%s</TD>", this.formatStringHTML(thisSep.getMethod())));
-			myRow.addItem(String.format("<TD>Notes:</TD><TD>%s</TD>", this.formatStringHTML(thisSep.getNotes())));
+			myRow.addItem(String.format("<TD>Stationary Phase:</TD><TD>%s</TD>", formatStringHTML(thisSep.getStationaryPhase())));
+			myRow.addItem(String.format("<TD>Mobile Phase:</TD><TD>%s</TD>", formatStringHTML(thisSep.getMobilePhase())));
+			myRow.addItem(String.format("<TD>Method:</TD><TD>%s</TD>", formatStringHTML(thisSep.getMethod())));
+			myRow.addItem(String.format("<TD>Notes:</TD><TD>%s</TD>", formatStringHTML(thisSep.getNotes())));
 			myTable.addItem(myRow);
 			return myTable.toString();
 		} catch (DataException e) {
@@ -307,7 +311,7 @@ public class SeparationForm extends BaseForm {
 		return aPop;
 	}
 	
-	public String sampleTable(Separation aSep, Sample samples) {
+	public String sampleTable(Separation aSep, Material sources) {
 		String[] headers = {"Sample", "Culture ID", "Date", "Collection", "Location", "Amount" };
 		TableCell myCell = new TableHeader(headers);
 		myCell.setClass("header");
@@ -318,35 +322,34 @@ public class SeparationForm extends BaseForm {
 		try {
 			SQLData myData = this.myWrapper.getSQLDataSource();
 			Strain aStrain = null;
-			SampleCollection aCol = null;
+//			SampleCollection aCol = null;
 
-			if ( samples != null && samples.first() ) {
+			if ( sources != null && sources.first() ) {
 				SimpleDateFormat myDateFormat = this.dateFormat();
-				samples.beforeFirst();
+				sources.beforeFirst();
 				boolean odd = true;
-				float total = 0.0f;
-				while ( samples.next() ) {
+				BigDecimal total = BigDecimal.ZERO;
+				while ( sources.next() ) {
 					try {
-						myCell = new TableCell(this.sampleLink(samples));
-						if ( aStrain == null || (! aStrain.getID().equals(samples.getCultureID())) ) 
-								aStrain = new SQLStrain(myData, samples.getCultureID());
+						myCell = new TableCell(sources.getID());
+						if ( aStrain == null || (! aStrain.getID().equals(sources.getCultureID())) ) 
+								aStrain = new SQLStrain(myData, sources.getCultureID());
 						myCell.addItem(this.strainLink(aStrain));
-						myCell.addItem(myDateFormat.format(samples.getDate()));
-						if ( aCol == null || (! aCol.getID().equals(samples.getCollectionID())) )
-							aCol = samples.getCollection();
-						myCell.addItem(this.sampleColLink(aCol));
-						myCell.addItem(samples.getLocation());
-						float concentration = samples.getConcentration();
-						if ( concentration == 0 ) concentration = 1;
-						float amount = samples.getAmountForSeparation(aSep) * concentration;
-						if ( amount < 0 ) amount = amount * -1.0f;
-						total += amount;
-						String unit = "mg";
-						if ( amount >= 1 ) unit = "g";
-						myCell.addItem(formatAmount("%.2f %s", amount, unit));
+						myCell.addItem(myDateFormat.format(sources.getDate()));
+	//					if ( aCol == null || (! aCol.getID().equals(sources.getCollectionID())) )
+	//						aCol = sources.getCollection();
+	//					myCell.addItem(this.sampleColLink(aCol));
+	//					myCell.addItem(sources.getLocation());
+	//					BigDecimal concentration = sources.getConcentration();
+	//					if ( concentration == null || concentration.equals(BigDecimal.ZERO) ) concentration = BigDecimal.ONE;
+	//					BigDecimal amount = sources.getAmountForSeparation(aSep).multiply(concentration);
+						BigDecimal amount = sources.getAmountForSeparation(aSep);
+						if ( amount.signum() < 0) amount = amount.negate();
+						total = total.add(amount);
+						myCell.addItem(SQLSeparation.autoFormatAmount(amount, SQLSeparation.MASS_TYPE));
 						myRow = new TableRow(myCell);
 						myRow.setAttribute("ALIGN", "CENTER");
-						if ( samples.isRemoved() )
+						if ( sources.isRemoved() )
 							myCell.setClass("removed");						
 						if ( odd ) {
 							myRow.setClass("odd");
@@ -361,9 +364,9 @@ public class SeparationForm extends BaseForm {
 					}
 				}
 				String unit = "mg";
-				if ( total >= 1 ) unit = "g";
+				if ( total.compareTo(BigDecimal.ONE) > -1 ) unit = "g";
 				myTable.addItem("<TR><TD COLSPAN=5 ALIGN='right'><B>TOTAL</B></TD><TD ALIGN='CENTER'><B>" + 
-						formatAmount("%.2f %s", total, unit) + "</B></TD></TR>");
+						formatAmount(total, unit) + "</B></TD></TR>");
 			} else {
 				myTable = new Table("<TR><TD ALIGN='center'><B>NONE</B></TD></TR>");
 			}
@@ -375,10 +378,11 @@ public class SeparationForm extends BaseForm {
 		return myTable.toString();
 	}
 
+
 	public Div sourceDiv(Separation aSep) {
 		String content = "CANNOT GENERATE OUTPUT";
 		try {
-			Sample sources = aSep.getSources();
+			Material sources = aSep.getSources();
 			content = this.sampleTable(aSep, sources);
 		} catch (DataException e) {
 			content = this.handleException(e);
@@ -389,7 +393,7 @@ public class SeparationForm extends BaseForm {
 	public Div fractionDiv(Separation aSep) {
 		String content = "CANNOT GENERATE OUTPUT";
 		try {
-			Sample sources = aSep.getFractions();
+			Material sources = aSep.getFractions();
 			content = this.sampleTable(aSep, sources);
 		} catch (DataException e) {
 			content = this.handleException(e);
@@ -397,7 +401,7 @@ public class SeparationForm extends BaseForm {
 		return this.openDiv("sep_product", "Fractions", content);
 	}
 
-	public String protocolForm(SeparationProtocol myProtocol) {
+	public String protocolForm(SeparationTemplate myProtocol) {
 		Table myTable = new Table();
 		myTable.setAttribute("ALIGN","CENTER");
 		TableRow myRow = new TableRow(this.makeFormTextRow("Stationary Phase:", "sphase", myProtocol.getStationaryPhase()));
@@ -407,6 +411,7 @@ public class SeparationForm extends BaseForm {
 		return myTable.toString();
 	}
 	
+	/*
 	public String dataForm(Separation anObject) {
 		if ( anObject.isAllowed(Role.WRITE) && this.hasFormValue("showBrowser") ) {
 			Form myForm = new Form(DataForm.fileManagerApplet(this.myWrapper, "separation", anObject.getID(), Separation.LC_DATA_TYPE, false));				
@@ -427,5 +432,131 @@ public class SeparationForm extends BaseForm {
 	}
 
 
+	public String compoundForm(Separation anObject) {
+		CompoundForm aForm = new CompoundForm(this.myWrapper);
+		if ( anObject.isAllowed(Role.WRITE) && this.hasFormValue("showCmpdForm") ) {	
+			try {
+				Form myForm = new Form("<P ALIGN='CENTER'>Compound ID:");				
+				myForm.setAttribute("NAME", "compoundForm");
+				myForm.addHiddenValue("id", anObject.getID());
+				myForm.addHiddenValue("div", COMPOUND_FORM_ID);
+				Compound compoundList = SQLCompound.compounds(this.getSQLDataSource(), SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT);
+				myForm.addItem(aForm.linkCompoundMenu("cmpdID", "newCmpdID", compoundList)); 
+				myForm.addItem("</BR>Retention time: <INPUT TYPE='TEXT' NAME='retTime' SIZE=10/> min<BR/></P>");
+				myForm.addItem("<H3>Samples to link:</H3>");
+				myForm.addItem(this.sampleList(anObject));
+				myForm.addItem(String.format("</P><P ALIGN='CENTER'><BUTTON TYPE='BUTTON' onClick=\"updateForm(this,'%s')\" NAME='linkCompound'>Link Compound</BUTTON>", COMPOUND_FORM_ID));
+				myForm.addItem(String.format("<BUTTON TYPE='BUTTON' onClick=\"updateForm(this,'%s')\" NAME='closeForm'>Close</BUTTON></P>", COMPOUND_FORM_ID));
+				return myForm.toString();
+			} catch (DataException e) {
+				e.printStackTrace();
+				return (this.handleException(e));
+			}
+		} 
+		StringBuffer output = new StringBuffer();
+				
+		if ( anObject.isAllowed(Role.WRITE) && this.hasFormValue("linkCompound") ) {
+			String[] samples = this.getFormValues("sample");
+			String retTime = this.getFormValue("retTime");
+			String cmpdID = this.getFormValue("cmpdID");
+			
+			if ( cmpdID.length() < 1 ) {
+				cmpdID = this.getFormValue("newCmpdID");
+			}
 
+			output.append(String.format("<P><B>Linking compound %s </P>", cmpdID));
+			
+			for ( int i = 0; i < samples.length; i++ ) {
+				try {
+					output.append(String.format("For sample ID: %s...", samples[i]));
+					anObject.addCompoundID(cmpdID, samples[i], retTime);
+					output.append("<FONT COLOR='green'><B>SUCCESS</B></FONT><BR>");
+				} catch (DataException e) {
+					output.append("<FONT COLOR='red'><B>ERROR</B></FONT> ");
+					output.append(e.getLocalizedMessage());
+					output.append("<BR>");
+					e.printStackTrace();
+				}
+			}
+		} 
+
+		output.append(aForm.listCompounds(anObject));
+		if ( anObject.isAllowed(Role.WRITE) )
+			output.append(String.format("<FORM><P ALIGN='CENTER'><INPUT TYPE=HIDDEN NAME='id' VALUE='%s'/><BUTTON TYPE='BUTTON' NAME='showCmpdForm' onClick=\"loadForm(this, '%s')\">Link a new compound</BUTTON></P></FORM>", anObject.getID(), COMPOUND_FORM_ID));
+		return output.toString();
+	}
+	
+
+	public String sampleList(Separation aSep) {
+		String[] headers = {"", "Sample", "Culture ID", "Date", "Collection", "Location"};
+		TableCell myCell = new TableHeader(headers);
+		myCell.setClass("header");
+		TableRow myRow = new TableRow(myCell);
+		Table myTable = new Table(myRow);
+		myTable.setClass("list");
+
+		try {
+			myTable.addItem("<TR><TH COLSPAN=6>Source Materials</TH></TR>");
+			myTable.addItem(this.loadTable(aSep.getSources(), true));
+			myTable.addItem("<TR><TH COLSPAN=6>Fractions</TH></TR>");
+			myTable.addItem(this.loadTable(aSep.getFractions(), false));
+		} catch (DataException e) {
+			myRow.addItem(String.format("<TD COLSPAN=6>%s</TD>", this.handleException(e)));
+		}
+
+		myTable.setAttribute("ALIGN","CENTER");
+		myTable.setAttribute("WIDTH", "80%");
+		return myTable.toString();
+	}
+
+
+	private String loadTable(Material material, boolean select) {
+		StringBuffer output = new StringBuffer();
+		try {
+			SQLData myData = this.myWrapper.getSQLDataSource();
+			Strain aStrain = null;
+//			SampleCollection aCol = null;
+			TableRow myRow = null;
+
+			if ( material != null && material.first() ) {
+				SimpleDateFormat myDateFormat = this.dateFormat();
+				material.beforeFirst();
+				boolean odd = true;
+				while ( material.next() ) {
+					try {
+						TableCell myCell = new TableCell(String.format("<INPUT TYPE='CHECKBOX' NAME='sample' VALUE='%s' %s>", material.getID(), (select ? "CHECKED" : "")));
+						myCell.addItem(material.getID());
+						if ( aStrain == null || (! aStrain.getID().equals(material.getCultureID())) ) 
+							aStrain = new SQLStrain(myData, material.getCultureID());
+						myCell.addItem(this.strainLink(aStrain));
+						myCell.addItem(myDateFormat.format(material.getDate()));
+//						if ( aCol == null || (! aCol.getID().equals(material.getCollectionID())) )
+//							aCol = material.getCollection();
+//						myCell.addItem(this.sampleColLink(aCol));
+//						myCell.addItem(material.getLocation());
+						myRow = new TableRow(myCell);
+						myRow.setAttribute("ALIGN", "CENTER");
+						if ( material.isRemoved() )
+							myCell.setClass("removed");						
+						if ( odd ) {
+							myRow.setClass("odd");
+							odd = false;
+						} else {
+							myRow.setClass("even");
+							odd = true;
+						}
+						output.append(myRow);
+					} catch (DataException eRow) {
+						myRow.addItem(String.format("<TD COLSPAN=6>%s</TD>", this.handleException(eRow)));
+					}
+				}
+			} else {
+				output.append("<TR><TD ALIGN='center' COLSPAN=6><B>NONE</B></TD></TR>");
+			}
+		} catch (DataException e) {
+			output.append(String.format("<TR><TD COLSPAN=6>%s</TD></TR>", this.handleException(e)));
+		}
+		return output.toString();
+	}
+	*/
 }

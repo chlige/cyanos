@@ -14,7 +14,6 @@ public class FileRoot {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6654442100703355481L;
 	private File root = null;
 	
 	public FileRoot(String rootPath) {

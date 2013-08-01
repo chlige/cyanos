@@ -38,7 +38,7 @@ public class GoogleMap extends CyanosMap {
 	 *
 	 * @return the map DIV
 	 */
-	@Override
+	
 	public Div mapDiv() {
 		Div mapDiv = new Div(this.collectionMap());
 		mapDiv.addItem("<SCRIPT TYPE='text/javascript'>\n//<![CDATA[\n");
@@ -58,15 +58,16 @@ public class GoogleMap extends CyanosMap {
 	 *
 	 * @return the map DIV
 	 */
-	@Override
+	
 	public Div hiddenDiv() {
-		Div mapDiv = new Div(this.collectionMap());
+//		Div mapDiv = new Div(this.collectionMap());
+		Div mapDiv = super.hiddenDiv();
 		mapDiv.addItem("<SCRIPT TYPE='text/javascript'>\n//<![CDATA[\n");
 		mapDiv.addItem("function setupControls(map) {");
 		mapDiv.addItem(" map.addControl(new GMapTypeControl());\n map.addControl(new GSmallMapControl()); \n");
 		mapDiv.addItem(" var bottomRight = new GControlPosition(G_ANCHOR_BOTTOM_RIGHT, new GSize(10,25));\n map.addControl(new GScaleControl(), bottomRight);\n } \n");
 		mapDiv.addItem("//]]>\n</SCRIPT>\n");
-		Div showDiv = new Div("<P ALIGN='CENTER'><BUTTON onClick='this.innerHTML=\"Loading...\"; this.enabled=false; document.getElementById(\"map_hide\").className = \"showSection\"; document.getElementById(\"map_show\").className = \"hideSection\"; window.setTimeout(setupMap, 100, document.getElementById(\"map_canvas\"));' TYPE=BUTTON>View Map</BUTTON></P>");
+/*		Div showDiv = new Div("<P ALIGN='CENTER'><BUTTON onClick='this.innerHTML=\"Loading...\"; this.enabled=false; document.getElementById(\"map_hide\").className = \"showSection\"; document.getElementById(\"map_show\").className = \"hideSection\"; window.setTimeout(setupMap, 100, document.getElementById(\"map_canvas\"));' TYPE=BUTTON>View Map</BUTTON></P>");
 		showDiv.setID("map_show");
 		showDiv.setAttribute("STYLE", String.format("margin: 0 auto; width: %dpx; border: 1px solid gray; background-color: #FCFCFC;", this.divWidth));
 		mapDiv.addItem(showDiv);
@@ -78,6 +79,8 @@ public class GoogleMap extends CyanosMap {
 		hidingDiv.setID("map_hide");
 		hidingDiv.setClass("hideSection");
 		mapDiv.addItem(hidingDiv);
+*/		
+
 		return mapDiv;
 	}
 
@@ -86,7 +89,7 @@ public class GoogleMap extends CyanosMap {
 	 *
 	 * @param aCollection collections to map
 	 */
-	@Override
+	
 	public String collectionMap() {		
 		this.zoomLevel = ( this.zoomLevel > 19 ? 19 : this.zoomLevel );
 		try {
@@ -124,9 +127,17 @@ public class GoogleMap extends CyanosMap {
 	
 	private String buildMapSetup() {
 		StringBuffer output = new StringBuffer();
-		output.append("function setupMap(canvas) { \n var map = new GMap2(canvas);\n");
+/*
+ * 		Google Maps v2
+ 		output.append("function setupMap(canvas) { \n var map = new GMap2(canvas);\n");
 		output.append(String.format(" map.setCenter(new GLatLng(%.4f, %.4f), %d);\n", this.latCenter, this.longCenter, this.zoomLevel));
 		output.append(" map.removeMapType(G_HYBRID_MAP);\n map.addMapType(G_PHYSICAL_MAP);\n map.setMapType(G_PHYSICAL_MAP);\n");
+		output.append(" addCollectionMarkers(map);\n");
+		output.append(" setupControls(map);\n }\n");
+ */
+ 		output.append("function setupMap(canvas) { var mapOptions = {\n");
+		output.append(String.format(" center: new google.maps.LatLng(%.4f, %.4f), zoom: %d, mapTypeId: google.maps.MapTypeId.TERRAIN };\n", this.latCenter, this.longCenter, this.zoomLevel));
+		output.append(" var map = new google.maps.Map(canvas);\n");
 		output.append(" addCollectionMarkers(map);\n");
 		output.append(" setupControls(map);\n }\n");
 		return output.toString();

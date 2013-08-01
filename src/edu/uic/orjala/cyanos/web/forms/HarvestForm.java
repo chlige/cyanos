@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import edu.uic.orjala.cyanos.Collection;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Harvest;
 import edu.uic.orjala.cyanos.Inoc;
-import edu.uic.orjala.cyanos.Sample;
+import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.SampleAccount;
 import edu.uic.orjala.cyanos.Strain;
 import edu.uic.orjala.cyanos.sql.SQLCollection;
@@ -72,12 +73,12 @@ public class HarvestForm extends BaseForm {
 					myCell.addItem(myDate.format(harvests.getDate()));
 					myCell.addItem(harvests.getColor());
 					myCell.addItem(harvests.getType());
-					Float cellMass = harvests.getCellMass();
+					BigDecimal cellMass = harvests.getCellMass();
 					myCell.addItem((cellMass != null ? 
-							BaseForm.formatAmount("%.2f %s", cellMass.floatValue(), "g")	: ""));
-					Float mediaVolume = harvests.getMediaVolume();
+							BaseForm.formatAmount(cellMass, "g")	: ""));
+					BigDecimal mediaVolume = harvests.getMediaVolume();
 					myCell.addItem((mediaVolume != null ?
-							BaseForm.formatAmount("%.1f %s", mediaVolume.floatValue(), "L") : ""));
+							BaseForm.formatAmount(mediaVolume, "L") : ""));
 					myCell.addItem(harvests.getNotes());
 					myCell.addItem("<A HREF=harvest?id=" + harvests.getID() + ">View Harvest</A>");
 					TableRow aRow = new TableRow(myCell);
@@ -161,7 +162,7 @@ public class HarvestForm extends BaseForm {
 
 		try {
 			sourceDiv.addItem(String.format("<INPUT TYPE=HIDDEN NAME='col' VALUE='%s'/>", this.getFormValue("col")));
-			sourceDiv.addItem(this.collectionList(new SQLCollection(this.getSQLDataSource(), this.getFormValue("col"))));
+			sourceDiv.addItem(this.collectionList(SQLCollection.load(this.getSQLDataSource(), this.getFormValue("col"))));
 		} catch (DataException e) {
 			sourceDiv.addItem(this.handleException(e));
 		}
@@ -180,7 +181,7 @@ public class HarvestForm extends BaseForm {
 			projectPop.setName("project");
 			String projectID = null;
 			if ( this.hasFormValue("col") ) {
-				Collection aCol = new SQLCollection(this.getSQLDataSource(), this.getFormValue("col"));
+				Collection aCol = SQLCollection.load(this.getSQLDataSource(), this.getFormValue("col"));
 				projectID = aCol.getProjectID();
 			} 
 			if ( projectID != null ) 
@@ -226,7 +227,7 @@ public class HarvestForm extends BaseForm {
 			projectPop.setName("project");
 			String projectID = null;
 			if ( this.hasFormValue("strain") ) {
-				Strain aStrain = new SQLStrain(this.getSQLDataSource(), this.getFormValue("strain"));
+				Strain aStrain = SQLStrain.load(this.getSQLDataSource(), this.getFormValue("strain"));
 				projectID = aStrain.getProjectID();
 			}
 			if ( projectID != null ) 
@@ -299,27 +300,32 @@ public class HarvestForm extends BaseForm {
 	public String makeExtract(Harvest myHarvest) {
 		if ( this.getFormValue("makeExtract").equals("Create New Extract") ) {
 			try {
-				Sample newExtract = myHarvest.createExtract();
+				Material newExtract = myHarvest.createExtract();
 				if ( newExtract != null && newExtract.first() ) {
 					newExtract.setManualRefresh();
-					newExtract.setCollectionID(this.getFormValue("collection"));
-					newExtract.setName(this.getFormValue("name"));
+	//				newExtract.setCollectionID(this.getFormValue("collection"));
+					newExtract.setLabel(this.getFormValue("name"));
 					newExtract.setNotes(this.getFormValue("sampleNotes"));
-					newExtract.setVialWeight(this.getFormValue("vial_wt"));
+	//				newExtract.setVialWeight(this.getFormValue("vial_wt"));
 					newExtract.setDate(this.getFormValue("date"));
 					newExtract.setProjectID(this.getFormValue("project"));
 					String vals[] = this.getFormValue("amount").split(" ");
+					String unit = ( vals.length == 2 ? vals[1] : "mg");
+	/*
 					if ( vals.length == 2 )
 						newExtract.setBaseUnit(vals[1]);
 					else
 						newExtract.setBaseUnit("mg");
+	*/
 					String myProtocol = this.getFormValue("protocol");
 					if ( myProtocol != null && (! myProtocol.equals("")) ) {
-						Map protocol = this.loadDataTemplate("extract protocol", myProtocol);
+						Map<String, String> protocol = this.loadDataTemplate("extract protocol", myProtocol);
 						newExtract.setExtractSolvent((String)protocol.get("solvent"));
 						newExtract.setExtractType((String)protocol.get("type"));
 					}
 					newExtract.refresh();
+					newExtract.setAmount(parseAmount(this.getFormValue("amount"), "g"));
+
 					SampleAccount txnAccount = newExtract.getAccount();
 					txnAccount.addTransaction();
 					txnAccount.setDate(this.getFormValue("date"));
@@ -327,12 +333,12 @@ public class HarvestForm extends BaseForm {
 					txnAccount.depositAmount(this.getFormValue("amount"));
 					txnAccount.setTransactionReference(myHarvest);
 					txnAccount.updateTransaction();
-					String location = newExtract.getLocation();
-					if ( location != null ) location = "Location: " + location;
-					else location = "";
-					return String.format("<B>New Extract</B>: <A HREF='sample?id=%s'>%s</A> %s (%s) Collection: %s %s",newExtract.getID(), newExtract.getName(), 
-							BaseForm.formatAmount("%.2f %s", newExtract.accountBalance(), newExtract.getBaseUnit()), 
-							this.dateFormat().format(newExtract.getDate()), newExtract.getCollectionID(), location);	
+//					String location = newExtract.getLocation();
+//					if ( location != null ) location = "Location: " + location;
+//					else location = "";
+					return String.format("<B>New Extract</B>: <A HREF='sample?id=%s'>%s</A> %s (%s)", newExtract.getID(), newExtract.getLabel(), 
+							BaseForm.formatAmount(txnAccount.accountBalance(), unit), 
+							this.dateFormat().format(newExtract.getDate()));	
 				} else 
 					return "<FONT COLOR='red'><B>Extract creation failed!</B></FONT><BR/>" + this.makeExtractForm(myHarvest);
 			} catch (DataException e) {
@@ -439,7 +445,7 @@ public class HarvestForm extends BaseForm {
 				myCell.addItem(myDate.format(myInocs.getDate()));
 				myCell.addItem(myInocs.getProjectID());
 				myCell.addItem(myInocs.getMedia());
-				myCell.addItem(BaseForm.formatAmount("%.0f %s", myInocs.getVolume(), "mL"));
+				myCell.addItem(BaseForm.formatAmount(myInocs.getVolume(), "mL"));
 				myCell.addItem(BaseForm.shortenString(myInocs.getNotes(), 25));
 				TableRow aRow = new TableRow(myCell);
 				aRow.setClass(curClass);
@@ -498,7 +504,7 @@ public class HarvestForm extends BaseForm {
 	
 	public String harvestForm(Harvest aHarvest) {
 		StringBuffer output = new StringBuffer();
-		Map updateMap = new HashMap();
+		Map<String,String> updateMap = new HashMap<String,String>();
 		try {
 			if ( this.hasFormValue("updateHarvest") ) {
 				aHarvest.setManualRefresh();
@@ -590,12 +596,12 @@ public class HarvestForm extends BaseForm {
 			tableRow.addItem(this.makeFormDateRow("PrepDate:", "prepDate", "harvest", aHarvest.getPrepDateString()));
 
 			myCell = new TableCell("Cell Mass:");
-			Float cellMass = aHarvest.getCellMass();
+			BigDecimal cellMass = aHarvest.getCellMass();
 			if ( cellMass == null ) {
 				myCell.addItem("<INPUT TYPE=TEXT NAME='cell_mass' />");
 			} else {
 				myCell.addItem("<INPUT TYPE=TEXT NAME='cell_mass' VALUE='" + 
-					BaseForm.formatAmount("%.2f %s", cellMass.floatValue(),"g") + "'>");
+					BaseForm.formatAmount(cellMass,"g") + "'>");
 			}
 			if (updateMap.containsKey("cell_mass")) 
 				myCell.setAttribute("bgcolor", "yellow");		
@@ -603,7 +609,7 @@ public class HarvestForm extends BaseForm {
 			
 			
 			myCell = new TableCell("Extract:");
-			Sample extract = aHarvest.getExtract();
+			Material extract = aHarvest.getExtract();
 			if ( this.hasFormValue("makeExtract") && (! this.hasFormValue("resetForm")) ) {
 				myCell = new TableCell(this.makeExtract(aHarvest));
 				myCell.setAttribute("COLSPAN", "2");
@@ -613,13 +619,15 @@ public class HarvestForm extends BaseForm {
 				Table extractTable = new Table();
 				boolean oddRow = true;
 				while ( extract.next() ) {
-					TableCell extCell = new TableCell(String.format("<A HREF='sample?id=%s'>%s</A>", extract.getID(), extract.getName()));
-					extCell.addItem(String.format("Extract Amount:%s (%s)", BaseForm.formatAmount("%.2f %s", extract.getAmountForHarvest(aHarvest), extract.getBaseUnit()), 
-							myDate.format(extract.getDate())));
-					extCell.addItem(String.format("Current Balance: %s", BaseForm.formatAmount("%.2f %s", extract.accountBalance(), extract.getBaseUnit())));
+					TableCell extCell = new TableCell(String.format("<A HREF='material?id=%s'>%s</A>", extract.getID(), extract.getLabel()));
+					// TODO need to add information for extracts
+	//				extCell.addItem(String.format("Extract Amount:%s (%s)", BaseForm.formatAmount(extract.getAmountForHarvest(aHarvest), extract.getBaseUnit()), 
+	//						myDate.format(extract.getDate())));
+	//				extCell.addItem(String.format("Current Balance: %s", BaseForm.formatAmount(extract.accountBalance(), extract.getBaseUnit())));
 					
-					if ( extract.isRemoved() )
-						extCell.setClass("removed");
+	//				if ( extract.isRemoved() )
+	//					extCell.setClass("removed");
+					
 					TableRow extRow = new TableRow(extCell);
 					if ( oddRow )
 						extRow.setClass("odd");
@@ -639,12 +647,12 @@ public class HarvestForm extends BaseForm {
 			tableRow.addItem(myCell);
 
 			myCell = new TableCell("Media Volume");
-			Float mediaVol = aHarvest.getMediaVolume();
+			BigDecimal mediaVol = aHarvest.getMediaVolume();
 			if ( mediaVol == null ) {
 				myCell.addItem("<INPUT TYPE='TEXT' NAME='media_volume' />");
 			} else {
 			myCell.addItem("<INPUT TYPE=TEXT NAME='media_volume' VALUE='" + 
-					BaseForm.formatAmount("%.1f %s", mediaVol.floatValue(),"L") + "'/>");
+					BaseForm.formatAmount(mediaVol,"L") + "'/>");
 			}
 			if (updateMap.containsKey("media_volume")) {
 				myCell.setAttribute("bgcolor", "yellow");
@@ -739,7 +747,7 @@ public class HarvestForm extends BaseForm {
 	public String addHarvest() {
 		try {
 			if ( this.hasFormValue("col") ) {
-				return this.addHarvest(new SQLCollection(this.getSQLDataSource(), this.getFormValue("col")));
+				return this.addHarvest(SQLCollection.load(this.getSQLDataSource(), this.getFormValue("col")));
 			} else {
 				return this.addHarvestInoc();
 			}
@@ -765,7 +773,7 @@ public class HarvestForm extends BaseForm {
 			output.append("<P ALIGN=CENTER>Added harvest serial # " + aHarvest.getID() + "</P>");
 			String[] inocs = this.getFormValues("inoc");
 			for (int i = 0; i < inocs.length; i++ ) {
-				Inoc anInoc = new SQLInoc(this.getSQLDataSource(), inocs[i]);
+				Inoc anInoc = SQLInoc.load(this.getSQLDataSource(), inocs[i]);
 				anInoc.setHarvest(aHarvest);
 				TableCell myCell = new TableCell("Updating Inoculation: " + inocs[i]);
 				myCell.addItem("<FONT COLOR='green'><B>Updated</B></FONT>");

@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos.web.forms;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 
 import edu.uic.orjala.cyanos.Assay;
 import edu.uic.orjala.cyanos.AssayData;
+import edu.uic.orjala.cyanos.AssayPlate;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Project;
 import edu.uic.orjala.cyanos.Role;
@@ -21,9 +23,9 @@ import edu.uic.orjala.cyanos.Sample;
 import edu.uic.orjala.cyanos.SampleCollection;
 import edu.uic.orjala.cyanos.Strain;
 import edu.uic.orjala.cyanos.sql.SQLAssay;
+import edu.uic.orjala.cyanos.sql.SQLAssayData;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLSampleCollection;
-import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.html.Div;
@@ -94,10 +96,9 @@ public class AssayForm extends BaseForm {
 						if (activity == null) myCell.addItem("");
 						else myCell.addItem(activity);
 						
-						float concentration = myData.getConcentration();
-						if ( concentration == 0 ) myCell.addItem("-");
-						else if ( concentration >= 1 ) myCell.addItem(BaseForm.formatAmount("%.0f %s", concentration, "mg/ml"));
-						else myCell.addItem(BaseForm.formatAmount("%.0f %s", concentration, "ug/ml"));
+						BigDecimal concentration = myData.getConcentration();
+						if ( concentration.compareTo(BigDecimal.ZERO) == 0 ) myCell.addItem("-");
+						else myCell.addItem(SQLAssayData.autoFormatAmount(concentration, SQLAssayData.CONCENTRATION_TYPE));
 						
 						TableRow aRow = new TableRow(myCell);
 						if ( myData.isActive() ) {
@@ -125,6 +126,7 @@ public class AssayForm extends BaseForm {
 		return myTable.toString();
 	}
 	
+	/*
 	public String assayListForSample(Sample aSample) {
 		StringBuffer output = new StringBuffer();
 
@@ -191,7 +193,7 @@ public class AssayForm extends BaseForm {
 
 		return output.toString();
 	}
-
+*/
 	public Div assayDiv() {
 		return this.loadableDiv(DIV_ID, DIV_TITLE);
 	}
@@ -204,9 +206,11 @@ public class AssayForm extends BaseForm {
 		return this.ajaxDiv(DIV_ID, this.assayListForStrain(aStrain));
 	}
 	
+	/*
 	public Div assayDiv(Sample aSample) {
 		return this.collapsableDiv(DIV_ID, DIV_TITLE, this.assayListForSample(aSample));
 	}
+	*/
 	
 	public String showPlateGraphic(Assay myAssay) {
 		try {
@@ -216,7 +220,7 @@ public class AssayForm extends BaseForm {
 			}
 
 			TableRow row = new TableRow(boxHeader);
-			AssayData myData = myAssay.getAssayData();
+			AssayPlate myData = myAssay.getAssayData();
 			myData.beforeFirstRow();
 			while ( myData.nextRow() ) {
 				myData.beforeFirstColumn();
@@ -278,27 +282,20 @@ public class AssayForm extends BaseForm {
 
 			TableRow row = new TableRow(boxHeader);
 			AssayData myData = myAssay.getAssayData();
-			myData.beforeFirstRow();
-			while ( myData.nextRow() ) {
-				myData.beforeFirstColumn();
+			myData.beforeFirst();
+			while ( myData.next() ) {
 				TableCell thisRow = new TableCell();
 				thisRow.setAttribute("ALIGN", "CENTER");
 				thisRow.setAttribute("VALIGN", "TOP");
-				while ( myData.nextColumn() ) {
-					if ( myData.currentLocationExists() ) {
-						String activity = myData.getActivityString();
-						if ( activity != null ) {
-							if ( myData.isActive() )
-								thisRow.addItem("<B>" + activity + "</B>");
-							else 
-								thisRow.addItem(activity);
-						} else
-							thisRow.addItem("");							
-					} else
-						thisRow.addItem("");
-
-				}					
-				row.addItem(String.format("<TH WIDTH=3>%s</TH>%s", myData.currentRowAlpha(), thisRow.toString()));
+				String activity = myData.getActivityString();
+				if ( activity != null ) {
+					if ( myData.isActive() )
+						thisRow.addItem("<B>" + activity + "</B>");
+					else 
+						thisRow.addItem(activity);
+				} else
+					thisRow.addItem("");											
+				row.addItem(String.format("<TH WIDTH=3>%s</TH>%s", myData.getLocation(), thisRow.toString()));
 			}
 			Table myTable = new Table(row);
 			return myTable.toString();
@@ -317,24 +314,17 @@ public class AssayForm extends BaseForm {
 
 			TableRow row = new TableRow(boxHeader);
 			AssayData myData = myAssay.getAssayData();
-			myData.beforeFirstRow();
-			while ( myData.nextRow() ) {
-				myData.beforeFirstColumn();
+			myData.beforeFirst();
+			while ( myData.next() ) {
 				TableCell thisRow = new TableCell();
 				thisRow.setAttribute("ALIGN", "CENTER");
 				thisRow.setAttribute("VALIGN", "TOP");
-				while ( myData.nextColumn() ) {
-					if ( myData.currentLocationExists() ) {
-						Sample aSample = myData.getSample();
-						if ( aSample != null )
-							thisRow.addItem(String.format("<A HREF='sample?id=%s'>%s</A>", aSample.getID(), aSample.getName()));
-						else
-							thisRow.addItem(myData.getLabel());							
-					} else
-						thisRow.addItem("");
-
-				}					
-				row.addItem(String.format("<TH WIDTH=3>%s</TH>%s", myData.currentRowAlpha(), thisRow.toString()));
+				Sample aSample = myData.getSample();
+				if ( aSample != null )
+					thisRow.addItem(String.format("<A HREF='sample?id=%s'>%s</A>", aSample.getID(), aSample.getName()));
+				else
+					thisRow.addItem(myData.getLabel());												
+				row.addItem(String.format("<TH WIDTH=3>%s</TH>%s", myData.getLocation(), thisRow.toString()));
 			}
 			Table myTable = new Table(row);
 			return myTable.toString();
@@ -350,10 +340,15 @@ public class AssayForm extends BaseForm {
 			myAssay.setName(this.getFormValue("assayName"));
 			myAssay.setDate(this.getFormValue("date"));
 			myAssay.setProjectID(this.getFormValue("project"));
-			myAssay.setTarget(this.getFormValue("assayTarget"));
+			String assayTarget = this.getFormValue("assayTarget");
+			if ( assayTarget != null && assayTarget.length() > 0 ) {
+				myAssay.setTarget(this.getFormValue("assayTarget"));				
+			} else if ( this.hasFormValue("newTarget") ) {
+				myAssay.setTarget(this.getFormValue("newTarget"));
+			}
 			myAssay.setActiveOperator(this.getFormValue("active_op"));
 			myAssay.setActiveLevel(this.getFormValue("active"));
-			myAssay.setUnitFormat(this.getFormValue("unit"));
+			myAssay.setUnit(this.getFormValue("unit"));
 			
 			Pattern sizePat = Pattern.compile("(\\d+)x(\\d+)");
 			Matcher match = sizePat.matcher(this.getFormValue("size"));
@@ -416,7 +411,7 @@ public class AssayForm extends BaseForm {
 			myCell = new TableCell("Unit Format:");
 			aPop = this.unitFormats();
 			aPop.setName("unit");
-			aPop.setDefault(myAssay.getUnitFormat());
+			aPop.setDefault(myAssay.getUnit());
 			myCell.addItem(aPop.toString());
 			tableRow.addItem(myCell);
 
@@ -483,12 +478,12 @@ public class AssayForm extends BaseForm {
 			
 			
 			myCell = new TableCell("Active Level:");
-			Map<String,String> opMap = this.operatorMap();			
-			myCell.addItem(opMap.get(myAssay.getActiveOperator()) + " " + String.format(myAssay.getUnitFormat(), myAssay.getActiveLevel()));
+			Map<String,String> opMap = operatorMap();			
+			myCell.addItem(opMap.get(myAssay.getActiveOperator()) + " " + String.format(myAssay.getUnit(), myAssay.getActiveLevel()));
 			tableRow.addItem(myCell);
 
 			myCell = new TableCell("Unit Format:");
-			myCell.addItem(myAssay.getUnitFormat());
+			myCell.addItem(myAssay.getUnit());
 			tableRow.addItem(myCell);
 
 			myCell = new TableCell("Assay Size:");
@@ -514,7 +509,7 @@ public class AssayForm extends BaseForm {
 		return output.toString();
 	}
 
-	private Map<String,String> operatorMap() {
+	public static Map<String,String> operatorMap() {
 		Map<String,String> aMap = new HashMap<String,String>();
 		aMap.put(Assay.OPERATOR_EQUAL,"=");
 		aMap.put(Assay.OPERATOR_NOT_EQUAL,"!=");
@@ -911,6 +906,8 @@ public class AssayForm extends BaseForm {
 		}
 	}
 	
+	/*
+	
 	public static String targetHitList(CyanosWrapper aWrap, Assay myAssay) {	
 		try {
 			TableRow myRow = new TableRow("<TD COLSPAN=4 ALIGN='CENTER'><B><FONT SIZE='+2'>Target Hit List</FONT></B></TD>");
@@ -938,7 +935,7 @@ public class AssayForm extends BaseForm {
 							TableCell myCell = new TableCell(sampleName);
 							String assayName = String.format("<A HREF='%s/assay?id=%s'>%s</A>", aWrap.getContextPath(), myID, myName);
 							myCell.addItem(assayName);
-							myCell.addItem(myData.currentLocation());
+							myCell.addItem(myData.getLocation());
 							float conc = myData.getConcentration();
 							if ( conc != 0 ) {
 								myCell.addItem(BaseForm.formatAmount("%.0f %s", conc, "ug/ml"));
@@ -965,7 +962,9 @@ public class AssayForm extends BaseForm {
 			return aWrap.handleException(e);
 		}
 	}
+	*/
 
+	/*
 	public String assayList(Assay myAssay) {
 		String[] vialHeaders = {"Strain", "Sample Name", "Concentration", "Location", "Activity"};
 		TableCell headers = new TableHeader(vialHeaders);
@@ -977,14 +976,12 @@ public class AssayForm extends BaseForm {
 		vialTable.setAttribute("width","95%");
 		try {
 			AssayData myData = myAssay.getAssayData();
-			myData.beforeFirstColumn();
-			myData.firstRow(); 
+			myData.beforeFirst();
 			String curClass = "odd";
-			while ( myData.nextLocationByColumn() ) {
+			while ( myData.next() ) {
 				try {
-					if ( ! myData.currentLocationExists() ) continue;
 					TableCell myCell = new TableCell();
-					Strain aStrain = new SQLStrain(this.getSQLDataSource(), myData.getStrainID());
+					Strain aStrain = SQLStrain.load(this.getSQLDataSource(), myData.getStrainID());
 					if ( aStrain.first() )
 						myCell.addItem(this.strainLink(aStrain));
 					else myCell.addItem(myData.getStrainID());
@@ -995,7 +992,7 @@ public class AssayForm extends BaseForm {
 					} else {
 						myCell.addItem("");
 					}
-					myCell.addItem(myData.currentLocation());
+					myCell.addItem(myData.getLocation());
 					myCell.addItem(myData.getActivityString());
 					TableRow aRow = new TableRow(myCell);
 					aRow.setAttribute("align", "center");
@@ -1021,6 +1018,7 @@ public class AssayForm extends BaseForm {
 		}
 		return vialTable.toString();
 	}
+	*/
 	
 	public String addAssay() {
 		return AssayForm.addAssay(this.myWrapper);
@@ -1045,7 +1043,7 @@ public class AssayForm extends BaseForm {
 				String dimS[] = aWrap.getFormValue("size").split("x",2);
 				newAssay.setLength(Integer.parseInt(dimS[0]));
 				newAssay.setWidth(Integer.parseInt(dimS[1]));
-				newAssay.setUnitFormat(aWrap.getFormValue("unit"));
+				newAssay.setUnit(aWrap.getFormValue("unit"));
 				newAssay.setNotes(aWrap.getFormValue("notes"));
 				newAssay.refresh();
 				aParagraph.addItem("<B><FONT COLOR='greem'>SUCCESS:</FONT> Added a new assay.</B><BR/>");
@@ -1053,10 +1051,10 @@ public class AssayForm extends BaseForm {
 				int size = newAssay.getLength() * newAssay.getWidth();
 				if ( size >= 384 && (! aWrap.getFormValue("source1").equals("")) ) {
 					aParagraph.addItem("<BR/><BR/>");
-					SampleCollection source1 = new SQLSampleCollection(data, aWrap.getFormValue("source1"));
-					SampleCollection source2 = new SQLSampleCollection(data, aWrap.getFormValue("source2"));
-					SampleCollection source3 = new SQLSampleCollection(data, aWrap.getFormValue("source3"));
-					SampleCollection source4 = new SQLSampleCollection(data, aWrap.getFormValue("source4"));
+					SampleCollection source1 = SQLSampleCollection.load(data, aWrap.getFormValue("source1"));
+					SampleCollection source2 = SQLSampleCollection.load(data, aWrap.getFormValue("source2"));
+					SampleCollection source3 = SQLSampleCollection.load(data, aWrap.getFormValue("source3"));
+					SampleCollection source4 = SQLSampleCollection.load(data, aWrap.getFormValue("source4"));
 					if ( aWrap.hasFormValue("loadType") && aWrap.getFormValue("loadType").equals("full") ) {
 						int midCol = newAssay.getWidth() / 2;
 						int midRow = newAssay.getLength() / 2;
@@ -1066,7 +1064,7 @@ public class AssayForm extends BaseForm {
 						aParagraph.addItem(AssayForm.addSamplesToAssay(source4, newAssay, midRow, midCol));
 					} else {
 						boolean oddCol = true;
-						AssayData myData = newAssay.getAssayData();
+						AssayPlate myData = newAssay.getAssayData();
 						myData.beforeFirstColumn();
 						source1.beforeFirstColumn();
 						source2.beforeFirstColumn();
@@ -1124,7 +1122,7 @@ public class AssayForm extends BaseForm {
 					}
 				} else if ( ! aWrap.getFormValue("source").equals("") ) {
 					aParagraph.addItem("<BR/><BR/>");
-					SampleCollection aCol = new SQLSampleCollection(aWrap.getSQLDataSource(), aWrap.getFormValue("source"));
+					SampleCollection aCol = SQLSampleCollection.load(aWrap.getSQLDataSource(), aWrap.getFormValue("source"));
 					try {
 						aParagraph.addItem(AssayForm.addSamplesToAssay(aCol, newAssay));
 					} catch (DataException e) {
@@ -1150,7 +1148,7 @@ public class AssayForm extends BaseForm {
 		if ( aCol.first() ) {
 			aCol.beforeFirstRow();
 			aCol.firstColumn();
-			AssayData myData = anAssay.getAssayData();
+			AssayPlate myData = anAssay.getAssayData();
 			while ( aCol.nextLocationByRow() ) {
 				Sample aSample = aCol.getCurrentSample();
 				myData.gotoLocation(aCol.currentRowIndex() + rowOffset, aCol.currentColumnIndex() + colOffset);

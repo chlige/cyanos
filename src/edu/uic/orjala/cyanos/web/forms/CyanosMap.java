@@ -96,14 +96,15 @@ public abstract class CyanosMap extends BaseForm {
 	 */
 	public Div hiddenDiv() {
 		Div mapDiv = new Div(this.collectionMap());
-		Div showDiv = new Div("<P ALIGN='CENTER'><BUTTON onClick='this.innerHTML=\"Loading...\"; this.enabled=false; document.getElementById(\"map_hide\").className = \"showSection\"; document.getElementById(\"map_show\").className = \"hideSection\"; window.setTimeout(setupMap, 100, document.getElementById(\"map_canvas\"));' TYPE=BUTTON>View Map</BUTTON></P>");
+		mapDiv.setAttribute("style", String.format("width: %dpx; margin: 0 auto; border: 1px solid gray; background-color: #FCFCFC;", this.divWidth));
+		Div showDiv = new Div("<P ALIGN='CENTER' STYLE='margin-top:30%'><BUTTON onClick='this.innerHTML=\"Loading...\"; this.enabled=false; document.getElementById(\"map_hide\").className = \"showSection\"; document.getElementById(\"map_show\").className = \"hideSection\"; window.setTimeout(setupMap, 100, document.getElementById(\"map_canvas\"));' TYPE=BUTTON>View Map</BUTTON></P>");
 		showDiv.setID("map_show");
-		showDiv.setAttribute("STYLE", String.format("margin: 0 auto; width: %dpx; border: 1px solid gray; background-color: #FCFCFC;", this.divWidth));
+		showDiv.setAttribute("STYLE", String.format("margin: 0 auto; width: %dpx;", this.divWidth));
 		mapDiv.addItem(showDiv);
 		
 		Div canvasDiv = new Div("<P ALIGN=CENTER STYLE='margin-top:30%'>Loading...</P>");
 		canvasDiv.setID("map_canvas");
-		canvasDiv.setAttribute("style", String.format("width: %dpx; height: %dpx; margin: 0 auto; border: 1px solid gray; background-color: #FCFCFC;", this.divWidth, this.divHeight));
+		canvasDiv.setAttribute("style", String.format("width: %dpx; height: %dpx; margin: 0 auto;", this.divWidth, this.divHeight));
 		Div hidingDiv = new Div(canvasDiv);
 		hidingDiv.setID("map_hide");
 		hidingDiv.setClass("hideSection");

@@ -55,25 +55,24 @@ public class Queue extends SQLObject {
 	private static final String QUEUE_USER_SQL = "SELECT DISTINCT queue_name,queue_type FROM queue WHERE queue_type='user' AND queue_name = ?";
 
 	
-	public static void addItem(SQLData data, String queueType, String queueName, Strain aStrain, String requestDetails) throws SQLException {
+	public static void addItem(SQLData data, String queueType, String queueName, Strain aStrain, String requestDetails) throws DataException {
 		Queue.addItem(data, queueType, queueName, STRAIN_TYPE, aStrain.getID(), requestDetails);
 	}
 
-	public static void addItem(SQLData data, String queueType, String queueName, Sample aSample, String requestDetails) throws SQLException {
+	public static void addItem(SQLData data, String queueType, String queueName, Sample aSample, String requestDetails) throws DataException {
 		Queue.addItem(data, queueType, queueName, SAMPLE_TYPE, aSample.getID(), requestDetails);
 	}
 
-	public static void addItem(SQLData data, String queueType, String queueName, Inoc anInoc, String requestDetails) throws SQLException {
+	public static void addItem(SQLData data, String queueType, String queueName, Inoc anInoc, String requestDetails) throws DataException {
 		Queue.addItem(data, queueType, queueName, INOC_TYPE, anInoc.getID(), requestDetails);
 	}
 	
-	public static void addItem(SQLData data, String queueType, String queueName, Harvest aHarv, String requestDetails) throws SQLException {
+	public static void addItem(SQLData data, String queueType, String queueName, Harvest aHarv, String requestDetails) throws DataException {
 		Queue.addItem(data, queueType, queueName, HARVEST_TYPE, aHarv.getID(), requestDetails);
 	}
 	
-	public static void addItem(SQLData data, String queueType, String queueName, String itemType, String itemID, String requestDetails) throws SQLException {
+	public static void addItem(SQLData data, String queueType, String queueName, String itemType, String itemID, String requestDetails) throws DataException {
 		PreparedStatement aSth = null;
-		SQLException excep = null;
 		try {
 			aSth = data.prepareStatement(ADD_ITEM_SQL);
 			aSth.setString(1, queueType);
@@ -84,18 +83,19 @@ public class Queue extends SQLObject {
 			aSth.setString(6, requestDetails);
 			aSth.executeUpdate();
 			aSth.close();
+		} catch (DataException e) {
+			throw e;
 		} catch (SQLException e) {
-			excep = e;
-		}
-		if ( aSth != null ) {
-			try {
-				aSth.close();
-			} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			if ( aSth != null ) {
+				try {
+					aSth.close();
+				} catch (SQLException e) {
 
+				}
 			}
 		}
-		if ( excep != null )
-			throw excep;
 	}
 	
 	public static Queue myQueues(SQLData data) throws DataException {
@@ -174,7 +174,7 @@ public class Queue extends SQLObject {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.sql.SQLObject#fetchRecord()
 	 */
-	@Override
+	
 	protected void fetchRecord() throws DataException {
 		// TODO Auto-generated method stub
 	}

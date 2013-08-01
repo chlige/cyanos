@@ -24,6 +24,7 @@ import org.apache.commons.fileupload.FileItem;
 
 import edu.uic.orjala.cyanos.Assay;
 import edu.uic.orjala.cyanos.Compound;
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.DataFileObject;
 import edu.uic.orjala.cyanos.ExternalFile;
@@ -37,6 +38,7 @@ import edu.uic.orjala.cyanos.sql.SQLExternalFile;
 import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
@@ -144,10 +146,10 @@ public class DataForm extends BaseForm {
 		return myTable.toString();
 	}
 
-	private String linkFile() {
+	private String linkFile() throws ConfigException {
 		StringBuffer output = new StringBuffer();
 
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
+		AppConfig myConf = this.myWrapper.getAppConfig();
 		String path = myConf.getFilePath(this.getFormValue("class"), this.getFormValue("type"));
 		String preFileName = this.getFormValue("aFile");
 		String fileName = preFileName.replaceFirst("^/+", "");
@@ -177,7 +179,7 @@ public class DataForm extends BaseForm {
 		return output.toString();
 	}
 	
-	public String finishUpload() {
+	public String finishUpload() throws ConfigException {
 		if ( this.hasFormValue("linkExisting") )
 			return this.linkFile();
 		else
@@ -185,10 +187,10 @@ public class DataForm extends BaseForm {
 	}
 	
 	
-	private String linkNewFile() {
+	private String linkNewFile() throws ConfigException {
 		StringBuffer output = new StringBuffer();
 	
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
+		AppConfig myConf = this.myWrapper.getAppConfig();
 		String path = myConf.getFilePath(this.getFormValue("class"), this.getFormValue("type"));
 		HttpSession aSession = this.myWrapper.getSession();
 		FileItem fileItem = (FileItem)aSession.getAttribute(DataForm.DATAFILE);
@@ -266,7 +268,7 @@ public class DataForm extends BaseForm {
 			output.append("<P ALIGN='CENTER'><B><FONT COLOR='GREEN'>Success: </FONT>File linked.</B></P>");
 			output.append(this.sampleLink(aSample));
 		} else if (this.getFormValue("class").equals("strain") ) {
-			Strain aStrain = new SQLStrain(this.getSQLDataSource(), this.getFormValue("id"));
+			Strain aStrain = SQLStrain.load(this.getSQLDataSource(), this.getFormValue("id"));
 			aStrain.linkDataFile(aFile, this.getFormValue("type"));
 			output.append("<P ALIGN='CENTER'><B><FONT COLOR='GREEN'>Success: </FONT>File linked.</B></P>");
 			output.append(this.strainLink(aStrain));
@@ -281,7 +283,7 @@ public class DataForm extends BaseForm {
 			output.append("<P ALIGN='CENTER'><B><FONT COLOR='GREEN'>Success: </FONT>File linked.</B></P>");
 			output.append(String.format("<A HREF='compound?id=%s'>%s</A>", aCompound.getID(), aCompound.getName()));						
 		} else if ( this.getFormValue("class").equals("assay") ) {
-			Assay anObject = new SQLAssay(this.getSQLDataSource(), this.getFormValue("id"));
+			Assay anObject = SQLAssay.load(this.getSQLDataSource(), this.getFormValue("id"));
 			anObject.linkDataFile(aFile, this.getFormValue("type"));
 			output.append("<P ALIGN='CENTER'><B><FONT COLOR='GREEN'>Success: </FONT>File linked.</B></P>");
 			output.append(String.format("<A HREF='assay?id=%s'>%s</A>", anObject.getID(), anObject.getName()));						
@@ -362,8 +364,9 @@ public class DataForm extends BaseForm {
 		FileItem anItem = null;
 		boolean uploadFile = ( this.hasFormValue("useUpload") ? true : (! this.hasFormValue("linkExisting")) );
 
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
-		String rootPath = myConf.getFilePath(this.getFormValue("class"), this.getFormValue("type"));
+		AppConfig myConf = this.myWrapper.getAppConfig();
+		String rootPath;
+		rootPath = myConf.getFilePath(this.getFormValue("class"), this.getFormValue("type"));
 		
 		if ( uploadFile ) {
 			myCell.addItem("File:");
@@ -469,30 +472,29 @@ public class DataForm extends BaseForm {
 		return aList.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static File[] filesForPath(File somePath) {
 		File[] fileList = somePath.listFiles();
 		Arrays.sort(fileList, DataForm.fileCompare());
 		return fileList;
 	}
 	
-	public static Comparator fileCompare() {
-		return new Comparator()
+	public static Comparator<File> fileCompare() {
+		return new Comparator<File>()
 		    {
-		      public int compare(final Object o1, final Object o2) {
-		        return ((File) o1).getName().compareToIgnoreCase(((File)o2).getName());
+		      public int compare(final File o1, final File o2) {
+		        return o1.getName().compareToIgnoreCase(o2.getName());
 		      }
 		    };
 	}
 	
-	public static Comparator directoryFirstCompare() {
-		return new Comparator()
+	public static Comparator<File> directoryFirstCompare() {
+		return new Comparator<File>()
 		    {
-		      public int compare(final Object o1, final Object o2) {
-		    	  boolean isDir1 = ((File)o1).isDirectory();
-		    	  boolean isDir2 = ((File)o2).isDirectory();
+		      public int compare(final File o1, final File o2) {
+		    	  boolean isDir1 = o1.isDirectory();
+		    	  boolean isDir2 = o2.isDirectory();
 		    	  if ( isDir1 == isDir2 ) {
-		    		  return ((File) o1).getName().compareToIgnoreCase(((File)o2).getName());
+		    		  return ( o1.getName().compareToIgnoreCase(o2.getName()) );
 		    	  } else if ( isDir1 ) {
 		    		  return -1;
 		    	  } else {

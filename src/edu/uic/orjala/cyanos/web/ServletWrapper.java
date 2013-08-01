@@ -6,10 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.Session;
 import javax.naming.Context;
@@ -20,61 +17,64 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import edu.uic.orjala.cyanos.AccessException;
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLUser;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.html.Div;
 import edu.uic.orjala.cyanos.web.html.Header;
 import edu.uic.orjala.cyanos.web.html.Image;
+import edu.uic.orjala.cyanos.web.servlet.ServletObject;
 
 /**
  * @author George Chlipala
  *
  */
+@Deprecated
 public class ServletWrapper implements CyanosWrapper {
 
+	/**
+	 * @author George Chlipala
+	 *
+	 */
+	
+	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, yyyy");
+	private final static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
+
+//	Google Maps Version 2
+//	private static final String GOOGLE_MAPS_JS_URL = "http://maps.google.com/maps?file=api&v=2&key=%s";
+//	Google Maps Version 3
+	private static final String GOOGLE_MAPS_JS_URL = "https://maps.googleapis.com/maps/api/js?key=%s&sensor=false";
+	private static final String OPENLAYERS_JS_URL = "openlayers/OpenLayers.js";
+	
 	private HttpServletRequest req = null;
 	private HttpServletResponse res = null;
 	private ServletObject myServlet = null;
-	protected DataSource dbh = null;
+
 	private PrintWriter printer = null;
 	private ServletOutputStream outStream = null;
 	private HttpSession mySess = null;
 	
 	private SQLData mySQLData = null;
 
-	private Map<String, String[]> formValues = null;
-	private Map<String, FileItem[]> uploadItems = null;
-
 	private static final String MENU_SEPARATOR = "<HR WIDTH='80%' NOSHADE SIZE='1'/>";
 	
 	public final static String APP_CONFIG_ATTR = "cyanosAppConfig";
 	
-	public ServletWrapper(ServletObject aServlet, DataSource aDBH, HttpServletRequest aReq, HttpServletResponse aRes) {
+	public ServletWrapper(ServletObject aServlet, HttpServletRequest aReq, HttpServletResponse aRes) {
 		this.req = aReq;
 		this.res = aRes;
-		this.dbh = aDBH;
 		this.myServlet = aServlet;
 		this.parseRequest(aReq);
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void parseRequest(HttpServletRequest aReq) {
-		if ( ServletFileUpload.isMultipartContent(this.req)) {
-			this.parseMultipartReq();
-		} else {
-			this.formValues = aReq.getParameterMap();
-		}
+
 	}
 	
 	/* (non-Javadoc)
@@ -82,8 +82,7 @@ public class ServletWrapper implements CyanosWrapper {
 	 */
 	public SimpleDateFormat dateFormat()
 	{
-		SimpleDateFormat myDate = new SimpleDateFormat("MMMMM d, yyyy");
-		return myDate;
+		return DATE_FORMAT;
 	}
 
 	/* (non-Javadoc)
@@ -91,8 +90,7 @@ public class ServletWrapper implements CyanosWrapper {
 	 */
 	public SimpleDateFormat dateTimeFormat()
 	{
-		SimpleDateFormat myDate = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
-		return myDate;
+		return DATETIME_FORMAT;
 	}
 
 	/* (non-Javadoc)
@@ -103,31 +101,31 @@ public class ServletWrapper implements CyanosWrapper {
 	}
 
 
-	private SQLData newSQLDataSource() throws DataException {
+	private Connection getConnection() {
+		return (Connection) this.getSession().getAttribute(ServletObject.DB_CONN);
+	}
+
+	@Deprecated
+	public SQLData getSQLDataSource(boolean independent) throws DataException {
 		try {
-			if ( this.getRemoteUser() == null )
-				return new SQLData(this.dbh.getConnection(), this.getGuestUser());				
+			if ( independent )
+				return this.myServlet.newSQLData(req, this.getConnection());
 			else 
-				return new SQLData(this.dbh.getConnection(), this.getRemoteUser());
+				return this.getSQLDataSource();
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
 	}
-	
-	public SQLData getSQLDataSource(boolean independent) throws DataException {
-		if ( independent )
-			return this.newSQLDataSource();
-		else 
-			return this.getSQLDataSource();
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getSQLDataSource()
 	 */
 	public SQLData getSQLDataSource() throws DataException {
-		if ( this.mySQLData == null )
-				this.mySQLData = this.newSQLDataSource();
-		return this.mySQLData;
+		try {
+			return this.myServlet.getSQLData(this.req);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -138,17 +136,7 @@ public class ServletWrapper implements CyanosWrapper {
 	}
 	
 	public User getUser(String userID) throws DataException {
-		try {
-			return new SQLUser(this.dbh.getConnection(), userID);
-		} catch (SQLException e) {
-			throw new DataException(e);
-		}
-	}
-	
-	private User getGuestUser() {
-		String[] roles = { User.CULTURE_ROLE };
-		String[] projects = { GuestUser.GLOBAL_PROJECT };
-		return new GuestUser(roles, projects);
+		return new SQLUser(this.getConnection(), userID);
 	}
 	
 	/* (non-Javadoc)
@@ -170,8 +158,8 @@ public class ServletWrapper implements CyanosWrapper {
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getFormValue(java.lang.String, int)
 	 */
 	public String getFormValue(String key, int index) {
-		if ( this.formValues.containsKey(key) )
-			return ((String[])formValues.get(key))[index];
+		if ( req.getParameterValues(key) != null )
+			return req.getParameterValues(key)[index];
 		else 
 			return "";
 	}
@@ -180,51 +168,57 @@ public class ServletWrapper implements CyanosWrapper {
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getFormValueCount(java.lang.String)
 	 */
 	public int getFormValueCount(String key) {
-		return ((String[])formValues.get(key)).length;
+		if ( req.getParameterValues(key) != null )
+			return req.getParameterValues(key).length;
+		else 
+			return 0;
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getFormValues(java.lang.String)
 	 */
 	public String[] getFormValues(String key) {
-		return (String[])formValues.get(key);
+		return req.getParameterValues(key);
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#hasFormValue(java.lang.String)
 	 */
 	public boolean hasFormValue(String key) {
-		return this.formValues.containsKey(key);
+		return (req.getParameter(key) != null );
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#hasFormValues()
 	 */
 	public boolean hasFormValues() {
-		return (! this.formValues.isEmpty());
+		return (! req.getParameterMap().isEmpty() );
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#hasUpload(java.lang.String)
 	 */
 	public boolean hasUpload(String key) {
-		return (this.uploadItems != null && this.uploadItems.containsKey(key));
+		return ( req instanceof MultiPartRequest );
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUpload(java.lang.String)
 	 */
-	public FileItem getUpload(String key) {
-		return this.getUpload(key, 0);
+	public FileUpload getUpload(String key) {
+		if ( req instanceof MultiPartRequest ) 
+			return ((MultiPartRequest) req).getUpload(key);
+		else 
+			return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUpload(java.lang.String, int)
 	 */
-	public FileItem getUpload(String key, int index) {
-		if ( this.uploadItems != null && this.uploadItems.containsKey(key) )
-			return (uploadItems.get(key))[index];
-		else 
+	public FileUpload getUpload(String key, int index) {
+		if ( req instanceof MultiPartRequest ) 
+			return ((MultiPartRequest) req).getUpload(key, index);
+		else
 			return null;
 	}
 	
@@ -232,8 +226,8 @@ public class ServletWrapper implements CyanosWrapper {
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUploadCount(java.lang.String)
 	 */
 	public int getUploadCount(String key) {
-		if ( this.uploadItems != null )
-			return (this.uploadItems.get(key)).length;
+		if ( req instanceof MultiPartRequest ) 
+			return ((MultiPartRequest) req).getUploadCount(key);
 		else
 			return 0;
 	}
@@ -241,9 +235,9 @@ public class ServletWrapper implements CyanosWrapper {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUploads(java.lang.String)
 	 */
-	public FileItem[] getUploads(String key) {
-		if ( this.uploadItems != null && this.uploadItems.containsKey(key))
-			return this.uploadItems.get(key);
+	public List<FileUpload> getUploads(String key) {
+		if ( req instanceof MultiPartRequest ) 
+			return ((MultiPartRequest)req).getUploads(key);
 		else
 			return null;
 	}
@@ -264,7 +258,7 @@ public class ServletWrapper implements CyanosWrapper {
 		try {
 			if ( this.mySQLData != null ) {
 				this.mySQLData.close();
-				this.mySQLData.closeDBC();
+	//			this.mySQLData.closeDBC();
 				this.mySQLData = null;
 			}
 		} catch (DataException e) {
@@ -305,44 +299,6 @@ public class ServletWrapper implements CyanosWrapper {
 		this.res.setContentType(aType);
 	}
 	
-	private void parseMultipartReq() {		
-		this.formValues = new Hashtable<String, String[]>();
-		this.uploadItems = new Hashtable<String, FileItem[]>();
-		try {
-			FileItemFactory factory = new DiskFileItemFactory();
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			List items = upload.parseRequest(this.req);
-			Iterator iter = items.iterator();
-			while (iter.hasNext() ) {
-				FileItem anItem = (FileItem) iter.next();
-				String thisField = anItem.getFieldName();
-				if ( anItem.isFormField()) {
-					if ( this.formValues.containsKey(thisField) ) {
-						String[] vals = this.formValues.get(thisField);
-						int next = vals.length;
-						vals[next] = anItem.getString();
-						this.formValues.put(thisField, vals);
-					} else {
-						String[] vals = { anItem.getString() };
-						this.formValues.put(thisField, vals);
-					}
-				} else if (anItem.getSize() > 0) {
-					if ( this.uploadItems.containsKey(thisField) ) {
-						FileItem[] vals = this.uploadItems.get(thisField);
-						int next = vals.length;
-						vals[next] = anItem;
-						this.uploadItems.put(thisField, vals);
-					} else {
-						FileItem[] vals = { anItem };
-						this.uploadItems.put(thisField, vals);
-					}
-				}
-			}
-		} catch (FileUploadException e) {
-			this.myServlet.log("COULD NOT PARSE UPLOAD", e);
-		}
-	}
-
 	public String getStyle() {
 		String cssFile = "cyanos.css";
 		return String.format("%s/%s", this.getContextPath(), cssFile);
@@ -359,9 +315,9 @@ public class ServletWrapper implements CyanosWrapper {
 		return aImage;
 	}
 
-	public CyanosConfig getAppConfig() {
+	public AppConfig getAppConfig() {
 		ServletContext aCtx = this.myServlet.getServletContext();
-		CyanosConfig aConfig = (CyanosConfig)aCtx.getAttribute(APP_CONFIG_ATTR);
+		AppConfig aConfig = (AppConfig)aCtx.getAttribute(APP_CONFIG_ATTR);
 		return aConfig;
 	}
 
@@ -408,11 +364,11 @@ public class ServletWrapper implements CyanosWrapper {
 		return myHeader;
 	}
 	
-	public PrintWriter startHTMLDoc(String title) throws IOException {
+	public PrintWriter startHTMLDoc(String title) throws IOException, ConfigException {
 		return this.startHTMLDoc(title, true);
 	}
 	
-	public PrintWriter startHTMLDoc(String title, boolean showMenu) throws IOException {
+	public PrintWriter startHTMLDoc(String title, boolean showMenu) throws IOException, ConfigException {
 		return this.startHTMLDoc(title, showMenu, false);
 	}
 	
@@ -515,10 +471,11 @@ public class ServletWrapper implements CyanosWrapper {
 			menuBar.addItem("<SPAN CLASS='menu' ID='sampleMenu'><A NAME='samples' onClick='toggleMenu(\"sampleMenu\")'>Samples</A><BR>");
 			subMenu = new Div("<P>");
 			subMenu.setClass("submenu");
+			subMenu.addItem(String.format(urlFormat, "/material", "Browse Materials"));
+			subMenu.addItem(String.format(urlFormat, "/sample/protocol", "Manage Extract Protocols"));
+			subMenu.addItem(MENU_SEPARATOR);
 			subMenu.addItem(String.format(urlFormat, "/sample/newCollection","Add a New Collection"));		
 			subMenu.addItem(String.format(urlFormat, "/sample","Browse"));
-			subMenu.addItem(MENU_SEPARATOR);
-			subMenu.addItem(String.format(urlFormat, "/sample/protocol", "Manage Protocols"));
 			subMenu.addItem(String.format(urlFormat, "/upload/sample","Upload Data"));
 			subMenu.addItem(MENU_SEPARATOR);
 			subMenu.addItem(String.format(urlFormat, "/compound", "View Compounds"));
@@ -583,7 +540,7 @@ public class ServletWrapper implements CyanosWrapper {
 		Connection aDBC = null;
 		SQLException execp = null;
 		try {
-			aDBC = this.dbh.getConnection();
+			aDBC = this.getConnection();
 			PreparedStatement psth = aDBC.prepareStatement("UPDATE users SET password=SHA1(?) WHERE username=?");
 			psth.setString(1, newPassword);
 			psth.setString(2, this.getRemoteUser());
@@ -604,36 +561,41 @@ public class ServletWrapper implements CyanosWrapper {
 		return retVal;
 	}
 
-	public PrintWriter startHTMLDoc(String title, boolean showMenu, boolean enableMap) throws IOException {
+	public PrintWriter startHTMLDoc(String title, boolean showMenu, boolean enableMap) throws IOException, ConfigException {
 		PrintWriter out = this.getWriter();
 		if ( out != null ) {
 			this.setContentType("text/html");
 			Header myHeader = this.getHTMLHeader(title);
-			CyanosConfig myConf = this.getAppConfig();
-			if ( enableMap && myConf.canMap() ) {
-				Map<String,String> layers = myConf.getMapServerLayers();
-				if ( ! layers.isEmpty() ) {
-					myHeader.addJavascriptFile(String.format("%s/OpenLayers.js", this.getContextPath()));
-					out.println(myHeader);
-					out.println("<BODY>");
-				} else {
-					String googleMapKey = myConf.getGoogleMapKey();
-					if ( googleMapKey != null )  {
-						String googleMapURL = String.format("http://maps.google.com/maps?file=api&v=2&key=%s", googleMapKey);
-						myHeader.addJavascriptFile(googleMapURL);
-						myHeader.addJavascriptFile("http://gmaps-utility-library.googlecode.com/svn/trunk/markermanager/release/src/markermanager.js");
-						out.println(myHeader);
-						out.println("<BODY onUnload='GUnload()'>");
-					}
-				} 
-			} else {
-				out.println(myHeader);
-				out.println("<BODY>");
+			AppConfig myConf = this.getAppConfig();
+			if ( enableMap ) {
+				myHeader.addJavascriptFile(String.format("%s/%s", this.getContextPath(), OPENLAYERS_JS_URL));
+				//					myHeader.addJavascriptFile("http://maps.google.com/maps/api/js?v=3&sensor=false");
+				myHeader.addJavascriptFile(String.format("%s/cyanos-map.js", this.getContextPath()));
+				//					myHeader.addJavascriptFile(String.format("%s/openlayers/OpenLayers.js", this.getContextPath()));
+				String googleMapKey = myConf.getGoogleMapKey();
+				if ( googleMapKey != null && googleMapKey.length() > 0 )  {
+					String googleMapURL = String.format(GOOGLE_MAPS_JS_URL, googleMapKey);
+					myHeader.addJavascriptFile(googleMapURL);
+				}
 			}
+			out.println(myHeader);
+			out.println("<BODY>");
 			if ( showMenu )	out.println( this.menu() );
 			out.println("<DIV class='content'>");
 		}
 		return out;
+	}
+
+	public PrintWriter startRedirectDoc(String title, String url, int delay)
+			throws IOException, ConfigException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public PrintWriter startRedirectDoc(String title, boolean showMenu,
+			String url, int delay) throws IOException, ConfigException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -3,9 +3,8 @@
  */
 package edu.uic.orjala.cyanos.web;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -26,7 +25,6 @@ public class GuestUser extends BasicUser {
 	 */
 	public GuestUser() {
 		this.myID = "guest";
-		this.projectRoles = new HashMap<String, List<Role>>();
 	}
 	
 	public GuestUser(String[] allowedRoles) {
@@ -57,40 +55,41 @@ public class GuestUser extends BasicUser {
 
 	public void setRoles(String[] allowedRoles) {
 		this.projectRoles.clear();
-		List<Role> roleList = new ArrayList<Role>(allowedRoles.length);
+		Map<String,Role> roleList = new HashMap<String,Role>(allowedRoles.length);
 		for (int i = 0; i < allowedRoles.length; i++) {
 			Role aRole = new Role(allowedRoles[i], Role.READ);
-			roleList.add(aRole);
+			roleList.put(allowedRoles[i], aRole);
 		}
 		this.projectRoles.put(NULL_PROJECT, roleList);
 	}
 
+
 	protected void setRoles(Role[] allowedRoles) {
 		this.projectRoles.clear();
-		List<Role> roleList = new ArrayList<Role>(allowedRoles.length);
+		Map<String,Role> roleList = new HashMap<String,Role>(allowedRoles.length);
 		for (int i = 0; i < allowedRoles.length; i++) {
-			roleList.add(allowedRoles[i]);
+			roleList.put(allowedRoles[i].roleName(), allowedRoles[i]);
 		}
 		this.projectRoles.put(NULL_PROJECT, roleList);
 	}
 	
 	protected void setRole(String role) {
-		List<Role> roleList;
+		Map<String,Role> roleList;
 		if ( this.projectRoles.containsKey(NULL_PROJECT) ) {
 			roleList = this.projectRoles.get(NULL_PROJECT);
 		} else {
-			roleList = new ArrayList<Role>();
+			roleList = new HashMap<String,Role>();
 			this.projectRoles.put(NULL_PROJECT, roleList);
 		}
-		Role test = this.getRole(roleList, role);
+		Role test = this.projectRoles.get(NULL_PROJECT).get(role);
 		if ( test == null ) {
-			roleList.add(new Role(role, Role.READ));
+			roleList.put(role, new Role(role, Role.READ));
 		}
 	}
 	
 	protected void addProject(String project) {
 		if ( ! this.projectRoles.containsKey(project) ) {
-			List<Role> roleList = this.projectRoles.get(NULL_PROJECT);
+			Map<String,Role> roleList = this.projectRoles.get(NULL_PROJECT);
 			this.projectRoles.put(project, roleList);
 		}
 	}

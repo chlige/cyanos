@@ -19,6 +19,7 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
 
 import edu.uic.orjala.cyanos.Collection;
+import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.ExternalFile;
 import edu.uic.orjala.cyanos.Inoc;
@@ -28,10 +29,12 @@ import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.SingleFile;
 import edu.uic.orjala.cyanos.Strain;
 import edu.uic.orjala.cyanos.Taxon;
+import edu.uic.orjala.cyanos.sql.SQLCollection;
+import edu.uic.orjala.cyanos.sql.SQLIsolation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.sql.SQLTaxon;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
-import edu.uic.orjala.cyanos.web.CyanosConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.FileRoot;
 import edu.uic.orjala.cyanos.web.html.Anchor;
@@ -53,12 +56,19 @@ import edu.uic.orjala.cyanos.web.html.TableRow;
  */
 public class StrainForm extends BaseForm {
 
+	public static final String DIV_VALID_GENUS = "validgenus";
+	private static final String FIELD_GENUS = "genus";
 	public static final String INOC_DIV_TITLE = "Inoculations";
 	public static final String INOC_DIV_ID = "strainInocs";
 	public static final String QUERY_PARAM = "strainquery";
 	public static final String SORT_PARAM = "sort";
 	public static final String DIRECTION_PARAM = "dir";
 	public static final String PHOTO_FORM = "photoForm";
+	
+	public static final String LIVESEARCH_GENUS = FIELD_GENUS;
+	
+	protected static final String INPUT_LIVESEARCH = "<INPUT ID=\"%s\" TYPE='TEXT' NAME=\"%s\" VALUE=\"%s\" autocomplete='off' onKeyUp=\"livesearch(this, '%s', '%s')\" style='padding-bottom: 0px'/>";
+
 	
 	/**
 	 * 
@@ -94,6 +104,54 @@ public class StrainForm extends BaseForm {
 
 	}
 	
+	public String livesearchGenus() {
+		try {
+			Taxon taxa = SQLTaxon.taxaLike(getSQLDataSource(), String.format("%s%%", this.getFormValue(FIELD_GENUS)));
+
+			StringBuffer output = new StringBuffer();
+			if ( taxa.first() ) {
+				taxa.beforeFirst();
+				while ( taxa.next() ) {
+					String name = taxa.getName();
+					output.append(String.format("<A onClick='setLS(\"%s\",\"%s\",\"%s\")'>%s</A><BR>", FIELD_GENUS, name, DIV_VALID_GENUS, name));
+				}
+				return output.toString();
+			} else {
+				return "No suggestions.";
+			}
+		} catch (DataException e) {
+			return this.handleException(e);
+		}
+
+	}
+
+	/*
+	public String validateGenus() {
+		try {
+			if ( SQLTaxonFlat.isValid(getSQLDataSource(), TaxonFlat.GENUS, this.getFormValue(FIELD_GENUS))) {
+				return this.message(SUCCESS_TAG, "Genus Valid");
+			}
+			TaxonFlat possibles = SQLTaxonFlat.soundsLike(getSQLDataSource(), TaxonFlat.GENUS, this.getFormValue(FIELD_GENUS));
+			possibles.beforeFirst();
+			String[] headers = {"", "Genus", "Family", "Order", "Class", "Phylum"};
+			TableRow row = new TableRow(new TableHeader(headers));
+			while ( possibles.next() ) {
+				TableCell myCell = new TableCell(String.format("<BUTTON TYPE='BUTTON' onClick=\"this.form.genus.value='%s'\">Select</BUTTON>", possibles.getGenus()));
+				myCell.addItem(possibles.getGenus());
+				myCell.addItem(possibles.getFamily());
+				myCell.addItem(possibles.getOrder());
+				myCell.addItem(possibles.getTaxonClass());
+				myCell.addItem(possibles.getPhylum());
+				row.addItem(myCell);
+			}
+			Table aTable = new Table(row);
+			return aTable.toString();
+		} catch (DataException e) {
+			return this.handleException(e);
+		}
+		
+	}
+	*/
 	public String queryForm() {
 		StringBuffer output = new StringBuffer();
 
@@ -152,9 +210,9 @@ public class StrainForm extends BaseForm {
 					myLink.setLink(myUrl.toString());
 					myCell.addItem(myLink.toString());
 					myCell.addItem(aStrain.getName());
-					Taxon myTaxon = aStrain.getTaxon();
-					if ( myTaxon != null && myTaxon.first() )
-						myCell.addItem(myTaxon.getOrder());
+					String orderName = aStrain.getTaxonName(Taxon.LEVEL_ORDER);
+					if ( orderName != null )
+						myCell.addItem(orderName);
 					else 
 						myCell.addItem("");
 					TableRow aRow = new TableRow(myCell);
@@ -202,7 +260,7 @@ public class StrainForm extends BaseForm {
 			if ( sortField.equals("name")) {
 				sortString = SQLStrain.NAME_COLUMN;
 			} else if ( sortField.equals("order")) {
-				sortString = SQLTaxon.ORDER_COLUMN;
+				sortString = sortField;
 			}
 		}
 
@@ -270,9 +328,9 @@ public class StrainForm extends BaseForm {
 				myLink.setLink(myUrl.toString());
 				myCell.addItem(myLink.toString());
 				myCell.addItem(myStrains.getName());
-				Taxon myTaxon = myStrains.getTaxon();
-				if ( myTaxon != null && myTaxon.first() )
-					myCell.addItem(myTaxon.getOrder());
+				String orderName = myStrains.getTaxonName(Taxon.LEVEL_ORDER);
+				if ( orderName != null )
+					myCell.addItem(orderName);
 				else 
 					myCell.addItem("");
 				TableRow aRow = new TableRow(myCell);
@@ -307,7 +365,20 @@ public class StrainForm extends BaseForm {
 		myTable.setClass("species");
 		myTable.setAttribute("align", "center");
 		tableRow.addItem(this.makeFormTextRow("Culture ID:", "culture_id", newID));
-		tableRow.addItem(this.makeFormTextRow("Culture Source:", "culture_source"));
+		myCell = new TableCell("Culture Source:");
+		myCell.addItem(String.format("<INPUT TYPE='TEXT' SIZE=25 NAME='%s' VALUE=\"%s\"> <INPUT TYPE='CHECKBOX' NAME='%s' onClick=\"var div = window.document.getElementById('%s'); if ( this.checked ) { div.className = 'showSection'; } else { div.className='hideSection';}\"> Manually set collection and isolation information", 
+				"culture_source", this.getFormValue("culture_source"), "useColIso", "div_source"));
+
+		tableRow.addItem(myCell);
+		Div sourceDiv = new Div();
+		sourceDiv.setID("div_source");
+		sourceDiv.setClass("hideSection");
+		sourceDiv.addItem(String.format("Collection ID: <INPUT TYPE='TEXT' SIZE=20 NAME='collection_id' VALUE=\"%s\"><BR>Isolation ID: <INPUT TYPE='TEXT' SIZE=20 NAME='isolation_id' VALUE=\"%s\">", 
+				this.getFormValue("collection_id"), this.getFormValue("isolation_id")));
+
+		TableCell divCell = new TableCell("");
+		divCell.addItem(sourceDiv);
+		tableRow.addItem(divCell);
 		tableRow.addItem(this.makeFormTextRow("Latin Binomial", "binomial"));
 		tableRow.addItem(this.makeFormTextRow("Default Media:", "orig_media"));
 		tableRow.addItem(this.makeFormDateRow("Date Added:", "date", "strain"));
@@ -369,7 +440,25 @@ public class StrainForm extends BaseForm {
 				if ( newStrain.first() ) {
 					newStrain.setManualRefresh();
 					String genus = this.getFormValue("binomial").split(" ", 2)[0];
+
+					String cultureSource = this.getFormValue("culture_source");
 					newStrain.setCultureSource(this.getFormValue("culture_source"));
+
+					if ( this.hasFormValue("useColIso")) {
+						newStrain.setSourceCollectionID(this.getFormValue("collection_id"));
+						newStrain.setSourceIsolationID(this.getFormValue("isolation_id"));
+					} else {
+						Isolation anIso = new SQLIsolation(this.getSQLDataSource(), cultureSource);
+						if ( anIso != null && anIso.first() ) {
+							newStrain.setSourceIsolation(anIso);
+						}
+						Collection aCol = new SQLCollection(this.getSQLDataSource(), cultureSource);
+						if ( aCol != null && aCol.first() ) {
+							newStrain.setSourceCollection(aCol);
+						}
+					}
+
+					
 					newStrain.setName(this.getFormValue("binomial"));
 					newStrain.setGenus(genus);
 					newStrain.setDate(this.getFormValue("date"));
@@ -413,11 +502,16 @@ public class StrainForm extends BaseForm {
 
 			Isolation anIso = aStrain.getSourceIsolation();
 			if ( anIso != null ) {
-				Collection aCol = anIso.getCollection();
 				tableRow.addItem("<TD WIDTH='100'>Culture Source:</TD><TD>" + aStrain.getCultureSource() + 
-						" [<A HREF='collection?id=" + anIso.getID() + "'>View Source Isolation</A>] [<A HREF='collection?col=" + aCol.getID() + "'>View Source Collection</A>]</TD>");
+						" [<A HREF='collection?id=" + anIso.getID() + "'>View Source Isolation</A>] [<A HREF='collection?col=" + anIso.getCollectionID() + "'>View Source Collection</A>]</TD>");
 			} else {
-				tableRow.addItem("<TD WIDTH='100'>Culture Source:</TD><TD>" + aStrain.getCultureSource() + "</TD>");
+				Collection aCol = aStrain.getSourceCollection();
+				if ( aCol != null ) {
+					tableRow.addItem("<TD WIDTH='100'>Culture Source:</TD><TD>" + aStrain.getCultureSource() + 
+							" [<A HREF='collection?col=" + aCol.getID() + "'>View Source Collection</A>]</TD>");					
+				} else {
+					tableRow.addItem("<TD WIDTH='100'>Culture Source:</TD><TD>" + aStrain.getCultureSource() + "</TD>");
+				}
 			}
 
 			myCell = new TableCell("Scientific Name:");
@@ -493,11 +587,32 @@ public class StrainForm extends BaseForm {
 	public String updateStrain(Strain aStrain) {
 		if ( this.hasFormValue("updateAction") ) {
 			try {
+				boolean setCollection = true;
+				boolean setIsolation = true;
 				aStrain.setManualRefresh();
-				if ( this.hasFormValue("culture_source") && ( ! this.getFormValue("culture_source").equals(aStrain.getCultureSource())) ) 
+				if ( this.hasFormValue("culture_source") && ( ! this.getFormValue("culture_source").equals(aStrain.getCultureSource())) ) {
+					String cultureSource = this.getFormValue("culture_source");
 					aStrain.setCultureSource(this.getFormValue("culture_source"));
-				if ( this.hasFormValue("genus") && ( ! this.getFormValue("genus").equals(aStrain.getGenus())) )
-					aStrain.setGenus(this.getFormValue("genus"));
+					Isolation anIso = new SQLIsolation(this.getSQLDataSource(), cultureSource);
+					if ( anIso != null && anIso.first() ) {
+						aStrain.setSourceIsolation(anIso);
+						setCollection = false;
+						setIsolation = false;
+					}
+					Collection aCol = new SQLCollection(this.getSQLDataSource(), cultureSource);
+					if ( aCol != null && aCol.first() ) {
+						aStrain.setSourceCollection(aCol);
+						setCollection = false;
+					}
+				}
+				if ( setCollection && this.hasFormValue("collection_id") && (! this.getFormValue("collection_id").equals(aStrain.getSourceCollectionID()))) {
+					aStrain.setSourceCollectionID(this.getFormValue("collection_id"));
+					aStrain.setSourceIsolationID(this.getFormValue("isolation_id"));
+				} else if ( setIsolation && this.hasFormValue("isolation_id") && (! this.getFormValue("isolation_id").equals(aStrain.getSourceIsolationID()))){
+					aStrain.setSourceIsolationID(this.getFormValue("isolation_id"));
+				}
+				if ( this.hasFormValue(FIELD_GENUS) && ( ! this.getFormValue(FIELD_GENUS).equals(aStrain.getGenus())) )
+					aStrain.setGenus(this.getFormValue(FIELD_GENUS));
 				if ( this.hasFormValue("strainName") && ( ! this.getFormValue("strainName").equals(aStrain.getName())) )
 					aStrain.setName(this.getFormValue("strainName"));
 				if ( this.hasFormValue("media_name") && (! this.getFormValue("media_name").equals(aStrain.getDefaultMedia())) )
@@ -524,10 +639,53 @@ public class StrainForm extends BaseForm {
 
 		
 		try {
-			TableRow tableRow = new TableRow(this.makeFormTextRow("Culture Source:", "culture_source", aStrain.getCultureSource()));
+			
+			TableCell myCell = new TableCell("Culture Source:");
+			StringBuffer cellText = new StringBuffer(String.format("<INPUT TYPE='TEXT' SIZE=25 NAME='%s' VALUE=\"%s\">", "culture_source", aStrain.getCultureSource()));
+			cellText.append("<BR> Collection: ");
+			Collection coll = aStrain.getSourceCollection();
+			if ( coll != null && coll.first() ) {
+				cellText.append(String.format("<INPUT TYPE='TEXT' SIZE=20 NAME='collection_id' VALUE=\"%s\"> Isolation: ", coll.getID()));
+				cellText.append(String.format("<INPUT TYPE='TEXT' SIZE=20 NAME='isolation_id' VALUE=\"%s\">", aStrain.getSourceIsolationID()));
+/*
+				Popup aPop = new Popup();
+				aPop.setName("isolation_id");
+				aPop.addItemWithLabel("", "Field Collection");
+				Isolation possibles = coll.getIsolations();
+				possibles.beforeFirst();
+				while ( possibles.next() ) {
+					aPop.addItem(possibles.getID());
+				}
+				String isoID = aStrain.getSourceIsolationID();
+				if ( isoID == null ) isoID = "";
+				aPop.setDefault(isoID);
+				cellText.append("Isolation:");
+				cellText.append(aPop);
+*/
+			} else {
+				String isoID = aStrain.getSourceIsolationID();
+				cellText.append("<INPUT TYPE='TEXT' SIZE=20 NAME='collection_id'> Isolation: ");
+				cellText.append(String.format("<INPUT TYPE='TEXT' SIZE=20 NAME='isolation_id' VALUE=\"%s\">", (isoID != null ? isoID : "")));				
+			}
+			myCell.addItem(cellText.toString());
+			TableRow tableRow = new TableRow(myCell);
 			tableRow.addItem(this.makeFormTextRow("Scientific Name:", "strainName", aStrain.getName()));
 
-			tableRow.addItem(this.makeFormTextRow("Genus:", "genus", aStrain.getGenus()));
+			
+			myCell = new TableCell("Genus:");
+			StringBuffer field = new StringBuffer(String.format(INPUT_LIVESEARCH, FIELD_GENUS, FIELD_GENUS, aStrain.getGenus(), FIELD_GENUS, DIV_VALID_GENUS));
+			Div sourceDiv = new Div();
+			sourceDiv.setID(DIV_VALID_GENUS);
+			sourceDiv.setClass("livesearch");
+			field.append(sourceDiv.toString());
+			myCell.addItem(field.toString());
+			tableRow.addItem(myCell);
+/*		
+	//		field.append("<BUTTON TYPE='BUTTON' onClick=\"loadForm(this, '%s')\">Validate</BUTTON>");
+			TableCell divCell = new TableCell("");
+			divCell.addItem(sourceDiv);
+			tableRow.addItem(divCell);
+*/
 
 			tableRow.addItem(this.makeFormDateRow("Date Added:", "addDate", "strain", aStrain.getDateString()));
 			tableRow.addItem(this.makeFormTextRow("Default Media:", "media_name", aStrain.getDefaultMedia()));
@@ -540,7 +698,7 @@ public class StrainForm extends BaseForm {
 			aPop.addItemWithLabel(Strain.REMOVED_STATUS, "Removed");
 			aPop.addItemWithLabel(Strain.FIELD_HARVEST_STATUS, "Field Collection");
 			aPop.setDefault(aStrain.getStatus());
-			TableCell myCell = new TableCell("Culture Status:");
+			myCell = new TableCell("Culture Status:");
 			myCell.addItem(aPop);
 			tableRow.addItem(myCell);
 
@@ -580,29 +738,26 @@ public class StrainForm extends BaseForm {
 	}
 
 	private String buildTaxonTable(boolean asForm, Strain aStrain) {
-		String headers[] = {"Kingdom", "Phylum", "Class", "Order", "Family", "Genus"};
-		TableCell taxCell = new TableHeader(headers);
-		TableRow taxRow = new TableRow(taxCell);
-		taxCell = new TableCell();
+		TableCell taxHeader = new TableHeader();
+		TableRow taxRow = new TableRow(taxHeader);
+		TableCell taxCell = new TableCell();
+		taxRow.addCell(taxCell);
 		try {
 			Taxon myTaxon = aStrain.getTaxon();
 			if ( myTaxon.first() ) {
-				String[] links = {"kingdom", "phylum", "class", "ord", "family" };
-				String[] values = {myTaxon.getKingdom(), myTaxon.getPhylum(), myTaxon.getTaxonClass(), myTaxon.getOrder(), myTaxon.getFamily() };
-				for ( int i = 0; i < links.length; i++ ) {
-					if ( values[i] == null ) {
-						taxCell.addItem("");
-					} else {
-						taxCell.addItem(String.format("<A HREF='taxabrowser?%s=%s'>%s</A>",links[i],values[i], values[i]));				
-					}
+				Taxon lineage = myTaxon.getLinage();
+				lineage.beforeFirst();
+				while ( lineage.next() ) {
+					String levelname = lineage.getLevel();
+					taxHeader.addItem(levelname.substring(0, 1).toUpperCase() + levelname.substring(1).toLowerCase());
+					String taxaName = lineage.getName();
+					taxCell.addItem(String.format("<a href='taxabrowser?name=%s&level%s>%s</a>",taxaName, levelname, taxaName));
 				}
-				String myGenus = myTaxon.getGenus();
-				if ( asForm ) taxCell.addItem(String.format("<INPUT TYPE=TEXT NAME='genus' VALUE='%s'/><BR><A HREF='taxabrowser?genus=%s'>Show genus</A>", myGenus, myGenus));
-				else taxCell.addItem(String.format("<A HREF='taxabrowser?genus=%s'>%s</A>", myGenus, myGenus));
-				if ( myTaxon.hasSynonym() ) {
-					String mySyn = myTaxon.getSynonym().getGenus();
-					taxCell.addItem(String.format("<A HREF='taxabrowser?genus=%s'>%s</A>", mySyn, mySyn));
-				}
+				
+//				if ( myTaxon.hasSynonym() ) {
+//					String mySyn = myTaxon.getSynonym().getGenus();
+//					taxCell.addItem(String.format("<A HREF='taxabrowser?genus=%s'>%s</A>", mySyn, mySyn));
+//				}
 			} else {
 				if ( asForm) taxCell.addItem(String.format("<INPUT TYPE=TEXT NAME='genus' VALUE='%s'/><BR><B>Genus not found in taxonomic database</B>", aStrain.getGenus()));
 				else taxCell.addItem(String.format("%s<BR><B>Genus not found in taxonomic database</B>", aStrain.getGenus()));
@@ -616,21 +771,21 @@ public class StrainForm extends BaseForm {
 		return taxTable.toString();
 	}
 
-	public String photoList(Strain aStrain) {
+	public String photoList(Strain aStrain) throws ConfigException {
 		return this.photoList(aStrain, 1);
 	}
 
-	public String photoAlbum(Strain aStrain) {
+	public String photoAlbum(Strain aStrain) throws ConfigException {
 		return this.photoList(aStrain, 3);
 	}
 
-	public String photoList(Strain aStrain, int cols) {
+	public String photoList(Strain aStrain, int cols) throws ConfigException {
 		Div aDiv = new Div(this.photoForm(aStrain, cols));
 		aDiv.setID(PHOTO_FORM);
 		return aDiv.toString();
 	}
 	
-	public String photoForm(Strain aStrain, int cols) {
+	public String photoForm(Strain aStrain, int cols) throws ConfigException {
 		StringBuffer output = new StringBuffer();
 		if ( this.hasFormValue("photoBrowser") && (! this.hasFormValue("cancelBrowser")) ) {
 			if ( this.hasFormValue("addPhotos") ) {
@@ -647,10 +802,10 @@ public class StrainForm extends BaseForm {
 		return output.toString();
 	}
 
-	private String addPhotos(Strain aStrain) {
+	private String addPhotos(Strain aStrain) throws ConfigException {
 		String[] images = this.getFormValues("image");
 		StringBuffer output = new StringBuffer();
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
+		AppConfig myConf = this.myWrapper.getAppConfig();
 		String rootPath = myConf.getFilePath(Strain.DATA_FILE_CLASS, Strain.PHOTO_DATA_TYPE);				
 
 		for (int i = 0; i < images.length; i++ ) {
@@ -739,9 +894,8 @@ public class StrainForm extends BaseForm {
 		return myForm.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Deprecated
-	public String photoBrowser(Strain aStrain, int cols) {
+	public String photoBrowser(Strain aStrain, int cols) throws ConfigException {
 		TableRow myRow = new TableRow();
 		myRow.setAttribute("align", "center");
 		Table myTable = new Table(myRow);	
@@ -763,7 +917,7 @@ public class StrainForm extends BaseForm {
 		}
 			
 		File currentPath;
-		CyanosConfig myConf = this.myWrapper.getAppConfig();
+		AppConfig myConf = this.myWrapper.getAppConfig();
 		String rootPath = myConf.getFilePath(Strain.DATA_FILE_CLASS, Strain.PHOTO_DATA_TYPE);				
 		FileRoot thisRoot = new FileRoot(rootPath);
 		
@@ -1174,11 +1328,11 @@ public class StrainForm extends BaseForm {
 
 		try {
 			myRow.addItem(String.format("<TD>Number of strains:</TD><TD>%d</TD>", SQLStrain.numberOfStrains(this.getSQLDataSource())));
-			myRow.addItem(String.format("<TD>Number of taxonomic orders:</TD><TD>%d</TD>", SQLStrain.numberOfTaxa(this.getSQLDataSource(), SQLTaxon.ORDER)));
+			myRow.addItem(String.format("<TD>Number of taxonomic orders:</TD><TD>%d</TD>", SQLStrain.numberOfTaxa(this.getSQLDataSource(), Taxon.LEVEL_ORDER)));
 
 			HtmlList myList = new HtmlList();
 			myList.unordered();
-			Map<String, Integer> taxa = SQLStrain.countForTaxa(this.getSQLDataSource(), SQLTaxon.ORDER);
+			Map<String, Integer> taxa = SQLStrain.countForTaxa(this.getSQLDataSource(), Taxon.LEVEL_ORDER);
 			Iterator<Entry<String,Integer>> anIter = taxa.entrySet().iterator();
 			while ( anIter.hasNext() ) {
 				Entry<String,Integer> anEntry = anIter.next();

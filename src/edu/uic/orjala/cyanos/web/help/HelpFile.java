@@ -61,7 +61,10 @@ public class HelpFile {
 			aDoc.add(new Field(HelpIndex.PATH_FIELD, String.format("%s/%s", this.myPrefix, myFile.getName()), Field.Store.YES, Field.Index.NO));			
 		else 
 			aDoc.add(new Field(HelpIndex.PATH_FIELD, myFile.getName(), Field.Store.YES, Field.Index.NO));
-		aDoc.add(new Field(HelpIndex.LAST_MODIFIED_FIELD, DateTools.timeToString(myFile.lastModified(), DateTools.Resolution.MINUTE),
+		
+		aDoc.add(new Field(HelpIndex.FILENAME_FIELD, myFile.getName(), Field.Store.YES, Field.Index.NO));	
+		aDoc.add(new Field(HelpIndex.LAST_MODIFIED_FIELD, 
+				DateTools.timeToString(myFile.lastModified(), DateTools.Resolution.MINUTE),
 		        Field.Store.YES, Field.Index.NOT_ANALYZED));
 
 		

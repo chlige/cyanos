@@ -3,26 +3,26 @@
  */
 package edu.uic.orjala.cyanos.web.upload;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.servlet.http.HttpServletRequest;
+
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Sample;
 import edu.uic.orjala.cyanos.SampleAccount;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSample;
-import edu.uic.orjala.cyanos.web.CyanosWrapper;
-import edu.uic.orjala.cyanos.web.Sheet;
+import edu.uic.orjala.cyanos.web.BaseForm;
+import edu.uic.orjala.cyanos.web.SheetValue;
 import edu.uic.orjala.cyanos.web.UploadForm;
-import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
-import edu.uic.orjala.cyanos.web.html.Popup;
-import edu.uic.orjala.cyanos.web.html.Table;
-import edu.uic.orjala.cyanos.web.html.TableCell;
-import edu.uic.orjala.cyanos.web.html.TableRow;
 
 /**
  * @author George Chlipala
@@ -32,54 +32,43 @@ public class SampleLibraryUpload extends UploadForm {
 
 	public static final String TITLE = "Sample Library Data";
 	
+	public static final String PROTOCOL = "sample library upload";
+
 	// Template keys
-	private static final String HEADER = "header";
-	private static final String INFO_TYPE = "infoType";
-	private static final String SOURCE_DATE = "sourceDate";
-	private static final String SOURCE_CULTURE_ID = "sourceCultureID";
-	private static final String SOURCE_COLLECTION = "sourceCollection";
-	private static final String SOURCE_LOCATION = "sourceLocation";
-	private static final String SOURCE_ID = "sourceID";
-	private static final String LOAD_DATE = "loadDate";
-	private static final String LOAD_AMT_UNIT = "loadAmtUnit";
-	private static final String LOAD_AMOUNT = "loadAmt";
-	private static final String LOAD_COL = "loadCol";
-	private static final String LOAD_CONC = "loadConc";
-	private static final String STATIC_CONC = "staticConc";
-	private static final String DEST_COLLECTION = "destCollection";
-	private static final String DEST_LOCATION = "destLocation";
-	private static final String DEST_LABEL = "destLabel";
-	private static final String DEST_NOTES = "destNotes";
-	private static final String PROJECT_COL = "projectCol";
-	private static final String STATIC_PROJECT = "staticProject";
-	
-	public static final String[] templateKeys = { INFO_TYPE, HEADER, 
-		SOURCE_DATE, SOURCE_CULTURE_ID, 
-		SOURCE_COLLECTION, SOURCE_LOCATION, 
-		SOURCE_ID,
+	public static final String SOURCE_ID = "sourceID";
+	public static final String LOAD_DATE = "loadDate";
+	public static final String LOAD_AMT_UNIT = "loadAmtUnit";
+	public static final String LOAD_AMOUNT = "loadAmt";
+	public static final String LOAD_COL = "loadCol";
+	public static final String LOAD_CONC = "loadConc";
+	public static final String STATIC_CONC = "staticConc";
+	public static final String DEST_COLLECTION = "destCollection";
+	public static final String DEST_LOCATION = "destLocation";
+	public static final String DEST_LABEL = "destLabel";
+	public static final String DEST_NOTES = "destNotes";
+	public static final String PROJECT_COL = "projectCol";
+	public static final String STATIC_PROJECT = "staticProject";
+	public static final String STATIC_COLLECTION = "staticCollection";
+
+	public static final String[] templateKeys = { PARAM_HEADER, SOURCE_ID,
 		LOAD_DATE, LOAD_AMT_UNIT, LOAD_AMOUNT, LOAD_COL, LOAD_CONC, STATIC_CONC,
-		DEST_COLLECTION, DEST_LOCATION, DEST_LABEL, DEST_NOTES, PROJECT_COL, STATIC_PROJECT};
-	
-	private static final String[] templateHeader = {"Source", "Date", "Destination Collection", "Amount", "Concentration", "Location", "Label", "Notes", "Project Code"};
-	private static final String[] templateType = {"Required (One of the following)<BR/>- Sample Collection & Location<BR/>- Sample ID", 
-			"Required", "Required", "Optional or Static", "Optional", "Optional", "Optional", "Optional", "Optional or Static"};
+		DEST_COLLECTION, DEST_LOCATION, DEST_LABEL, DEST_NOTES, PROJECT_COL, STATIC_PROJECT, STATIC_COLLECTION};
+
+	private static final String[] templateHeader = {"Source ID", "Date", "Destination Collection", "Amount", "Concentration", "Location", "Label", "Notes", "Project Code"};
+	private static final String[] templateType = {"Required <BR/>Material ID", 
+		"Required", "Required or Static", "Optional or Static", "Optional", "Optional", "Optional", "Optional", "Optional or Static"};
+
+	public static final String JSP_FORM = "/upload/forms/isolation.jsp";
 
 	/**
 	 * Create a new SampleLibraryUpload.
-	 * 
-	 * @param servlet
-	 * @param aSheet
-	 * @throws SQLException 
-	 * @throws DataException 
 	 */
-	public SampleLibraryUpload(CyanosWrapper aWrapper, Sheet aSheet) throws DataException {
-		super(aWrapper, aSheet);
-		this.template = this.buildTemplate(templateKeys);
-		this.hasHeaderRow = this.template.containsKey(HEADER);
+	public SampleLibraryUpload(HttpServletRequest req) {
+		super(req);
 		this.accessRole = User.SAMPLE_ROLE;
 		this.permission = Role.CREATE;
 	}
-	
+
 	public String worksheetTemplate() {
 		return this.worksheetTemplate(templateHeader, templateType);
 	}
@@ -90,139 +79,128 @@ public class SampleLibraryUpload extends UploadForm {
 	public void run() {
 		if ( this.working ) return;
 		StringBuffer output = new StringBuffer();
-		List rowNum = this.rowList();
+		List<Integer> rowNum = this.rowList();
 		this.done = 0;
 		this.todos = rowNum.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = rowNum.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
+		try {
+//			int sourceLibCol = -1, sourceLocCol = -1, 
+			int sourceIDCol = -1;
 
-		int sourceLibCol = -1, sourceLocCol = -1, sourceIDCol = -1;
+			int loadDateCol = Integer.parseInt(template.get(LOAD_DATE));
+			int loadAmt = Integer.parseInt(template.get(LOAD_AMOUNT));
+			String loadUnit = template.get(LOAD_AMT_UNIT);
+			int loadConcCol = Integer.parseInt(template.get(LOAD_CONC));
+			BigDecimal staticConc = BigDecimal.ZERO;
+			if ( ! template.get(STATIC_CONC).equals("") ) {
+				staticConc = BaseForm.parseAmount(template.get(STATIC_CONC), "mg/ml");
+			}
+			boolean wksConc = (loadConcCol > 0);
 
-		int loadDateCol = Integer.parseInt(template.get(LOAD_DATE));
-		int loadAmt = Integer.parseInt(template.get(LOAD_AMOUNT));
-		String loadUnit = template.get(LOAD_AMT_UNIT);
-		int loadConcCol = Integer.parseInt(template.get(LOAD_CONC));
-		float staticConc = 0;
-		if ( ! template.get(STATIC_CONC).equals("") ) {
-			staticConc = parseAmount(template.get(STATIC_CONC), "mg/ml");
-		}
-		boolean wksConc = (loadConcCol > 0);
+			int destLibCol = Integer.parseInt(template.get(DEST_COLLECTION));
+			int destLocCol = Integer.parseInt(template.get(DEST_LOCATION));
+			int destLabelCol = Integer.parseInt(template.get(DEST_LABEL));
+			int destNotesCol = Integer.parseInt(template.get(DEST_NOTES));
+			int projectCol = Integer.parseInt(template.get(PROJECT_COL));
+			String staticProject = template.get(PROJECT_COL);
+			boolean useProjectCol = ( projectCol > -1 );
 
-		int destLibCol = Integer.parseInt(template.get(DEST_COLLECTION));
-		int destLocCol = Integer.parseInt(template.get(DEST_LOCATION));
-		int destLabelCol = Integer.parseInt(template.get(DEST_LABEL));
-		int destNotesCol = Integer.parseInt(template.get(DEST_NOTES));
-		int projectCol = Integer.parseInt(template.get(PROJECT_COL));
-		String staticProject = template.get(PROJECT_COL);
-		boolean useProjectCol = ( projectCol > -1 );
-		
-		String infoType = template.get(INFO_TYPE);
-
-		int loadType = 0;
-		if ( infoType.equals("location") ) {
-			loadType = 1;
-			sourceLibCol = Integer.parseInt(template.get(SOURCE_COLLECTION));
-			sourceLocCol = Integer.parseInt(template.get(SOURCE_LOCATION));
-		} else if ( infoType.equals("id") ) {
-			loadType = 2;
 			sourceIDCol = Integer.parseInt(template.get(SOURCE_ID)); 
-		}
 
-		Date myDate = new Date();
-		String bulkLoadNote = String.format("\nCreated via bulk load by user: %s\n %s", this.myUser.getUserID(), myDate.toString());
+			Date myDate = new Date();
+			String bulkLoadNote = String.format("\nCreated via bulk load by user: %s\n %s",  this.getSQLDataSource().getUser().getUserID(), myDate.toString());
 
-		while (rowIter.hasNext() && this.working ) {
-			Integer row = (Integer)rowIter.next();
-			if ( this.worksheet.gotoRow(row.intValue()) ) {
-			HtmlList currResults = new HtmlList();
-			currResults.unordered();
-			try {
-				SQLSample source = null;
-				if ( loadType == 1 ) {
-					source = (SQLSample) SQLSample.loadFromCollection(this.myData, this.worksheet.getValue(sourceLibCol), this.worksheet.getValue(sourceLocCol));
-				} else if ( loadType == 2 ) {
-					source = new SQLSample(this.myData, this.worksheet.getValue(sourceIDCol));
-				}
-				
-				if ( source != null && source.getRecordCount() > 1 ) {
-					currResults.addItem(ERROR_TAG + "Source information ambigiuous. Use a sample ID.");
-				} else if (source != null && source.first()) {
-					String thisDate = this.worksheet.getValue(loadDateCol);
-					Sample dest;
-					if ( useProjectCol ) dest = SQLSample.createInProject(this.myData, source.getCultureID(), this.worksheet.getValue(projectCol));
-					else dest = SQLSample.createInProject(this.myData, source.getCultureID(), staticProject);
-					dest.setManualRefresh();
-					dest.setDate(thisDate);
-					float conc = 0;
-					if ( wksConc ) { conc = Integer.parseInt(this.worksheet.getValue(loadConcCol));
-					} else { conc = staticConc; }
-					dest.setConcentration(conc);
-					dest.setCollectionID(this.worksheet.getValue(destLibCol));
-					if (destLocCol > -1) { dest.setLocation(this.worksheet.getValue(destLocCol)); }
-					if (destLabelCol > -1) { dest.setName(this.worksheet.getValue(destLabelCol)); }
-					dest.setNotes(bulkLoadNote);
-					if (destNotesCol > -1)  { dest.addNotes(this.worksheet.getValue(destNotesCol)); }
-					dest.setBaseUnit(loadUnit);
-					dest.setLibrarySource(source);
-					dest.refresh();
-					dest.setAutoRefresh();
-					SampleAccount srcAcct = source.getAccount();
-					if ( srcAcct.addTransaction() ) {
-						float amount = parseAmount(this.worksheet.getValue(loadAmt), loadUnit);
-						float sConc = ( source.isSolution() ? source.getConcentration() : 1.0f );
-						float dConc = ( dest.isSolution() ? dest.getConcentration() : 1.0f );
-						float sAmt = (amount * dConc) / sConc;
-						srcAcct.withdrawAmount(sAmt);
-						srcAcct.setDate(thisDate);
-						srcAcct.setTransactionReference(dest);
-						srcAcct.setNotes("To sample." + bulkLoadNote);
-						currResults.addItem(SUCCESS_TAG + "Amount withdrawn from source.");
-						srcAcct.updateTransaction();
-						SampleAccount destAcct = dest.getAccount();
-						if ( destAcct.addTransaction() ) {
-							destAcct.depositAmount(amount);
-							destAcct.setTransactionReference(source);
-							destAcct.setDate(thisDate);
-							destAcct.setNotes("Initial Amount" + bulkLoadNote);
-							destAcct.updateTransaction();
-							currResults.addItem(SUCCESS_TAG + "Amount deposited into destination.");
+			while (rowIter.hasNext() && this.working ) {
+				Integer row = (Integer)rowIter.next();
+				if ( this.worksheet.gotoRow(row.intValue()) ) {
+					HtmlList currResults = new HtmlList();
+					currResults.unordered();
+					try {
+						Material source = SQLMaterial.load(myData, this.worksheet.getStringValue(sourceIDCol));
+						if (source != null && source.first()) {
+							SheetValue thisDate = this.worksheet.getValue(loadDateCol);
+							Sample dest;
+							if ( useProjectCol ) dest = SQLSample.createInProject(this.myData, source.getID(), this.worksheet.getStringValue(projectCol));
+							else dest = SQLSample.createInProject(this.myData, source.getID(), staticProject);
+							dest.setManualRefresh();
+							if ( thisDate.isDate() )
+								dest.setDate(thisDate.getDate());
+							else 
+								dest.setDate(thisDate.toString());
+							BigDecimal conc = BigDecimal.ZERO;
+							if ( wksConc ) { conc = BaseForm.parseAmount(this.worksheet.getStringValue(loadConcCol));
+							} else { conc = staticConc; }
+							dest.setConcentration(conc);
+							dest.setCollectionID(this.worksheet.getStringValue(destLibCol));
+							if (destLocCol > -1) { dest.setLocation(this.worksheet.getStringValue(destLocCol)); }
+							if (destLabelCol > -1) { dest.setName(this.worksheet.getStringValue(destLabelCol)); }
+							dest.setNotes(bulkLoadNote);
+							if (destNotesCol > -1)  { dest.addNotes(this.worksheet.getStringValue(destNotesCol)); }
+							dest.setBaseUnit(loadUnit);
+							dest.refresh();
+							dest.setAutoRefresh();
+							SampleAccount destAcct = dest.getAccount();
+							if ( destAcct.addTransaction() ) {
+								destAcct.depositAmount(this.worksheet.getStringValue(loadAmt), loadUnit);
+								if ( thisDate.isDate() )
+									destAcct.setDate(thisDate.getDate());
+								else
+									destAcct.setDate(thisDate.toString());
+								destAcct.setNotes("Initial Amount" + bulkLoadNote);
+								destAcct.updateTransaction();
+								currResults.addItem(SUCCESS_TAG + "Amount deposited into destination.");
+//								srcAcct.setDate(thisDate);
+//								srcAcct.setNotes("To sample." + bulkLoadNote);
+//								currResults.addItem(SUCCESS_TAG + "Amount withdrawn from source.");
+//								srcAcct.updateTransaction();
+							} else {
+								currResults.addItem(ERROR_TAG + "Could not create a transaction for the destination sample.");
+							}
 						} else {
-							currResults.addItem(ERROR_TAG + "Could not create a transaction for the destination sample.");
+							currResults.addItem(ERROR_TAG + "Could not load source information.");
 						}
-					} else {
-						currResults.addItem(ERROR_TAG + "Could not create a transaction for the source sample.");
+					} catch (DataException e) {
+						currResults.addItem("<FONT COLOR='red'><B>SQL FAILURE</B></FONT> " + e.getMessage());
+						e.printStackTrace();
 					}
-				} else {
-					currResults.addItem(ERROR_TAG + "Could not load source information.");
+					resultList.addItem(String.format("Row #:%d %s",row + 1, currResults.toString()));
 				}
-			} catch (DataException e) {
-				currResults.addItem("<FONT COLOR='red'><B>SQL FAILURE</B></FONT> " + e.getMessage());
-				e.printStackTrace();
+				this.done++;
 			}
-			resultList.addItem(String.format("Row #:%d %s",row + 1, currResults.toString()));
-			}
-			this.done++;
+
+		} catch (Exception e) {
+			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();
+			this.working = false;
+		}
+		try {
+			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
+			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+		} catch (SQLException e) {
+			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		}
 		output.append(resultList.toString());
-		if ( ! this.working ) { output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
 		this.working = false;
 		this.resultOutput = output.toString();		
 	}
 
+	/*
 	public String templateForm() {
 		Table smallTable;
 		TableCell myCell;
 		List<String> headerList = this.getHeaderList(template.containsKey(HEADER));
-		
+
 		if ( template.containsKey(HEADER) ) {
 			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' CHECKED /> Spreadsheet has a header row.<BR>");					
 		} else {
 			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' /> Spreadsheet has a header row.<BR>");
 		}
-		
+
 		myCell.setAttribute("COLSPAN", "2");
 		myCell.setAttribute("ALIGN", "CENTER");
 		TableRow fullRow = new TableRow(myCell);
@@ -241,29 +219,33 @@ public class SampleLibraryUpload extends UploadForm {
 			useOtherPop.addItemWithLabel(index, value);
 		}
 
-		
+
+/*
 		if ( ! this.template.containsKey(INFO_TYPE) ) this.template.put(INFO_TYPE, "date");
 		String infoType = template.get(INFO_TYPE);
-		
+
 		Popup infoTypePop = new Popup();
 		infoTypePop.addItemWithLabel("location", "Sample collection and location");
 		infoTypePop.addItemWithLabel("id", "Sample ID");
 		infoTypePop.setName(INFO_TYPE);
 		infoTypePop.setDefault(infoType);
 		infoTypePop.setAttribute("onChange", "this.form.submit();");
-		
+	
 		myCell = new TableCell("Find source sample by:" + infoTypePop.toString());
 		myCell.setAttribute("COLSPAN", "2");
 		myCell.setAttribute("ALIGN", "CENTER");
 		fullRow.addItem(myCell);
-	
+
 		String[] dateFields = {SOURCE_CULTURE_ID, SOURCE_DATE};
 		String[] locationFields = {SOURCE_COLLECTION, SOURCE_LOCATION};
 		String[] idFields = {SOURCE_ID};
-		TableRow myRow = new TableRow();
+*/
+/*
+ 		TableRow myRow = new TableRow();
 		myRow.addItem("<TH COLSPAN=2 ALIGN='CENTER'>Source Sample Information</TH>");
 		StringBuffer hideRow = new StringBuffer("<TD>");
-		
+*/
+		/*
 		if ( infoType.equals("date") ) {
 			myRow.addItem(this.simpleTemplateRow("Culture ID:", SOURCE_CULTURE_ID, ssColPop));
 			myRow.addItem(this.simpleTemplateRow("Sample Date:", SOURCE_DATE, ssColPop));
@@ -275,11 +257,12 @@ public class SampleLibraryUpload extends UploadForm {
 			hideRow.append(this.hideTemplateValues(dateFields));
 			hideRow.append(this.hideTemplateValues(idFields));
 		} else if ( infoType.equals("id") ) {
-			myRow.addItem(this.simpleTemplateRow("Sample ID:", SOURCE_ID, ssColPop));
-			hideRow.append(this.hideTemplateValues(locationFields));
-			hideRow.append(this.hideTemplateValues(dateFields));
-		}
-		
+		*/
+/*			myRow.addItem(this.simpleTemplateRow("Sample ID:", SOURCE_ID, ssColPop));
+//			hideRow.append(this.hideTemplateValues(locationFields));
+//			hideRow.append(this.hideTemplateValues(dateFields));
+//		}
+
 		hideRow.append("</TD>");
 		myRow.addItem(hideRow.toString());
 		smallTable = new Table(myRow);
@@ -302,23 +285,28 @@ public class SampleLibraryUpload extends UploadForm {
 		fullCell.addItem(smallTable);
 		myRow = new TableRow();
 		fullRow.addItem(fullCell);
-				
+
 		Table formTable = new Table(fullRow);
 		formTable.setAttribute("WIDTH", "85%");
-		
+
 		return formTable.toString();
 	}
-
+*/
+	
 	public String title() {
 		return TITLE;
 	}
 
-	@Deprecated
-	public UploadModule makeNew(CyanosWrapper aServlet, Sheet aSheet) throws DataException {
-		return new SampleLibraryUpload(aServlet, aSheet);
-	}
-
 	public String[] getTemplateKeys() {
 		return templateKeys;
+	}
+	
+	public String getTemplateType() {
+		return PROTOCOL;
+	}
+
+	@Override
+	public String jspForm() {
+		return JSP_FORM;
 	}
 }

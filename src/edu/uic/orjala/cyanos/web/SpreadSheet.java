@@ -16,6 +16,8 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -25,11 +27,15 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.fileupload.FileItem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
+import edu.uic.orjala.cyanos.xml.MSXMLHandler;
+import edu.uic.orjala.cyanos.xml.ODSHandler;
+import edu.uic.orjala.cyanos.xml.OOXMLHandler;
 
 /**
  * @author George Chlipala
@@ -41,16 +47,15 @@ public class SpreadSheet {
 	 * 
 	 */
 	
-	
-	protected List<Sheet> myData;
-	protected final String[][] TAGS = { 
+	protected final List<Sheet> myData = new ArrayList<Sheet>();
+	private final String[][] TAGS = { 
 			{ "table:table", "table:table-row", "table:table-cell", "text:p", "table:name", "office:date-value", "table:number-columns-repeated", "ss:Index" },
 			{ "Worksheet", "Row", "Cell", "Data", "ss:Name", "DATE_TAG_HOLDER", "table:number-columns-repeated", "ss:Index" }, 
 			{ "table", "table-row", "table-cell", "table-data", "table-name" }};
-	protected final int TABLE_TAG = 0;
-	protected final int ROW_TAG = 1;
-	protected final int CELL_TAG = 2;
-	protected final int DATA_TAG = 3;
+	private final int TABLE_TAG = 0;
+	private final int ROW_TAG = 1;
+	private final int CELL_TAG = 2;
+	private final int DATA_TAG = 3;
 	protected final int TABLE_NAME_TAG = 4;
 	protected final int DATE_VALUE_TAG = 5;
 	protected final int REPEAT_TAG = 6;
@@ -60,19 +65,27 @@ public class SpreadSheet {
 	public final static int MS_EXCEL_TYPE = 1;
 	public final static int INTERNAL_TYPE = 2;
 	
-	public SpreadSheet() {
-		this.myData = new ArrayList<Sheet>();
-	}
+	private static final String XML_CONTENT_TYPE = "application/xml";
+	private static final String XML_EXT = ".xml";
+	
+	public final static String XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	public final static String XLSX_EXT = ".xlsx";
+
+	private static final String ODS_CONTENT_TYPE = "application/vnd.oasis.opendocument.spreadsheet";
+	private static final String ODS_EXT = ".ods";
+
 	
 	public SpreadSheet(InputStream anInput, int dataType) throws ParserConfigurationException, SAXException, IOException {
 		this.loadXMLFile(anInput, dataType);
 	}
 
-	public SpreadSheet(FileItem anItem) throws ParserConfigurationException, SAXException, IOException {
-		InputStream xmlData = anItem.getInputStream();
-		if (anItem.getContentType().equals("application/xml") || anItem.getName().endsWith(".xml") || anItem.getName().endsWith(".xls")) {
+	public SpreadSheet(FileUpload anItem) throws ParserConfigurationException, SAXException, IOException {
+		InputStream xmlData = anItem.getStream();
+		String contentType = anItem.getContentType();
+		String fileName = anItem.getName();
+		if (contentType.equals(XML_CONTENT_TYPE) || fileName.endsWith(XML_EXT) || fileName.endsWith(".xls")) {
 			this.loadXMLFile(xmlData, MS_EXCEL_TYPE);
-		} else if (anItem.getContentType().equals("application/vnd.oasis.opendocument.spreadsheet") || anItem.getName().endsWith(".ods")) {
+		} else if (contentType.equals(ODS_CONTENT_TYPE) || fileName.endsWith(ODS_EXT)) {
 			ZipInputStream zipStream = new ZipInputStream(xmlData);
 			ZipEntry anEntry = zipStream.getNextEntry();
 			boolean foundContent = false;
@@ -87,11 +100,28 @@ public class SpreadSheet {
 				this.loadXMLFile(zipStream, ODF_TYPE);
 			}
 			zipStream.close();
+		} else if ( contentType.equals(XLSX_CONTENT_TYPE) || fileName.endsWith(XLSX_EXT) ) {
+			OOXMLHandler handler = new OOXMLHandler(this);
+			handler.parseFile(xmlData);
 		}
 	}
 	
 	protected void loadXMLFile(InputStream xmlData, int dataType) throws ParserConfigurationException, SAXException, IOException {
-		this.myData = new ArrayList<Sheet>();
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setNamespaceAware(true);
+		SAXParser saxParser = factory.newSAXParser();
+		DefaultHandler handler = null;
+		switch (dataType) {
+		case ODF_TYPE:
+			handler = new ODSHandler(this);
+			break;
+		case MS_EXCEL_TYPE:
+			handler = new MSXMLHandler(this);
+			break;
+		}
+		saxParser.parse(xmlData, handler);
+
+		/*
 		String[] theseTags = this.TAGS[dataType];
 		if ( xmlData != null ) {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -132,7 +162,7 @@ public class SpreadSheet {
 									}
 									int anIndex = -1;
 									if ( cellEl.hasAttribute(theseTags[this.INDEX_TAG]) ) {
-										anIndex = Integer.parseInt(cellEl.getAttribute(theseTags[this.INDEX_TAG]));
+										anIndex = Integer.parseInt(cellEl.getAttribute(theseTags[this.INDEX_TAG])) - 1;
 									}
 									for ( int crep = 0; crep < reps ; crep++ ) {
 										if ( anIndex > 0 ) 
@@ -148,6 +178,7 @@ public class SpreadSheet {
 				}
 			}
 		}
+		*/
 	}
 
 	public List<String> worksheetNames() {
@@ -212,7 +243,7 @@ public class SpreadSheet {
 				for ( int c = 0; c < aSheet.rowSize(); c++ ) {
 					Element aCell = dom.createElement(theseTags[CELL_TAG]);
 					Element dataEl = dom.createElement(theseTags[DATA_TAG]);
-					dataEl.setNodeValue(aSheet.getValue(c));
+					dataEl.setNodeValue(aSheet.getStringValue(c));
 					aCell.appendChild(dataEl);
 					aRow.appendChild(aCell);
 				}

@@ -193,11 +193,11 @@ public class MSDereplication extends BaseForm implements DereplicationForm {
 		String[] labels = {"M","H", "Na", "NH<SUB>4</SUB>", "K"};
 		String[] names = { "M","H", "Na", "NH4", "K"};
 		TableCell myCell = new TableCell();
-		List aList;
+		List<String> aList;
 		if ( this.hasFormValue("adduct") ) {
 			aList = Arrays.asList( this.getFormValues("adduct") );
 		} else {
-			aList = new ArrayList();
+			aList = new ArrayList<String>();
 		}
 		
 		for (int i=0; i < names.length; i++) {

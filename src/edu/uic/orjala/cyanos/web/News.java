@@ -86,7 +86,7 @@ public class News extends SQLObject {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.sql.SQLObject#fetchRecord()
 	 */
-	@Override
+	
 	protected void fetchRecord() throws DataException {
 		this.fetchRecord(SQL_LOAD_NEWS);
 	}
