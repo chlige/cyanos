@@ -19,51 +19,50 @@
 
 <B><A NAME='toc'>Table of Contents</A></B>
 <OL>
+<LI><A HREF='#compound'>Compound Records</A>
+<OL>
 <LI><A HREF='#add_compound'>Add a new compound</A></LI>
 <LI><A HREF='#modify_compound'>Modify a compound record</A></LI>
+</OL></LI>
+<LI><A HREF='#dereplication'>Dereplication</A>
+<OL>
+<LI><A HREF='#mass'>Mass Spectrometric Searching</A></LI>
+<LI><A HREF='#nmr'><SUP>1</SUP>H NMR Searching</A></LI>
+</OL></LI>
+<!--
 <LI><A HREF='#roles'>Required Roles</A></LI> 
+-->
 </OL>
 </P>
 <HR WIDTH='85%' ALIGN='LEFT'/>
-<H2><A NAME='add_compound'>Add a new compound</A></H2>
-<OL>
-<LI><P>Select <B>Add Compound</B> from the <B>Samples</B> menu.<BR/>
-<IMG SRC="compound01.png" NAME="compound01" ALIGN=CENTER BORDER=0></P></LI>
-<LI><P>Enter information into the <I>Add Compound</I> form.  CYANOS will calculate the formula, associated formula weight, and monoisotopic mass from an uploaded chemical structure file, either in MDL or CML format.<BR/>
-<IMG SRC="compound02.png" NAME="compound02" ALIGN=CENTER BORDER=0></P></LI>
-<LI><P>Click the <B><SPAN CLASS='exampleButton'>Add</SPAN></B> Button.<BR/>
-</OL>
-<P>The compound is now added to the database and can be viewed on the compound list, which can be viewed via the menu <B>Samples</B> &gt; <B>View Compounds</B>.</P>
+<H2><A NAME='dereplication'>Dereplication</A></H2>
+<P>The ability to quickly identify known compounds, a.k.a. dereplication, is a very important part of natural product research.  To aid this process CYANOS has two chemical search engines that can allow one to search for compounds within the CYANOS database.  The dereplication search engines are available via the menu <B>Samples</B> &gt; <B>Dereplication</B><P>
 
+<H3><A NAME='mass'>Mass Spectrometric Searching</A></H3>
+<P>The Mass Spectrometric (MS) search engine, shown above, allows a user to search for compounds based upon observed MS data.  The search engine allows one to submit an observed <I>m/z</I> value, the polarity, an acceptable error range (Da or ppm), and list of possible adducts.  The search engine will then query the database for compounds using the stored monoisotopic mass of each compound.</P>
+<P><IMG SRC="dereplication01.png" NAME="graphics23" ALIGN=CENTER></P>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
-<H2><A NAME='modify_compound'>Modify a compound record</A></H2>
-<P>Compound information can be accessed from various compound links within the CYANOS website as well as the compound list, which can be viewed via the menu <B>Samples</B> &gt; <B>View Compounds</B>. Click on the name of a compound to view the information page for that compound.</P>
-<P><IMG SRC="compound03.png" NAME="compound03" ALIGN=CENTER BORDER=0></P>
-<P>The top part of the page displays the attributes of the compound.  If the user has permission to modify the compound, the <B><SPAN CLASS='exampleButton'>Edit Values</SPAN></B> button will be available and the user can click that button to display an editable form to change the compound's attributes.</P>
-<P><IMG SRC="compound04.png" NAME="compound04" ALIGN=CENTER BORDER=0></P>
-<P>If the compound record does not contain MDL data, an upload field will be available to select a MDL file to upload when the <B><SPAN CLASS='exampleButton'>Update</SPAN></B> button is clicked.</P>
-<P><IMG SRC="compound05.png" NAME="compound05" ALIGN=CENTER BORDER=0></P>
-<P>If one includes an MDL upload, CYANOS will calculate the formula, formula weight, monoisotopic mass, and SMILES string of the compound from the uploaded MDL file and will disregard the values from the HTML form. <B>Please Note:</B> this behavior cannot be overridden.</P>
-<P>One can clear the existing MDL data for a compound by clicking on the <B><SPAN CLASS='exampleButton'>Clear MDL Data</SPAN></B> button. <B>Please Note:</B> clearing the MDL data will ONLY delete the assoicated MDL data and will NOT clear the values of the formula, formula weight, monoisotopic mass, and SMILES string.</P>
-<P>If the compound record contains a chemical structure, i.e. MDL data, the compound form will display a 2D representation of the structure of the compound as well as options to download the MDL data, via <B><SPAN CLASS='exampleButton'>Export Structure</SPAN></B>, or generate additional images via <B><SPAN CLASS='exampleButton'>Generate</SPAN></B></P>
-<P><IMG SRC="compound06.png" NAME="compound06" ALIGN=CENTER BORDER=0></P>
-<P>The lower part of the page has sections that list records associated to the compound.  Each of these sections can be opened or closed by clicking on the green triangle to the left of the section title.  For example, if a user clicked on <I>Samples</I>, the section would open to reveal a listing of samples that are instances of this compound.</P>
-
+<H3><A NAME='nmr'><SUP>1</SUP>H NMR Searching</A></H3>
+<P>The <SUP>1</SUP>H NMR search engine allows one to utilize key <SUP>1</SUP>H NMR patterns to find compounds.  For this search engine, one would conduct a brief survey of a <SUP>1</SUP>H NMR spectrum to determine the number and type of methyl signals, e.g. triplet, doublet, singlet, OMe, or NMe, protons attached to sp2 carbons, the number of aromatic protons and related substitution pattern.</P>
+<P><IMG SRC="dereplication02.png" NAME="graphics23" ALIGN=CENTER></P>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
+<!--
 <H2><A NAME='roles'>Required Roles</A></H2>
-<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Compound records lack project information thus, access would need to be granted either globally or for the "Null Project"</P>
+<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Actions in
+italics utilize global level permissions only.</P>
 <TABLE WIDTH='80%' BORDER=1 ALIGN='CENTER'>
 <TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
-<TR VALIGN=TOP><TD>Add a new compound record</TD><TD ALIGN='CENTER'>sample(Create)</TD></TR>
-<TR VALIGN=TOP><TD>Modify a compound record</TD><TD ALIGN='CENTER'>sample(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new field collection</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a field collection</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new isolation</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify an isolation</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
 </TABLE>
 <A HREF='#toc'>Return to table of contents</A>
-<HR WIDTH='85%' ALIGN='LEFT'/>
-
+-->
 <A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
 </BODY>
 </HTML>
