@@ -11,11 +11,11 @@
 	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
-<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<A HREF='toc'>Main Table of Contents</A>
 <H2>Culture Management</H2>
 <HR WIDTH='90%' ALIGN='LEFT'/>
 <P>Often cultured organisms are used in natural product drug discovery efforts.  The CYANOS database can manage information relating to the culture conditions (inoculations), harvest information, and cryopreservation data for all strains.</P>
-<P><B><A NAME='toc'>Table of Contents</A></B>
+<P><B><A NAME='toc'>Table of Contents</A></B></P>
 <OL>
 <LI><A HREF='#inocs'>Inoculations</A>
 <OL>
@@ -38,159 +38,155 @@
 </OL></LI>
 <LI><A HREF='#roles'>Required Roles</A></LI>
 </OL>
-</P>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
-<P ALIGN='CENTER'><H2><A NAME='inocs'>Inoculations</A></H2></P>
-The inoculation records in CYANOS are used to keep track of culture conditions, which include inoculation date, volume, and media.  CYANOS can also track the parent of each inoculation as well as the fate of the culture.
+<H2><A NAME='inocs'>Inoculations</A></H2>
+The inoculation records in CYANOS are used to keep track of culture conditions, which include inoculation date, volume, and media.  
+CYANOS can also track the parent of each inoculation as well as the fate of the culture.
 
 <H2><A NAME='add_inocs'>Adding Inoculation Data</A></H2>
-<P>The form to add inoculations can be accessed by either:
+<P>The form to add inoculations can be accessed by either:</P>
 <UL>
 <LI>The menu option <B>Culture</B> &gt; <B>Add Inoculation(s)</B></LI>
 <LI>Clicking the <SPAN CLASS="exampleButton"><B>Add New Inoculations</B></SPAN> button in the <I>Inoculations</I> section of a strain's data page.</LI>
 </UL>
-<P>Enter information into the <I>Add Inoculations</I> form.<BR/>
-<IMG SRC="culture01.png" NAME="graphics01" ALIGN=CENTER BORDER=0></P>
-<P>The form has the following main fields:<BR>
-<DL>
-<DT><I>Number of inoculations</I></DT>
-<DD>Use this popup menu to adjust the number of rows needed for the inoculation form.</DD>
-<DT><SPAN CLASS="exampleButton">Retrieve Culture Information</SPAN></DT>
-<DD>Use this button to reload the form and set the default media and possible parent inoculations for any culture IDs that have been entered.</DD>
-</DL></P>
-<P>For each row, the following fields are present:<BR>
-<DL>
-<DT><I>Culture ID</I></DT>
-<DD>Culture or strain ID of the inoculation</DD>
-<DT><I>
-
-<A HREF='#toc'>Return to table of contents</A>
-<HR WIDTH='85%' ALIGN='LEFT'/>
-
-<H2><A NAME='add_collection'>Adding Field Collection Data</A></H2>
-<P>Field collection data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
-
-<H3><A NAME='add_collection_web'>by Web Form</A></H3>
-<OL>
-<LI>Select <B>Add New</B> from the <B>Collection</B> menu.</LI>
-<LI>Enter information into the <I>Add a New Collection</I> form.
-<P><IMG SRC="collection03.png" NAME="graphics7" ALIGN=LEFT BORDER=0></P></LI>
-<BR CLEAR='LEFT'>
-<LI>Click the <B><SPAN STYLE="background: #999999">Create</SPAN></B> Button.</LI>
-</OL>
-
-<H3><A NAME='add_collection_upload'>Spreadsheet Upload</A></H3>
-
-<P>Often multiple field collections are made as part of a collection trip, thus creating a spreadsheet is typically more useful than the web form.  As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
-Collections</B>.  The format of the spreadsheet should be as follows.</P>
-<TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
-<TR BGCOLOR="#e6e6e6">
-<TH WIDTH='11%'>Collection ID</TH>
-<TH WIDTH='11%'>Date</TH>
-<TH WIDTH='11%'>Collected by</TH>
-<TH WIDTH='11%'>Location Name</TH>
-<TH WIDTH='11%'>Latitude</TH>
-<TH WIDTH='11%'>Longitude</TH>
-<TH WIDTH='11%'>Lat/Long</TH>
-<TH WIDTH='11%'>Precision</TH>
-<TH WIDTH='11%'>Notes</TH>
-</TR>
-<TR>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-</TR>
-<TR>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-</TR>
+<P>Either of these methods will open the <I>Add Inoculations</I> form.<BR>
+<IMG SRC="inoc01.png" ALIGN=LEFT BORDER=0></P><BR CLEAR="LEFT">
+<P>This form allows one to create single or multiple inoculation records using a spreadsheet style entry form.  
+At the bottom of the form is the <SPAN CLASS="exampleButton"><B>Add Row</B></SPAN> button that allows one to add additional rows to the form. 
+Rows can be deleted from the form by clicking the (<font color="red"><b>X</b></font>) at the end of the row.</p>
+  
+<p>Each row in the form has the following entry fields.</P>
+<TABLE><TR><TD><B>Date</B></TD><TD>Inoculation date</TD></TR>
+<TR><TD><B>Project</B></TD><TD>Project code to associate with the inoculation.<BR>If the <I>Inherit</I> field is selected, the inoculation record will inhert the project code first form the parent inoculation (if designated) then the culture ID.</TD></TR>
+<TR><TD><B>Parent Stock</B></TD><TD>Parent/source inoculation for this inoculation.<BR>
+This field is generated when the culture ID for the row is changed.</TD></TR>
+<TR><TD><B>Volume</B></TD><TD>The volume of media inoculated.  The default unit is liters.  Other scales, e.g. mL, can be specified in the field.<BR>
+Preceeding the volume field is the quantity field which allows one to specifiy multiple instances of the same inoculation, e.g. 2 x 150 mL.</TD></TR>
+<TR><TD><B>Media</B></TD><TD>Media of the inoculation.<BR>
+If this field is empty and the culture ID is changed, the default media of the strain will be put in the field.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the inoculation record</TD></TR>
+<TR><TD><B>Stock</B></TD><TD>Select this checkbox to designate the inoculation as a stock culture.  This will set the fate of the inoculation record as stock and make it unavailable for harvest.</TD></TR>
 </TABLE>
-<P>For each entry, only the &quot;Collection ID&quot; is required, although the collection date will be set to a default value, i.e. January 1, 1900, if not present in the spreadsheet.</P>
-<A HREF='#toc'>Return to table of contents</A>
+<P>Once all the data is entered into the form, click the <SPAN CLASS="exampleButton"><B>Add Inoculation(s)</B></SPAN> button to add the records to the database.</P>
+<img src="inoc02.png" align="center">
+
+<p><A HREF='#toc'>Return to table of contents</A></p>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
-<P ALIGN='CENTER'><H2><A NAME='isolation'>Isolations</A></H2></P>
-
-<P>The isolation information stored allows one to keep track of isolation work as well as connect strains with collections. 
-Isolation records can contain the following parameters: date, type, media, parent material, and notes. As with field collections, isolation IDs can consist of any combination of alphanumeric characters and must be unique.  This isolation ID is important to connect strain records with isolation and collection information.</P>
-
-<H2><A NAME='add_isolation'>Adding Isolation Data</A></H2>
-<P>As with field collection data, isolation data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
-
-<H3><A NAME='add_isolation_web'>by Web Form</A></H3>
-<OL>
-<LI>Locate the parent field collection record.</LI>
-<LI>Click the <B><SPAN STYLE="background: #999999">Add an Isolation</SPAN></B> button at the bottom of the <I>Isolation List</I>.
-<P><IMG SRC="isolation01.png" NAME="graphics8" ALIGN=CENTER BORDER=0></P></LI>
-<LI>Enter information into the <I>Add an Isolation</I> subform.
-<P><IMG SRC="isolation02.png" NAME="graphics9" ALIGN=CENTER BORDER=0></P></LI>
-<LI>Click the <B><SPAN STYLE="background: #999999">Add</SPAN></B> Button.</LI>
-</OL>
-
-<H3><A NAME='add_isolation_upload'>Spreadsheet Upload</A></H3>
-<P>As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
-Isolations</B>.  The format of the spreadsheet should be as follows.</P>
-
-<TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
-<TR BGCOLOR="#e6e6e6">
-<TH WIDTH='12%'>Isolation ID</TH>
-<TH WIDTH='12%'>Collection ID</TH>
-<TH WIDTH='12%'>Date</TH>
-<TH WIDTH='12%'>Parent</TH>
-<TH WIDTH='12%'>Type</TH>
-<TH WIDTH='12%'>Media</TH>
-<TH WIDTH='12%'>Notes</TH>
-<TH WIDTH='12%'>Project Code</TH>
-</TR>
-<TR>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-</TR>
-<TR>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-<TD><BR></TD>
-</TR>
+<H2><A NAME='harvest'>Harvests</A></H2>
+<P>Harvest records in CYANOS are used to keep track of inoculations or field collections harvested to generate extracts.</P>
+<H3><A NAME='add_harvest'>Adding Harvest Data</A></H3>
+<P>Harvest records are added via two different forms, depending on the source of the harvested material, i.e. cultures (inoculations) or field collections.</P>
+<H3><A NAME='inoc_harvest'>Harvesting Cultured Material</A></H3>
+<OL><LI>Access the <I>Inoculations</I> section of the strain's data page<BR/><IMG SRC='harvest01.png' ALIGN=LEFT BORDER=0><BR CLEAR='left'></LI>
+<LI>Select the desired inoculations to harvest via the checkbox at the end of the row.</LI>
+<LI>Click the <SPAN CLASS='exampleButton'><B>Harvest</B></SPAN> button.  This will open the <I>Add New Harvest</I> form.<BR><IMG SRC='harvest02.png' BORDER=0></LI>
+<LI>Use the form to set the characters of the harvest.<BR>
+<TABLE><TR><TD><B>Culture ID</B></TD><TD>Culture/Strain ID of the strain.</TD></TR>
+<TR><TD><B>Date</B></TD><TD>Harvest date</TD></TR>
+<TR><TD><B>Project</B></TD><TD>Project code to associate with the harvest record.</TD></TR>
+<TR><TD><B>Color</B></TD><TD>Color of the cell material</TD></TR>
+<TR><TD><B>Type</B></TD><TD>Type description of the cell material.</TD></TR>
+<TR><TD><B>Cell Mass</B></TD><TD>The mass of the cell material harvested.  
+The default unit is grams.  Other scales, e.g. mg, can be specified in the field.<BR>
+<B>NOTE:</B> this information can be added after the harvest record is created.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the harvest record</TD></TR>
 </TABLE>
-<P>For each entry, the &quot;Isolation ID&quot; and &quot;Parent&quot;
-are required, although the isolation date will be set to a default
-value, i.e. January 1, 1900, if not present in the spreadsheet.  The
-&quot;Parent&quot; value should be either the isolation ID of the
-parent isolation or the collection ID, if this isolation was made
-directly from the field collected material.</P>
+</LI>
+<LI>Click the <SPAN CLASS="exampleButton"><B>Add Harvest</B></SPAN> button to create the harvest record.</LI>
+</OL>
+<IMG SRC='harvest03.png' ALIGN=CENTER BORDER=0>
+<p><A HREF='#toc'>Return to table of contents</A></p>
+
+<H3><A NAME='field_harvest'>Harvesting Field Collected Material</A></H3>
+<OL><LI>Access the <I>Harvests</I> section of the collections data page.</LI>
+<LI>Click on the <FONT COLOR='green'><U>Add a New Harvest</U></FONT> link at the bottom of the harvest table to open the <I>Add New Harvest</I> form.</LI>
+<LI>Use the form to set the characters of the harvest.<BR>
+<TABLE><TR><TD><B>Culture ID</B></TD><TD>Culture/Strain ID of the strain.<BR><B>NOTE: Do not leave this field blank as it is not possible to link to a strain record once the harvest record is created!</B></TD></TR>
+<TR><TD><B>Date</B></TD><TD>Harvest date</TD></TR>
+<TR><TD><B>Project</B></TD><TD>Project code to associate with the harvest record.</TD></TR>
+<TR><TD><B>Color</B></TD><TD>Color of the cell material</TD></TR>
+<TR><TD><B>Type</B></TD><TD>Type description of the cell material.<BR><B>NOTE:</B> this information can be updated after the harvest record is created.</TD></TR>
+<TR><TD><B>Cell Mass</B></TD><TD>The mass of the cell material harvested.  The default unit is grams.  Other scales, e.g. mg, can be specified in the field.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the harvest record</TD></TR>
+</TABLE></LI>
+<LI>Click the <SPAN CLASS="exampleButton"><B>Add Harvest</B></SPAN> button to create the harvest record.</LI>
+</OL>
+<A HREF='#toc'>Return to table of contents</A>
+
+<H3><A NAME='modify_harvest'>Updating Harvest Data</A></H3>
+<P>Once the harvest record is created, it is possible to update certain attributes of the harvest, e.g. cell mass or notes.  Harvest details can be viewed and updated from the <I>Harvest Details</I> page for the particular harvest.  This page can be accessed via the following:</P>
+<OL><LI>Access the <I>Harvests</I> section of the strain's data page</LI>
+<LI>Click the <U><FONT COLOR='green'>View Harvest</FONT></U> link for the selected harvest.</LI></OL>
+<P>The <I>Harvest Details</I> page will display the attributes of the harvest record, e.g. harvest date, project code, and source material.  This form will also allow one to update the following fields.</P>
+<TABLE>
+<TR><TD><B>Prep Date</B></TD><TD>Date the harvested material is ready for further action, e.g. extraction</TD></TR>
+<TR><TD><B>Cell Mass</B></TD><TD>The mass of the cell material harvested.  The default unit is grams.  Other scales, e.g. mg, can be specified in the field.<BR><B>NOTE:</B> this information can be updated after the harvest record is created.</TD></TR>
+<TR><TD><B>Media Volume</B></TD><TD>The volume of media harvested.  The default unit is liters.  Other scales, e.g. mL, can be specified in the field.<BR><B>NOTE:</B> this information can be updated after the harvest record is created.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the harvest record</TD></TR>
+</TABLE>
+<P>Click the <SPAN CLASS="exampleButton"><B>Update Harvest</B></SPAN> button to update the harvest record in the database.</P>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
-<H2><A NAME='linking'>Linking Isolation and Strain Records</A></H2>
-<P>Ultimately, an isolation should be linked to a strain in the collection. Since the strain will be linked to chemical and bioassay data, the isolation link allows one to associate bioassay and compound information with collection data, e.g. collection date and geographic location.  To link a strain with an isolation record, the culture source of the strain should be set to the isolation ID of the parent isolation.  The following figure shows a strain record with a culture source that does not corresponds to an isolation ID.</P>
-<P><IMG SRC="isolation03.png" NAME="graphics10" ALIGN=CENTER BORDER=0></P>
-<P>Once the culture source properly set to an isolation ID, the CYANOS database should be able to link the strain record with the isolation and collection information.</P>
-<P><IMG SRC="isolation04.png" NAME="graphics11" ALIGN=CENTER BORDER=0></P>
+<H2><A NAME='cryo'>Cryopreservation</A></H2>
+<H3><A NAME='add_cryo'>Adding Cryopreservation Records</A></H3>
+<P>The form to add cryopreservations can be accessed the menu option <B>Culture</B> &gt; <B>Add Cryopreservations(s)</B>.  This action will open the <I>Add Cryopreservations</I> form. 
+Initially, this form will present a list of available dewars.</P>  
+<OL>
+<LI>Selected the desired dewar to view available racks in this dewar.</LI>
+<LI>Select the desired rack to view boxes in this rack.</LI> 
+<LI>Finally, select the desired box to view the form to add the cryopreservation records.  This form is shown below.</LI>
+</OL>
+<IMG SRC="culture04.png" ALIGN=LEFT BORDER=0>
+<BR CLEAR="LEFT">
+<P>Use the form to set the details of the cryopreservations.  The checkbox grid should be used to denote the location of the cryopreservation vials in the box.</P>
+<TABLE>
+<TR><TD><B>Strain</B></TD><TD>Strain to be preserved.</TD></TR>
+<TR><TD><B>Inoculation</B></TD><TD>Source material for cryopreservation.  <B>Note:</B>This field will be generated when the strain is selected</TD></TR>
+<TR><TD><B>Preservation Date</B></TD><TD>Date of the cryopreservation</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the collection record</TD></TR>
+<TR><TD><B>Duplicate Box</B></TD><TD>The box in which a duplicate set of vials will be stored.  <B>Note:</B> the duplication feature will use the locations specified in the first box for the duplicate box.</TD></TR>
+</TABLE>
+<P>Click the <SPAN CLASS="exampleButton"><B>Add Vials</B></SPAN> button to create the cryopreservation record(s) in the database.</P>	
+
+<H3><A NAME='manage_cryo'>Manage Cryopreservation Collections</A></H3>
+<P>New collections, i.e. dewars, racks, and boxes, can be added to the CYANOS database to allow efficient management of cyropreservations.  
+The form to add a new dewar, rack, or box can be accessed from either the <I>Browse Cryopreservations</I> or <I>Add Cryopreservations</I> forms.  
+Click the <FONT COLOR='green'><U>Add a New (Dewar/Rack/Box)</U></FONT> link at the bottom of the table listing the current dewars/racks/boxes.  
+This link will open the <I>Add Cryo Collection</I> form to add a dewar/rack/box.  The following example is the <I>Add Cryo Collection</I> form to add a new dewar.</P>
+<IMG SRC="culture05.png" ALIGN=LEFT BORDER=0><BR CLEAR="LEFT">
+<P>Use the form to set the details of the cryo collection.</P>
+<TABLE>
+<TR><TD><B>Collection ID</B></TD><TD>A globally unique alphanumeric ID for this collection.</TD></TR>
+<TR><TD><B>Collection Name</B></TD><TD>A descriptive name for this collection.</TD></TR>
+<TR><TD><B>Number of Racks/Boxes</B> or <B>Size</B></TD><TD>Size of the collection.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the collection record</TD></TR>
+</TABLE>
+<P>Click the <SPAN CLASS="exampleButton"><B>Create Dewar/Rack/Box</B></SPAN> button to create the cryo collection record in the database.</P>
+<H3><A NAME='thaw_cryo'>Thawing Cryopreservations</A></H3>
+<P>Cryopresevation vials can be thawed to create a new inoculation record.  To "thaw" a cryopreservation locate the record of the vial that will be thawed.</P>
+<OL><LI>First open the box containing the vial.  This can be completed via one of the following methods:
+<UL>
+<LI>The menu option <B>Culture</B> &gt; <B>Browse Cryopreservation(s)</B></LI>
+<LI>Open the <I>Cryopreservations</I> section of a strain's data page.</LI>
+</UL></LI>
+<LI>Select the desired vial in the layout graphic.  An example is shown below.  Vials are displayed as blue circles.<BR>
+<IMG SRC="culture06.png" ALIGN=LEFT><BR CLEAR="LEFT"></LI>
+<LI>Click the <SPAN CLASS="exampleButton"><B>Thaw Vial</B></SPAN> button to open the <I>Thaw Cryopreservation</I> form.<BR>
+<IMG SRC="culture07.png" ALIGN=LEFT><BR CLEAR="LEFT"></LI>
+<LI>Use the form to set the details of the child culture for the cryo vial.<BR>
+<TABLE>
+<TR><TD><B>Volume</B></TD><TD>The volume of media inoculated.  The default unit is liters.  Other scales, e.g. mL, can be specified in the field.</TD></TR>
+<TR><TD><B>Date</B></TD><TD>Inoculation date</TD></TR>
+<TR><TD><B>Media</B></TD><TD>Media of the inoculation.</TD></TR>
+<TR><TD><B>Project</B></TD><TD>Project code to associate with the inoculation.</TD></TR>
+<TR><TD><B>Stock culture</B></TD><TD>Select this checkbox to designate the inoculation as a stock culture.  This will set the fate of the inoculation record as stock and make it unavailable for harvest.</TD></TR>
+<TR><TD><B>Remove vial from box</B></TD><TD>Select this checkbox to remove the vial from the cryopreservation box.</TD></TR>
+</TABLE></LI>
+<LI>Click the <SPAN CLASS="exampleButton"><B>Thaw Vial</B></SPAN> button to update the changes in the database.</LI>
+</OL>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
@@ -199,14 +195,16 @@ directly from the field collected material.</P>
 italics utilize global level permissions only.</P>
 <TABLE BORDER=1 ALIGN='CENTER'>
 <TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
-<TR VALIGN=TOP><TD>Add a new field collection</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
-<TR VALIGN=TOP><TD>Modify a field collection</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
-<TR VALIGN=TOP><TD>Add a new isolation</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
-<TR VALIGN=TOP><TD>Modify an isolation</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new inoculation</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new harvest</TD><TD ALIGN='CENTER'>culture(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify a harvest record</TD><TD ALIGN='CENTER'>culture(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new cryopreservations</TD><TD ALIGN='CENTER'>cryo(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Add a new cryo collection</TD><TD ALIGN='CENTER'>cryo(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Thaw a cryopreservation</TD><TD ALIGN='CENTER'>cryo(Write), culture(Write)</TD></TR>
 </TABLE>
 <A HREF='#toc'>Return to table of contents</A>
 
 <HR WIDTH='85%' ALIGN='LEFT'/>
-<A HREF='toc'>Main Table of Contents</A> | <A HREF='find'>Find Help</A> | <A HREF='search'>Search Help</A>
+<A HREF='toc'>Main Table of Contents</A>
 </BODY>
 </HTML>
