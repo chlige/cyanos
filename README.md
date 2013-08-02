@@ -11,7 +11,7 @@ The CYANOS database system was developed to facilitate data management and minin
 Illinois Open Source License
 ----------------------------
 
-Copyright � 2010 George Chlipala. All rights reserved.
+Copyright (c) 2010 George Chlipala. All rights reserved.
 
 Developed by:	George Chlipala
 			University of Illinois at Chicago
