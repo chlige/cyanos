@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    
+<!-- 
+	Change the url parameter to match the information for 
+	your database instance.  The format of the URL should be as follows.  
+	
+	jdbc:mysql://<db server>:3306/<database_name>?autoReconnect=true&amp;useLocalSessionState=true
+	
+	<db server> should be the name of your database server.	"localhost" can 
+	be used if the MySQL database is on the same server as the Tomcat service.
+	
+	<database_name> should be the name of the database. 
+	The default name of the database is "cyanos".  
+	Besure to change if you have changed the name of the database.
+	
+	Also set the username and password of the MySQL user that was granted 
+	SELECT, INSERT, UPDATE, DELETE, EXECUTE privileges on the database.
+	
+-->
+    
+<Resource auth="Container" name="jdbc/CyanosDB" 
+    	type="javax.sql.DataSource" driverClassName="com.mysql.jdbc.Driver"
+        url="jdbc:mysql://localhost/cyanos?autoReconnect=true&amp;useLocalSessionState=true"
+        username="cyanos-user" password="bluegreen"
+        maxActive="100" maxWait="5000" maxIdle="2"
+        removeAbandoned="true"/>
+
+<!-- 
+	Set the mail.smtp.host to the hostname of a SMTP server that 
+	can be used by CYANOS to send automated email messages.
+	
+	mail.smtp.host="<smtp hostname>"	This sets the hostname for the 
+										SMTP server.
+
+	mail.smtp.from="<email address>"	This will set the from address 
+										for all emails sent by CYANOS
+										
+	Email address standards allow a display name to be included
+	with an email address.  In those instances, the display name
+	is placed before the email address and the email address is
+	enclosed in angle brackets ("<", ">").  For example...
+			
+		John Smith <john.smith@nowhere.com>
+			
+	The angle brackets are a special character in XML files and 
+	must be written as "&lt;" and "&gt;" in text values. Theses
+	escape codes will then be converted when the file is processed. 
+	
+	For example, the previous address would appear as follows in this configuration file.
+			
+		mail.smtp.from="John Smith &lt;john.smith@nowhere.com&gt;"  
+
+	
+	If additional configuration is required, e.g. SSL, add 
+	the following attributes to the Resource definition below.
+	
+
+	mail.smtp.starttls.enable="true"	This will enable the use of STARTTLS 
+										for encryption.
+	
+	mail.smtp.starttls.required="true"	This will configure the SMTP session 
+										to require a successful STARTTLS
+	
+	mail.smtp.ssl.enable="true"			This will enable SMTP over SSL. 
+										The default port will be 465.
+										
+	mail.smtp.port="<port number>"		This attribute can be used to change 
+										the port used to contact the SMTP server.  
+										The default is 25 for normal SMTP
+										and 465 for SMTP over SSL.
+										
+ -->
+
+<Resource name="mail/Session" auth="Container"
+            type="javax.mail.Session"
+            mail.smtp.host="localhost"
+            mail.smtp.from="CYANOS DATABASE &lt;do-not-reply@cyanos&gt;"/>
+
+<!-- DO NOT MODIFY OR DELETE THE FOLLOWING RESOURCE DEFINITION -->
+<Realm className="org.apache.catalina.realm.DataSourceRealm" 
+    	dataSourceName="jdbc/CyanosDB"
+        digest="SHA" localDataSource="true" 
+        roleNameCol="role" 
+        userCredCol="password" userNameCol="username"
+        userRoleTable="roles" userTable="users"/>
+
+</Context> 
