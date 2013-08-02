@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Bioassay Management</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.0  (Linux)">
+	<META NAME="AUTHOR" CONTENT="George Chlipala">
+	<META NAME="CREATED" CONTENT="20080421;12543200">
+	<META NAME="KEYWORDS" CONTENT="bioassay,assay">
+	<META NAME="MODULE" CONTENT="assay">
+	<LINK REL="stylesheet" TYPE='text/css' HREF='help.css'>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<A HREF='toc'>Main Table of Contents</A>
+<H2>Bioassay Management</H2>
+<HR WIDTH='90%' ALIGN='LEFT'/>
+<P>Ultimately, biological activity is the driving force for any natural products drug discovery effort.  Therefore, proper management of biologically activity data is vital for any reporting or data-mining activities.</P>
+<P><B><A NAME='toc'>Table of Contents</A></B></P>
+<OL>
+<LI><A HREF='#basic_assay'>Basic Assay Management</A>
+<OL>
+<LI><A HREF='#add_assay'>Adding a New Bioassay</A></LI>
+<LI><A HREF='#mod_assay'>Modifying a Bioassay</A></LI>
+</OL></LI>
+<LI><A HREF='#add_data'>Adding Bioassay Data</A></LI>
+<LI><A HREF='#roles'>Required Roles</A></LI>
+</OL>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<H2><A NAME='basic_sample'>Basic Assay Management</A></H2>
+<P>CYANOS stores bioassay data as two compontents, the bioassay parameters and the data itself.  The bioassay parameters include the target, date performed, activity threshold, associated project, and any notes.  
+The following two subsections will detail how to manage these basic paremeters of an assay.</P>
+<H3><A NAME='add_assay'>Adding a New Bioassay</A></H3>
+<P>The form to add a new assay can be accessed by the menu option <B>Bioassays</B> &gt; <B>Add New</B>.  This will open the <I>Setup a New Assay</I> form.</P>
+<IMG SRC="assay01.png" ALIGN=LEFT BORDER=0><BR CLEAR="LEFT">
+<P>Use the form to set the basic parameters of the new assay.</P>
+<TABLE><TR><TD><B>Assay ID</B></TD><TD>Globally unique alphanumeric ID for the new assay.</TD></TR>
+<TR><TD><B>Assay Name</B></TD><TD>Descriptive name/label for the assay</TD></TR>
+<TR><TD><B>Assay Date</B></TD><TD>Date the assay was perfomed.</TD></TR>
+<TR><TD><B>Project Code</B></TD><TD>The project code associated with the assay.</TD></TR>
+<TR><TD><B>Assay Target</B></TD><TD>The target, e.g. TB or trypsin, of the assay.  Use the <I>NEW TARGET -&gt;</I> option to specifiy a new target in the input field adjacent to the pull down field.</TD></TR>
+<TR><TD><B>Active Level</B></TD><TD>Active threshold for this assay.</TD></TR>
+<TR><TD><B>Unit Format</B></TD><TD>Formats used for displaying the activity data on the CYANOS web interface.</TD></TR>
+<TR><TD><B>Size</B></TD><TD>The size of the assay plate.</TD></TR>
+<TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the assay record.</TD></TR>
+</TABLE>
+<P>The <SPAN CLASS="exampleButton"><B>Load an Assay Template</B></SPAN> button allows one to load default values from a stored assay template.  Assay templates can be created/modified using the <I>Assay Protocols</I> form, which is accessed via the <B>Bioassays</B> -&gt; <B>Manage Protocols</B> menu item.</P>
+
+<P>Once all the data is entered into the form, click the <SPAN CLASS="exampleButton"><B>Add</B></SPAN> button to add the assay details to database.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<H3><A NAME='mod_assay'>Modifying a Bioassay</A></H3>
+<P>Bioassay records can be access via the <B>Bioassays</B> -&gt; <B>Browse Data</B> menu item.  Use the pull down menu(s) to select the assay of choice.  
+The resulting <I>Assay Data</I> page allows one to view and edit the basic parameters of the bioassay.  
+Click the <SPAN CLASS="exampleButton"><B>Edit Values</B></SPAN> button to view the parameters in a form for editing.  All attributes, except Assay ID, can be modified by this form.</P>
+<P>Click the <SPAN CLASS="exampleButton"><B>Update</B></SPAN> button to update the database record.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='add_data'>Adding Bioassay Data</A></H2>
+<P>Currently, bioassay data can only be uploaded into CYANOS using the <I>Upload Bioassay Data</I> form.  This form can be accessed via the <B>Bioassays</B> -&gt; <B>Upload Data</B> menu item. 
+Prior to using the upload form, one must prepare the spread containing the bioassay data.  <B>Note:</B> For simplicity and ease of use, one should create the bioassay first before uploading data into CYANOS, however it is possible to upload the data then add bioassay parameters later.  The spreadsheet should have the following format.  Please note that items in italics are optional.</P>
+<TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
+<TR BGCOLOR="#e6e6e6">
+<TH WIDTH='13%'>Assay ID</TH>
+<TH WIDTH='13%'>Strain ID</TH>
+<TH WIDTH='13%'>Location</TH>
+<TH WIDTH='13%'><I>Activity</I></TH>
+<TH WIDTH='13%'><I>Sample ID</I></TH>
+<TH WIDTH='13%'><I>Label</I></TH>
+<TH WIDTH='13%'><I>Concentration</I></TH>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+<TR>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+<TD><BR></TD>
+</TR>
+</TABLE>
+<P>The <B>Assay ID</B> is the ID of the associated assay record.  The <I>Upload Data</I> form does allow one to choose an assay for all records, thus it is not necessary to include this column in the spreadsheet.  
+However, use of this field in the spreadsheet makes it is possible to include data from different assays and thus simplify uploading data from multiple assays.</P>  
+<P>The <B>Strain ID</B> is the associated strain ID of the assay data point and <B>Location</B> is the location within the plate for the data point, e.g. A1 or G12.  
+The <B>Activity</B> values for each data point can be a single column of values or two columns of mean values and standard deviations.  
+In either case, indefinite values, e.g. &gt; 100 &mu;g/mL, can be specified for the value or mean value.
+The <B>Sample ID</B> can be used to designate the serial number of the parent sample used for this assay.  <B>Note:</B> Linking samples is required to link assay data with extracts, fractions, and isolated compounds.  Therefore, it is a good practice to include the sample ID, if available.
+The <B>Label</B> can be used to designate a descriptive label for the sample assayed and the <B>Concentration</B> can be used to designate the concentration of the sample, if data reported was for a specific concentration.</P>
+<OL>
+<LI>Once the spreadsheet has been prepared, access the <I>Bioassay Data</I> upload form via the <B>Bioassays</B> &gt; <B>Upload Data</B> menu item.</LI>
+<LI>Upload the spreadsheet data to the web interface.</LI>
+<LI>Set the options of the spreadsheet parser.  The following is an example of the parser settings.<BR>
+<IMG SRC="assay02.png" ALIGN=LEFT BORDER=0><BR CLEAR="LEFT">
+<P>The selection fields in the form are used to designate the proper columns in the spreadsheet.</P>
+</LI>
+<LI>Click the <SPAN CLASS="exampleButton"><B>Parse Data</B></SPAN> button to have the web interface parse the data in the spreadsheet and add the records in the database.</LI>
+</OL>
+<P><B>Important Considerations.</B>  Assay data in CYANOS is tied to the assay (Assay ID) and the location within the assay, therefore it is possible to overwrite assay data 
+by specifying the same assay ID and location of an existing data point.  It is also important to note that CYANOS evaluates each row of the uploaded data independently in an add/replace fashion.  
+Any assay locations missing from the spreadsheet that are present in the database will NOT be deleted or modified.  
+Thus, it is possible to adjust individual or a subset of data points from a existing set of assay data without having to include those data points which did not change.</P>
+<P>Attributes, e.g. Sample ID, Activity, Label, that are optional and set to <I>SKIP ITEM</I> in the parser will not be changed or modified by the parser if the data point currently exists in the database.  
+Thus, it is possible to upload the format of an assay (Strain ID, Sample ID, Concentration, Label, Location) at one time then later add the activity data (Location, Strain ID, Activity).  
+To aid this two-step upload, CYANOS allows one to download a comma separated values (CSV) spreadsheet of existing assay data via the <FONT COLOR='green'><U>Export assay data</U></FONT> link adjacent to the Assay ID on the <I>Assay Data</I> page for the assay.</P>
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+<H2><A NAME='roles'>Required Roles</A></H2>
+<P>Required permissions listed in this table denote the role and permission bit, in parenthesis.  Actions in
+italics utilize global level permissions only.</P>
+<TABLE BORDER=1 ALIGN='CENTER'>
+<TR VALIGN=TOP><TD><B>Action</B></TD><TD ALIGN='CENTER'><B>Required Permission</B></TD></TR>
+<TR VALIGN=TOP><TD>Add a new assay</TD><TD ALIGN='CENTER'>assay(Create)</TD></TR>
+<TR VALIGN=TOP><TD>Modify an assay</TD><TD ALIGN='CENTER'>assay(Write)</TD></TR>
+<TR VALIGN=TOP><TD>Add assay data</TD><TD ALIGN='CENTER'>assay(Write)</TD></TR>
+</TABLE>
+<A HREF='#toc'>Return to table of contents</A>
+
+<HR WIDTH='85%' ALIGN='LEFT'/>
+<A HREF='toc'>Main Table of Contents</A>
+</BODY>
+</HTML>
