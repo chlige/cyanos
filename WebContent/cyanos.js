@@ -1,3 +1,5 @@
+var closeLSdiv = true;
+
 function setLoc(label) {
 	document.plate.location.value = label;
 }
@@ -196,14 +198,21 @@ function loadForm(button, tag) {
 
 function setLoading(div) {
 	var divs = div.getElementsByTagName("div"); 
+	var hasDiv = false;
 	for (var i = 0; i < divs.length; i++) { 
-		if ( divs[i].id == "loading" ) {
-			divs[i].className = "loading";		
+		if ( divs[i].id == "spinner" ) {
+			startSpin(divs[i]);
+			hasDiv = true;
 		}
+	}
+	div.className = "showSection";
+	if ( ! hasDiv ) {
+		div.innerHTML = "<p align=\"center\"><b><i>Loading...</i></b></p>";
 	}
 }
 
 function unsetLoading(div) {
+	spin = 0;
 	var divs = div.getElementsByTagName("div"); 
 	for (var i = 0; i < divs.length; i++) { 
 		if ( divs[i].id == "loading" ) {
@@ -218,11 +227,46 @@ function closeForm(tag) {
 }
 
 function updateForm(action, divID) {
-	var query = "div=" + escape(divID) + "&" + escape(action.name) + "=" + escape(action.value) + valuesForForm(action.form);
+	var query = "div=" + escape(divID) + "&" + ( action.type == "button" ? escape(action.name) + "=" + escape(action.value) : "" ) + valuesForForm(action.form);
+	action.disabled = true;
+	var div = window.document.getElementById(divID);
+	if ( div == null ) { 
+		divID = "div_" + divID;
+		div = window.document.getElementById(divID);
+	}
+	setLoading(div);
+	window.setTimeout( loadQuery, 100, query, divID);	
+}
+
+function updateDiv(action, divID) {
+	var query = "div=" + escape(divID) + "&" + ( action.type == "button" ? escape(action.name) + "=" + escape(action.value) : "" )  + valuesForForm(action.form);
 	action.disabled = true;
 	var div = window.document.getElementById(divID);
 	setLoading(div);
-	window.setTimeout( loadQuery, 100, query, divID);	
+	window.setTimeout( loadAJAXDiv, 100, query, divID);	
+}
+
+function updateFileDiv(divID, directory, dataClass, dataType) {
+	var query = "showBrowser&div=" + escape(divID) + "&path=" + directory  + "&dataClass=" + dataClass;
+	if ( dataType != null && dataType != '' ) { query = query + "&dataType=" + dataType; }
+	var div = window.document.getElementById(divID);
+	setLoading(div);
+	window.setTimeout(loadAJAXDiv, 100, query, divID);	
+}
+
+function refreshDiv(action, divID) {
+	var query = "div=" + escape(divID) + "&" + ( action.type == "button" ? escape(action.name) + "=" + escape(action.value) : "" )  + valuesForForm(action.form);
+	action.disabled = true;
+	var div = window.document.getElementById("div_" + divID);
+	setLoading(div);
+	window.setTimeout( loadAJAXDiv, 100, query, "div_" + divID);	
+}
+
+function sortTable(divID, sortField, sortDir) {
+	var query = "div=" + escape(divID) + "&sortField=" + escape(sortField) + "&sortDir=" + escape(sortDir);
+	var div = window.document.getElementById(divID);
+	setLoading(div);
+	window.setTimeout( loadQuery, 100, query, divID);		
 }
 
 function refreshForm(divID, field, value, form) {
@@ -241,9 +285,8 @@ function loadDiv(tag) {
 	if ( div.className == "unloaded" ) {
 		imgPath[imgPath.length - 1] = "twist-open.png";
 		img.src = imgPath.join("/");
-		var div = window.document.getElementById(divID);
 		setLoading(div);
-		window.setTimeout( loadContent, 100, tag, div);
+		window.setTimeout( loadContent, 250, tag, div);
 	} else if ( div.className == "hideSection" ) {
 		div.className = "showSection";
 		imgPath[imgPath.length - 1] = "twist-open.png";
@@ -253,7 +296,7 @@ function loadDiv(tag) {
 	}
 	img.src = imgPath.join("/");
 }
-	
+
 function twistModule(tag) {
 	var divID = "div_" + tag;
 	var imgID = "twist_" + tag;
@@ -292,6 +335,13 @@ function toggleDiv(tag, show) {
 		aDiv.className = "hideSection";
 	}
 }	
+
+function showHideButton(button, divID) {
+	var show = (button.innerHTML == 'Show'); 
+	toggleDiv(divID, show); 
+	if ( show ) { button.innerHTML = 'Hide'; 
+	} else { button.innerHTML = 'Show';}
+}
 
 function showHide(show, hide) {
 	var showDiv = window.document.getElementById(show);
@@ -345,7 +395,7 @@ function toggleTab(evObj) {
 	anItem.blur();
 }
 
-function loadTable(anUrl) {
+function loadTable(anUrl, showCheck) {
 	var xmlHttp = null;
 	var myLoc = window.location;
 	
@@ -354,15 +404,58 @@ function loadTable(anUrl) {
 	} else if (window.ActiveXObject) {
 		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
   	}
-  	
+	
+	if ( showCheck != null && showCheck.checked ) {
+		anUrl = anUrl + "&" + showCheck.name;
+	}
+  	console.log(anUrl);
+  	console.log(showCheck);
 	if (xmlHttp != null) {
   		xmlHttp.open("GET", myLoc.protocol + "//" + myLoc.hostname + ":" + myLoc.port + anUrl, false);
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
 			var docDiv = document.getElementById("spreadsheet");
-			docDiv.innerHTML = xmlHttp.responseText;
-		} else {
+			setDivContent(docDiv, xmlHttp);
+		}
+  	} 
+}
 
+function showSpreadSheet(anUrl, worksheet, length, showCheck, header) {
+	var xmlHttp = null;
+	
+	if (window.XMLHttpRequest) {  
+		xmlHttp=new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+  	}
+	
+	var myLoc = document.createElement('a');
+	myLoc.href = anUrl;
+	
+	if ( myLoc.search.length > 0 ) {
+		myLoc.search = myLoc.search + "&worksheet=" + worksheet;
+	} else {
+		myLoc.search = "worksheet=" + worksheet;		
+	}
+	
+	myLoc.search = myLoc.search + "&length=" + length;
+	
+	if ( showCheck != null && showCheck.checked ) {
+		myLoc.search = myLoc.search + "&" + showCheck.name;
+	}
+	
+	if ( header != null && header ) {
+		myLoc.search = myLoc.search + "&header";
+	} 
+	
+  	console.log(anUrl);
+  	console.log(showCheck);
+	if (xmlHttp != null) {
+  		xmlHttp.open("GET", myLoc.href, false);
+ 		xmlHttp.send(null);
+ 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+			var docDiv = document.getElementById("spreadsheet");
+			setDivContent(docDiv, xmlHttp);
 		}
   	} 
 }
@@ -387,9 +480,9 @@ function loadContent(tag, div) {
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
 			var docDiv = document.getElementById(div.id);
-			docDiv.innerHTML = xmlHttp.responseText;
 			docDiv.className = "showSection";
 			unsetLoading(docDiv);
+			setDivContent(docDiv, xmlHttp);
 		} 
   	} 
 }
@@ -412,14 +505,145 @@ function loadQuery(query, divID) {
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
 			var docDiv = document.getElementById(divID);
-			docDiv.innerHTML = xmlHttp.responseText;
 			docDiv.className = "showSection";
 			unsetLoading(docDiv);
+			setDivContent(docDiv, xmlHttp);
 		} 
   	} 
 }
 
+function loadAJAXDiv(query, divID) {
+	var xmlHttp = null;
+	var myLoc = window.location;
+	
+	if (window.XMLHttpRequest) {  
+		xmlHttp=new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+  	}
+  	
+ 	if (xmlHttp != null) {
+ 		if ( myLoc.search && myLoc.search.length > 0 ) 
+	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, false);
+		else 
+ 			xmlHttp.open("GET", myLoc.toString() + "?" + query, false);
+ 		xmlHttp.send(null);
+ 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+			var docDiv = document.getElementById(divID);
+			unsetLoading(docDiv);
+			setDivContent(docDiv, xmlHttp);
+		} 
+  	} 
+}
 
+function livesearch(field, searchTag, divTag) {
+	var div = window.document.getElementById(divTag);
+	if ( field.value.length == 0 ) {
+		div.style.border = "0px";
+		div.innerHTML = "";
+		div.style.display = "none";
+	} else {	
+		div.innerHTML = "<FONT COLOR='#505050'>Loading...</FONT>";
+		div.style.border = "1px solid #A5ACB2";
+		div.style.display = "block";
+		var query = "div=" + escape(divTag) + "&" + escape(field.name) + "=" + escape(field.value) + "&livesearch=" + escape(searchTag);
+		window.setTimeout(loadLS, 100, query, divTag);
+	}
+}
+
+/*
+function showDate(divTag) {
+	var div = window.document.getElementById(divTag);
+	div.style.border = "1px solid #A5ACB2";
+	if ( div.style.display == "block") {
+		div.style.display = "none";
+	} else {
+		div.style.display = "block";
+		
+	}
+}
+*/
+/*
+function livesearch(field, module, searchTag, divTag) {
+	var div = window.document.getElementById(divTag);
+	if ( field.value.length == 0 ) {
+		div.style.border = "0px";
+		div.innerHTML = "";
+		div.style.display = "none";
+	} else {	
+		div.innerHTML = "<FONT COLOR='#505050'>Loading...</FONT>";
+		div.style.border = "1px solid #A5ACB2";
+		div.style.display = "block";
+		var query = "div=" + escape(divTag) + "&" + escape(field.name) + "=" + escape(field.value) + "&livesearch=" + escape(searchTag);
+		window.setTimeout(loadLS, 100, query, divTag);
+	}
+}
+
+*/
+	
+function setLS(fieldTag, fieldValue, divTag) {
+	window.document.getElementById(fieldTag).value= fieldValue; 
+	closeLSdiv = true;
+	closeLS(divTag);
+}
+
+function closeLS(divTag) {
+	if ( closeLSdiv ) {
+		var div = window.document.getElementById(divTag);
+		div.style.border = "0px";
+		div.innerHTML = "";
+		div.style.display = "none";
+	}
+}
+
+function setDateDiv(fieldTag, fieldValue, divTag) {
+	var div = window.document.getElementById(divTag);
+	window.document.getElementById(fieldTag).value= fieldValue; 
+	div.style.border = "0px";
+	div.style.display = "none";
+}
+
+function loadLS(query, divID) {
+	var xmlHttp = null;
+	var myLoc = window.location;
+	
+	if (window.XMLHttpRequest) {  
+		xmlHttp=new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+  	}
+	
+ 	if (xmlHttp != null) {
+ 		if ( myLoc.search && myLoc.search.length > 0 ) 
+	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, false);
+		else 
+ 			xmlHttp.open("GET", myLoc.toString() + "?" + query, false);
+ 		xmlHttp.send(null);
+ 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+			var docDiv = document.getElementById(divID);
+			setDivContent(docDiv, xmlHttp);
+		} 
+  	} 
+}
+
+function setDivContent(div, xmlHttp) {
+	if ( document.getElementById("loginCover") == null ) {
+		div.innerHTML = xmlHttp.responseText;
+		var cover = div.childNodes["loginCover"];
+		if ( cover != null ) {
+//			document.body.appendChild(cover); 
+			document.body.appendChild(cover);
+			var loginBox = div.childNodes['loginBox'];
+			document.body.appendChild(loginBox);
+
+			document.getElementById("loginForm").style.display = "none";
+			document.getElementById('loginNote').style.visibility = "visible";
+			cover.style.height = window.screen.height; 
+			cover.style.visibility = "visible";
+			div.innerHTML = "";
+		}
+	}
+}
 
 function reloadDiv(divID, formObject) {
 	var xmlHttp = null;
@@ -447,7 +671,7 @@ function reloadDiv(divID, formObject) {
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
 			var docDiv = document.getElementById("div_" + divID);
-			docDiv.innerHTML = xmlHttp.responseText;
+			setDivContent(docDiv, xmlHttp);
 			unsetLoading(docDiv);
 		} 
   	} 
@@ -480,7 +704,7 @@ function setValue(anElem, aValue) {
 		anElem.checked = aValue;
 	} else if ( anElem.type == "select" ) {
 		var opts = anElem.options;
-		for ( i = 0; i < opts.length; i++ ) {
+		for ( var i = 0; i < opts.length; i++ ) {
 			if ( opts[i].value == aValue ) {
 				anElem.selectedIndex = i;
 				break;
@@ -518,3 +742,191 @@ function makeOLMarker(ll, content) {
 function OLLatLong(lat, long) {
 	return new OpenLayers.LonLat(long, lat);
 }
+
+function setupCalendar(divTag, fieldTag) {
+	var div = window.document.getElementById(divTag);
+	var field = window.document.getElementById(fieldTag); 	
+	var form = new String("<table class='month' width='250'><tr><th width='14%'>Sun</th><th width='14%'>Mon</th><th width='14%'>Tues</th><th width='14%'>Wed</th><th width='14%'>Thurs</th><th width='14%'>Fri</th><th width='14%'>Sat</th></tr>");
+	form = form.concat(value);
+	var match = field.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+	if ( match != null ) {
+		var year = match[0];
+	}
+}
+
+function getCurrentFMPath(fmObTag, fmETag, formObj) {
+	var objectFM = top.document.getElementById(fmObTag);
+	var embedFM = top.document.getElementById(fmETag);
+	if ( objectFM != null && objectFM.getCurrentPath != null ) {
+		formObj.value = objectFM.getCurrentPath();
+	} else if ( embedFM != null && embedFM.getCurrentPath != null ) {
+		formObj.value = embedFM.getCurrentPath();
+	}
+}
+
+function refreshFM(fmObjTag, fmETag) {
+	var objectFM = top.document.getElementById(fmObjTag);
+	var embedFM = top.document.getElementById(fmETag);
+	if ( objectFM != null && objectFM.refreshFileList != null ) {
+		objectFM.refreshFileList();
+	} else if ( embedFM != null && embedFM.refreshFileList != null ) {
+		embedFM.refreshFileList();
+	}	
+}
+
+function validatePassword(pass1, pass2, button, divID) {
+	if ( pass1.length > 0 && pass2.length > 0 ) {
+		var div = document.getElementById(divID);
+		if ( pass1 == pass2 ) {
+			if ( div != null ) {
+				div.innerHTML = "<font color='green'>Password confirmed</font>";
+			}
+			if ( button != null ) {
+				button.disabled = false;
+			}
+		} else {
+			if ( div != null ) {
+				div.innerHTML = "<font color='red'>Password mismatch</font>";
+			}			
+			if ( button != null ) {
+				button.disabled = true;
+			}
+		}
+	}
+}
+
+
+
+//simple script to rotate all spinners 45 degrees on each tick
+//this works differently from the css transforms, which is smooth
+
+var count = 0;
+var spin = 0;
+
+/*
+function spinner() {
+	if ( spin == 1 ) {
+		var elem = document.getElementById('spinner');
+		elem.style.MozTransform = 'scale(0.5) rotate('+count+'deg)';
+		elem.style.WebkitTransform = 'scale(0.5) rotate('+count+'deg)';
+		if (count==360) { count = 0; }
+		count+=45;
+		window.setTimeout(spinner, 100);
+	}
+}
+*/
+
+function runSpinner(spinnerDiv) {
+	if ( spin == 1 ) {
+		spinnerDiv.style.MozTransform = 'scale(0.5) rotate('+count+'deg)';
+		spinnerDiv.style.WebkitTransform = 'scale(0.5) rotate('+count+'deg)';
+		if (count==360) { count = 0; }
+		count+=45;
+		window.setTimeout(runSpinner, 100, spinnerDiv);
+	}
+}
+
+function startSpin(spinnerDiv) {
+	spin = 1;
+	count = 0;
+	runSpinner(spinnerDiv);
+}
+
+var progressLen = 0;
+
+function progress() {
+	if ( spin == 1 ) {
+		var elem = document.getElementById('progressBar');
+		elem.style.opacity = (0.3 *  Math.sin((count / 180) * Math.PI)) + 0.7 ;
+		elem.style.width = progressLen + "%";
+		var elem = document.getElementById('progressText');
+		if ( elem != null ) {
+			elem.innerHTML =  progressLen.toFixed(0) + "%";
+		}
+		if (count==360) { count = 0; }
+		count += 15;
+		window.setTimeout(progress, 100);		
+	}
+}
+
+function setProgress(length) {
+	var elem = document.getElementById('progressBar');
+	elem.style.opacity = (0.3 *  Math.sin((count / 180) * Math.PI)) + 0.7 ;
+	elem.style.width = length + "%";
+	var elem = document.getElementById('progressText');
+	if ( elem != null ) {
+		elem.innerHTML =  length.toFixed(0) + "%";
+	}
+	if (count==360) { count = 0; }
+	count += 15;
+}
+
+
+function endProgress(length, button) {
+	var elem = document.getElementById('progressBar');
+	elem.style.opacity = 1.0 ;
+	elem.style.width = length + "%";
+	spin = 0;
+	if ( button != null ) {
+		button.disabled = false;
+	}
+}
+
+function testProgress() {
+	if ( progressLen < 1 ) {
+		progressLen += .05;
+		window.setTimeout(testProgress, 1000);
+	} else {
+		endProgress(progressLen);
+		var elem = document.getElementById('progressText');
+		if ( elem != null ) {
+			elem.innerHTML =  "Complete";
+		}
+	}
+}
+
+function enableButton(button) {
+	if ( button != null ) {
+		button.disabled = false;
+	}
+}
+
+function uploadStatus(updatePath, resultButton) {
+	var xmlHttp = null;
+	
+	if (window.XMLHttpRequest) {  
+		xmlHttp=new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+  	}
+  	
+	if (xmlHttp != null) {
+ 		xmlHttp.open("GET", updatePath, false);
+ 		xmlHttp.send(null);
+ 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 			var progText = document.getElementById('progressText');
+			var response = xmlHttp.responseText;
+			if ( response === "DONE" ) {
+				endProgress(100, resultButton);
+				if ( progText != null ) {
+					progText.innerHTML = "Complete";
+				}
+			} else if ( response === "ERROR" ) { 
+				endProgress(progressLen, resultButton);
+				if ( progText != null ) {
+					progText.innerHTML = "<font color='red'>ERROR!</font>";
+				}						
+			} else if ( response === "STOP" ) {
+				endProgress(progressLen, resultButton);
+				if ( progText != null ) {
+					progText.innerHTML = "Stopped";
+				}				
+			} else {
+				progressLen = Number(response);
+				setProgress(progressLen);
+				window.setTimeout(uploadStatus, 50, updatePath, resultButton);
+			}
+		} 
+  	} 
+}
+
