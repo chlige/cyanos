@@ -1,26 +1,37 @@
-<!--
-  Copyright 2004 The Apache Software Foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page isErrorPage="true" %>
+<%@ page import="java.io.PrintWriter" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>Error Page For Examples</title>
-<LINK REL="stylesheet" TYPE="text/css" HREF="cyanos.css"/>
+<%  String contextPath = request.getContextPath(); %>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
+<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
+<title>Cyanos Database Error</title>
 </head>
-<body bgcolor="white">
-Invalid username and/or password, please try
-<a href='<%= response.encodeURL("login.jsp") %>'>again</a>.
-<P><a href='<%= response.encodeURL("reset") %>'>Password reset.</a></P>
+<body>
+<jsp:include page="includes/menu.jsp" />
+<div class='content'>
+<h2>An error has been generated</h2>
+<dl>
+<dt><b>Exception: </b> <%= exception.getClass().getCanonicalName() %></dt>
+<dd>
+<pre>
+<% PrintWriter writer = new PrintWriter(out);
+	exception.printStackTrace(writer);%>
+</pre></dd>
+<% 	Throwable cause = exception.getCause();
+	if ( cause == null && exception instanceof ServletException )
+		cause = ((ServletException) exception).getRootCause();
+	while ( cause != null ) { %>
+<dt><b>Caused by: </b> <%= cause.getClass().getCanonicalName() %></dt>
+<dd><pre><% cause.printStackTrace(writer); cause = cause.getCause(); if ( cause == null && cause instanceof ServletException ) { cause = ((ServletException)cause).getRootCause(); } %></pre></dd>
+<% } %>
+<!-- <c:out value="<%= exception.toString() %>"></c:out> -->
+</dl>
+</div>
 </body>
 </html>
