@@ -21,6 +21,10 @@ REQUIREMENTS:
 
 INSTALLATION INSTRUCTIONS:
 
+Before installing CYANOS be sure that MySQL and Apache Tomcat are installed properly. 
+Also insure that the MySQL Connector/J is installed in the CLASSPATH of your Apache Tomcat installation. 
+This is typically the subdirectory /common/lib of the Apache Tomcat installation directory
+
      1. Create the CYANOS database in MySQL.  Refer to the MySQL documentation 
 	for details on how to create a database. Typically, the following 
 	command would be able to create the database "cyanos"
@@ -28,24 +32,47 @@ INSTALLATION INSTRUCTIONS:
 	# mysqladmin create cyanos
 
      2. Setup the CYANOS schema in MySQL.  Connect to the database
-	created in the previous step and execute the "cyanos_mysql.sql"
+	created in the previous step and execute the "cyanos-schema.sql"
 	file.  This file has the necessary SQL commands to create the
 	CYANOS schema.  The command can be executed as follows.  
 	Please refer to MySQL documentation for more details on
 	using the mysql command-line tool.
 
-	# mysql cyanos < cyanos_mysql.sql
-
-	Also, it is strongly suggested to define a SQL account for 
-	the web application to access the database.
-	This SQL account should be allowed the following on cyanos.*
+	# mysql cyanos < cyanos_mysql.sql | tee cyanos.log
 	
-     	    SELECT, INSERT, UPDATE, DELETE, EXECUTE.
+	or if a SQL user and password must be specified.
 
-	Refer to MySQL documentation for details on user administration.
-
-     3. Deploy the WAR file in a Tomcat server.  
+	# mysql -u <username> -p <password> cyanos < cyanos_mysql.sql | tee cyanos.log
 	
+	or the SQL file can be executed from within the MySQL command interface. In this case, the tee command can be used to log any messages to a file.
+
+	mysql> tee cyanos.log
+	mysql> source cyanos_mysql.sql
+
+	3. Create SQL account for web application. This SQL account should be allowed the following on cyanos.* 
+
+		SELECT, INSERT, UPDATE, DELETE, EXECUTE
+
+		Refer to MySQL documentation for details on user administration. 
+		For example, if MySQL and Tomcat were installed on the same host, 
+		one could create and grant access to an account named "accountname" 
+		with password "password" using the following command in the MySQL command interface.
+
+		mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON cyanos.* TO 'accountname'@'localhost' IDENTIFIED BY 'password';
+
+		If the Tomcat service was installed on a separate host, e.g. tomcathost.school.edu, 
+		one could create and grant access to an account named "accountname" 
+		with password "password" using the following command in the MySQL command interface.
+
+		mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON cyanos.* TO 'accountname'@'tomcathost.school.edu' IDENTIFIED BY 'password';
+	
+
+     4. Deploy the WAR file in a Tomcat server.  
+	
+	Online deployment (preferred Method):
+		Use the Tomcat manager (i.e., http://<server>:8080/manager/html) 
+		to deploy the application.  In the "Deploy" section, use the "WAR file to deploy" form. 
+
 	Offline deployment:
 		While the Tomcat server is stopped, copy the included 
 		"cyanos.war" file to the webapps directory of the 
@@ -56,55 +83,105 @@ INSTALLATION INSTRUCTIONS:
 
 		Start the Tomcat server to complete deployment.
 
-	Online deployment:
-		Use the Tomcat manager (i.e., http://<server>:8080/manager/html) 
-		to deploy the application.
+     5. Configure the CYANOS web application
+     
+	Customizing the <Context> definition within the Tomcat configuration files. 
+	The cyanos.war includes a default context configuration file (context.xml). 
+	When the web application is deployed online (see previous step), 
+	the Tomcat server will copy this context.xml file to $CATALINA_HOME/conf/[enginename]/[hostname]/cyanos.xml. 
+	
+	Note: before editing this file is it best to stop the cyanos web application 
+		(can be done from the Tomcat manager) then restart after you have completed making 
+		the changes to the Context definition. 
 
-     4. Configure the CYANOS web application
-	These steps can be performed using the Tomcat Administration Tool 
-	(http://<server>:8080/admin) or by customizing the <Context> 
-	definition within the Tomcat configuration files.  An example 
-	configuration can be found in the file "cyanos_example.xml"
-
-	A. Define the CYANOS JDBC/JNDI resource.  The JNDI Datasource should
+	A. Define the CYANOS JDBC resource.  The JDBC Datasource should
 	   have the following parameters. The username and password should match
-	   the SQL account created in step 2.
+	   the SQL account created in step 3.  
+	   
+	   The following is an example of a definition of the JDBC resource
 
-		name: jdbc/CyanosDB
-		url: jdbc:mysql://<db server>:3306/<database>?autoReconnect=true
-		max active connections: 100 or more
+		<Resource auth="Container" name="jdbc/CyanosDB"
+ 			type="javax.sql.DataSource" driverClassName="com.mysql.jdbc.Driver"
+ 			url="jdbc:mysql://<db server>:3306/<database>?autoReconnect=true&useLocalSessionState=true"
+ 			username="<username>" password="<password>"
+			maxActive="100" maxWait="5000" maxIdle="2"
+ 			removeAbandoned="true"/>
 			
-	B. Define the User Realm for authentication. Create the Tomcat Realm 
-	   using the previously defined JNDI datasource.	
-	
-	   	type: DataSourceRealm
-		name: jdbc/CyanosDB
-		digest alogrithm: SHA
-		role name column: role
-		user credential column: password
-		user name column: user
-		user role table: roles
-		user table: users
+			
+		url - Change the url parameter to match the information for your database instance. 
+			The format of the URL should be as follows. 
+			
+		jdbc:mysql://<db server>:3306/<database>?autoReconnect=true&useLocalSessionState=true
 
-	C. Define a Javamail session. The SMTP host should be a host that 
-	   will accept outgoing mail from the application server.
-	
-		name: mail/Session
+			db server - should be the name of your database server. 
+				"localhost" can be used if the MySQL database is on 
+				the same server as the Tomcat service.
 
-	D. Create the application config environmental entry.  The CYANOS
-	   application requires an additional configuration file to store
-	   important settings for the interal working of the application.
-	   This configuration file should NOT exist at the time of the 
-	   initial installation, however the Tomcat server process should be 
-	   able to create, read, and write the file. 
+			database_name - should be the name of the database. 
+				The default name of the database is "cyanos". 
+				Besure to change IF you have changed the name of the database.
 
-		name: cyanosAppConfig
-		type: java.lang.String
-		value: <location of the cyanos application configuration file>
+		If you have installed the MySQL service on the same host as the Tomcat service, 
+		and kept the name of the database as "cyanos", then the URL for your database will be...
+
+		jdbc:mysql://localhost:3306/cyanos?autoReconnect=true&useLocalSessionState=true
 
 
-	Once these configuration steps are complete, be sure to restart the 
-	application to allow these settings to become active.
+		usernameSQL - username that has SELECT, INSERT, UPDATE, DELETE, EXECUTE privileges 
+			for the cyanos database. (see step 3)
+		
+		password - Password for the SQL account. (see step 3)
+			
+	B. Define a Javamail session. 
+		The SMTP host should be a host that can be used by CYANOS to 
+		send automated email messages, e.g. password resets. 
+		
+		Note: Check with your local IT department to determine a proper SMTP 
+			host to use and additional configuration details required.
+			
+		The following is an example of a defined Javamail session.
+
+		<Resource name="mail/Session" auth="Container"
+ 			type="javax.mail.Session"
+ 			mail.smtp.host="localhost"
+ 			mail.smtp.from="CYANOS DATABASE &lt;do-not-reply@cyanos&gt;"/>
+ 			
+ 	mail.smtp.host - Hostname for the SMTP server. 
+ 		Can be localhost if the SMTP service is on the same server as the Tomcat service.
+ 		
+ 	mail.smtp.from - The from address for all emails sent by CYANOS. 
+ 		Email address standards allow a display name to be included with an email address. 
+ 		In those instances, the display name is placed before the email address and 
+ 		the email address is enclosed in angle brackets ("<", ">"). For example...
+
+		John Smith <john.smith@nowhere.com>
+
+		The angle brackets are a special character in XML files and must be written 
+		as "&lt;" and "&gt;" in text values. Theses escape codes will then be converted 
+		when the file is processed. 
+		
+		For example, the previous address would appear as follows in this configuration file.
+
+		John Smith &lt;john.smith@nowhere.com&gt;
+
+	If additional configuration is required, e.g. SSL, add the following attributes to the 
+	Resource definition.
+
+	mail.smtp.starttls.enable - Set this attribute to "true" to enable the use of STARTTLS 
+		for encryption.
+		
+	mail.smtp.starttls.required - Set this attribute to "true" to require a successful STARTTLS 
+		for all SMTP communications.
+		
+	mail.smtp.ssl.enable - Set this attribute "true" to enable SMTP over SSL. 
+		The default port SMTP will then be 465.
+		
+	mail.smtp.port - This attribute can be used to change the port used to contact the SMTP 
+		server. The default is 25 for normal SMTP and 465 for SMTP over SSL.
+
+
+	Once these configuration steps are complete, be sure to restart the application to allow 
+	these settings to become active. 
 
      5. Access the CYANOS web application to perform the initial setup.
 	The application should be available at http://<server>/cyanos 
@@ -112,5 +189,8 @@ INSTALLATION INSTRUCTIONS:
 
 VERSION HISTORY:
 
+	* Aug 2, 2013, George Chlipala, v1.4b
+	- Updates for new release of the CYANOS application
+	
 	* June 1, 2010, George Chlipala, v1.0
 	- Initial release
