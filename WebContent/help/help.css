@@ -4,4 +4,17 @@ table.spreadsheet tr td { border: 1px solid gray; }
 
 table.spreadsheet th { border: 1px solid gray; }
 
-.exampleButton { border: 2px outset #111111; background-color: #DDDDDD; margin-left: 3px; margin-right: 3px; padding-left: 3px; padding-right:3px; }
+.exampleButton { border: 2px outset #111111;
+	background-color: #DDDDDD; 
+	margin-left: 3px; 
+	margin-right: 3px; 
+	padding-left: 3px; 
+	padding-right:3px; 
+}
+
+body {
+	background-color: #ffffff;
+	font-weight: normal; color: #000000; 
+	font-family: sans-serif
+}
+	
