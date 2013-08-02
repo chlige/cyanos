@@ -22,6 +22,7 @@
 <LI><A HREF='#collection'>Field Collections</A>
 <OL>
 <LI><A HREF='#locations'>Location and Geographic Data</A></LI>
+<LI><A HREF='#search_collection'>Searching Field Collection Data</A>
 <LI><A HREF='#add_collection'>Adding Field Collection Data</A>
 <OL>
 <LI><A HREF='#add_collection_web'>by Web Form</A></LI>
@@ -48,9 +49,16 @@ A typical field collection record will contain a date, collector's name, locatio
 
 <H2><A NAME='locations'>Location and Geographic Data</A></H2>
 
-<P>Location information in the CYANOS database is handled using four fields: Name, Coordinates (latitude and longitude), and Precision.</P>
+<P>Location information in the CYANOS database is handled using four fields: Name, Coordinates (latitude and longitude), and Precision.</p>
+<p>Please note that the <B><SPAN CLASS='exampleButton'>Use current location</SPAN></B> button may not appear.  
+This button is only included if the web browser supports the Geolocation API (<a href="http://www.w3.org/TR/geolocation-API/">http://www.w3.org/TR/geolocation-API/</a>)</P>
+
 <P><IMG SRC="collection01.png" NAME="graphics5" ALIGN=LEFT BORDER=0></P><BR CLEAR='LEFT'>
-<P>The &quot;Name&quot; field is intended to hold the name or brief description of the location, e.g. Pacific Ocean, San Diego, CA or Burnham Park, Chicago, IL.  The &quot;Coordinates&quot; fields hold the latitude and longitude data of the collection site.  The CYANOS database can parse coordinate data in a variety of formats.  The following are accepted formats.  For all examples, the same location is used.</P>
+
+<P>The &quot;Name&quot; field is intended to hold the name or brief description of the location, e.g. Pacific Ocean, San Diego, CA or Burnham Park, Chicago, IL.  
+The &quot;Coordinates&quot; fields hold the latitude and longitude data of the collection site.  
+The CYANOS database can parse coordinate data in a variety of formats.  The following are accepted formats.  
+For all examples, the same location is used.</P>
 <TABLE BORDER=1 ALIGN='CENTER'>
 <TR><TH></TH><TH>Format</TH><TH>Examples</TH></TR>
 <TR><TD>Signed Decimal Degrees</TD><TD>DD.DDDD (negative for S/W)</TD><TD>44.9050 or -86.0635</TD></TR>
@@ -58,19 +66,48 @@ A typical field collection record will contain a date, collector's name, locatio
 <TR><TD>Degrees, Minutes</TD><TD>H DD MM.MMM'</TD><TD>N 44 54.301' or W 86 3.808'</TD></TR>
 <TR><TD>Degrees, Minutes, Seconds</TD><TD>H DD MM' SS&quot;</TD><TD>N 45 54' 18&quot; or W 86 3' 49&quot;</TD></TR>
 </TABLE>
-<P>By default, the CYANOS will display coordinate data using the H DD MM.MMM' format.  In addition to the coordinates, the precision of the coordinates can be recorded.  This value is not used by the database but stored for future reference, e.g. to aid in recollection.</P>
-<P>If the CYANOS web interface is properly configured with a Google API Key (see the Installation Guide for configuration details) and the collection record has valid coordinates then the &quot;Show map&quot; feature will be enabled.  If one clicks the &quot;Show map&quot; button, the web interface will build a map of the collection area along with markers for nearby collections.</P>
+<P>By default, the CYANOS will display coordinate data using the H DD MM.MMM' format.  
+In addition to the coordinates, the precision of the coordinates can be recorded.  
+This value is not used by the database but stored for future reference, e.g. to aid in recollection.</P>
+<P>CYANOS utilizes the OpenLayers mapping system to display maps (<a href='http://openlayers.org'>openlayers.org</a>).
+This mapping system allows one to customize the maps that can be displayed, also called layers.
+If the collection record has valid coordinates then the &quot;Show map&quot; feature will be enabled.  
+If one clicks the &quot;Show map&quot; button, the web interface will build a map of the collection area along with markers for nearby collections.</P>
 <P><IMG SRC="collection02.png" NAME="graphics5" ALIGN=LEFT BORDER=0></P><BR CLEAR='LEFT'>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
+<H2><A NAME='search_collection'>Searching Field Collection Data</A></H2>
+<p>Field collection data can be search by ID, Date, Collector's name, or Location name.</p>
+
+<img alt="collection search page" src="collection03a.png" border=0 align=left>
+<BR CLEAR='LEFT'>
+
+<p>The query results page will include a map of the collection records that have valid coordinates.  </p>
+<p>The results of the query can be exported as a CSV file or a KML file.  
+The KML file can be used by other geographic software, e.g. Google Earth.
+Please note that the KML file will only include records that have valid coordinate data. </p>
+
+<img alt="collection search results" src="collection03b.png" border=0 align=left>
+<BR CLEAR='LEFT'>
+
+
+<A HREF='#toc'>Return to table of contents</A>
+<HR WIDTH='85%' ALIGN='LEFT'/>
+
+
 <H2><A NAME='add_collection'>Adding Field Collection Data</A></H2>
-<P>Field collection data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
+<P>Field collection data can added using either a web form or by uploading a spreadsheet.  
+In either case, the same information can be added to the CYANOS database.</P>
 
 <H3><A NAME='add_collection_web'>by Web Form</A></H3>
 <OL>
 <LI>Select <B>Add New Collection</B> from the <B>Collection</B> menu.</LI>
-<LI>Enter information into the <I>Add a New Collection</I> form.
+<LI>Enter information into the <I>Add Collection</I> form.
+<ul>
+<li>The <i>Collection ID</i> can be any combination of alphanumeric characters but, must be unique.</li>
+<li>Latitude/longtitude information can designated using any of the formats described in the <a href="#locations">Location and Geographic Data</a> section.
+</ul>
 <P><IMG SRC="collection03.png" NAME="graphics7" ALIGN=LEFT BORDER=0></P></LI>
 <BR CLEAR='LEFT'>
 <LI>Click the <B><SPAN CLASS='exampleButton'>Create</SPAN></B> Button.</LI>
@@ -78,8 +115,9 @@ A typical field collection record will contain a date, collector's name, locatio
 
 <H3><A NAME='add_collection_upload'>Spreadsheet Upload</A></H3>
 
-<P>Often multiple field collections are made as part of a collection trip, thus creating a spreadsheet is typically more useful than the web form.  As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
-Collections</B>.  The format of the spreadsheet should be as follows.</P>
+<P>Often multiple field collections are made as part of a collection trip, thus creating a spreadsheet is typically more useful than the web form.  
+As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  
+The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload Collections</B>.  The format of the spreadsheet should be as follows.</P>
 <TABLE WIDTH='80%' CLASS='spreadsheet' ALIGN='CENTER'>
 <TR BGCOLOR="#e6e6e6">
 <TH WIDTH='11%'>Collection ID</TH>
@@ -125,6 +163,10 @@ Collections</B>.  The format of the spreadsheet should be as follows.</P>
 Isolation records can contain the following parameters: date, type, media, parent material, and notes. As with field collections, isolation IDs can consist of any combination of alphanumeric characters and must be unique.  This isolation ID is important to connect strain records with isolation and collection information.</P>
 
 <H2><A NAME='add_isolation'>Adding Isolation Data</A></H2>
+<p>Currently the only method for adding isolation data is via uploading a spreadsheet.</p>
+
+<!-- 
+
 <P>As with field collection data, isolation data can added using either a web form or by uploading a spreadsheet.  In either case, the same information can be added to the CYANOS database.</P>
 
 <H3><A NAME='add_isolation_web'>by Web Form</A></H3>
@@ -136,7 +178,7 @@ Isolation records can contain the following parameters: date, type, media, paren
 <P><IMG SRC="isolation02.png" NAME="graphics9" ALIGN=CENTER BORDER=0></P></LI>
 <LI>Click the <B><SPAN CLASS='exampleButton'>Add</SPAN></B> Button.</LI>
 </OL>
-
+ -->
 <H3><A NAME='add_isolation_upload'>Spreadsheet Upload</A></H3>
 <P>As stated in the <A HREF='02_interface.html#upload'>Interface Help Guide</A>, a spreadsheet can be either a Microsoft Excel XML or OpenOffice.org file.  The upload form can be access via the menu <B>Collection</B> &gt; <B>Upload
 Isolations</B>.  The format of the spreadsheet should be as follows.</P>
@@ -182,10 +224,15 @@ directly from the field collected material.</P>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
-<H2><A NAME='linking'>Linking Isolation and Strain Records</A></H2>
-<P>Ultimately, an isolation should be linked to a strain in the collection. Since the strain will be linked to chemical and bioassay data, the isolation link allows one to associate bioassay and compound information with collection data, e.g. collection date and geographic location.  To link a strain with an isolation record, the culture source of the strain should be set to the isolation ID of the parent isolation.  The following figure shows a strain record with a culture source that does not corresponds to an isolation ID.</P>
+<H2><A NAME='linking'>Linking Collection, Isolation and Strain Records</A></H2>
+<P>Ultimately, an isolation should be linked to a strain record. 
+Since the strain will be linked to chemical and bioassay data, the isolation link allows one to associate bioassay and compound information with collection data, e.g. collection date and geographic location.  
+To link a strain with an isolation record, set the <em>Isolation</em> field to the ID of the parent isolation. 
+Additionally, it is possible to link a strain to a collection record without an associated isolation ID.  
+Simply, set the <em>Collection</em> field to the ID of the parent collection.
+</P>
 <P><IMG SRC="isolation03.png" NAME="graphics10" ALIGN=CENTER BORDER=0></P>
-<P>Once the culture source properly set to an isolation ID, the CYANOS database should be able to link the strain record with the isolation and collection information.</P>
+<P>Once either the <em>Collection</em> or <em>Isolation</em> fields are properly set, CYANOS will be able to link a strain to its parent collection/isolation</P>
 <P><IMG SRC="isolation04.png" NAME="graphics11" ALIGN=CENTER BORDER=0></P>
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
