@@ -1,338 +1,1129 @@
--- MySQL dump 10.10
+-- -----------------------------------------------------
+-- SQL Schema for CYANOS database
 --
--- Host: localhost    Database: cyanos
--- ------------------------------------------------------
--- Server version	5.0.27-standard
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
+-- This file has the necessary SQL commands to create the CYANOS schema. 
+-- The command to create the schema can be executed as follows. 
+-- Please refer to MySQL documentation for more details on using the mysql command-line tool.
 --
--- Table structure for table `assay`
+-- 	# mysql --tee cyanos.log cyanos < cyanos_mysql.sql
 --
-
-DROP TABLE IF EXISTS `assay`;
-CREATE TABLE `assay` (
-  `plate` varchar(16) NOT NULL default '',
-  `culture_id` varchar(32) default NULL,
-  `location` varchar(8) NOT NULL default '',
-  `activity` varchar(45) NOT NULL default '',
-  `name` varchar(45) NOT NULL default '',
-  `sample_id` bigint(20) unsigned default NULL,
-  PRIMARY KEY  (`plate`,`location`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+-- or if a user and password must be specified.
+-- 
+-- 	# mysql -u <username> -p <password> --tee cyanos.log cyanos < cyanos_mysql.sql
 --
--- Table structure for table `assay_info`
+-- or the SQL file can be executed from within the MySQL command interface. 
+-- In this case, the tee command can be used to log any messages to a file.
+-- 
+-- 	mysql> tee cyanos.log
+-- 	mysql> source cyanos_mysql.sql
 --
-
-DROP TABLE IF EXISTS `assay_info`;
-CREATE TABLE `assay_info` (
-  `id` varchar(16) NOT NULL,
-  `target` varchar(32) default NULL,
-  `date` date NOT NULL default '1970-01-01',
-  `active_level` float default NULL,
-  `unit` varchar(16) default '%s',
-  `active_op` enum('eq','ne','gt','ge','lt','le') NOT NULL default 'ge',
-  `name` text,
-  `length` int(10) unsigned default NULL,
-  `width` int(10) unsigned default NULL,
-  `notes` text,
-  PRIMARY KEY  (`id`),
-  KEY `target` (`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+-- -----------------------------------------------------
+-- CUSTOMIZING inoculation fates & harvest material types.
 --
--- Table structure for table `collection`
+-- These columns use SQL data types that restrict the possible values
+-- that any record may have.  For both instances, the CYANOS web application
+-- uses the information of the current database schema to create web forms.
+-- Thus, one can change the possible values and the CYANOS web application 
+-- will reflect the change.  
 --
-
-DROP TABLE IF EXISTS `collection`;
-CREATE TABLE `collection` (
-  `id` varchar(16) NOT NULL default '',
-  `type` varchar(32) NOT NULL default '',
-  `format` varchar(8) default NULL,
-  `name` text,
-  `length` int(10) unsigned default NULL,
-  `width` int(10) unsigned default NULL,
-  `notes` text,
-  `parent` varchar(16) default NULL,
-  PRIMARY KEY  (`id`,`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+-- NOTE: If you desire to customize the possible values for these columns, 
+--	it is recommended that you do so when the schema is created.
 --
--- Table structure for table `cryo`
+-- Currently the "fate" for inoculation records is defined as an ENUM.
 --
-
-DROP TABLE IF EXISTS `cryo`;
-CREATE TABLE `cryo` (
-  `id` bigint(20) unsigned NOT NULL auto_increment,
-  `collection` varchar(16) NOT NULL default '',
-  `location` varchar(8) NOT NULL default '',
-  `date` date NOT NULL default '0000-00-00',
-  `source_id` bigint(20) unsigned default NULL,
-  `thaw_id` bigint(20) unsigned default NULL,
-  `notes` text,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `id` (`id`),
-  KEY `collection` (`collection`),
-  KEY `source_id` (`source_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+--  	`fate` ENUM('stock','cryo','harvest','dead') NULL DEFAULT NULL
 --
--- Table structure for table `data`
+-- The possible values defined in this schema are 'stock', 'cryo', 'harvest', 'dead', and NULL.
+-- The `fate` for any inoculation record can be ONE of these values.
+-- The CYANOS web application automatically reads the possible values for this field
+-- and will present on the web form as a pull down field.
+-- 
+-- If different possible values are desired, one can change the definition for the `fate` column
+-- either during schema creation (edit this file before creating the schema) or after the schema is 
+-- created (via the ALTER TABLE statement) and the CYANOS web application will automatically change 
+-- to reflect the defined column.
 --
-
-DROP TABLE IF EXISTS `data`;
-CREATE TABLE `data` (
-  `file` varchar(200) NOT NULL default '',
-  `type` varchar(32) default NULL,
-  `description` text,
-  `id` varchar(32) NOT NULL default '',
-  `tab` varchar(16) NOT NULL default 'species',
-  PRIMARY KEY  (`file`,`tab`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+-- NOTE: If the column is changed after inoculation data has been entered with 'fate' values that
+-- are NOT included in the new ENUM definition an SQL error may occur and the column may not 
+-- be changed to the new definition.
 --
--- Table structure for table `data_templates`
+-- The 'type' for harvest records is defined as a SET.
 --
-
-DROP TABLE IF EXISTS `data_templates`;
-CREATE TABLE `data_templates` (
-  `data` varchar(32) NOT NULL COMMENT 'Data type for the template, e.g. fraction_data or assay_data',
-  `name` varchar(32) NOT NULL COMMENT 'Name of the template',
-  `template` longblob COMMENT 'Template data.  Serialized java.util.HashMap',
-  PRIMARY KEY  (`data`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores data templates for uploads';
-
+-- 		`type` SET('filamentous','encrusting','planktonic') NULL DEFAULT NULL ,
 --
--- Table structure for table `extract`
+-- A SET is similar to an ENUM however the value can be ANY of the values allowed, including multiple values.
 --
+-- As with the 'fate' of inoculation records, the CYANOS web application reads the possible values for this 
+-- field and will present on the web form as a series of checkboxes.
+-- This field can also be customized before or after the schema is created.
+-- 
+-- -----------------------------------------------------
 
-DROP TABLE IF EXISTS `extract`;
-CREATE TABLE `extract` (
-  `sample_id` bigint(20) unsigned NOT NULL,
-  `harvest_id` bigint(20) unsigned NOT NULL,
-  `solvent` varchar(32) default NULL,
-  `type` varchar(32) default NULL,
-  PRIMARY KEY  USING BTREE (`sample_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extract Information';
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
---
--- Table structure for table `harvest`
---
+DROP SCHEMA IF EXISTS `cyanos` ;
+CREATE SCHEMA IF NOT EXISTS `cyanos` DEFAULT CHARACTER SET utf8 ;
+SHOW WARNINGS;
+USE `cyanos` ;
 
-DROP TABLE IF EXISTS `harvest`;
-CREATE TABLE `harvest` (
-  `id` bigint(20) unsigned NOT NULL auto_increment,
-  `date` date default NULL,
-  `color` text,
-  `type` varchar(8) default NULL,
-  `cell_mass` float default NULL COMMENT 'Cell Mass in grams',
-  `old_cell_mass` text,
-  `media_volume` float default NULL COMMENT 'Media volume in liters',
-  `old_media_volume` text,
-  `notes` text,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- -----------------------------------------------------
+-- Table `cyanos`.`assay`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`assay` ;
 
---
--- Table structure for table `inoculation`
---
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`assay` (
+  `assay_id` VARCHAR(32) NOT NULL ,
+  `culture_id` VARCHAR(32) NOT NULL ,
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `sample_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `name` VARCHAR(128) NOT NULL DEFAULT '' ,
+  `row` INT(10) NOT NULL DEFAULT '0' ,
+  `col` INT(10) NOT NULL DEFAULT '0' ,
+  `sign` INT(1) NOT NULL DEFAULT '0' ,
+  `activity` DECIMAL(30,15) NULL DEFAULT NULL ,
+  `std_dev` DECIMAL(30,15) NULL DEFAULT NULL ,
+  `concentration` DECIMAL(30,15) NOT NULL DEFAULT '0' ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`assay_id`, `row`, `col`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
 
-DROP TABLE IF EXISTS `inoculation`;
-CREATE TABLE `inoculation` (
-  `id` bigint(20) unsigned NOT NULL auto_increment,
-  `culture_id` varchar(32) NOT NULL default '',
-  `date` date NOT NULL default '0000-00-00',
-  `parent_id` bigint(20) unsigned default NULL,
-  `media` text NOT NULL,
-  `volume` float NOT NULL,
-  `old_volume` text,
-  `notes` text,
-  `fate` enum('stock','cryo','harvest','dead') default NULL,
-  `harvest_id` bigint(20) unsigned default NULL,
-  `removed` date default NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `id` (`id`),
-  KEY `harvest` (`harvest_id`),
-  KEY `parent` (`parent_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SHOW WARNINGS;
 
---
--- Table structure for table `roles`
---
+-- -----------------------------------------------------
+-- Table `cyanos`.`assay_info`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`assay_info` ;
 
-DROP TABLE IF EXISTS `roles`;
-CREATE TABLE `roles` (
-  `username` varchar(15) NOT NULL default '',
-  `role` varchar(15) NOT NULL default '',
-  PRIMARY KEY  (`username`,`role`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Tomcat role mapping';
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`assay_info` (
+  `assay_id` VARCHAR(32) NOT NULL ,
+  `name` VARCHAR(64) NOT NULL DEFAULT 'NONAME' ,
+  `target` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `length` INT(10) UNSIGNED NOT NULL DEFAULT '8' ,
+  `width` INT(10) UNSIGNED NOT NULL DEFAULT '12' ,
+  `sig_figs` INT(10) NOT NULL DEFAULT '5' ,
+  `unit` VARCHAR(16) NULL DEFAULT '' ,
+  `active_level` DECIMAL(30,15) NULL DEFAULT NULL ,
+  `active_op` ENUM('eq','ne','gt','ge','lt','le') NOT NULL DEFAULT 'ge' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  PRIMARY KEY (`assay_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
 
---
--- Table structure for table `sample`
---
+SHOW WARNINGS;
+CREATE INDEX `target` ON `cyanos`.`assay_info` (`target` ASC) ;
 
-DROP TABLE IF EXISTS `sample`;
-CREATE TABLE `sample` (
-  `sample_id` bigint(20) unsigned NOT NULL auto_increment,
-  `collection` varchar(16) NOT NULL default '',
-  `location` varchar(8) NOT NULL default '',
-  `date` date NOT NULL default '1970-01-01',
-  `name` text,
-  `culture_id` varchar(32) default NULL,
-  `notes` text,
-  `unit` enum('g','L') NOT NULL default 'g',
-  `vial_wt` varchar(45) default NULL,
-  `scale` enum('k','','m','u') NOT NULL default 'm',
-  PRIMARY KEY  USING BTREE (`sample_id`),
-  KEY `collection` (`collection`),
-  KEY `culture_id` (`culture_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SHOW WARNINGS;
 
---
--- Table structure for table `sample_acct`
---
+-- -----------------------------------------------------
+-- Table `cyanos`.`collection`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`collection` ;
 
-DROP TABLE IF EXISTS `sample_acct`;
-CREATE TABLE `sample_acct` (
-  `acct_id` bigint(20) unsigned NOT NULL default '0',
-  `sample_id` bigint(20) unsigned NOT NULL default '0',
-  `date` date NOT NULL default '1970-01-01',
-  `ref_table` varchar(45) default NULL,
-  `ref_id` varchar(45) default NULL,
-  `amount` float NOT NULL default '0',
-  `notes` text,
-  PRIMARY KEY  USING BTREE (`acct_id`,`sample_id`),
-  KEY `sample_id` (`sample_id`),
-  KEY `ref_table` (`ref_table`),
-  KEY `ref_id` (`ref_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`collection` (
+  `collection_id` VARCHAR(32) NOT NULL ,
+  `date` DATE NULL DEFAULT '1970-01-01' ,
+  `location` VARCHAR(256) NULL DEFAULT NULL ,
+  `latitude` DECIMAL(7,5) NULL DEFAULT NULL ,
+  `longitude` DECIMAL(8,5) NULL DEFAULT NULL ,
+  `geo_precision` INT(10) UNSIGNED NULL DEFAULT '182' ,
+  `collector` VARCHAR(256) NOT NULL DEFAULT 'UNKNOWN' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  PRIMARY KEY USING BTREE (`collection_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
 
---
--- Table structure for table `sample_library`
---
+SHOW WARNINGS;
 
-DROP TABLE IF EXISTS `sample_library`;
-CREATE TABLE `sample_library` (
-  `library` varchar(16) NOT NULL,
-  `collection` varchar(16) NOT NULL,
-  `default_type` enum('extract','fraction','compound') NOT NULL default 'fraction',
-  `name` text NOT NULL,
-  `length` int(10) unsigned NOT NULL,
-  `width` int(10) unsigned NOT NULL,
-  `notes` text,
-  PRIMARY KEY  USING BTREE (`collection`,`library`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Sample Library infomation';
+-- -----------------------------------------------------
+-- Table `cyanos`.`compound`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`compound` ;
 
---
--- Table structure for table `separation`
---
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`compound` (
+  `compound_id` VARCHAR(32) NOT NULL ,
+  `name` VARCHAR(128) NULL DEFAULT NULL ,
+  `formula` VARCHAR(64) NULL DEFAULT NULL ,
+  `smiles` VARCHAR(256) NULL DEFAULT NULL ,
+  `average_wt` DECIMAL(10,4) NULL DEFAULT NULL ,
+  `isotopic_wt` DECIMAL(11,5) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `cml_data` LONGTEXT NULL DEFAULT NULL ,
+  `mdl_data` LONGTEXT NULL DEFAULT NULL ,
+  `inchi_string` TEXT NULL DEFAULT NULL ,
+  `inchi_key` VARCHAR(256) NULL DEFAULT NULL ,
+  `project_id` VARCHAR(45) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(26) NULL DEFAULT NULL ,
+  PRIMARY KEY USING BTREE (`compound_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+COMMENT = 'Compound Information';
 
-DROP TABLE IF EXISTS `separation`;
-CREATE TABLE `separation` (
-  `separation_id` bigint(20) unsigned NOT NULL auto_increment,
-  `s_phase` text,
-  `m_phase` text,
-  `notes` text,
-  `date` date default NULL,
-  PRIMARY KEY  USING BTREE (`separation_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Fractionation Infomation';
+SHOW WARNINGS;
 
---
--- Table structure for table `separation_product`
---
+-- -----------------------------------------------------
+-- Table `cyanos`.`cryo`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`cryo` ;
 
-DROP TABLE IF EXISTS `separation_product`;
-CREATE TABLE `separation_product` (
-  `separation_id` bigint(20) unsigned NOT NULL,
-  `sample_id` bigint(20) unsigned NOT NULL,
-  `fraction_number` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  USING BTREE (`separation_id`,`fraction_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Fractionation Result Infomation';
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`cryo` (
+  `cryo_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `collection` VARCHAR(16) NOT NULL DEFAULT '' ,
+  `location` VARCHAR(8) NOT NULL DEFAULT '' ,
+  `row` INT(10) NULL DEFAULT '0' ,
+  `col` INT(10) NULL DEFAULT '0' ,
+  `date` DATE NULL DEFAULT '1970-01-01' ,
+  `source_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `culture_id` VARCHAR(32) NOT NULL ,
+  `thaw_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  PRIMARY KEY (`cryo_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
---
--- Table structure for table `separation_source`
---
+SHOW WARNINGS;
+CREATE UNIQUE INDEX `id` ON `cyanos`.`cryo` (`cryo_id` ASC) ;
 
-DROP TABLE IF EXISTS `separation_source`;
-CREATE TABLE `separation_source` (
-  `separation_id` bigint(20) unsigned NOT NULL,
-  `sample_id` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY  USING BTREE (`separation_id`,`sample_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Fractionation Source Infomation';
+SHOW WARNINGS;
+CREATE UNIQUE INDEX `cryo_id` ON `cyanos`.`cryo` (`cryo_id` ASC) ;
 
---
--- Table structure for table `species`
---
+SHOW WARNINGS;
+CREATE INDEX `collection` ON `cyanos`.`cryo` (`collection` ASC) ;
 
-DROP TABLE IF EXISTS `species`;
-CREATE TABLE `species` (
-  `culture_source` text,
-  `culture_id` varchar(32) NOT NULL default '',
-  `tax_order` text,
-  `name` text,
-  `genus` varchar(45) default NULL,
-  `media_name` text,
-  `notes` text,
-  `photo` blob,
-  `date` date default NULL,
-  `removed` date default NULL,
-  `remove_reason` varchar(45) default NULL,
-  PRIMARY KEY  (`culture_id`),
-  KEY `removed` (`remove_reason`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SHOW WARNINGS;
+CREATE INDEX `source_id` ON `cyanos`.`cryo` (`source_id` ASC) ;
 
---
--- Table structure for table `taxonomic`
---
+SHOW WARNINGS;
 
-DROP TABLE IF EXISTS `taxonomic`;
-CREATE TABLE `taxonomic` (
-  `kingdom` varchar(45) NOT NULL default '',
-  `phylum` varchar(45) NOT NULL default '',
-  `class` varchar(45) NOT NULL default '',
-  `ord` varchar(45) NOT NULL default '',
-  `family` varchar(45) NOT NULL default '',
-  `genus` varchar(45) NOT NULL default '',
-  `synonym` varchar(45) default NULL,
-  PRIMARY KEY  (`genus`),
-  KEY `family` (`family`),
-  KEY `class` (`class`),
-  KEY `phylum` (`phylum`),
-  KEY `order` (`ord`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Taxonomic map';
+-- -----------------------------------------------------
+-- Table `cyanos`.`cryo_library`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`cryo_library` ;
 
---
--- Table structure for table `users`
---
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`cryo_library` (
+  `collection` VARCHAR(32) NOT NULL ,
+  `format` VARCHAR(32) NULL DEFAULT NULL ,
+  `name` VARCHAR(64) NOT NULL DEFAULT 'NONAME' ,
+  `length` INT(10) UNSIGNED NULL DEFAULT NULL ,
+  `width` INT(10) UNSIGNED NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `date` DATE NULL DEFAULT '1970-01-01' ,
+  `parent` VARCHAR(32) NULL DEFAULT NULL ,
+  PRIMARY KEY (`collection`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
-  `username` varchar(15) NOT NULL default '',
-  `password` varchar(48) NOT NULL default '',
-  `fullname` text,
-  `email` text,
-  `style` text,
-  PRIMARY KEY  (`username`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Cyanos Users';
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+SHOW WARNINGS;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+-- -----------------------------------------------------
+-- Table `cyanos`.`data`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`data` ;
 
--- Dump completed on 2008-03-11  6:22:35
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`data` (
+  `file` VARCHAR(200) NOT NULL DEFAULT '' ,
+  `type` VARCHAR(32) NULL DEFAULT NULL ,
+  `description` TEXT NULL DEFAULT NULL ,
+  `id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `tab` VARCHAR(16) NOT NULL DEFAULT 'species' ,
+  `mime_type` VARCHAR(64) NULL DEFAULT NULL ,
+  PRIMARY KEY (`file`, `tab`, `id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`data_templates`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`data_templates` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`data_templates` (
+  `name` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `data` VARCHAR(128) NOT NULL DEFAULT '' ,
+  `template` LONGBLOB NULL DEFAULT NULL ,
+  PRIMARY KEY (`name`, `data`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`species`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`species` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`species` (
+  `culture_source` VARCHAR(32) NULL DEFAULT NULL ,
+  `culture_id` VARCHAR(32) NOT NULL ,
+  `collection_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `isolation_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `name` VARCHAR(256) NULL DEFAULT 'NONAME' ,
+  `genus` VARCHAR(45) NULL DEFAULT NULL ,
+  `media_name` VARCHAR(256) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `culture_status` VARCHAR(64) NULL DEFAULT 'good' ,
+  `removed` DATE NULL DEFAULT NULL ,
+  `remove_reason` VARCHAR(45) NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  PRIMARY KEY (`culture_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE INDEX `removed` ON `cyanos`.`species` (`remove_reason` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`material`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`material` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`material` (
+  `material_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `label` VARCHAR(45) NULL DEFAULT NULL ,
+  `culture_id` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
+  `date` DATE NOT NULL DEFAULT '1900-01-01' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `amount_value` INT(11) NOT NULL DEFAULT '0' COMMENT 'Initial amount of material in grams' ,
+  `amount_scale` INT(11) NOT NULL DEFAULT '0' ,
+  `sample_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  `remote_id` VARCHAR(36) NOT NULL ,
+  PRIMARY KEY (`material_id`) ,
+  CONSTRAINT `material_strain`
+    FOREIGN KEY (`culture_id` )
+    REFERENCES `cyanos`.`species` (`culture_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 4642
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE UNIQUE INDEX `material_id_UNIQUE` ON `cyanos`.`material` (`material_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `material_strain_idx` ON `cyanos`.`material` (`culture_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`harvest`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`harvest` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`harvest` (
+  `harvest_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `culture_id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `date` DATE NOT NULL DEFAULT '1970-01-10' ,
+  `color` VARCHAR(32) NULL DEFAULT NULL ,
+  `type` SET('filamentous','encrusting','planktonic') NULL DEFAULT NULL ,
+  `cell_mass_value` INT(11) NULL DEFAULT NULL ,
+  `cell_mass_scale` INT(11) NULL DEFAULT NULL ,
+  `prep_date` DATE NULL DEFAULT NULL ,
+  `media_volume_value` INT(11) NULL DEFAULT NULL ,
+  `media_volume_scale` INT(11) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `collection_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  `remote_id` VARCHAR(36) NOT NULL ,
+  PRIMARY KEY (`harvest_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`extract_info`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`extract_info` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`extract_info` (
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `harvest_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `solvent` VARCHAR(256) NULL DEFAULT NULL ,
+  `type` VARCHAR(128) NULL DEFAULT NULL ,
+  `method` VARCHAR(256) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`material_id`) ,
+  CONSTRAINT `ext_material`
+    FOREIGN KEY (`material_id` )
+    REFERENCES `cyanos`.`material` (`material_id` )
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `ext_harvest`
+    FOREIGN KEY (`harvest_id` )
+    REFERENCES `cyanos`.`harvest` (`harvest_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+COMMENT = 'Extract Information';
+
+SHOW WARNINGS;
+CREATE INDEX `ext_harvest_idx` ON `cyanos`.`extract_info` (`harvest_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`inoculation`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`inoculation` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`inoculation` (
+  `inoculation_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `culture_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `parent_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `media` VARCHAR(256) NULL DEFAULT '' ,
+  `volume_value` INT(11) NOT NULL DEFAULT '0' ,
+  `volume_scale` INT(11) NOT NULL DEFAULT '0' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `fate` ENUM('stock','cryo','harvest','dead') NULL DEFAULT NULL ,
+  `harvest_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `removed` DATE NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  PRIMARY KEY (`inoculation_id`) ,
+  CONSTRAINT `inoc_strain`
+    FOREIGN KEY (`culture_id` )
+    REFERENCES `cyanos`.`species` (`culture_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE INDEX `parent` ON `cyanos`.`inoculation` (`parent_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `inoc_strain_idx` ON `cyanos`.`inoculation` (`culture_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`isolation`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`isolation` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`isolation` (
+  `isolation_id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `collection_id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `type` VARCHAR(64) NOT NULL DEFAULT 'plate' ,
+  `media` VARCHAR(256) NOT NULL DEFAULT 'Z' ,
+  `parent` VARCHAR(64) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`isolation_id`) ,
+  CONSTRAINT `isolation_collection`
+    FOREIGN KEY (`collection_id` )
+    REFERENCES `cyanos`.`collection` (`collection_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+CREATE INDEX `isolation_collection_idx` ON `cyanos`.`isolation` (`collection_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`news`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`news` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`news` (
+  `subject` VARCHAR(512) NOT NULL DEFAULT '' ,
+  `date_added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `content` TEXT NULL DEFAULT NULL ,
+  `expires` DATETIME NULL DEFAULT NULL ,
+  PRIMARY KEY (`date_added`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`project`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`project` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`project` (
+  `project_id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `name` VARCHAR(128) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `url` VARCHAR(128) NULL DEFAULT NULL ,
+  `master_key` TEXT NULL DEFAULT NULL ,
+  `update_prefs` VARCHAR(128) NULL DEFAULT NULL ,
+  `last_update_sent` DATETIME NULL DEFAULT '1000-01-01 00:00:00' ,
+  `last_update_message` TEXT NULL ,
+  PRIMARY KEY USING BTREE (`project_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+COMMENT = 'Project Code Information';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`queue`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`queue` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`queue` (
+  `queue_name` VARCHAR(128) NOT NULL DEFAULT '' ,
+  `queue_type` VARCHAR(64) NOT NULL DEFAULT '' ,
+  `item_type` VARCHAR(64) NOT NULL DEFAULT '' ,
+  `item_id` VARCHAR(128) NOT NULL DEFAULT '' ,
+  `added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `completed` TIMESTAMP NULL DEFAULT NULL ,
+  `req_details` VARCHAR(512) NULL DEFAULT NULL ,
+  `complete_details` VARCHAR(512) NULL DEFAULT NULL ,
+  `added_by` VARCHAR(15) NULL DEFAULT 'UNKNOWN' ,
+  `completed_by` VARCHAR(15) NULL DEFAULT NULL ,
+  PRIMARY KEY USING BTREE (`queue_name`, `queue_type`, `item_type`, `item_id`, `added`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`roles`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`roles` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`roles` (
+  `username` VARCHAR(15) NOT NULL DEFAULT '' ,
+  `role` VARCHAR(15) NOT NULL DEFAULT '' ,
+  `project_id` VARCHAR(32) NOT NULL DEFAULT '' ,
+  `perm` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
+  PRIMARY KEY (`username`, `role`, `project_id`) )
+ENGINE = MyISAM
+DEFAULT CHARACTER SET = utf8
+COMMENT = 'Tomcat role mapping';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`sample`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`sample` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`sample` (
+  `sample_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `material_id` BIGINT(20) UNSIGNED NOT NULL ,
+  `collection` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
+  `row` INT(10) NULL DEFAULT NULL ,
+  `col` INT(10) NULL DEFAULT NULL ,
+  `name` TEXT NULL DEFAULT NULL ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `culture_id` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `unit` VARCHAR(16) NULL DEFAULT NULL ,
+  `concentration` FLOAT(11) NULL DEFAULT '0' ,
+  `removed_date` DATE NULL DEFAULT NULL ,
+  `removed_by` VARCHAR(15) NULL DEFAULT NULL ,
+  `vial_wt` VARCHAR(45) NULL DEFAULT NULL ,
+  `source_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:01' ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`sample_id`) ,
+  CONSTRAINT `sample_material`
+    FOREIGN KEY (`material_id` )
+    REFERENCES `cyanos`.`material` (`material_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 6051
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE INDEX `collection` ON `cyanos`.`sample` (`collection` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `culture_id` ON `cyanos`.`sample` (`culture_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `sample_material_idx` ON `cyanos`.`sample` (`material_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`sample_acct`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`sample_acct` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`sample_acct` (
+  `sample_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `acct_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `ref_table` VARCHAR(32) NULL DEFAULT NULL ,
+  `ref_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `void_date` DATE NULL DEFAULT NULL ,
+  `void_user` VARCHAR(15) NULL DEFAULT NULL ,
+  `amount` FLOAT NOT NULL DEFAULT '0' ,
+  `notes` VARCHAR(256) NULL DEFAULT '' ,
+  `amount_value` INT NOT NULL DEFAULT '0' ,
+  `amount_scale` INT NOT NULL DEFAULT '0' ,
+  PRIMARY KEY USING BTREE (`acct_id`, `sample_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+SHOW WARNINGS;
+CREATE INDEX `sample_id` ON `cyanos`.`sample_acct` (`sample_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `ref_table` ON `cyanos`.`sample_acct` (`ref_table` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `ref_id` ON `cyanos`.`sample_acct` (`ref_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`sample_library`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`sample_library` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`sample_library` (
+  `library` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
+  `collection` VARCHAR(32) NOT NULL ,
+  `default_type` ENUM('extract','fraction','compound') NOT NULL DEFAULT 'fraction' ,
+  `name` VARCHAR(256) NOT NULL DEFAULT '' ,
+  `length` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
+  `width` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  PRIMARY KEY USING BTREE (`collection`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COMMENT = 'Sample Library infomation';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`separation`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`separation` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`separation` (
+  `separation_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `tag` VARCHAR(128) NULL DEFAULT NULL ,
+  `date` DATE NOT NULL DEFAULT '1970-01-01' ,
+  `s_phase` VARCHAR(256) NULL DEFAULT '' ,
+  `m_phase` VARCHAR(256) NULL DEFAULT '' ,
+  `method` VARCHAR(256) NULL DEFAULT '' ,
+  `removed_date` DATE NULL DEFAULT NULL ,
+  `removed_by` VARCHAR(15) NULL DEFAULT NULL ,
+  `notes` TEXT NULL DEFAULT NULL ,
+  `project_id` VARCHAR(32) NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
+  `remote_id` VARCHAR(36) NOT NULL ,
+  PRIMARY KEY USING BTREE (`separation_id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COMMENT = 'Fractionation Infomation';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`separation_product`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`separation_product` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_product` (
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `separation_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `fraction_number` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`separation_id`, `material_id`) ,
+  CONSTRAINT `fraction_separation`
+    FOREIGN KEY (`separation_id` )
+    REFERENCES `cyanos`.`separation` (`separation_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+  CONSTRAINT `fraction_material`
+    FOREIGN KEY (`material_id` )
+    REFERENCES `cyanos`.`material` (`material_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+COMMENT = 'Fractionation Result Infomation';
+
+SHOW WARNINGS;
+CREATE INDEX `fraction_separation_idx` ON `cyanos`.`separation_product` (`separation_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `fraction_material_idx` ON `cyanos`.`separation_product` (`material_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`separation_source`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`separation_source` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_source` (
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 ,
+  `separation_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 ,
+  `amount_value` INT(11) NOT NULL DEFAULT 0 ,
+  `amount_scale` INT(11) NOT NULL DEFAULT 0 ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`separation_id`, `material_id`) ,
+  CONSTRAINT `sep_src_sep`
+    FOREIGN KEY (`separation_id` )
+    REFERENCES `cyanos`.`separation` (`separation_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+  CONSTRAINT `sep_src_material`
+    FOREIGN KEY (`material_id` )
+    REFERENCES `cyanos`.`material` (`material_id` )
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+COMMENT = 'Fractionation Source Infomation';
+
+SHOW WARNINGS;
+CREATE INDEX `sep_src_sep_idx` ON `cyanos`.`separation_source` (`separation_id` ASC) ;
+
+SHOW WARNINGS;
+CREATE INDEX `sep_src_material_idx` ON `cyanos`.`separation_source` (`material_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`users`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`users` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`users` (
+  `username` VARCHAR(15) NOT NULL DEFAULT '' ,
+  `password` VARCHAR(48) NOT NULL DEFAULT '' ,
+  `fullname` VARCHAR(256) NULL DEFAULT '' ,
+  `email` TEXT NULL ,
+  `style` TEXT NULL ,
+  PRIMARY KEY (`username`) )
+ENGINE = MyISAM
+DEFAULT CHARACTER SET = utf8
+COMMENT = 'Cyanos Users';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`config`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`config` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`config` (
+  `element` VARCHAR(45) NOT NULL ,
+  `param` VARCHAR(64) NOT NULL DEFAULT ' ' ,
+  `param_key` VARCHAR(64) NOT NULL DEFAULT ' ' ,
+  `value` TEXT NULL DEFAULT NULL )
+ENGINE = MyISAM;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`compound_peaks`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`compound_peaks` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`compound_peaks` (
+  `compound_id` VARCHAR(32) NOT NULL ,
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `retention_time` DECIMAL(10,4) NULL DEFAULT '0.0000' ,
+  `separation_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  CONSTRAINT `peak_compound_id`
+    FOREIGN KEY (`compound_id` )
+    REFERENCES `cyanos`.`compound` (`compound_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE INDEX `peak_compound_id_idx` ON `cyanos`.`compound_peaks` (`compound_id` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`update_host`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`update_host` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`update_host` (
+  `project_id` VARCHAR(45) NOT NULL ,
+  `host_id` VARCHAR(45) NOT NULL ,
+  `hostname` VARCHAR(45) NULL ,
+  `pub_key` TEXT NOT NULL ,
+  `last_update` DATETIME NOT NULL DEFAULT '1000-01-01 00:00:00' ,
+  PRIMARY KEY (`project_id`, `host_id`) )
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`queue_subscription`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`queue_subscription` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`queue_subscription` (
+  `queue_name` VARCHAR(128) NOT NULL ,
+  `queue_type` VARCHAR(64) NOT NULL ,
+  `username` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`queue_name`, `queue_type`, `username`) )
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`taxon`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`taxon` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`taxon` (
+  `name` VARCHAR(64) NOT NULL ,
+  `level` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`name`) )
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+CREATE INDEX `taxa_level` ON `cyanos`.`taxon` (`level` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `cyanos`.`taxon_paths`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `cyanos`.`taxon_paths` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `cyanos`.`taxon_paths` (
+  `parent` VARCHAR(64) NOT NULL ,
+  `child` VARCHAR(64) NOT NULL ,
+  `depth` INT(11) NULL DEFAULT '0' ,
+  CONSTRAINT `taxon_child`
+    FOREIGN KEY (`child` )
+    REFERENCES `cyanos`.`taxon` (`name` )
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `taxon_parent`
+    FOREIGN KEY (`parent` )
+    REFERENCES `cyanos`.`taxon` (`name` )
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci;
+
+SHOW WARNINGS;
+CREATE INDEX `taxon_child_idx` ON `cyanos`.`taxon_paths` (`child` ASC) ;
+
+-- -----------------------------------------------------
+-- function parseActivity
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`parseActivity`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `parseActivity`(val VARCHAR(45)) RETURNS float
+RETURN CASE 
+		WHEN val LIKE ">%" THEN CAST(TRIM(">" FROM val) AS DECIMAL) + 1 
+		WHEN val LIKE "<%" THEN CAST(TRIM("<" FROM val) AS DECIMAL) - 1 
+		ELSE CAST(val AS DECIMAL)
+	END$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function lonDMS
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`lonDMS`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DMS(c_value, prec))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function lonDM
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`lonDM`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DM(c_value, prec))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function lonD
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`lonD`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN IF ( lon < 0, CONCAT('W ', ABS(ROUND(lon,prec)), 'Â°'), CONCAT('E ', ROUND(lon,prec), 'Â°'))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function locationAlpha
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`locationAlpha`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `locationAlpha`(x_val INT(10), y_val INT(10)) RETURNS varchar(3) CHARSET latin1
+RETURN CONCAT(CHAR(64 + x_val), y_val)$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function latDMS
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`latDMS`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `latDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DMS(c_value, prec))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function latDM
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`latDM`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DM(c_value, prec))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function latD
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`latD`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN IF ( lat < 0, CONCAT('S ', ABS(ROUND(lat,prec)), 'Â°'), CONCAT('N ', ROUND(lat,prec), 'Â°'))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function isActive
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`isActive`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `isActive`(val VARCHAR(45), act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
+RETURN IF( CHAR_LENGTH(val) < 1, 0, active( parseActivity(val), act_level, act_op ))$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function active
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`active`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `active`(val FLOAT, act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
+RETURN CASE act_op 
+	WHEN 'eq' THEN IF( val = act_level, 1, 0)
+	WHEN 'ne' THEN IF( val <> act_level, 1, 0)
+	WHEN 'gt' THEN IF( val > act_level, 1, 0)
+	WHEN 'ge' THEN IF( val >= act_level, 1, 0)
+	WHEN 'lt' THEN IF( val < act_level, 1, 0)
+	WHEN 'le' THEN IF( val <= act_level, 1, 0) END$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function DMS
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`DMS`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( ABS(TRUNCATE(c_value,0)), 'Â° ', 
+	ABS(TRUNCATE((c_value * 60) % 60,0)), "\' ", 
+	ABS(ROUND((c_value * 3600) % 3600,0)), "\"")$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function DM
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `cyanos`.`DM`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( ABS(TRUNCATE(c_value,0)), 'Â° ', 
+	ABS(ROUND((c_value * 60) % 60, ABS(ROUND(LOG10(1825 / prec))) )), "\'")$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `cyanos`.`config`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `cyanos`;
+INSERT INTO `cyanos`.`config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2');
+
+COMMIT;
