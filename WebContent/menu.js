@@ -8,8 +8,8 @@
 var _assumeFrameset=1;
 var _framesetURL="http://www.yxscripts.com/menuG5";
 
-if( typeof(assumeFrameset)=="undefined" ) { assumeFrameset=_assumeFrameset };
-if( typeof(framesetURL)=="undefined" ) { framesetURL=_framesetURL };
+if( typeof(assumeFrameset)=="undefined" ) { assumeFrameset=_assumeFrameset; }
+if( typeof(framesetURL)=="undefined" ) { framesetURL=_framesetURL; }
 
 var yx_ii=yx_ih=yx_bv=yx_bu=yx_ie=yx_ij=yx_bt=yx_bw=yx_id=yx_bs=null;
 var yx_fr=yx_ft=null;
