@@ -19,12 +19,12 @@
 <P>The CYANOS database system was developed to facilitate data management and mining for natural product drug discovery efforts.  This User's Guide provides information on basic usage, e.g. add and view data, of the
 CYANOS database.  Information on the design and implementation of the CYANOS database can be found in the Developer's Guide.  The Developer's Guide also provides information for creating SQL queries
 used in report generation and data mining as well as information on adding features to and creating programs for the CYANOS database.  The code for this system is freely available and has been released under the Illinois Open Source license.</P>
-<P><B><A NAME='toc'>Table of Contents</A></B>
+<P><B><A NAME='toc'>Table of Contents</A></B></P>
 <OL>
 <LI><A HREF='#features'>Features</A></LI>
 <LI><A HREF='#implement'>Implementation</A></LI>
 </OL>
-</P>
+
 <HR WIDTH='85%' ALIGN='LEFT'/>
 
 <P ALIGN='CENTER'><IMG SRC="intro01.jpg" NAME="graphics4" WIDTH='100%' ALIGN=CENTER BORDER=0><BR/>
@@ -33,60 +33,66 @@ used in report generation and data mining as well as information on adding featu
 
 <H2><A NAME='features'>Features</A></H2>
 The CYANOS database allows one to manage data concerning field collections, culture information, extractions, chemical separations, and bioassay data.  Currently, the following information can be managed for each of the following data types.</P>
-<UL>
-	<LI><P>Field Collections</P>
-	<UL>
-		<LI><P>Allowed Attributes: date, collector, location, geographic coordinates, project code and collection notes</P>
-		<LI><P>Child objects can include: isolations and harvests</P>
-	</UL>
-	<LI><P>Field Isolations</P>
-	<UL>
-		<LI><P>Allowed Attributes: date, isolation type, media, parent collection, parent isolation (if exists), project code and isolation notes.</P>
-		<LI><P>Child objects can include: isolations and strains</P>
-	</UL>
-	<LI><P>Strains</P>
-	<UL>
-		<LI><P>Allowed Attributes: strain ID, culture source, date added, date removed, removal reason, culture status, Latin binomial, default media, project code and notes.</P>
-		<LI><P>Child objects can include: inoculations, cryopreservations, harvests, samples and bioassay data.</P>
-		<LI><P>Strains can also link to compounds and separations via sample information.</P>
-	</UL>
-	<LI><P>Inoculations</P>
-	<UL>
-		<LI><P>Allowed Attributes:  strain ID, creation date, media, volume, project code, fate, removal date and notes.</P>
-		<LI><P>Child objects can include: inoculations, cryopreservations and harvests.</P>
-	</UL>
-	<LI><P>Harvests</P>
-	<UL>
-		<LI><P>Allowed Parents: inoculation or field collection</P>
-		<LI><P>Allowed Attributes: strain ID, harvest date, preparation date, cell color and type, cell mass, media volume, project code and notes.</P>
-		<LI><P>Child objects can include: samples.</P>
-	</UL>
-	<LI><P>Samples</P>
-	<UL>
-		<LI><P>Samples are organized into sample collections, which can be organized into libraries.</P>
-		<LI><P>Allowed
-		Attributes: strain ID, date, label, default unit, concentration, sample collection, location, project code and notes.</P>
-		<LI><P>Transaction histories can be stored detailing date, amount, object link and notes.</P>
-		<LI><P>Extracts	can store extract information, e.g. solvent, source harvest and	method.</P>
-		<LI><P>Fractions can link to parent separations</P>
-		<LI><P>Compounds can link to compound records.</P>
-		<LI><P>Child objects can include: samples and separations.</P>
-	</UL>
-	<LI><P>Separations</P>
-	<UL>
-		<LI><P>Allowed Attributes: date, stationary phase, mobile phase, method and notes.</P>
-		<LI><P>Separations link to source materials and fractionation products.</P>
-	</UL>
-	<LI><P>Compounds</P>
-	<UL>
-		<LI><P>Allowed Attributes: compound ID, name, molecular formula, SMILES string, formula weight, monoisotopic weight, CML structure and notes.</P>
-	</UL>
-	<LI><P>Bioassays</P>
-	<UL>
-		<LI><P>Allowed Attributes: assay ID, target, date, activity thresholds, unit of	measure, project code and notes.</P>
-		<LI><P>Assay data can include: strain ID, sample serial number, location on plate, concentration, activity and standard deviation.</P>
-	</UL>
-</UL>
+<ul>
+	<li>Field Collections
+	<ul>
+		<li>Allowed Attributes: date, collector, location, geographic coordinates, project code and collection notes</li>
+		<li>Child objects can include: isolations and harvests</li>
+	</ul></li>
+	<li>Field Isolations
+	<ul>
+		<li>Allowed Attributes: date, isolation type, media, parent collection, parent isolation (if exists), project code and isolation notes.</li>
+		<li>Child objects can include: isolations and strains</li>
+	</ul></li>
+	<li>Strains
+	<ul>
+		<li>Allowed Attributes: strain ID, culture source, date added, date removed, removal reason, culture status, Latin binomial, default media, project code and notes.</li>
+		<li>Child objects can include: inoculations, cryopreservations, harvests, samples and bioassay data.</li>
+		<li>Strains can also link to compounds and separations via sample information.</li>
+	</ul></li>
+	<li>Inoculations
+	<ul>
+		<li>Allowed Attributes:  strain ID, creation date, media, volume, project code, fate, removal date and notes.</li>
+		<li>Child objects can include: inoculations, cryopreservations and harvests.</li>
+	</ul></li>
+	<li>Harvests
+	<ul>
+		<li>Allowed Parents: inoculation or field collection</li>
+		<li>Allowed Attributes: strain ID, harvest date, preparation date, cell color and type, cell mass, media volume, project code and notes.</li>
+		<li>Child objects can include: samples.</li>
+	</ul></li>
+	<li>Materials
+	<ul>
+		<li>Materials are the base for all substances in CYANOS.</li>
+		<li>Allowed Attributes: strain ID, date, label, initial amount (in grams), project code and notes.</li>
+		<li>Extracts can store extract information, e.g. source harvest, extraction type, solvent, and method.</li>
+		<li>Fractions can link to parent separations</li>
+		<li>Child objects can include: samples and separations.</li>
+		<li>All materials records can link to one or more compound records.</li>
+	</ul></li>
+	<li>Samples
+	<ul>
+		<li>Samples are small portions of materials that may be stored or sent to collaborators.</li>
+		<li>Samples are organized into sample collections, which can be organized into libraries.</li>
+		<li>Allowed Attributes: parent material ID, strain ID, date, label, default unit, concentration, sample collection, location, project code and notes.</li>
+		<li>Transaction histories can be stored detailing date, amount, object link and notes.</li>
+	</ul>
+	<li>Separations
+	<ul>
+		<li>Allowed Attributes: date, stationary phase, mobile phase, method and notes.</li>
+		<li>Separations link to source materials and fractionation products.</li>
+	</ul></li>
+	<li>Compounds
+	<ul>
+		<li>Allowed Attributes: compound ID, name, molecular formula, SMILES string, formula weight, monoisotopic weight, CML structure and notes.</li>
+		<li>Compound records can link to materials and separations (with retention time).
+	</ul></li>
+	<li>Bioassays
+	<ul>
+		<li>Allowed Attributes: assay ID, target, date, activity thresholds, unit of	measure, project code and notes.</li>
+		<li>Assay data can include: strain ID, sample serial number, location on plate, concentration, activity and standard deviation.</li>
+	</ul></li>
+</ul>
 
 <A HREF='#toc'>Return to table of contents</A>
 <HR WIDTH='85%' ALIGN='LEFT'/>
