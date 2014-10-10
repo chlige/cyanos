@@ -1,573 +1,485 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd" >
-<web-app>
-    <display-name>Cyanos Database</display-name>
-	<description>Cyanos Database servlets.</description>
-	<listener>
-		<listener-class>edu.uic.orjala.cyanos.web.listener.AppConfigListener</listener-class>
-	</listener>
-	<listener>
-		<listener-class>edu.uic.orjala.cyanos.web.listener.CyanosSessionListener</listener-class>
-	</listener>
-	<listener>
-		<listener-class>edu.uic.orjala.cyanos.web.listener.ProjectUpdateListener</listener-class>
-	</listener>
-	<!--  
- 	<listener>
-    	<listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
-  	</listener>
-  	-->
-	<servlet>
-		<servlet-name>jspAssign</servlet-name>
-		<servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
-        <init-param>
-            <param-name>logVerbosityLevel</param-name>
-            <param-value>WARNING</param-value>
-        </init-param>
-        <init-param>
-            <param-name>fork</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <load-on-startup>3</load-on-startup>
-	</servlet>
-		<servlet>
-		<servlet-name>help</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.HelpServlet</servlet-class>
-	</servlet>	
-	<servlet>
-		<servlet-name>main</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.MainServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>strain</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.StrainServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>cryo</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.CryoServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>inoc</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.InocServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>harvest</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.HarvestServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>cal</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.CalServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>sample</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.SampleServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>assay</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.AssayServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>upload</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.UploadServlet</servlet-class>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>separation</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.SeparationServlet</servlet-class>
-	</servlet>
-
-	<servlet>
-		<servlet-name>collection</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.CollectionServlet</servlet-class>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>taxon</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.TaxonServlet</servlet-class>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>datafile</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.DataFileServlet</servlet-class>
-		<init-param>
-			<param-name>readonly</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <init-param>
-            <param-name>mimetype-icons</param-name>
-            <param-value>WEB-INF/mimeicons.properties</param-value>
-        </init-param>
-	</servlet>
-	<servlet>
-		<servlet-name>admin</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.AdminServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>project</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.ProjectServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>queue</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.QueueServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>compound</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.CompoundServlet</servlet-class>
-	</servlet>
-		<servlet>
-		<servlet-name>dereplication</servlet-name>
-		<servlet-class>edu.uic.orjala.cyanos.web.servlet.DereplicationServlet</servlet-class>
-	</servlet>
-		<servlet>
-			<servlet-name>MaterialServlet</servlet-name>
-			<description>Servlet to manage material objects</description>
-			<servlet-class>edu.uic.orjala.cyanos.web.servlet.MaterialServlet</servlet-class>
-		</servlet>
-		<servlet>
-			<servlet-name>ProjectUpdateServlet</servlet-name>
-			<display-name>ProjectUpdateServlet</display-name>
-			<description>Project Update Servlet</description>
-			<servlet-class>edu.uic.orjala.cyanos.web.servlet.ProjectUpdateServlet</servlet-class>
-		</servlet>
-		<servlet>
-			<servlet-name>UploadStatusServlet</servlet-name>
-			<display-name>UploadStatusServlet</display-name>
-			<description>Status of Uploads</description>
-			<servlet-class>edu.uic.orjala.cyanos.web.servlet.UploadStatusServlet</servlet-class>
-		</servlet>
-<!-- The following are entries for the old servlets -->
-<!-- REMOVED
-	<servlet>
-		<servlet-name>link</servlet-name>
-		<servlet-class>com.walnutcs.cyanos.LinkServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>health</servlet-name>
-		<servlet-class>com.walnutcs.cyanos.HealthServlet</servlet-class>
-	</servlet>
--->
-	<servlet-mapping>
-		<servlet-name>main</servlet-name>
-		<url-pattern>/main</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>strain</servlet-name>
-		<url-pattern>/strain</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>strain</servlet-name>
-		<url-pattern>/strain.report</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>taxon</servlet-name>
-		<url-pattern>/taxabrowser</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>strain</servlet-name>
-		<url-pattern>/remove.strain</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>cryo</servlet-name>
-		<url-pattern>/cryo/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>help</servlet-name>
-		<url-pattern>/help</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>help</servlet-name>
-		<url-pattern>/help/toc</url-pattern>
-	</servlet-mapping>
-		<servlet-mapping>
-		<servlet-name>help</servlet-name>
-		<url-pattern>/help/search</url-pattern>
-	</servlet-mapping>
-		<servlet-mapping>
-		<servlet-name>help</servlet-name>
-		<url-pattern>/help/find</url-pattern>
-	</servlet-mapping>
-			<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/self/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/reset/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>inoc</servlet-name>
-		<url-pattern>/inoc</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>harvest</servlet-name>
-		<url-pattern>/harvest</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>datafile</servlet-name>
-		<url-pattern>/file/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>assay</servlet-name>
-		<url-pattern>/assay</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>assay</servlet-name>
-		<url-pattern>/assay/protocol</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>assay</servlet-name>
-		<url-pattern>/assay.protocol</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>assay</servlet-name>
-		<url-pattern>/assay.export</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>assay</servlet-name>
-		<url-pattern>/assay.csv</url-pattern>
-	</servlet-mapping>
-<!--
-	<servlet-mapping>
-		<servlet-name>link</servlet-name>
-		<url-pattern>/link</url-pattern>
-	</servlet-mapping>
--->
-	<servlet-mapping>
-		<servlet-name>cal</servlet-name>
-		<url-pattern>/cal</url-pattern>
-	</servlet-mapping>
-<!--
-	<servlet-mapping>
-		<servlet-name>health</servlet-name>
-		<url-pattern>/health</url-pattern>
-	</servlet-mapping>
--->
-
-    <servlet-mapping>
-        <servlet-name>jspAssign</servlet-name>
-        <url-pattern>/index.jsp</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>jspAssign</servlet-name>
-        <url-pattern>/login.jsp</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>upload</servlet-name>
-    	<url-pattern>/upload</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>UploadStatusServlet</servlet-name>
-    	<url-pattern>/upload/status</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>UploadStatusServlet</servlet-name>
-    	<url-pattern>/upload/results</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>UploadStatusServlet</servlet-name>
-    	<url-pattern>/upload/sheet</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-    	<servlet-name>separation</servlet-name>
-    	<url-pattern>/separation</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-    	<servlet-name>separation</servlet-name>
-    	<url-pattern>/separation/export</url-pattern>
-    </servlet-mapping>
-
-        <servlet-mapping>
-    	<servlet-name>separation</servlet-name>
-    	<url-pattern>/separation/protocol</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-		<servlet-name>sample</servlet-name>
-		<url-pattern>/sample</url-pattern>
-	</servlet-mapping>
-
-    <servlet-mapping>
-		<servlet-name>sample</servlet-name>
-		<url-pattern>/sample/export</url-pattern>
-	</servlet-mapping>
-
-    	<servlet-mapping>
-		<servlet-name>collection</servlet-name>
-		<url-pattern>/collection</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>collection</servlet-name>
-		<url-pattern>/collection.kml</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>collection</servlet-name>
-		<url-pattern>/collection.csv</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/admin</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/admin/get-config</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/admin/config</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/admin/user/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>admin</servlet-name>
-		<url-pattern>/news</url-pattern>
-	</servlet-mapping>
-	
-				
-	<servlet-mapping>
-		<servlet-name>project</servlet-name>
-		<url-pattern>/project</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>project</servlet-name>
-		<url-pattern>/project/update</url-pattern>
-	</servlet-mapping>
-
-		<servlet-mapping>
-		<servlet-name>queue</servlet-name>
-		<url-pattern>/queue/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>compound</servlet-name>
-		<url-pattern>/compound</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>compound</servlet-name>
-		<url-pattern>/compound/export/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>compound</servlet-name>
-		<url-pattern>/compound/graphic/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>dereplication</servlet-name>
-		<url-pattern>/dereplication</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>MaterialServlet</servlet-name>
-		<url-pattern>/material</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ProjectUpdateServlet</servlet-name>
-		<url-pattern>/update/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>UploadStatusServlet</servlet-name>
-		<url-pattern>/upload-status</url-pattern>
-	</servlet-mapping>
-
-	<error-page>
-	    <error-code>500</error-code>
-	    <location>/error.jsp</location>
-	</error-page>
-	
-	
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:web="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>Cyanos Database</display-name>
+  <description>Cyanos Database servlets.</description>
+  <listener>
+    <listener-class>edu.uic.orjala.cyanos.web.listener.AppConfigListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>edu.uic.orjala.cyanos.web.listener.CyanosSessionListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>edu.uic.orjala.cyanos.web.listener.ProjectUpdateListener</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>jspAssign</servlet-name>
+    <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+    <init-param>
+      <param-name>logVerbosityLevel</param-name>
+      <param-value>WARNING</param-value>
+    </init-param>
+    <init-param>
+      <param-name>fork</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <load-on-startup>3</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>help</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.HelpServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>main</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.MainServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>strain</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.StrainServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>cryo</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.CryoServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>inoc</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.InocServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>harvest</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.HarvestServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>cal</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.CalServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>sample</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.SampleServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>assay</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.AssayServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>upload</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.UploadServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>separation</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.SeparationServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>collection</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.CollectionServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>taxon</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.TaxonServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>datafile</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.DataFileServlet</servlet-class>
+    <init-param>
+      <param-name>readonly</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <param-name>mimetype-icons</param-name>
+      <param-value>WEB-INF/mimeicons.properties</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>admin</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.AdminServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>project</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.ProjectServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>queue</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.QueueServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>compound</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.CompoundServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>dereplication</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.DereplicationServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>Servlet to manage material objects</description>
+    <servlet-name>MaterialServlet</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.MaterialServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>Project Update Servlet</description>
+    <display-name>ProjectUpdateServlet</display-name>
+    <servlet-name>ProjectUpdateServlet</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.ProjectUpdateServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>Status of Uploads</description>
+    <display-name>UploadStatusServlet</display-name>
+    <servlet-name>UploadStatusServlet</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.UploadStatusServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>main</servlet-name>
+    <url-pattern>/main</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>strain</servlet-name>
+    <url-pattern>/strain</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>strain</servlet-name>
+    <url-pattern>/strain.report</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>taxon</servlet-name>
+    <url-pattern>/taxabrowser</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>strain</servlet-name>
+    <url-pattern>/remove.strain</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>cryo</servlet-name>
+    <url-pattern>/cryo/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>help</servlet-name>
+    <url-pattern>/help</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>help</servlet-name>
+    <url-pattern>/help/toc</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>help</servlet-name>
+    <url-pattern>/help/search</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>help</servlet-name>
+    <url-pattern>/help/find</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/self/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/reset/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>inoc</servlet-name>
+    <url-pattern>/inoc</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>harvest</servlet-name>
+    <url-pattern>/harvest</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>datafile</servlet-name>
+    <url-pattern>/file/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>assay</servlet-name>
+    <url-pattern>/assay</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>assay</servlet-name>
+    <url-pattern>/assay/protocol</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>assay</servlet-name>
+    <url-pattern>/assay.protocol</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>assay</servlet-name>
+    <url-pattern>/assay.export</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>assay</servlet-name>
+    <url-pattern>/assay.csv</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>cal</servlet-name>
+    <url-pattern>/cal</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>jspAssign</servlet-name>
+    <url-pattern>/index.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>jspAssign</servlet-name>
+    <url-pattern>/login.jsp</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>upload</servlet-name>
+    <url-pattern>/upload</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UploadStatusServlet</servlet-name>
+    <url-pattern>/upload/status</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UploadStatusServlet</servlet-name>
+    <url-pattern>/upload/results</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UploadStatusServlet</servlet-name>
+    <url-pattern>/upload/sheet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>separation</servlet-name>
+    <url-pattern>/separation</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>separation</servlet-name>
+    <url-pattern>/separation/export</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>separation</servlet-name>
+    <url-pattern>/separation/protocol</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>sample</servlet-name>
+    <url-pattern>/sample</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>sample</servlet-name>
+    <url-pattern>/sample/export</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>collection</servlet-name>
+    <url-pattern>/collection</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>collection</servlet-name>
+    <url-pattern>/collection.kml</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>collection</servlet-name>
+    <url-pattern>/collection.csv</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/admin</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/admin/get-config</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/admin/config</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/admin/user/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>admin</servlet-name>
+    <url-pattern>/news</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>project</servlet-name>
+    <url-pattern>/project</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>project</servlet-name>
+    <url-pattern>/project/update</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>queue</servlet-name>
+    <url-pattern>/queue/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>compound</servlet-name>
+    <url-pattern>/compound</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>compound</servlet-name>
+    <url-pattern>/compound/export/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>compound</servlet-name>
+    <url-pattern>/compound/graphic/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>dereplication</servlet-name>
+    <url-pattern>/dereplication</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MaterialServlet</servlet-name>
+    <url-pattern>/material</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ProjectUpdateServlet</servlet-name>
+    <url-pattern>/update/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UploadStatusServlet</servlet-name>
+    <url-pattern>/upload-status</url-pattern>
+  </servlet-mapping>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error.jsp</location>
+  </error-page>
   <resource-ref>
-	<res-ref-name>jdbc/CyanosDB</res-ref-name>
-	<res-type>javax.sql.DataSource</res-type>
-	<res-auth>Container</res-auth>
+    <res-ref-name>jdbc/CyanosDB</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
   </resource-ref>
-
   <resource-ref>
-  	<description>
+    <description>
   		Resource reference to a factory for javax.mail.Session
   		instances that may be used for sending electronic mail
   		messages, preconfigured to connect to the appropriate SMTP
   		server.
   	</description>
-  	<res-ref-name>mail/Session</res-ref-name>
-  	<res-type>javax.mail.Session</res-type>
-  	<res-auth>Container</res-auth>
+    <res-ref-name>mail/Session</res-ref-name>
+    <res-type>javax.mail.Session</res-type>
+    <res-auth>Container</res-auth>
   </resource-ref>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Login Form</web-resource-name>
-			 <url-pattern>/login.jsp</url-pattern>
-			 <url-pattern>/main-login.jsp</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>*</role-name>
-		</auth-constraint>
-	</security-constraint>
-	
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Other Utilities</web-resource-name>
-			 <url-pattern>/self/*</url-pattern>	
-			 <url-pattern>/queue/*</url-pattern>
-			 <url-pattern>/upload</url-pattern>
-			 <url-pattern>/upload/*</url-pattern>
-			 <url-pattern>/doc/*</url-pattern>
-			 <url-pattern>/file/manager/*</url-pattern>
-<!--  		 <http-method>PUT</http-method> -->
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>*</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Application Management</web-resource-name>
-			 <url-pattern>/admin/*</url-pattern>
-			 <url-pattern>/help/admin</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>admin</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Culture Servlets</web-resource-name>
-			 <url-pattern>/inoc</url-pattern>
-			 <url-pattern>/inoc/*</url-pattern>
-			 <url-pattern>/harvest/*</url-pattern>
-			 <url-pattern>/harvest</url-pattern>
-			 <url-pattern>/strain.report</url-pattern>
-			 <url-pattern>/remove.strain</url-pattern>
-			 <url-pattern>/upload/isolation</url-pattern>
-			 <url-pattern>/upload/collection</url-pattern>
-			 <url-pattern>/collection/*</url-pattern>
-			 <url-pattern>/collection.csv</url-pattern>
-			 <url-pattern>/collection.kml</url-pattern>
-			 <url-pattern>/cryo/*</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>culture</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Sample Servlets</web-resource-name>
-			 <url-pattern>/material.jsp</url-pattern>
-			 <url-pattern>/material/*</url-pattern>
-			 <url-pattern>/sample/*</url-pattern>
-			 <url-pattern>/upload/sample/*</url-pattern>
-			 <url-pattern>/upload/prefrac/*</url-pattern>
-			 <url-pattern>/upload/fraction/*</url-pattern>
-			 <url-pattern>/separation/*</url-pattern>
-			 <url-pattern>/compound/*</url-pattern>
-			 <url-pattern>/dereplication</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>sample</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Assay Servlets</web-resource-name>	
-			 <url-pattern>/assay/*</url-pattern>
-			 <url-pattern>/assay</url-pattern>
-			 <url-pattern>/assay.protocol</url-pattern>
-			 <url-pattern>/assay.export</url-pattern>
-			 <url-pattern>/assay.csv</url-pattern>
-			 <url-pattern>/upload/assay/*</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>assay</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<security-constraint>
-		<web-resource-collection>
-			 <web-resource-name>Project Servlets</web-resource-name>	
-			 <url-pattern>/project/*</url-pattern>
-		</web-resource-collection>
- 
-		<auth-constraint>
-			<role-name>project</role-name>
-		</auth-constraint>
-	</security-constraint>
-	
-  	<login-config>
-		<auth-method>FORM</auth-method>
-		<form-login-config> 
-			<form-login-page>/loginform.jsp</form-login-page>
-			<form-error-page>/login-error.jsp</form-error-page>
-		</form-login-config> 
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Login Form</web-resource-name>
+      <url-pattern>/login.jsp</url-pattern>
+      <url-pattern>/main-login.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Other Utilities</web-resource-name>
+      <url-pattern>/self/*</url-pattern>
+      <url-pattern>/queue/*</url-pattern>
+      <url-pattern>/upload</url-pattern>
+      <url-pattern>/upload/*</url-pattern>
+      <url-pattern>/doc/*</url-pattern>
+      <url-pattern>/file/manager/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Application Management</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+      <url-pattern>/help/admin</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Culture Servlets</web-resource-name>
+      <url-pattern>/inoc</url-pattern>
+      <url-pattern>/inoc/*</url-pattern>
+      <url-pattern>/harvest/*</url-pattern>
+      <url-pattern>/harvest</url-pattern>
+      <url-pattern>/strain.report</url-pattern>
+      <url-pattern>/remove.strain</url-pattern>
+      <url-pattern>/upload/isolation</url-pattern>
+      <url-pattern>/upload/collection</url-pattern>
+      <url-pattern>/collection/*</url-pattern>
+      <url-pattern>/collection.csv</url-pattern>
+      <url-pattern>/collection.kml</url-pattern>
+      <url-pattern>/cryo/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>culture</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Sample Servlets</web-resource-name>
+      <url-pattern>/material.jsp</url-pattern>
+      <url-pattern>/material/*</url-pattern>
+      <url-pattern>/sample/*</url-pattern>
+      <url-pattern>/upload/sample/*</url-pattern>
+      <url-pattern>/upload/prefrac/*</url-pattern>
+      <url-pattern>/upload/fraction/*</url-pattern>
+      <url-pattern>/separation/*</url-pattern>
+      <url-pattern>/compound/*</url-pattern>
+      <url-pattern>/dereplication</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>sample</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Assay Servlets</web-resource-name>
+      <url-pattern>/assay/*</url-pattern>
+      <url-pattern>/assay</url-pattern>
+      <url-pattern>/assay.protocol</url-pattern>
+      <url-pattern>/assay.export</url-pattern>
+      <url-pattern>/assay.csv</url-pattern>
+      <url-pattern>/upload/assay/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>assay</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Project Servlets</web-resource-name>
+      <url-pattern>/project/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>project</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/loginform.jsp</form-login-page>
+      <form-error-page>/login-error.jsp</form-error-page>
+    </form-login-config>
   </login-config>
-  
-   <security-role>
+  <security-role>
     <description>
       The role that is required to manage Cyro information
     </description>
     <role-name>cryo</role-name>
   </security-role>
-  
-   <security-role>
+  <security-role>
     <description>
       The role that is required to manage bioassay information
     </description>
     <role-name>assay</role-name>
   </security-role>
-  
-   <security-role>
+  <security-role>
     <description>
       The role that is required to manage sample information
     </description>
     <role-name>sample</role-name>
   </security-role>
-  
-   <security-role>
+  <security-role>
     <description>
       The role that is required to manage culture information
     </description>
     <role-name>culture</role-name>
   </security-role>
-  
-   <security-role>
+  <security-role>
     <description>
       The role that is required to administer the application
     </description>
     <role-name>admin</role-name>
-  </security-role> 
- 
-    <security-role>
+  </security-role>
+  <security-role>
     <description>
       The role that is required to manage project information
     </description>
     <role-name>project</role-name>
-  </security-role> 
- 
+  </security-role>
 </web-app>
