@@ -1,16 +1,13 @@
-@import url("menu.css");
-
 body {
-	background-color: #ffffff;
-	font-weight: normal; font-size: 12px; color: #000000; 
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Verdana, Arial, "Lucida Grande", sans-serif;
-	margin: 0px;
+	BACKGROUND-COLOR: #ffffff;
+	FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #000000; 
+	FONT-FAMILY: sans-serif;
 }
 
 h1 { text-align: center; }
 
 .content { /* position: absolute; */
-	margin-left: 50px; margin-right: 50px; margin-bottom: 50px; }
+	margin-top: 50px; margin-bottom: 50px; left: 50px; right: 50px;}
 .hideSection { display: none; }
 .unloaded { display: none; }
 .showSection { display: block; margin-bottom: 10px; }
@@ -24,10 +21,8 @@ h1 { text-align: center; }
 .right30 { width: 27%; float: right; display: inline; margin-bottom: 0; }
 .left25 { width: 25%; float: left; display: inline; margin-bottom: 0;}
 .right75 { width: 73%; float: right; display: inline; margin-bottom: 0; }
-.messages { display:block; background-color: #DDDDDD; width: 80%; 
-	border: 2px solid black; margin-left: 10%; margin-bottom: 10px; margin-top: 10px; padding-left: 10px; }
-.error { display:block; background-color: #FEDDDD; width: 80%; 
-	border: 2px solid red; margin-left: 10%; margin-bottom: 10px; margin-top: 10px; padding-left: 10px; }
+.messages { display:block; background-color: #DDDDDD; width: 80%; border: 2px solid black; margin-left: 10%; margin-bottom: 10px; margin-top: 10px; padding-left: 10px; }
+.error { display:block; background-color: #FEDDDD; width: 80%; border: 2px solid red; margin-left: 10%; margin-bottom: 10px; margin-top: 10px; padding-left: 10px; }
 .main { display: block; width: 90%; margin-left: 5%; margin-bottom: 10px; }
 .collapseSection { clear: both; display: block; width: 90%; margin-left: 5%; 
 	border-top: 1px solid gray; border-bottom: 1px solid gray; margin-bottom: 10px;  
@@ -129,13 +124,13 @@ tr.border { BACKGROUND-COLOR: #808080 }
 tr.updated { BACKGROUND-COLOR: #FFFF90 }
 
 
-th { FONT-WEIGHT: bold; font-style: oblique; font-size: 12px; 
-	COLOR: #000000; }
+th { FONT-WEIGHT: bold; font-style: oblique; FONT-SIZE: 12px; 
+	COLOR: #000000; FONT-FAMILY: sans-serif }
 th.header { border-bottom: 2px solid #808080; }
 th.footer { border-top: 2px solid #808080; }
 
 td { FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #000000; 
-	padding: 4px; }
+	FONT-FAMILY: sans-serif;  padding: 4px; }
 td.week { border-right: 1px solid #808080; 
 	border-left: 1px solid #808080 }
 td.day { BACKGROUND-COLOR: #BBEEFF; }
@@ -200,51 +195,46 @@ span.selectedTab {
 ul.intable { margin-left: 2px; padding: 0; margin-top: 0; margin-bottom: 1px  }
 ul.blank { list-style-type: none }
 
-/* ul.topmenu { position: fixed; margin-left: 0px; padding-left: 0px; top: 0px; }
-ul.topmenu li { list-style-type: none; position: relative; 
-	margin: 0px; min-width: 100px; padding-left: 7px;
-	padding-top: 5px; height: 25px;
-	background-image: url("images/cyan-menu.png");
-	border: 1.5px solid #323232; background-color:#59B27F; 
-	FONT-SIZE: 16px; FONT-WEIGHT: bold; COLOR:#E8E850 }
-ul.topmenu li > ul { display: none; position: absolute; background: #006060; 
-	min-width: 90px; margin-left: 5px; padding-left: 0px; margin-top: 5px;
-	border-right: 1px solid #323232;
-	border-left: 1px solid #323232;
-	border-bottom: 1px solid #323232; }
-ul.topmenu li:hover { cursor: default; }
-ul.topmenu li:hover > ul { display: block; }
-ul.topmenu li:active { cursor: default; }
-ul.topmenu li:active > ul { display: block; }
-ul.topmenu li > ul li { list-style-type: none; position: relative; margin: 0px; width: 87px; height: 20px; border: 0; background-image: none;}
-ul.topmenu li > ul li a:hover { background-color: #00CCCC; color: #202020; }
-*/
+.menu { position: relative; display: inline; float: left;
+	width: 125px; padding-left: 7px;
+	padding-top: 5px; height: 25px; margin-right: 2px;
+/*	background-image: url("images/cyan-menu.png");
+	background-repeat: no-repeat; */
+	background-color: #2E8B57;
+	border: 2px outset green;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+/*	FONT-SIZE: 16px; FONT-WEIGHT: bold; COLOR:#E8E850; */ }
+
 
 li.day { list-style: none; BACKGROUND-COLOR: #000000; COLOR: #FFFFFF }
 li.event { list-style: disc; margin-left: 20px; padding-left: 0 }
 
-a { color: #009000; text-decoration: none
+A {
+	FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #009000; 
+	FONT-FAMILY: sans-serif; TEXT-DECORATION: none
 }
 
 a.closeBox, a.closeBox:visited {
 	border: 1px solid black;  background-color:red;  padding-left:1px; padding-right:1px;
 }
 
-a.chemspider, a.chemspider:visited {	COLOR: #3A66CF; }
+A.chemspider, A.chemspider:visited {	COLOR: #3A66CF; }
 
-a.chemspider:hover { COLOR: #3A66CF; }
+A.chemspider:hover { COLOR: #3A66CF; }
 
-a.twist, a.twist:hover { color: #000000; font-weight: bold; font-size:16px; TEXT-DECORATION: none; 
+A.twist, A.twist:hover { color: #000000; font-weight: bold; font-size:16px; TEXT-DECORATION: none; 
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	user-select: none;
 }
-a.divTitle, a.divTitle:hover { font-weight: bold; font-size: 14px; TEXT-DECORATION: none; 
+A.divTitle, A.divTitle:hover { font-weight: bold; font-size: 14px; TEXT-DECORATION: none; 
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	user-select: none;}
 	
-a.divSubtitle, a.divSubtitle:hover { font-size: 14px; text-decoration: none; 
+A.divSubtitle, A.divSubtitle:hover { font-size: 14px; text-decoration: none; 
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	user-select: none;
@@ -260,39 +250,39 @@ a:visited {
 	FONT-SIZE: 12px; FONT-WEIGHT: normal; COLOR: #009000; TEXT-DECORATION: none
 }
 
-a.menu {
+A.menu {
 	FONT-SIZE: 16px; FONT-WEIGHT: bold; COLOR: #E8E850;
 }
 
-a.menu:hover {
+A.menu:hover {
 	cursor: default;
 }
 
-a.table {
+A.table {
 	FONT-WEIGHT: bold; COLOR:#805000;
 }
 
-a.table:hover {
+A.table:hover {
 	COLOR: black; cursor: default; TEXT-DECORATION: underline;
 }
 
-a.tab {
+A.tab {
 	FONT-SIZE: 12px; COLOR:#F0F0F0;
 }
 
-a.tab:hover {
+A.tab:hover {
 	COLOR:#FFFFF0; cursor: default; FONT-WEIGHT: normal; TEXT-DECORATION: none;
 }
 
-a.submenu {
+A.submenu {
 	FONT-SIZE: 12px; COLOR:#E8E850;
 }
 
-a.submenu:hover {
+A.submenu:hover {
 	COLOR:#727272; cursor: default; FONT-WEIGHT: normal; TEXT-DECORATION:none;
 }
 
-a.footer {
+A.footer {
 	FONT-SIZE: 16px; FONT-WEIGHT: bold;
 }
 
