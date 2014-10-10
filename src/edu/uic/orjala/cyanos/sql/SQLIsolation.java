@@ -3,6 +3,7 @@ package edu.uic.orjala.cyanos.sql;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 import edu.uic.orjala.cyanos.Collection;
 import edu.uic.orjala.cyanos.DataException;
@@ -53,6 +54,10 @@ public class SQLIsolation extends SQLObject implements Isolation {
 	private static final String SQL_LOAD_FOR_COLLECTION = SQL_BASE + " WHERE collection_id=? ORDER BY date ASC";
 	private static final String SQL_LOAD_POSSIBLE_PARENTS = SQL_BASE + " WHERE collection_id=? AND isolation_id != ? ORDER BY date ASC";
 
+	public static List<String> types(SQLData data) throws DataException, SQLException {
+		return data.getPossibles("SHOW COLUMNS FROM isolation LIKE 'type'");
+	}
+	
 	public static Isolation isolations(SQLData data, String column, String sortDirection) throws DataException {
 		SQLIsolation myIsos = new SQLIsolation(data);
 		String sqlString = String.format(SQL_LOAD_SORTABLE, column, sortDirection);
