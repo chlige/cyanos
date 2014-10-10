@@ -69,7 +69,7 @@ public class MainServlet extends ServletObject {
 	public static final String ATTR_FILE_COMPLETE = "fileUploaded";
 	
 	public void doPost ( HttpServletRequest req, HttpServletResponse res ) throws ServletException, IOException {
-		if ( this.newInstall || this.upgradeInstall ) {
+		if ( AppConfigListener.isUpgradeInstall() ) {
 			req = MultiPartRequest.parseRequest(req);
 			this.setupInstall(req);
 			if ( req.getParameter(SETUP_ACTION_FINISH) != null ) {
@@ -88,7 +88,6 @@ public class MainServlet extends ServletObject {
 							}
 							session.removeAttribute(APP_CONFIG_ATTR);
 							session.removeAttribute(ATTR_SETUP_VALUES);
-							this.newInstall = false;
 							disp = getServletContext().getRequestDispatcher("/setup/complete.jsp");
 						} else {
 							disp = getServletContext().getRequestDispatcher("/setup/failed.jsp");							
@@ -170,7 +169,7 @@ public class MainServlet extends ServletObject {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		if ( this.newInstall ) {
+		if ( AppConfigListener.isNewInstall() ) {
 			this.setupInstall(req);
 			
 			if ( req.getParameter("showConfig") != null ) {
@@ -221,7 +220,7 @@ public class MainServlet extends ServletObject {
 	private boolean createAdmin(Map<String,String> setupValues) throws ServletException {
 		boolean success = false;
 		try {
-			Connection conn = this.dbh.getConnection();
+			Connection conn = AppConfigListener.getDBConnection();
 			PreparedStatement psth = conn.prepareStatement("INSERT INTO users(username,password,fullname,email) VALUES(?,SHA1(?),?,?);");
 			conn.setAutoCommit(false);
 			Savepoint savepoint = conn.setSavepoint();
@@ -294,8 +293,7 @@ public class MainServlet extends ServletObject {
 			}
 			
 			try {
-				if ( this.dbh != null ) {
-					Connection conn = this.dbh.getConnection();
+					Connection conn = AppConfigListener.getDBConnection();
 					PreparedStatement psth = conn.prepareStatement("SELECT users.username,fullname FROM users JOIN roles ON (users.username = roles.username) " +
 							"WHERE roles.perm = ? AND project_id = ? AND role = ? ORDER BY users.username;");
 					psth.setInt(1, Role.CREATE + Role.DELETE + Role.READ + Role.WRITE);
@@ -316,14 +314,13 @@ public class MainServlet extends ServletObject {
 					results.close();
 					psth.close();
 					conn.close();
-				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			session.setAttribute(ATTR_SETUP_VALUES, setupValues);
 		}
 		try { 
-			if ( this.dbh != null && session.getAttribute(APP_CONFIG_ATTR) == null ) {
+			if ( session.getAttribute(APP_CONFIG_ATTR) == null ) {
 				AppConfig config = new AppConfigSQL(true);
 				if ( ! config.canMap() ) {
 					config.setMapParameter(AppConfig.MAP_OSM_LAYER, "1");

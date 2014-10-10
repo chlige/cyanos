@@ -28,21 +28,17 @@ import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
-import edu.uic.orjala.cyanos.sql.SQLUser;
 import edu.uic.orjala.cyanos.web.AppConfig;
-import edu.uic.orjala.cyanos.web.AppConfigSQL;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.GuestUser;
 import edu.uic.orjala.cyanos.web.ServletWrapper;
@@ -54,6 +50,8 @@ import edu.uic.orjala.cyanos.web.html.Table;
 import edu.uic.orjala.cyanos.web.html.TableCell;
 import edu.uic.orjala.cyanos.web.html.TableHeader;
 import edu.uic.orjala.cyanos.web.html.TableRow;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 /**
  * Abstract class for all servlets in application (common methods and attributes)
@@ -70,11 +68,11 @@ public abstract class ServletObject extends HttpServlet {
 	protected static final String RELEASE_DATE = "June 20, 2013";
 	protected static final int DATABASE_VERSION = 3;
 	
-	protected DataSource dbh = null;
-	protected boolean newInstall = false;
-	protected boolean upgradeInstall = false;
-	protected String configXMLFile;
-	protected int idtype = SQLData.ID_TYPE_SERIAL;
+//	protected DataSource dbh = null;
+//	protected boolean newInstall = false;
+//	protected boolean upgradeInstall = false;
+//	protected String configXMLFile;
+//	protected int idtype = SQLData.ID_TYPE_SERIAL;
 
 	final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, yyyy");
 	final static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
@@ -92,6 +90,7 @@ public abstract class ServletObject extends HttpServlet {
 
 	public static final String APP_CONFIG_ATTR = "cyanosAppConfig";
 	
+/*
 	public void init(ServletConfig config) throws ServletException {
 		try {
 			super.init(config);
@@ -122,6 +121,7 @@ public abstract class ServletObject extends HttpServlet {
 			throw new ServletException(e);
 		}
 	}
+	*/
 	
 	protected void doGet ( HttpServletRequest req, HttpServletResponse res ) throws ServletException, IOException {
 		CyanosWrapper aWrap = new ServletWrapper(this, req, res);		
@@ -160,7 +160,7 @@ public abstract class ServletObject extends HttpServlet {
 		throws SQLException
 	{
 		StringBuffer script = new StringBuffer("var strains = new Array();\n");
-		Connection dbc = this.dbh.getConnection();
+		Connection dbc = AppConfigListener.getDBConnection();
 		Statement sth = dbc.createStatement();
 		ResultSet results = sth.executeQuery("SELECT culture_id,name FROM species ORDER BY CAST(culture_id as UNSIGNED)");
 		results.beforeFirst();
@@ -185,7 +185,7 @@ public abstract class ServletObject extends HttpServlet {
 	{
 		Popup strainPop = new Popup();
 		strainPop.addItem("");
-		Connection dbc = this.dbh.getConnection();
+		Connection dbc = AppConfigListener.getDBConnection();
 		Statement sth = dbc.createStatement();
 		ResultSet results = sth.executeQuery(sqlString);
 		results.beforeFirst();
@@ -203,7 +203,7 @@ public abstract class ServletObject extends HttpServlet {
 	{
 		Popup strainPop = new Popup();
 		strainPop.addItem("");
-		Connection dbc = this.dbh.getConnection();
+		Connection dbc = AppConfigListener.getDBConnection();
 		Statement sth = dbc.createStatement();
 		ResultSet results = sth.executeQuery(sqlString);
 		results.beforeFirst();
@@ -221,7 +221,7 @@ public abstract class ServletObject extends HttpServlet {
 	{
 		Popup aPop = new Popup();
 		aPop.addItemWithLabel("", "UNDEFINED");
-		Connection dbc = this.dbh.getConnection();
+		Connection dbc = AppConfigListener.getDBConnection();
 		Statement sth = dbc.createStatement();
 		ResultSet results = sth.executeQuery("SELECT DISTINCT ord FROM taxonomic");
 		results.beforeFirst();
@@ -241,7 +241,7 @@ public abstract class ServletObject extends HttpServlet {
 	public String fileList(String table, String key)
 		throws SQLException
 	{
-		Connection dbc = this.dbh.getConnection();
+		Connection dbc = AppConfigListener.getDBConnection();
 		Statement sth = dbc.createStatement();
 		String selectSQL = "SELECT file,type,description FROM data WHERE tab='" + 
 			table + " AND id='" + key + "'";
@@ -593,7 +593,7 @@ public abstract class ServletObject extends HttpServlet {
 		SQLException execp = null;
 
 		try {
-			aDBC = this.dbh.getConnection();
+			aDBC = AppConfigListener.getDBConnection();
 			Statement sth = aDBC.createStatement();
 			ResultSet results = sth.executeQuery(String.format("SELECT name FROM data_templates WHERE data='%s'",protocol));
 			results.beforeFirst();
@@ -660,45 +660,34 @@ public abstract class ServletObject extends HttpServlet {
 	protected void setupSession(HttpServletRequest req) throws SQLException, DataException {
 		HttpSession session = req.getSession();
 
-		Connection conn = (Connection) session.getAttribute(DB_CONN);
-		if ( conn == null || conn.isClosed() ) {
-			conn = this.dbh.getConnection();
-			session.setAttribute(DB_CONN, conn);
-		}
+//		Connection conn = (Connection) session.getAttribute(DB_CONN);
+//		if ( conn == null || conn.isClosed() ) {
+//			conn = AppConfigListener.getDBConnection();
+//			session.setAttribute(DB_CONN, conn);
+//		}
 		
-		SQLData data = this.newSQLData(req, conn);
+//		SQLData data = this.newSQLData(req, conn);
 		
-		req.setAttribute(DATASOURCE, data);
+//		req.setAttribute(DATASOURCE, data);
 
 		if ( session.getAttribute(SESS_ATTR_DATE_FORMAT) == null ) 
 			session.setAttribute(SESS_ATTR_DATE_FORMAT, DATE_FORMAT);
 
-		if ( session.getAttribute(SESS_ATTR_USER) == null ) {
-			session.setAttribute(SESS_ATTR_USER, data.getUser());
-		}		
+//		if ( session.getAttribute(SESS_ATTR_USER) == null ) {
+//			session.setAttribute(SESS_ATTR_USER, data.getUser());
+//		}		
 	}
 
-	public SQLData getSQLData(HttpServletRequest req) throws SQLException, DataException {
-		Object data = req.getAttribute(DATASOURCE);
-		if ( data != null && data instanceof SQLData ) {
-			return (SQLData) data;
-		} else {
-			this.setupSession(req);
-			return (SQLData) req.getAttribute(DATASOURCE);
-		}
+	public static SQLData getSQLData(HttpServletRequest req) throws SQLException, DataException {
+		return CyanosRequestListener.getSQLData(req);
 	}
 	
-	public SQLData newSQLData(HttpServletRequest req, Connection conn) throws DataException, SQLException {
-		if ( req.getRemoteUser() == null ) {
-			return new SQLData(this.getAppConfig(), conn, getGuestUser(), this.idtype);
-		} else {
-			User userObj = new SQLUser(conn, req.getRemoteUser());
-			return new SQLData(this.getAppConfig(), conn, userObj, this.idtype);
-		}
+	public static SQLData newSQLData(HttpServletRequest req, Connection conn) throws DataException, SQLException {
+		return CyanosRequestListener.newSQLData(req);
 	}
 
-	protected User getUser(HttpServletRequest req) throws SQLException, DataException {
-		return this.getSQLData(req).getUser();
+	public static User getUser(HttpServletRequest req) throws SQLException, DataException {
+		return getSQLData(req).getUser();
 	}
 	
 	

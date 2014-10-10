@@ -71,6 +71,7 @@ import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLProject;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.AppConfig;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.task.UpdateUser;
 import edu.uic.orjala.cyanos.xml.ProjectUpdateXMLHandler;
 
@@ -207,7 +208,7 @@ public class ProjectUpdateServlet extends ServletObject {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if ( this.newInstall || this.upgradeInstall ) 
+		if ( AppConfigListener.isUpgradeInstall() ) 
 			return;
 
 		String projectID = request.getPathInfo();
@@ -217,7 +218,7 @@ public class ProjectUpdateServlet extends ServletObject {
 		if ( projectID != null && projectID.length() > 1 ) {
 			projectID = projectID.substring(1);
 			try {
-				myData = new SQLData(this.getAppConfig(), this.dbh.getConnection(), new UpdateUser(projectID));
+				myData = new SQLData(this.getAppConfig(), AppConfigListener.getDBConnection(), new UpdateUser(projectID));
 				project = SQLProject.load(myData, projectID);
 			} catch (SQLException e) {
 				throw new ServletException(e);
@@ -249,7 +250,7 @@ public class ProjectUpdateServlet extends ServletObject {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if ( this.newInstall || this.upgradeInstall ) 
+		if ( AppConfigListener.isUpgradeInstall() ) 
 			return;
 
 		String projectID = request.getPathInfo();
@@ -259,7 +260,7 @@ public class ProjectUpdateServlet extends ServletObject {
 		if ( projectID != null && projectID.length() > 1 ) {
 			projectID = projectID.substring(1);
 			try {
-				myData = new SQLData(this.getAppConfig(), this.dbh.getConnection(), new UpdateUser(projectID));
+				myData = new SQLData(this.getAppConfig(), AppConfigListener.getDBConnection(), new UpdateUser(projectID));
 				project = SQLProject.load(myData, projectID);
 			} catch (SQLException e) {
 				new ServletException(e);
@@ -295,7 +296,7 @@ public class ProjectUpdateServlet extends ServletObject {
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if ( this.newInstall || this.upgradeInstall ) 
+		if ( AppConfigListener.isUpgradeInstall() ) 
 			return;
 		
 		String projectID = request.getPathInfo();
@@ -305,7 +306,7 @@ public class ProjectUpdateServlet extends ServletObject {
 		if ( projectID != null && projectID.length() > 1 ) {
 			projectID = projectID.substring(1);
 			try {
-				myData = new SQLData(this.getAppConfig(), this.dbh.getConnection(), new UpdateUser(projectID));
+				myData = new SQLData(this.getAppConfig(), AppConfigListener.getDBConnection(), new UpdateUser(projectID));
 				project = SQLProject.load(myData, projectID);
 			} catch (SQLException e) {
 				throw new ServletException(e);

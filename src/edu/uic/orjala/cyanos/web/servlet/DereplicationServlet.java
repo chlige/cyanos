@@ -30,6 +30,7 @@ import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.Image;
 import edu.uic.orjala.cyanos.web.html.Paragraph;
 import edu.uic.orjala.cyanos.web.html.StyledText;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 /**
  * @author George Chlipala
@@ -47,7 +48,7 @@ public class DereplicationServlet extends ServletObject {
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		if ( ! this.newInstall ) {
+		if ( ! AppConfigListener.isNewInstall() ) {
 			this.derepForms = new ArrayList<Class>();
 			this.derepForms.add(MSDereplication.class);
 			if ( this.checkNMRDerep() ) 
@@ -381,7 +382,7 @@ public class DereplicationServlet extends ServletObject {
 		Connection aDBC = null;
 		boolean retVal = false;
 		try {
-			aDBC = this.dbh.getConnection();
+			aDBC = AppConfigListener.getDBConnection();
 			Statement aSth = aDBC.createStatement();
 			ResultSet aResult = aSth.executeQuery("SELECT MATCH_SUBSTRUCT('C=O','C(N)C(=O)NC(C(C)C)C(=O)O')");
 			if ( aResult.first() ) {

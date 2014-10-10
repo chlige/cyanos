@@ -74,6 +74,7 @@ public class CollectionServlet extends ServletObject {
 	public static final String ATTR_COLLECTION = "collection";
 	public static final String ATTR_ISOLATION = "isolation";
 	public static final String ATTR_MAP_BOUNDS = "map bounds";
+	public static final String ATTR_TYPES = "types";
 
 	/**
 	 * 
@@ -145,6 +146,7 @@ public class CollectionServlet extends ServletObject {
 				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
 			} else if ( req.getParameter("id") != null ) {
 				req.setAttribute(ATTR_ISOLATION, SQLIsolation.load(this.getSQLData(req), req.getParameter("id")));
+				req.setAttribute(ATTR_TYPES, SQLIsolation.types(this.getSQLData(req)));
 				this.forwardRequest(req, res, "/isolation.jsp");
 				return;
 			} else if ( req.getParameter("query") != null ) {

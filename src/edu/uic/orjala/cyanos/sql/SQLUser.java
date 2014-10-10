@@ -85,7 +85,7 @@ public class SQLUser extends BasicUser {
 	
 	protected void finalize() throws Throwable {
 		try {
-			this.close();
+			this.closeAll();
 		} finally {
 			super.finalize();
 		}
@@ -259,6 +259,7 @@ public class SQLUser extends BasicUser {
 		this.close();
 		try {
 			if ( this.dbc != null && (! this.dbc.isClosed()) )
+//				System.out.format("SQLUser: DB Connection CLOSE: %d\n", dbc.hashCode());
 				this.dbc.close();
 		} catch (SQLException e) {
 			throw new DataException(e);

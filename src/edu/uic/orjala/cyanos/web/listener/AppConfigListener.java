@@ -2,20 +2,28 @@ package edu.uic.orjala.cyanos.web.listener;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
 
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.LockObtainFailedException;
 
 import edu.uic.orjala.cyanos.ConfigException;
+import edu.uic.orjala.cyanos.sql.SQLData;
+import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.AppConfigSQL;
 import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.help.HelpIndex;
@@ -30,6 +38,9 @@ import edu.uic.orjala.cyanos.web.servlet.UploadServlet;
 public class AppConfigListener implements ServletContextListener {
 
 	private static AppConfigSQL config = null;
+	private static DataSource dbh = null;
+	private static int idtype = SQLData.ID_TYPE_SERIAL;
+	
 	private static final Map<String, Class<UploadModule>> uploadModules = new HashMap<String, Class<UploadModule>>();
 	
 	/**
@@ -39,10 +50,17 @@ public class AppConfigListener implements ServletContextListener {
         ServletContext context = arg0.getServletContext();
 		if ( context.getAttribute(ServletObject.APP_CONFIG_ATTR) == null ) {
 			try {
+				Context initCtx = new InitialContext();
+				if ( dbh == null ) {
+					dbh  = (DataSource) initCtx.lookup("java:comp/env/jdbc/" + AppConfig.CYANOS_DB_NAME);
+					idtype = AppConfigSQL.getSchemaIDType(dbh);
+				}
+
 				if ( config == null ) {
 					context.log("Initializing CYANOS configuration.");
 					config = new AppConfigSQL();
 				}
+								
 				context.setAttribute(ServletObject.APP_CONFIG_ATTR, config);
 				context.setAttribute(UploadServlet.CUSTOM_UPLOAD_MODULES, uploadModules);
 				List<String> addOns = config.classesForUploadModule();
@@ -56,8 +74,8 @@ public class AppConfigListener implements ServletContextListener {
 					srvCtx.setAttribute(ServletWrapper.APP_CONFIG_ATTR, myConf);
 				}
 				*/
-			} catch (ConfigException e) {
-				context.log("UNABLE TO INITIALIZE CYANOS CONFIG", e);
+			} catch (ConfigException | NamingException | SQLException e) {
+				context.log("UNABLE TO INITIALIZE CYANOS", e);
 			}
 		}
 		
@@ -65,10 +83,6 @@ public class AppConfigListener implements ServletContextListener {
 			context.log("Building CYANOS help index.");
 			String path = context.getRealPath(HelpServlet.HELP_PATH);
 			HelpIndex.rebuildIndex(path);
-		} catch (CorruptIndexException e) {
-			context.log("UNABLE TO BUILD HELP INDEX", e);
-		} catch (LockObtainFailedException e) {
-			context.log("UNABLE TO BUILD HELP INDEX", e);
 		} catch (IOException e) {
 			context.log("UNABLE TO BUILD HELP INDEX", e);
 		}
@@ -122,6 +136,24 @@ public class AppConfigListener implements ServletContextListener {
 
 	}
 	
+	public static AppConfig getConfig() {
+		return config;
+	}
+	
+	public static DataSource getDataSource() {
+		return dbh;
+	}
+	
+	public static int getIDType() {
+		return idtype;
+	}
+	
+	public static Connection getDBConnection() throws SQLException {
+		Connection conn = dbh.getConnection();
+//		System.out.format("DB Connection Open: %d\n", conn.hashCode());
+		return conn;
+	}
+	
 	public static UploadModule getUploadModule(HttpServletRequest req, String module) throws Exception {
 		Class<UploadModule> aModule = uploadModules.get(module);
 		if ( aModule != null ) {
@@ -132,6 +164,13 @@ public class AppConfigListener implements ServletContextListener {
 		}
 		return null;
 	}
+	
+	public static boolean isNewInstall() {
+		return ( config.getVersion() < 0 );
+	}
 
+	public static boolean isUpgradeInstall() {
+		return ( AppConfig.APP_VERSION > config.getVersion() );
+	}
 
 }

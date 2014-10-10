@@ -22,6 +22,7 @@ import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.UploadModule;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.upload.AssayUpload;
 import edu.uic.orjala.cyanos.web.upload.CollectionUpload;
 import edu.uic.orjala.cyanos.web.upload.ExtractUpload;
@@ -162,7 +163,7 @@ public class UploadServlet extends ServletObject {
 			UploadModule form = (UploadModule) thisSession.getAttribute(UPLOAD_JOB);
 			if ( form != null && form.getActiveWorksheet() != null ) {
 				try {
-					form.startParse(req, this.newSQLData(req, this.dbh.getConnection()));
+					form.startParse(req, this.newSQLData(req, AppConfigListener.getDBConnection()));
 				} catch (DataException e) {
 					throw new ServletException(e);
 				} catch (SQLException e) {

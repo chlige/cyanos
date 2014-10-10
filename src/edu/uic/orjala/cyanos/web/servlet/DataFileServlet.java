@@ -77,6 +77,7 @@ import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.forms.DataForm;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 
 public class DataFileServlet extends ServletObject {
@@ -166,7 +167,7 @@ public class DataFileServlet extends ServletObject {
 	}
 
 	public void doPut ( HttpServletRequest req, HttpServletResponse res ) throws ServletException, IOException {
-		if ( this.newInstall ) {
+		if ( AppConfigListener.isUpgradeInstall() ) {
 			return;
 		}
 		

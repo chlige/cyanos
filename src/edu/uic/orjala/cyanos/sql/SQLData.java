@@ -70,12 +70,13 @@ public class SQLData {
 		}
 
 		protected void close() throws DataException {
-//			try {
-//				this.dbc.close();
 				this.savepoints.clear();
-//			} catch (SQLException e) {
-//				throw new DataException(e);
-//			}			
+//				System.out.format("SQLConnection: DB Connection CLOSE: %d\n", this.dbc.hashCode());
+			try {
+				this.dbc.close();
+			} catch (SQLException e) {
+				throw new DataException(e);
+			}			
 		}
 
 		public Savepoint setSavepoint() throws SQLException {
@@ -484,6 +485,16 @@ public class SQLData {
 			throw new DataException(e);
 		}
 	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#finalize()
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		this.close();
+		this.closeDBC();
+		super.finalize();
+	}
+
 	/**
 	 * Retieves float value for parameter
 	 * 

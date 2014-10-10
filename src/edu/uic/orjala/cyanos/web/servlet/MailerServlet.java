@@ -27,6 +27,8 @@ import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+
 
 /**
  * @author George Chlipala
@@ -53,7 +55,7 @@ public class MailerServlet extends ServletObject {
 	}
 	
 	protected Connection getDBC() throws SQLException {
-		return this.dbh.getConnection();
+		return AppConfigListener.getDBConnection();
 	}
 }
 
