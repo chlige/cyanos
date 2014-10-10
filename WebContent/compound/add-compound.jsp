@@ -2,7 +2,7 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
 	edu.uic.orjala.cyanos.User,edu.uic.orjala.cyanos.Role" %>
 <% 	String contextPath = request.getContextPath(); 
-	User user = (User) session.getAttribute(CompoundServlet.SESS_ATTR_USER);
+	User user = CompoundServlet.getUser(request);
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>

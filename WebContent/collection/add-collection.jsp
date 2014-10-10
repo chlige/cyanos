@@ -13,7 +13,7 @@
 	java.util.Date,
 	java.text.SimpleDateFormat" %>
 <% 	String contextPath = request.getContextPath(); 
-	User userObj = (User) session.getAttribute(CollectionServlet.SESS_ATTR_USER); 
+	User userObj = CollectionServlet.getUser(request); 
 	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 %><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>

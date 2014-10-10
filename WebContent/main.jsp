@@ -7,11 +7,7 @@
 	edu.uic.orjala.cyanos.web.News,
 	edu.uic.orjala.cyanos.User,
 	java.text.SimpleDateFormat" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
+<jsp:include page="/includes/header-template.jsp"/>
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
@@ -21,7 +17,6 @@
 		loginBox.style.display = "block";
 	}
 </script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
 <title>Cyanos Database v<%= MainServlet.versionString() %></title>
 </head>
 <body>
@@ -52,7 +47,7 @@
 <div style="height:100px;">
 <div class="sideModule">
 <% if ( request.getRemoteUser() != null )  { 
-	User aUser = (User) session.getAttribute(MainServlet.SESS_ATTR_USER);  %>
+	User aUser = MainServlet.getUser(request);  %>
 <p><b>Welcome, <%= aUser.getUserName() %></b></p>
 <p><a href="self/password">Update Password</a><br>
 <a href="logout.jsp">Logout</a></p>

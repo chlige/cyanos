@@ -4,7 +4,7 @@
 	edu.uic.orjala.cyanos.Role,
 	edu.uic.orjala.cyanos.Project" %>
 <% 	String contextPath = request.getContextPath(); 
-	User userObj = (User) session.getAttribute(ProjectServlet.SESS_ATTR_USER);  %>
+	User userObj = ProjectServlet.getUser(request);  %>
 <h2 align="center">New Project</h2>
 <div class="content">
 <% if ( userObj != null && userObj.hasGlobalPermission(User.PROJECT_MANAGER_ROLE, Role.CREATE) ) { %>
