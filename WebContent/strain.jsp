@@ -12,8 +12,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<script language="JAVASCRIPT" src="cyanos-date.js"></script>
+<script language="javascript" src="cyanos.js"></script>
+<script language="javascript" src="cyanos-date.js"></script>
 <link rel="stylesheet" type="text/css" href="cyanos.css"/>
 <%  String contextPath = request.getContextPath();
 	Strain strainObject = (Strain) request.getAttribute(StrainServlet.STRAIN_OBJECT);
