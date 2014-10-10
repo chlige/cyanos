@@ -174,6 +174,23 @@ function toggleMenu(id) {
 	thisMenu.blur();
 }
 
+function toggleNavMenu(id) {
+	var thisMenu = document.getElementById(id);
+	var menubar = document.getElementById("menu")
+
+	if ( thisMenu.style.display == 'none' ) {
+		var subList = menubar.getElementsByTagName("DIV");
+		for ( var x = 0; x < subList.length; x++ ) {
+			subList[x].style.display="none";
+		}
+		thisMenu.style.display="block"
+	} else {
+		thisMenu.style.display="none";
+	}
+	thisMenu.blur();
+}
+
+
 function selectDiv(checkbox) {
 	var divID = "div_" + checkbox.name;
 	var div = window.document.getElementById(divID);	
