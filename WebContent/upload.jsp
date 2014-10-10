@@ -81,14 +81,16 @@ for ( int i = 0; i < sheets.size(); i++ ) { %>
 <p align="center">
 <b>File to upload: </b>
 <input type="file" name="xmlFile" size="25"/>
-<button type="submit">Upload</button></p>
+<button type="submit">Upload</button></p></form>
+<form method="post" action="<%= request.getContextPath() %>/upload">
+<p align="center"><button type="submit" name="clearUpload">Return to Upload Menu</button></p>
+</form>
 <p align="center"><b>Upload Instructions</b></p>
 <ul>
 <li><b>Microsoft Excel 2007 or higher</b> - Save the file as a standard <b>Excel Workbook (*.xlsx)</b>.</li>
 <li><b>Microsoft Excel 2003 or earlier</b> - Save spreadsheet as a <b>XML spreadsheet (*.xml)</b> and upload the resulting .xml file.</li>
 <li><b>OpenOffice 2.0 or higher</b> - Save as a standard <b>OpenOffice spreadsheet (*.ods)</b>.</li>
 </ul>
-</form>
 <hr width='100%'><p align="center"><font size=+1><b>Worksheet Template</b></font></p>
 <%= form.worksheetTemplate() %>
 <% } } } else { session.removeAttribute(UploadServlet.UPLOAD_JOB);  %><h1 style="color: red;">ACCESS DENIED</h1><% } %></div><% } else { %>		
