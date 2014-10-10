@@ -208,6 +208,7 @@ public class OOXMLHandler extends DefaultHandler {
 	private final static String DIMENSION_TAG = "dimension";
 	private static final String FORMULA_TAG = "f";
 	private final static String NUMBER_FORMAT_TAG = "numFmt";
+	private static final String RELATIONSHIP_TAG = "Relationship";
 	
 	private static final String CELLXFS_TAG = "cellXfs";
 	private static final String XF_TAG = "xf";
@@ -218,7 +219,11 @@ public class OOXMLHandler extends DefaultHandler {
 	private static final String SHEET_ID_ATTR = "sheetId";
 	private static final String REF_ATTR = "ref";
 	private static final String STYLE_ATTR = "s";
+	private static final String ID_ATTR = "Id";
+	private static final String TARGET_ATTR = "Target";
 
+	private static final String XMLNS_RELS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+	
 	private static final String FORMAT_CODE_ATTR = "formatCode";
 	private static final String NUMBER_FORMAT_ID = "numFmtId";
 	private static final String COUNT_ATTR = "count";
@@ -245,11 +250,16 @@ public class OOXMLHandler extends DefaultHandler {
 	protected final static String STYLE_FILENAME = "xl/styles.xml";
 	protected final static int STYLE_FILE = 3;
 	
+	
+	protected final static String REL_FILENAME = "xl/_rels/workbook.xml.rels";
+	protected final static int REL_FILE = 5;
+	
 	protected final Map<String, InputStream> xmlData = new HashMap<String,InputStream>();
 	protected final List<StringValue> sharedStrings = new ArrayList<StringValue>();
 	private final List<OOXMLSheet> sheets = new ArrayList<OOXMLSheet>();
 	private final List<OOXMLStyle> styles = new ArrayList<OOXMLStyle>();
 	private final Map<String, String> numFormats = new HashMap<String,String>();
+	private final Map<String, String> relIDs = new HashMap<String,String>();
 	
 	protected final static int TYPE_NUMBER = 1;
 	protected final static int TYPE_DATETIME = 2;
@@ -282,19 +292,24 @@ public class OOXMLHandler extends DefaultHandler {
 	public void parseFile(InputStream xlsxFile) throws IOException, ParserConfigurationException, SAXException {		
 		ZipInputStream zipStream = new ZipInputStream(xlsxFile);
 		ZipEntry anEntry = zipStream.getNextEntry();
+
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		factory.setNamespaceAware(true);
+		SAXParser saxParser = factory.newSAXParser();
+
 		while ( anEntry != null ) {
 			String name = anEntry.getName();
-			if ( name.equals(SHAREDSTRINGS_FILENAME) || name.equals(WORKBOOK_FILENAME) || name.equals(STYLE_FILENAME) || name.startsWith("xl/worksheets/sheet") ) {
+			if ( name.equals(SHAREDSTRINGS_FILENAME) || name.equals(WORKBOOK_FILENAME) || name.equals(STYLE_FILENAME) 
+					|| name.startsWith("xl/worksheets/sheet") ) {
 				this.loadFile(anEntry, zipStream);
+			} else if ( name.startsWith(REL_FILENAME) ) {
+				this.inFile = REL_FILE;
+				saxParser.parse(this.getStream(zipStream), this);
 			}
 			anEntry = zipStream.getNextEntry();
 		}
 		zipStream.close();
 		
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		factory.setNamespaceAware(true);
-		SAXParser saxParser = factory.newSAXParser();
-
 		this.inFile = SHAREDSTRINGS_FILE;
 		saxParser.parse(xmlData.get(SHAREDSTRINGS_FILENAME), this);
 		
@@ -317,8 +332,7 @@ public class OOXMLHandler extends DefaultHandler {
 		}
 	}
 	
-	
-	private void loadFile(ZipEntry entry, ZipInputStream stream) throws IOException {
+	private InputStream getStream(ZipInputStream stream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int count;
@@ -326,7 +340,12 @@ public class OOXMLHandler extends DefaultHandler {
             baos.write(buffer, 0, count);
         }
         baos.flush();
-        this.xmlData.put(entry.getName(), new ByteArrayInputStream(baos.toByteArray()));
+        return new ByteArrayInputStream(baos.toByteArray());
+	}
+	
+	
+	private void loadFile(ZipEntry entry, ZipInputStream stream) throws IOException {
+        this.xmlData.put(entry.getName(), this.getStream(stream));
 	}
 
 	/* (non-Javadoc)
@@ -494,11 +513,15 @@ public class OOXMLHandler extends DefaultHandler {
 			break;
 		case WORKBOOK_FILE:
 			if ( localName.equalsIgnoreCase(SHEET_TAG) ) {
-				String filename = String.format("xl/worksheets/sheet%s.xml", attributes.getValue(SHEET_ID_ATTR));
+				String filename = "xl/".concat(this.relIDs.get(attributes.getValue(XMLNS_RELS, "id")));
 				this.sheets.add(new OOXMLSheet(attributes.getValue(NAME_ATTR), this.xmlData.get(filename)));
 			}
 			break;
-			
+		case REL_FILE:
+			if (localName.equalsIgnoreCase(RELATIONSHIP_TAG) ) {
+				this.relIDs.put(attributes.getValue(ID_ATTR), attributes.getValue(TARGET_ATTR));
+			}
+			break;
 		case STYLE_FILE:
 			if ( localName.equalsIgnoreCase(CELLXFS_TAG) ) {
 				String count = attributes.getValue(COUNT_ATTR);
