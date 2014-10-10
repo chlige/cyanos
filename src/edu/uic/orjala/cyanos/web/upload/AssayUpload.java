@@ -18,7 +18,6 @@ import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Sample;
-import edu.uic.orjala.cyanos.SampleAccount;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLAssay;
 import edu.uic.orjala.cyanos.sql.SQLAssayTemplate;

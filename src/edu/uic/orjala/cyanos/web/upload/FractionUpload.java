@@ -53,10 +53,9 @@ public class FractionUpload extends UploadForm {
 	
 	public final static String TITLE = "Fraction Data";
 
-	private final static String[] templateHeader = {"Material ID","Fraction Number","Amount", "Label", "Notes"};
+	private final static String[] templateHeader = {"Material ID","Fraction Number", "Amount", "Label", "Destination Collection", "Library Amount", "Concentration", "Location", "Notes"};
 	private final static String[] templateType = {"Required<BR>(for sources only)", "Required<BR/>A numbher for a fraction<i>or</i><br>S = Source material", 
-		"Required<br><i>Only absolute values</i>", 
-		"Optional<br>(Ignored for source materials)", "Optional<br>(Ignored for source materials)"};
+		"Required<br><i>Only absolute values</i>", "Optional<br>(Ignored for source materials)", "Required or Static", "Optional or Static", "Optional", "Optional", "Optional<br>(Ignored for source materials)"};
 
 	// N in the fraction number would cause the uploader to generate a new separation record.  Need to find a good way of documenting that and detailing on the upload page.
 	

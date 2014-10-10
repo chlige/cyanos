@@ -58,7 +58,7 @@ public class SampleLibraryUpload extends UploadForm {
 	private static final String[] templateType = {"Required <BR/>Material ID", 
 		"Required", "Required or Static", "Optional or Static", "Optional", "Optional", "Optional", "Optional", "Optional or Static"};
 
-	public static final String JSP_FORM = "/upload/forms/isolation.jsp";
+	public static final String JSP_FORM = "/upload/forms/sample-library.jsp";
 
 	/**
 	 * Create a new SampleLibraryUpload.
