@@ -363,8 +363,7 @@ public abstract class AppConfig {
 	}
 	
 	public String getDataTypeDescription(String aClass, String description) {
-		Map<String,String> classMap;
-		classMap = this.dataTypes.get(aClass);
+		Map<String,String> classMap = this.getDataTypeMap(aClass);
 		if ( classMap.containsKey(description) ) {
 			return classMap.get(description);
 		} else {
@@ -374,11 +373,7 @@ public abstract class AppConfig {
 
 
 	public void setDataType(String aClass, String type, String description) {
-		if ( ! dataTypes.containsKey(aClass) ) {
-			Map <String,String> classMap = new TreeMap<String,String>();
-			this.dataTypes.put(aClass, classMap);
-		}
-		this.dataTypes.get(aClass).put(type, description);
+		this.getDataTypeMap(aClass).put(type, description);
 		this.updated = true;
 	}
 
@@ -386,7 +381,13 @@ public abstract class AppConfig {
 	 * @see edu.uic.orjala.cyanos.web.CyanosConfig#getDataTypeMap()
 	 */
 	public Map<String,String> getDataTypeMap(String dataClass) {
-		return this.dataTypes.get(dataClass);
+		Map<String,String> map = this.dataTypes.get(dataClass);
+		if ( map != null )
+			return map;
+
+		map = new TreeMap<String,String>();
+		this.dataTypes.put(dataClass, map);
+		return map;
 	}
 
 	/* (non-Javadoc)
