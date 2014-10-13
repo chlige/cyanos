@@ -47,8 +47,9 @@
 <% String source = strainObj.getSourceIsolationID();
 	String colsrc = strainObj.getSourceCollectionID();
 	
-	if ( source != null ) { %>[<a href="collection?id=<%= source %>">View Source Isolation</a>]<% } %>
-<% if ( colsrc != null ) { %>[<a href="collection?col=<%= colsrc %>">View Source Collection</a>]<% } %></td></tr>
+	if ( colsrc != null ) { %>[<a href="collection?col=<%= colsrc %>">View Source Collection</a>]<% } %>
+<% if ( source != null ) { %>[<a href="collection?id=<%= source %>">View Source Isolation</a>]<% } %>
+</td></tr>
 <tr<% if ( update ) { 
 	String value = request.getParameter("sci_name");
 	boolean setUpdate = false;
