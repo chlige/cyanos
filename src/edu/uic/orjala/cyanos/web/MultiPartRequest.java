@@ -112,6 +112,8 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 	 * @throws IOException
 	 */
 	public static HttpServletRequest parseRequest(HttpServletRequest request) throws ServletException, IOException {
+		if ( request instanceof MultiPartRequest ) 
+			return request;
 		if ( ServletFileUpload.isMultipartContent(request)) 
 			return new MultiPartRequest(request);
 		else
