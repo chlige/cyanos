@@ -30,7 +30,7 @@ Default unit: <input type="text" name="<%= FractionUpload.DEFAULT_UNIT_KEY %>" v
 <% selected = template.get(FractionUpload.METHOD_MOBILE); %>
 <tr><td>Mobile Phase:</td><td><input type="text" name="<%= FractionUpload.METHOD_MOBILE %>" value="<c:out value='<%= selected %>'/>" size="25"></td></tr>
 <% selected = template.get(FractionUpload.METHOD_PARAM ); %>
-<tr><td>Mobile Phase:</td><td><textarea name="<%= FractionUpload.METHOD_PARAM %>" rows="5" cols="25"><c:out value='<%= selected %>'/></textarea></td></tr>
+<tr><td>Method:</td><td><textarea name="<%= FractionUpload.METHOD_PARAM %>" rows="5" cols="25"><c:out value='<%= selected %>'/></textarea></td></tr>
 <%--  
 <tr><td>Separation Protocol:</td><td><select name="<%= FractionUpload.PROTOCOL_KEY %>"><option value="">NONE</option><% 		
 	String selected = template.get(FractionUpload.PROTOCOL_KEY);

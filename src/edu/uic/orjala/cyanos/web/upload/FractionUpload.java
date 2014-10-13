@@ -14,11 +14,9 @@ import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Separation;
-import edu.uic.orjala.cyanos.Separation.SeparationTemplate;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
-import edu.uic.orjala.cyanos.sql.SQLSeparationTemplate;
 import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
@@ -53,9 +51,13 @@ public class FractionUpload extends UploadForm {
 	
 	public final static String TITLE = "Fraction Data";
 
-	private final static String[] templateHeader = {"Material ID","Fraction Number", "Amount", "Label", "Destination Collection", "Library Amount", "Concentration", "Location", "Notes"};
-	private final static String[] templateType = {"Required<BR>(for sources only)", "Required<BR/>A numbher for a fraction<i>or</i><br>S = Source material", 
-		"Required<br><i>Only absolute values</i>", "Optional<br>(Ignored for source materials)", "Required or Static", "Optional or Static", "Optional", "Optional", "Optional<br>(Ignored for source materials)"};
+	private final static String[] templateHeader = {"Material ID", "Fraction Number", "Amount", "Label", 
+		// "Destination Collection", "Library Amount", "Concentration", "Location", 
+		"Notes"};
+	private final static String[] templateType = {"Required<BR>(for sources only)", "Required<BR/>A number for a fraction<i>or</i><br>S = Source material", 
+		"Required<br><i>Only absolute mass values</i>", "Optional<br>(Ignored for source materials)", 
+		// "Required or Static", "Optional or Static", "Optional", "Optional", 
+		"Optional<br>(Ignored for source materials)"};
 
 	// N in the fraction number would cause the uploader to generate a new separation record.  Need to find a good way of documenting that and detailing on the upload page.
 	
@@ -69,7 +71,7 @@ public class FractionUpload extends UploadForm {
 
 	public String worksheetTemplate() {
 		StringBuffer template = new StringBuffer(this.worksheetTemplate(templateHeader, templateType));
-		template.append("<P ALIGN='CENTER'><B>NOTE:</B> A spreadsheet must contain <B><I>only one</I></B> separation!</P>");
+		template.append("<P ALIGN='CENTER'><B>NOTE:</B> A spreadsheet can contain multiple separations.  Separate each with a row where the fraction number is \"NEW\".</P>");
 		return template.toString();
 	}
 
@@ -184,6 +186,23 @@ public class FractionUpload extends UploadForm {
 							} else {
 								currResults.addItem(ERROR_TAG + "Failed to find source material.");
 							}
+						} else if ( frNumber.matches("^[nN].*") ) {
+							if ( mySep.getSources().first() ) {
+								this.setFractionNames(mySep, useLabel, frLabelFormat);
+								output.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
+							}
+							if ( rowIter.hasNext() ) {
+								mySep = SQLSeparation.create(this.myData);
+//								if ( aTemplate != null ) {
+//									mySep.setProtocol(aTemplate);
+//								}
+								mySep.setMethod(method);
+								mySep.setMobilePhase(mphase);
+								mySep.setStationaryPhase(sphase);
+								
+								mySep.setDate(sepDate);
+								mySep.setNotes(txnNote);
+							}
 						} else if ( frNumber.length() > 0 ) {
 							int frInt = Integer.parseInt(frNumber);
 							Material fraction = mySep.makeFraction(frInt);
@@ -225,23 +244,6 @@ public class FractionUpload extends UploadForm {
 	*/
 							} else {
 								currResults.addItem(ERROR_TAG + "Failed to create fraction material.");
-							}
-						} else if ( frNumber.matches("^[nN].*") ) {
-							if ( mySep.getSources().first() ) {
-								this.setFractionNames(mySep, useLabel, frLabelFormat);
-								output.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
-							}
-							if ( rowIter.hasNext() ) {
-								mySep = SQLSeparation.create(this.myData);
-//								if ( aTemplate != null ) {
-//									mySep.setProtocol(aTemplate);
-//								}
-								mySep.setMethod(method);
-								mySep.setMobilePhase(mphase);
-								mySep.setStationaryPhase(sphase);
-								
-								mySep.setDate(sepDate);
-								mySep.setNotes(txnNote);
 							}
 						}
 						resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
