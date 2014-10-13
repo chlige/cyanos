@@ -11,29 +11,25 @@
 	edu.uic.orjala.cyanos.web.BaseForm,
 	java.text.DateFormat" %>
 <%	String contextPath = request.getContextPath();
-	String rowString = request.getParameter("rows");
-	int rows = 1;
-	if ( rowString != null ) {
-		rows = Integer.parseInt(rowString);	
-	}
+	String[] rows = request.getParameterValues("row");
 	DateFormat format = (DateFormat) session.getAttribute(InocServlet.SESS_ATTR_DATE_FORMAT);
-	SQLData data = (SQLData) request.getAttribute(InocServlet.DATASOURCE);
+	SQLData data = InocServlet.getSQLData(request);
 %><table class="dashboard">
 <tr><td></td><th class="header">Inoc ID</th><th class="header">Culture ID</th><th class="header">Date</th><th class="header">Parent Stock</th><th class="header">Media</th><th class="header">Volume</th><th class="header">Project</th><th class="header">Notes</th><th class="header">Stock</th></tr>
-<% for ( int row = 1; row <= rows; row++) { 
-	String strainName = request.getParameter(String.format("%02d_strain", row));
+<% for ( String row: rows ) { 
+	String strainName = request.getParameter(row + "_strain");
 	if ( strainName != null ) {
-		String dateString = request.getParameter(String.format("%02d_date", row));
-		String parent = request.getParameter(String.format("%02d_parent", row));
-		String media = request.getParameter(String.format("%02d_media", row));
-		String volume = request.getParameter(String.format("%02d_vol", row));
-		String project = request.getParameter(String.format("%02d_project", row));
+		String dateString = request.getParameter(row + "_date");
+		String parent = request.getParameter(row + "_parent");
+		String media = request.getParameter(row + "_media");
+		String volume = request.getParameter(row + "_vol");
+		String project = request.getParameter(row + "_project");
 		if ( project.length() < 1 ) { project = null; }
-		String notes = request.getParameter(String.format("%02d_notes", row));
-		boolean stock = request.getParameter(String.format("%02d_stock",row)) != null;
+		String notes = request.getParameter(row + "_notes");
+		boolean stock = request.getParameter(row + "_stock") != null;
 		int count = 1;
 		try { 
-			count = Integer.parseInt(request.getParameter(String.format("%02d_qty", row)));
+			count = Integer.parseInt(request.getParameter(row + "_qty"));
 		} catch (NumberFormatException e) {
 			
 		}
