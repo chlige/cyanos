@@ -421,9 +421,14 @@ public abstract class UploadForm implements Runnable, UploadModule {
 	}
 
 	public boolean isAllowed(HttpServletRequest req) throws DataException {
-		HttpSession session = req.getSession();
-		User myUser = (User) session.getAttribute(ServletObject.SESS_ATTR_USER);
-		return myUser.isAllowed(this.accessRole, User.NULL_PROJECT, this.permission);
+		try {
+			User myUser = UploadServlet.getUser(req);		
+			//		HttpSession session = req.getSession();
+			//		User myUser = (User) session.getAttribute(ServletObject.SESS_ATTR_USER);
+			return myUser.isAllowed(this.accessRole, User.NULL_PROJECT, this.permission);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
 	}
 	
 	@Override
