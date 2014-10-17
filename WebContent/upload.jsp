@@ -21,7 +21,6 @@
 
 <jsp:include page="/includes/menu.jsp"/>
 
-
 <div class="content">
 <h1>Upload Data</h1>
 <hr width="90%">
@@ -52,7 +51,7 @@
 	uploadStatus(updatePath, document.getElementById("resultButton"));
 </script>
 <% } else { 
-	SpreadSheet aWKS = (SpreadSheet) session.getAttribute(UploadServlet.SPREADSHEET);
+	SpreadSheet aWKS = UploadServlet.getSpreadsheet(request);
 	if ( aWKS != null ) {  String jspFile = form.jspForm(); 
 	if ( jspFile != null ) { form.updateTemplate(request); %>
 <form method="post" action="<%= request.getContextPath() %>/upload">	
