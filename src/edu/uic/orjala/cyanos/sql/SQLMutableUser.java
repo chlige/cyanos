@@ -144,6 +144,10 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		}
 	}
 	
+	public static SQLMutableUser load(SQLData data, String userID) throws DataException {
+		return new SQLMutableUser(data, userID);
+	}
+	
 	public SQLMutableUser(SQLData data) {
 		super(data);
 		this.initVals();
