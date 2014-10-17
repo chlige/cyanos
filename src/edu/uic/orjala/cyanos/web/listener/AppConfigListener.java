@@ -74,8 +74,12 @@ public class AppConfigListener implements ServletContextListener {
 					srvCtx.setAttribute(ServletWrapper.APP_CONFIG_ATTR, myConf);
 				}
 				*/
-			} catch (ConfigException | NamingException | SQLException e) {
+			} catch (ConfigException e ) {
 				context.log("UNABLE TO INITIALIZE CYANOS", e);
+			} catch ( NamingException e ) {
+				context.log("UNABLE TO INITIALIZE CYANOS", e);
+			} catch ( SQLException e) {
+				context.log("UNABLE TO INITIALIZE CYANOS", e);				
 			}
 		}
 		
