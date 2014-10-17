@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/menu.css"/>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/cyanos.css"/>
 <script language="javascript" src="${pageContext.request.contextPath}/cyanos.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/cyanos-date.js"></script>
+<title><%= request.getParameter("page_title") %></title>

@@ -7,7 +7,9 @@
 	edu.uic.orjala.cyanos.web.News,
 	edu.uic.orjala.cyanos.User,
 	java.text.SimpleDateFormat" %>
-<jsp:include page="/includes/header-template.jsp"/>
+<jsp:include page="/includes/header-template.jsp">
+<jsp:param value="Cyanos Database v<%= MainServlet.versionString() %>" name="page_title"/>
+</jsp:include>
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
@@ -17,7 +19,6 @@
 		loginBox.style.display = "block";
 	}
 </script>
-<title>Cyanos Database v<%= MainServlet.versionString() %></title>
 </head>
 <body>
 
