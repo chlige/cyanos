@@ -198,7 +198,7 @@ public class AdminServlet extends ServletObject {
 				HtmlList formList = new HtmlList();
 				formList.unordered();
 				formList.setAttribute("type", "none");
-				formList.addItem("<LI><A HREF='admin/user'>User Administration</A></LI>");
+				formList.addItem("<LI><A HREF='admin/user.jsp'>User Administration</A></LI>");
 				formList.addItem("<LI><A HREF='admin/config'>Configuration Management</A></LI>");
 				out.println(formList.toString());
 			}

@@ -18,8 +18,8 @@ String contextPath = request.getContextPath();
 <li><a href='<%= contextPath %>/logout.jsp'>Logout</a></li>
 <%		if ( request.isUserInRole("admin") ) { 
 %>
-<li class="break"><a href='<%= contextPath %>/admin/user'>Manage Users</a></li>
-<li><a href='<%= contextPath %>/admin/news'>Manage News</a></li>
+<li class="break"><a href='<%= contextPath %>/admin/user.jsp'>Manage Users</a></li>
+<li><a href='<%= contextPath %>/admin/news.jsp'>Manage News</a></li>
 <li><a href='<%= contextPath %>/admin/config'>Manage Config</a></li>
 <% 		} 
 	} else { 
