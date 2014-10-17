@@ -30,6 +30,16 @@ public class Role {
 		return "";
 	}
 	
+	public static String charForBit(int aBit) {
+		switch ( aBit ) {
+		case 0: return "R";
+		case 1: return "W";
+		case 2: return "C";
+		case 4: return "D";
+		default: return "";
+		}
+	}
+	
 	public Role(String roleName, int bits) {
 		this.myRole = roleName;
 		this.permBits = bits;
@@ -50,6 +60,15 @@ public class Role {
 	
 	public int permissions() {
 		return this.permBits;
+	}
+	
+	public String permissionString() {
+		StringBuffer output = new StringBuffer();
+		if ( this.hasPermission(READ) ) output.append("R");
+		if ( this.hasPermission(WRITE) ) output.append("W");
+		if ( this.hasPermission(CREATE) ) output.append("C");
+		if ( this.hasPermission(DELETE) ) output.append("D");
+		return output.toString();
 	}
 
 }
