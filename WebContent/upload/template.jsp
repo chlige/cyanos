@@ -7,9 +7,9 @@
 	edu.uic.orjala.cyanos.sql.SQLProtocol,
 	edu.uic.orjala.cyanos.web.UploadForm, java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
+<% SQLData datasource = UploadServlet.getSQLData(request);
 	UploadForm form = (UploadForm) session.getAttribute(UploadServlet.UPLOAD_JOB);
-	String dataType = "upload/".concat(form.getClass().getCanonicalName()); 
+	String dataType = request.getParameter("template_type");
 	String jspFile = form.jspForm(); %>
 <p align='center'>
 <% if ( jspFile != null ) { 
