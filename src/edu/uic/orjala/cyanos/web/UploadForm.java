@@ -25,7 +25,6 @@ import edu.uic.orjala.cyanos.web.html.Table;
 import edu.uic.orjala.cyanos.web.html.TableCell;
 import edu.uic.orjala.cyanos.web.html.TableHeader;
 import edu.uic.orjala.cyanos.web.html.TableRow;
-import edu.uic.orjala.cyanos.web.servlet.ServletObject;
 import edu.uic.orjala.cyanos.web.servlet.UploadServlet;
 
 /**
