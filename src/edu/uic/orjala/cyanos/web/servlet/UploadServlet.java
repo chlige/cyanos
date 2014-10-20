@@ -6,6 +6,8 @@ package edu.uic.orjala.cyanos.web.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -19,8 +21,10 @@ import org.xml.sax.SAXException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
+import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;
+import edu.uic.orjala.cyanos.web.UploadJob;
 import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.upload.AssayUpload;
@@ -41,14 +45,18 @@ import edu.uic.orjala.cyanos.web.upload.TaxaUpload;
 public class UploadServlet extends ServletObject {
 	
 
+	public static final String PARAM_FILE = "xmlFile";
+
 	private static final long serialVersionUID = 1L;
 
-//	private Sheet worksheet = null;
-//	private UploadModule myForm = null;
-	
 	public static final String PARAM_HEADER = "header";
 	public static final String PARAM_SHOW_TYPE = "showType";
 	public static final String PARAM_MODULE = "module";
+	
+	public static final String PARAM_ROW_BEHAVIOR = "behavior";
+	public static final String PARAM_ROWS = "rows";
+		
+
 
 	public final static String RESULTS = "upload results";
 	public final static String PARSE_ACTION = "parseAction";
@@ -112,7 +120,7 @@ public class UploadServlet extends ServletObject {
 		super.doPost(req, res);
 		try {
 			if ( req instanceof MultiPartRequest ) {
-				FileUpload anItem = ((MultiPartRequest)req).getUpload("xmlFile");			
+				FileUpload anItem = ((MultiPartRequest)req).getUpload(PARAM_FILE);			
 				SpreadSheet aWKS = new SpreadSheet(anItem);
 				if ( aWKS != null  ) {
 					HttpSession thisSession = req.getSession();
@@ -144,18 +152,31 @@ public class UploadServlet extends ServletObject {
 	
 	public static SpreadSheet getSpreadsheet(HttpServletRequest request) throws ServletException, IOException, ParserConfigurationException, SAXException {
 		HttpSession thisSession = request.getSession();
-		SpreadSheet worksheet = (SpreadSheet) thisSession.getAttribute(SPREADSHEET);
+		if ( request.getParameter(CLEAR_SHEET_ACTION) != null ) {
+			thisSession.removeAttribute(SPREADSHEET);
+			return null;
+		}
+		SpreadSheet worksheet = (SpreadSheet) thisSession.getAttribute(SPREADSHEET);	
 		if ( worksheet == null ) {
 			request = MultiPartRequest.parseRequest(request);
 			if ( request instanceof MultiPartRequest ) {
-				FileUpload anItem = ((MultiPartRequest)request).getUpload("xmlFile");			
+				FileUpload anItem = ((MultiPartRequest)request).getUpload(PARAM_FILE);			
 				worksheet = new SpreadSheet(anItem);
 				thisSession.setAttribute(SPREADSHEET, worksheet);
 			}
-		}
+		} 
 		return worksheet;
 	}
-
+	
+	public static UploadJob getUploadJob(HttpSession session) {
+		return (UploadJob) session.getAttribute(UPLOAD_JOB);
+	} 
+	
+	public static void setUploadJob(HttpServletRequest request, UploadJob job) {
+		HttpSession session = request.getSession();
+		session.setAttribute(UPLOAD_JOB, job);
+	}
+	
 	private void clearSession(HttpServletRequest req) {
 		HttpSession thisSession = req.getSession();
 		thisSession.removeAttribute(SPREADSHEET);
@@ -163,6 +184,99 @@ public class UploadServlet extends ServletObject {
 		thisSession.removeAttribute(UPLOAD_JOB);
 	}
 	
+	public static Sheet getActiveWorksheet(HttpServletRequest req) throws ServletException, IOException, ParserConfigurationException, SAXException {
+		SpreadSheet aWKS = getSpreadsheet(req);
+		if ( aWKS != null ) {
+			String wksParam = req.getParameter(UploadServlet.WORKSHEET_PARAM);
+			if ( wksParam != null && wksParam.length() > 0 ) {
+				int wksTab = Integer.parseInt(wksParam);
+				return (Sheet)aWKS.getSheet(wksTab);
+			} else {
+				return aWKS.getSheet(0);
+			}
+		}
+		return null;
+	}
+	
+	public static String[] getColumnList(HttpServletRequest req) throws ServletException, IOException, ParserConfigurationException, SAXException {
+		String[] columns = (String[])req.getAttribute("columnList");
+		
+		if ( columns == null ) {
+			Sheet worksheet = getActiveWorksheet(req);
+			int maxColumns = worksheet.columnCount();
+			worksheet.firstRow();
+			int extraCols = 0;
+			List<String> headers = new ArrayList<String>();
+			if ( req.getParameter(PARAM_HEADER) != null ) {
+				extraCols = worksheet.rowSize();
+				worksheet.beforeFirstColumn();
+				while ( worksheet.nextCellInRow() ) {
+					headers.add(worksheet.getStringValue());
+				}
+			}
+			for ( int i = extraCols; i < maxColumns; i++ ) {
+				headers.add(String.format("Col: %d", i + 1));
+			}
+			String[] empty = {};
+			columns = headers.toArray(empty);
+			req.setAttribute("columnList", columns);
+		}
+		return columns;
+	}
+	
+	public static String genColumnSelect(HttpServletRequest req, String column, String firstOption) throws ServletException, IOException, ParserConfigurationException, SAXException {
+		StringBuffer output = new StringBuffer("<select name=\"");
+		output.append(column);
+		output.append("\">");
+		if ( firstOption != null ) {
+			output.append("<option value=\"-1\">");
+			output.append(firstOption);
+			output.append("</option>");
+		}		
+
+		addOptions(req, column, output);
+		
+		output.append("</select>");
+		return output.toString();
+
+	}
+	
+	private static void addOptions(HttpServletRequest req, String column, StringBuffer output) throws ServletException, IOException, ParserConfigurationException, SAXException {
+		int sel = -1;
+		String colVal = req.getParameter(column);
+		
+		if ( colVal != null && colVal.length() > 0 ) {
+			sel = Integer.parseInt(colVal);
+		}
+		
+		boolean hasHeader = req.getParameter(PARAM_HEADER) != null;
+		
+		String[] columns = getColumnList(req);
+		
+		for ( int i = 0; i < columns.length; i++ ) {
+			output.append("<option value=\"");
+			output.append(i);
+			output.append("\"");
+			String thisColumn = columns[i]; 
+			if ( i == sel ) {
+				output.append(" selected");
+			} else if ( sel < 0 && hasHeader ) {
+				if ( column.equalsIgnoreCase(thisColumn) ) {
+					output.append(" selected");					
+				}
+			}
+			output.append(">");
+			output.append(thisColumn);
+			output.append("</option>\n");
+		}	
+	}
+	
+	public static String genOptions(HttpServletRequest req, String column) throws IOException, ServletException, ParserConfigurationException, SAXException {
+		StringBuffer output = new StringBuffer();
+		addOptions(req, column, output);
+		return output.toString();
+	}
+		
 	public void handleRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 
 		// Clear the uploaded worksheet, if requested
