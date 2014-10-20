@@ -12,9 +12,10 @@
 	int colSpan = worksheet.columnCount() + 1;
 	boolean showTypes = request.getParameter(UploadServlet.PARAM_SHOW_TYPE) != null;
 	String[] columns = UploadServlet.getColumnList(request); 
+	int sheetIndex = UploadServlet.getSelectedWorksheetIndex(request);
 %><div align="center">
 <p><input type="checkbox" name="<%= UploadServlet.PARAM_SHOW_TYPE %>" <%= ( showTypes ? "checked" : "") %> 
-	onclick="showSpreadSheet('<%= request.getContextPath() %>/upload/status?sheet','<%= request.getParameter(UploadServlet.WORKSHEET_PARAM) %>',<%= length %>, this)">
+	onclick="showSpreadSheet('<%= request.getContextPath() %>/upload/status?sheet','<%= sheetIndex %>',<%= length %>, this.form.elements['<%= UploadServlet.PARAM_SHOW_TYPE %>'], this.form.elements['<%=UploadServlet.PARAM_HEADER%>'])")">
 	Highlight Data Types (String, <FONT COLOR='red'>Number</FONT>, <FONT COLOR='blue'>Date/Time</FONT>)</p>
 <table class="spreadsheet">
 <tr><th></th><% for ( String col : columns ) { %><th><%= col %></th><% } %></tr>
@@ -22,18 +23,21 @@
 	if ( request.getParameter(UploadServlet.PARAM_HEADER) != null ) startRow = 1; 
 	int rows = length;
 	if ( length < 0 || length > worksheet.rowCount() ) rows = worksheet.rowCount();
-	for ( int r = startRow; r < rows; r++ ) { %>
-<tr><th><input type="checkbox" name="<%= UploadServlet.PARAM_ROWS %>" value="<%= r %>">(<%= r + 1 %>)</th>
+	for ( int r = startRow; r < rows; r++ ) { 
+%><tr><th><input type="checkbox" name="<%= UploadServlet.PARAM_ROWS %>" value="<%= r %>">(<%= r + 1 %>)</th>
 <% 			worksheet.gotoRow(r);
 			worksheet.beforeFirstColumn();
-			while ( worksheet.nextCellInRow() ) { SheetValue value = worksheet.getValue(); %><td>
-<% if ( value != null ) { if ( showTypes ) { 
-	if ( value.isNumber() ) { %><font color="red"><% } else if (value.isDate()) {%><font color="blue"><% } else { %><font><% } } %><%= value.toString() %><% if (showTypes ) { %></font><% } %>			
-<% } %></td><% } %></tr><% } %>
-</table>
+			while ( worksheet.nextCellInRow() ) { SheetValue value = worksheet.getValue(); 
+%><td><% if ( value != null ) { 
+	String color="black";
+	if ( showTypes ) { 
+		if ( value.isNumber() ) color = "red";
+		else if ( value.isDate() ) color = "blue";
+	}	
+%><font color="<%= color %>"><%= value.toString() %></font>		
+<% } %></td><% } %></tr><% } %></table>
 <% if ( length < maxLength ) { 
 		int newLength = length + 25;
 		if ( maxLength < newLength ) newLength = maxLength; %>
-<button type="button" onclick="showSpreadSheet('<%= request.getContextPath() %>/upload/status?sheet','<%= request.getParameter(UploadServlet.WORKSHEET_PARAM) %>',<%= newLength %>, this.form.elements['<%= UploadServlet.PARAM_SHOW_TYPE %>'], this.form.elements['<%=UploadServlet.PARAM_HEADER%>'])">Show rows <%= length + 1 %> to <%= newLength  %></button>
-<% }  %>
-</div>
+<button type="button" onclick="showSpreadSheet('<%= request.getContextPath() %>/upload/status?sheet','<%= sheetIndex %>',<%= newLength %>, this.form.elements['<%= UploadServlet.PARAM_SHOW_TYPE %>'], this.form.elements['<%=UploadServlet.PARAM_HEADER%>'])">Show rows <%= length + 1 %> to <%= newLength  %></button>
+<% }  %></div>

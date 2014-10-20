@@ -1,8 +1,11 @@
 <%@ tag language="java" pageEncoding="UTF-8"%>
 <%@ tag import="edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.Sheet,
+	edu.uic.orjala.cyanos.web.SpreadSheet,
 	edu.uic.orjala.cyanos.web.UploadJob,
-	edu.uic.orjala.cyanos.sql.SQLData" %>
+	edu.uic.orjala.cyanos.sql.SQLData,
+	edu.uic.orjala.cyanos.sql.SQLProtocol,
+	java.util.List" %>
 <%@ attribute name="jspform" required="true" %>
 <%@ attribute name="templateType" required="false" %>
 <% 	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
@@ -22,27 +25,42 @@
 <div id="uploadForm">
 <p align="center"><b>Select a worksheet:</b>
 <select name="<%= UploadServlet.WORKSHEET_PARAM %>" onChange="this.form.submit()">
-<% List<String> sheets = aWKS.worksheetNames();  
+<% 	SpreadSheet aWKS = UploadServlet.getSpreadsheet(request);
+	List<String> sheets = aWKS.worksheetNames();  
 String selectString = request.getParameter(UploadServlet.WORKSHEET_PARAM);
 int selectedSheet = 0;
 if ( selectString != null ) { selectedSheet = Integer.parseInt(selectString); } 
 for ( int i = 0; i < sheets.size(); i++ ) { %>
 <option value="<%= i %>" <%= ( i == selectedSheet ? "selected"  : "") %>><%= sheets.get(i) %></option>
-<% } %>
-</select><br>
+<% } %></select><br>
 <button type="submit" name="clearUpload">Clear Uploaded Data</button></p>
-<% SQLData datasource = UploadServlet.getSQLData(request); %>
+<% SQLData datasource = UploadServlet.getSQLData(request);
+	String templateType = (String) jspContext.getAttribute("templateType");
+	List<String> allTemplates = SQLProtocol.listProtocols(datasource, templateType);
+%><p align="center">
+<input type="checkbox" name="<%=UploadServlet.PARAM_HEADER %>" value="true" onClick="this.form.submit()" <%=( request.getParameter(UploadServlet.PARAM_HEADER) != null ? "checked" : "")%>> Spreadsheet has a header row.</p>
 
 
 <jsp:include page="${jspform}"/>
-</div>
 
-<div id="spreadsheet">
+<p align="center">
+<% String behavior = request.getParameter(UploadServlet.PARAM_ROW_BEHAVIOR);
+	if ( behavior == null ) behavior = UploadServlet.ROW_BEHAVIOR_IGNORE;
+%>(<input type="radio" name="<%= UploadServlet.PARAM_ROW_BEHAVIOR %>" value="<%= UploadServlet.ROW_BEHAVIOR_IGNORE %>" <%= behavior.equals(UploadServlet.ROW_BEHAVIOR_IGNORE) ? "checked" : "" %>> Ignore | 
+<input type="radio" name="<%= UploadServlet.PARAM_ROW_BEHAVIOR %>" value="<%= UploadServlet.ROW_BEHAVIOR_INCLUDE %>" <%= behavior.equals(UploadServlet.ROW_BEHAVIOR_INCLUDE) ? "checked" : "" %>>Include
+) selected rows.<br>
+<button type="submit" name="<%=UploadServlet.PARSE_ACTION%>">Parse Upload</button></p>
+
+</div>
+<!-- <div class="collapseSection"><a class='twist' onClick='loadDiv("sheet")' class='divTitle'>
+<IMG ALIGN="ABSMIDDLE" ID="twist_sheet" SRC="<%= request.getContextPath() %>/images/twist-open.png" /> SpreadSheet</a>   -->
+<div class="showSection" id="spreadsheet">
 <jsp:include page="/upload/sheet.jsp"/>
 </div>
+<!-- </div> -->
 </form>
-<% } else { %>
-<form method="post" enctype="multipart/form-data">
+<% } else { 
+%><form method="post" enctype="multipart/form-data">
 <p align="center"><b>File to upload: </b>
 <input type="file" name="<%= UploadServlet.PARAM_FILE %>" size="25"/>
 <button type="submit">Upload</button></p>

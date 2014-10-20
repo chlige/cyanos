@@ -80,6 +80,9 @@ public class UploadServlet extends ServletObject {
 	
 	public final static String TEMPLATE_DIV = "templateDiv";
 	
+	public static final String ROW_BEHAVIOR_INCLUDE = "include";
+	public static final String ROW_BEHAVIOR_IGNORE = "ignore";
+	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.servlet.ServletObject#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
@@ -187,15 +190,20 @@ public class UploadServlet extends ServletObject {
 	public static Sheet getActiveWorksheet(HttpServletRequest req) throws ServletException, IOException, ParserConfigurationException, SAXException {
 		SpreadSheet aWKS = getSpreadsheet(req);
 		if ( aWKS != null ) {
-			String wksParam = req.getParameter(UploadServlet.WORKSHEET_PARAM);
-			if ( wksParam != null && wksParam.length() > 0 ) {
-				int wksTab = Integer.parseInt(wksParam);
-				return (Sheet)aWKS.getSheet(wksTab);
-			} else {
-				return aWKS.getSheet(0);
-			}
+			int wksTab = getSelectedWorksheetIndex(req);
+			return aWKS.getSheet(wksTab);
 		}
 		return null;
+	}
+	
+	public static int getSelectedWorksheetIndex(HttpServletRequest request) {
+		int selected = 0;
+		String wksParam = request.getParameter(UploadServlet.WORKSHEET_PARAM);
+		if ( wksParam != null && wksParam.length() > 0 ) {
+			selected = Integer.parseInt(wksParam);
+		}
+
+		return selected;
 	}
 	
 	public static String[] getColumnList(HttpServletRequest req) throws ServletException, IOException, ParserConfigurationException, SAXException {

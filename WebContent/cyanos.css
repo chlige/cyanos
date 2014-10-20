@@ -84,7 +84,9 @@ table.dashboard { border-collapse: collapse; margin-left:auto; margin-right:auto
 col.datashort { width: 25%; }
 col.datalong { width: 50%; }
 table.upload tr td, table.upload tr th { border: 1px solid #999; padding-left: 10px; padding-right: 10px; }
-
+table.uploadForm tr td { border-bottom: 2px solid #bbb;}
+table.uploadForm { margin-left: auto; margin-right: auto; border-top: 2px solid #bbb; }
+table.uploadForm tr td:first-child {  border-right: 1px solid #ddd; font-weight: bold;}
 
 table.files { border: 0px; width:100%; border-collapse: collapse; margin-left:auto; margin-right:auto; }
 tr.listing td { border: 1px solid black; background-color: white; }

@@ -9,10 +9,6 @@
 	edu.uic.orjala.cyanos.Assay,
 	edu.uic.orjala.cyanos.sql.SQLAssayTemplate, java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<jsp:include page="/upload/header.jsp"/>	
-<jsp:include page="/upload/template.jsp">
-<jsp:param value="upload/assay" name="template_type"/>
-</jsp:include>	
 <script type="text/javascript">
 //<![CDATA[ 
 function setAutoLoc(assay_box) {
@@ -27,7 +23,7 @@ function setAutoLoc(assay_box) {
 }
 //]]>
 </script>
-<table><tr><td>Assay ID:</td><td>
+<table class="uploadForm"><tr><td>Assay ID:</td><td>
 <select onChange="setAutoLoc(this)" onLoad="setAutoLoc(this)" name="<%= AssayUpload.ASSAY_ID %>">
 <option value="-1">Use Assay -&gt;</option>
 <%= UploadServlet.genOptions(request, AssayUpload.ASSAY_ID) %></select>
