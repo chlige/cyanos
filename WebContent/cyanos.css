@@ -70,6 +70,7 @@ p.footer {
 
 p.toggle {	margin-left: 7%; font-weight: bold; font-size:14px; }
 
+table { border-collapse: collapse; }
 table.species { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 table.list { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 table.plate { border-collapse: collapse; margin-left:auto; margin-right:auto; }
@@ -82,6 +83,8 @@ table.spreadsheet td.rowselect { border: none; }
 table.dashboard { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 col.datashort { width: 25%; }
 col.datalong { width: 50%; }
+table.upload tr td, table.upload tr th { border: 1px solid #999; padding-left: 10px; padding-right: 10px; }
+
 
 table.files { border: 0px; width:100%; border-collapse: collapse; margin-left:auto; margin-right:auto; }
 tr.listing td { border: 1px solid black; background-color: white; }
