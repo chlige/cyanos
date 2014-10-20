@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.ConfigException;
@@ -21,7 +20,6 @@ import edu.uic.orjala.cyanos.web.GuestUser;
  * Application Lifecycle Listener implementation class CyanosRequestListener
  *
  */
-@WebListener
 public class CyanosRequestListener implements ServletRequestListener {
 
 	private static final String DATASOURCE = "datasource";
@@ -63,7 +61,7 @@ public class CyanosRequestListener implements ServletRequestListener {
 	 */
 	@Override
 	public void requestInitialized(ServletRequestEvent event) {
-		ServletRequest object = event.getServletRequest();
+//		ServletRequest object = event.getServletRequest();
 //		if ( object instanceof HttpServletRequest ) {
 //			HttpServletRequest req = (HttpServletRequest) object;
 //			try {

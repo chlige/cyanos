@@ -1,10 +1,8 @@
 <%@ page import="edu.uic.orjala.cyanos.web.AppConfig, 
 	edu.uic.orjala.cyanos.web.servlet.AdminServlet,
 	edu.uic.orjala.cyanos.sql.SQLProject,
-	java.security.KeyPair,
 	java.security.GeneralSecurityException,
 	java.net.URL,
-	org.apache.commons.codec.binary.Base64,
 	edu.uic.orjala.cyanos.web.listener.ProjectUpdateListener" %>
 <div><h2>Update Keys</h2>
 <p>Update keys are required by CYANOS to establish a relationship between two servers for project updates. 
