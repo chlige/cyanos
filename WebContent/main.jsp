@@ -7,9 +7,11 @@
 	edu.uic.orjala.cyanos.web.News,
 	edu.uic.orjala.cyanos.User,
 	java.text.SimpleDateFormat" %>
-<jsp:include page="/includes/header-template.jsp">
-<jsp:param value="Cyanos Database v<%= MainServlet.versionString() %>" name="page_title"/>
-</jsp:include>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<jsp:include page="/includes/header-template.jsp"/>
+<title>Cyanos Database v<%= MainServlet.versionString() %></title>
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  

@@ -4,10 +4,11 @@
 	edu.uic.orjala.cyanos.sql.SQLMutableUser,
 	edu.uic.orjala.cyanos.Role,
 	java.text.SimpleDateFormat" %>
-
-<jsp:include page="/includes/header-template.jsp">
-<jsp:param value="Application Administration" name="page_title"/>
-</jsp:include>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<jsp:include page="/includes/header-template.jsp"/>
+<title>Application Administration</title>
 </head>
 <body>
 <jsp:include page="/includes/menu.jsp"/>
