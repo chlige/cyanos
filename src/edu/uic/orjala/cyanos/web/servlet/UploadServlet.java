@@ -175,7 +175,8 @@ public class UploadServlet extends ServletObject {
 		return (UploadJob) session.getAttribute(UPLOAD_JOB);
 	} 
 	
-	public static void setUploadJob(HttpServletRequest request, UploadJob job) {
+	public static void startJob(HttpServletRequest request, UploadJob job) throws DataException, SQLException, ServletException, IOException, ParserConfigurationException, SAXException {
+		job.startParse(request, getActiveWorksheet(request));
 		HttpSession session = request.getSession();
 		session.setAttribute(UPLOAD_JOB, job);
 	}

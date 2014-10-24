@@ -1,4 +1,6 @@
-<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.net.URLEncoder,
+	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
+	edu.uic.orjala.cyanos.web.UploadJob" %>
 <%
 String contextPath = request.getContextPath();
 %>
@@ -93,5 +95,8 @@ String contextPath = request.getContextPath();
 <li><a href='<%= contextPath %>/help?search'>Search</a></li>
 </ul></li>
 </ul>
+<div style="float:right;margin-right: 30px;padding: 4px;"><%= (UploadServlet.getSpreadsheet(request) != null ? "SHEET" : "") %><%
+	UploadJob job = UploadServlet.getUploadJob(session);
+	if ( job != null ) { %>JOB<% } %></div>
 </nav>
 <div style='height:20px'></div>

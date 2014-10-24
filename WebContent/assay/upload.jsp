@@ -2,6 +2,8 @@
     pageEncoding="UTF-8"%>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.AssayServlet,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
+	edu.uic.orjala.cyanos.web.UploadJob,
+	edu.uic.orjala.cyanos.web.upload.AssayUploadJob,
 	edu.uic.orjala.cyanos.User,
 	edu.uic.orjala.cyanos.Role,
 	edu.uic.orjala.cyanos.web.Sheet" %>
@@ -16,6 +18,14 @@
 <jsp:include page="/includes/menu.jsp"/>
 <h1>Assay Data Upload</h1>
 <div class="content">
+<% if ( request.getParameter(UploadServlet.PARSE_ACTION) != null ) {
+	UploadJob job = UploadServlet.getUploadJob(session);
+	if ( job != null && job.isWorking() ) { %>
+<p style="text-align: center; color: red; font-weight:bold">ERROR: Cannot start upload job.  Current upload job running.</p>		
+<%	} else {
+		UploadServlet.startJob(request, new AssayUploadJob());
+	}
+}%>
 <cyanos:upload-form jspform="/assay/upload-form.jsp">
 <table align="center" class="upload">
 <tr style="text-align:center"><th>Assay ID</th><th>Strain ID</th><th>Location</th><th>Activity</th><th>Material ID</th><th>Sample ID</th><th>Sample Amount</th><th>Label</th><th>Concentration</th></tr>
