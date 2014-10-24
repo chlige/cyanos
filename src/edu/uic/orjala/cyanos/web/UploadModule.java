@@ -19,7 +19,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
  * @author George Chlipala
  *
  */
-public interface UploadModule extends UploadJob {
+public interface UploadModule {
 	
 	public static final int ROW_BEHAVIOR_INCLUDE = 1;
 	public static final int ROW_BEHAVIOR_IGNORE = 2;

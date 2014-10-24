@@ -683,6 +683,10 @@ public abstract class ServletObject extends HttpServlet {
 	}
 	
 	public static SQLData newSQLData(HttpServletRequest req, Connection conn) throws DataException, SQLException {
+		return newSQLData(req);
+	}
+
+	public static SQLData newSQLData(HttpServletRequest req) throws DataException, SQLException {
 		return CyanosRequestListener.newSQLData(req);
 	}
 
