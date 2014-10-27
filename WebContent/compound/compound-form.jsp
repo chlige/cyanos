@@ -1,5 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos"%>
 <%@ page import="edu.uic.orjala.cyanos.Compound,
+	edu.uic.orjala.cyanos.sql.SQLCompound,
 	edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
 	edu.uic.orjala.cyanos.Role,
 	java.text.SimpleDateFormat,
@@ -19,8 +21,15 @@
 <p align='center'><b>ERROR:</b> Object not found</p>
 <% out.flush(); return; } 	boolean hasMDL = compoundObj.hasMDLData(); %>
 <div CLASS="showSection" ID="view_info">
-<% if ( hasMDL ) { %>
-<div><div class="left70">
+<% if ( hasMDL ) { 
+	if ( request.getParameter("genGraph") != null ) {
+//		try {
+		((SQLCompound)compoundObj).updateGraph();
+//		} catch (Exception e) {
+%><%-- <p>Error building graph: <%= e.getMessage() %> --%><%
+//		}
+	}
+%><div><div class="left70">
 <% } %>
 <table class="species">
 <tr><td width='125'>Compound ID:</td><td><%= compoundObj.getID() %></td></tr>
@@ -70,7 +79,9 @@ None
 <img src="<%= contextPath %>/compound/graphic/<%= compoundObj.getID() %>" height=300 width=300>
 <p>Image size: <input type="text" size="5" name="imgW" value="500"> &times; <input type="text" size="5" name="imgH" value="500">
 <button type="button" onclick='showCompound("<%= compoundObj.getID() %>", this.form.imgW.value, this.form.imgH.value)'>Generate Image</button></p>
-<p><button type="button" onclick='exportCompound("<%= compoundObj.getID() %>", ".mol")'>Export Structure</button></p>
+<p><a href="<%= request.getContextPath() %>/compound?exportType=mol&id=<%= compoundObj.getID() %>">Export Structure (MOL)</a>
+<%-- <button type="button" onclick='exportCompound("<%= compoundObj.getID() %>", ".mol")'>Export Structure</button> --%>
+</p>
 </form>
 </div></div>
 <% } if ( compoundObj.isAllowed(Role.WRITE) ) {  %>
@@ -104,13 +115,17 @@ None
 <tr><td>InChI Key:</td><td><input type="text" name="<%= CompoundServlet.FIELD_INCHI_KEY %>" value="<c:out value="<%= inchiKey %>"></c:out>" size="50"></td></tr>
 <tr><td>InChI String:</td><td><textarea name="<%= CompoundServlet.FIELD_INCHI_STRING %>" cols="50" rows="3"><c:out value="<%= inchiString %>"></c:out></textarea>
 <% if ( hasMDL ) { %>
-<br><input type="checkbox" name="genString" value="inchi" onClick="this.form.elements['<%= CompoundServlet.FIELD_INCHI_KEY %>'].disabled = this.checked; this.form.elements['<%= CompoundServlet.FIELD_INCHI_STRING %>'].disabled = this.checked;">Generate InChI string and key from structure data.
+<br><input type="checkbox" name="genString" value="inchi" onClick="this.form.elements['<%= CompoundServlet.FIELD_INCHI_KEY %>'].disabled = this.checked; this.form.elements['<%= CompoundServlet.FIELD_INCHI_STRING %>'].disabled = this.checked;">Generate InChI string and key from structure data.<br>
+<br><input type="checkbox" name="genGraph">Regenerate Compound graph entries (for structure searches)
 <% } %>
 </td></tr>
 <tr><td>Project</td><td>
+<cyanos:project-popup fieldName="project" project="<%= compoundObj.getProjectID() %>"/>
+<%-- 
 <jsp:include page="/includes/project-popup.jsp">
 <jsp:param value="<%=compoundObj.getProjectID() %>" name="project"/>
 <jsp:param value="project" name="fieldName"/></jsp:include>
+--%>
 </td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= compoundObj.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="submit" name="<%= CompoundServlet.UPDATE_ACTION %>">Update</button>

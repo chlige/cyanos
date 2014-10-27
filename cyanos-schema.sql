@@ -69,12 +69,12 @@ SHOW WARNINGS;
 USE `cyanos` ;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`assay`
+-- Table `assay`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`assay` ;
+DROP TABLE IF EXISTS `assay` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`assay` (
+CREATE  TABLE IF NOT EXISTS `assay` (
   `assay_id` VARCHAR(32) NOT NULL ,
   `culture_id` VARCHAR(32) NOT NULL ,
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
@@ -95,12 +95,12 @@ COLLATE = utf8_general_ci;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`assay_info`
+-- Table `assay_info`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`assay_info` ;
+DROP TABLE IF EXISTS `assay_info` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`assay_info` (
+CREATE  TABLE IF NOT EXISTS `assay_info` (
   `assay_id` VARCHAR(32) NOT NULL ,
   `name` VARCHAR(64) NOT NULL DEFAULT 'NONAME' ,
   `target` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
@@ -121,17 +121,17 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `target` ON `cyanos`.`assay_info` (`target` ASC) ;
+CREATE INDEX `target` ON `assay_info` (`target` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`collection`
+-- Table `collection`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`collection` ;
+DROP TABLE IF EXISTS `collection` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`collection` (
+CREATE  TABLE IF NOT EXISTS `collection` (
   `collection_id` VARCHAR(32) NOT NULL ,
   `date` DATE NULL DEFAULT '1970-01-01' ,
   `location` VARCHAR(256) NULL DEFAULT NULL ,
@@ -151,12 +151,12 @@ COLLATE = utf8_general_ci;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`compound`
+-- Table `compound`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`compound` ;
+DROP TABLE IF EXISTS `compound` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`compound` (
+CREATE  TABLE IF NOT EXISTS `compound` (
   `compound_id` VARCHAR(32) NOT NULL ,
   `name` VARCHAR(128) NULL DEFAULT NULL ,
   `formula` VARCHAR(64) NULL DEFAULT NULL ,
@@ -180,12 +180,12 @@ COMMENT = 'Compound Information';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`cryo`
+-- Table `cryo`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`cryo` ;
+DROP TABLE IF EXISTS `cryo` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`cryo` (
+CREATE  TABLE IF NOT EXISTS `cryo` (
   `cryo_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `collection` VARCHAR(16) NOT NULL DEFAULT '' ,
   `location` VARCHAR(8) NOT NULL DEFAULT '' ,
@@ -201,26 +201,26 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
-CREATE UNIQUE INDEX `id` ON `cyanos`.`cryo` (`cryo_id` ASC) ;
+CREATE UNIQUE INDEX `id` ON `cryo` (`cryo_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE UNIQUE INDEX `cryo_id` ON `cyanos`.`cryo` (`cryo_id` ASC) ;
+CREATE UNIQUE INDEX `cryo_id` ON `cryo` (`cryo_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `collection` ON `cyanos`.`cryo` (`collection` ASC) ;
+CREATE INDEX `collection` ON `cryo` (`collection` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `source_id` ON `cyanos`.`cryo` (`source_id` ASC) ;
+CREATE INDEX `source_id` ON `cryo` (`source_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`cryo_library`
+-- Table `cryo_library`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`cryo_library` ;
+DROP TABLE IF EXISTS `cryo_library` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`cryo_library` (
+CREATE  TABLE IF NOT EXISTS `cryo_library` (
   `collection` VARCHAR(32) NOT NULL ,
   `format` VARCHAR(32) NULL DEFAULT NULL ,
   `name` VARCHAR(64) NOT NULL DEFAULT 'NONAME' ,
@@ -236,12 +236,12 @@ DEFAULT CHARACTER SET = utf8;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`data`
+-- Table `data`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`data` ;
+DROP TABLE IF EXISTS `data` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`data` (
+CREATE  TABLE IF NOT EXISTS `data` (
   `file` VARCHAR(200) NOT NULL DEFAULT '' ,
   `type` VARCHAR(32) NULL DEFAULT NULL ,
   `description` TEXT NULL DEFAULT NULL ,
@@ -255,12 +255,12 @@ DEFAULT CHARACTER SET = utf8;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`data_templates`
+-- Table `data_templates`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`data_templates` ;
+DROP TABLE IF EXISTS `data_templates` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`data_templates` (
+CREATE  TABLE IF NOT EXISTS `data_templates` (
   `name` VARCHAR(32) NOT NULL DEFAULT '' ,
   `data` VARCHAR(128) NOT NULL DEFAULT '' ,
   `template` LONGBLOB NULL DEFAULT NULL ,
@@ -271,12 +271,12 @@ DEFAULT CHARACTER SET = utf8;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`species`
+-- Table `species`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`species` ;
+DROP TABLE IF EXISTS `species` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`species` (
+CREATE  TABLE IF NOT EXISTS `species` (
   `culture_source` VARCHAR(32) NULL DEFAULT NULL ,
   `culture_id` VARCHAR(32) NOT NULL ,
   `collection_id` VARCHAR(32) NULL DEFAULT NULL ,
@@ -298,17 +298,17 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `removed` ON `cyanos`.`species` (`remove_reason` ASC) ;
+CREATE INDEX `removed` ON `species` (`remove_reason` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`material`
+-- Table `material`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`material` ;
+DROP TABLE IF EXISTS `material` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`material` (
+CREATE  TABLE IF NOT EXISTS `material` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `label` VARCHAR(45) NULL DEFAULT NULL ,
   `culture_id` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
@@ -324,7 +324,7 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`material` (
   PRIMARY KEY (`material_id`) ,
   CONSTRAINT `material_strain`
     FOREIGN KEY (`culture_id` )
-    REFERENCES `cyanos`.`species` (`culture_id` )
+    REFERENCES `species` (`culture_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -333,20 +333,20 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE UNIQUE INDEX `material_id_UNIQUE` ON `cyanos`.`material` (`material_id` ASC) ;
+CREATE UNIQUE INDEX `material_id_UNIQUE` ON `material` (`material_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `material_strain_idx` ON `cyanos`.`material` (`culture_id` ASC) ;
+CREATE INDEX `material_strain_idx` ON `material` (`culture_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`harvest`
+-- Table `harvest`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`harvest` ;
+DROP TABLE IF EXISTS `harvest` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`harvest` (
+CREATE  TABLE IF NOT EXISTS `harvest` (
   `harvest_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `culture_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `date` DATE NOT NULL DEFAULT '1970-01-10' ,
@@ -371,12 +371,12 @@ COLLATE = utf8_general_ci;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`extract_info`
+-- Table `extract_info`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`extract_info` ;
+DROP TABLE IF EXISTS `extract_info` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`extract_info` (
+CREATE  TABLE IF NOT EXISTS `extract_info` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `harvest_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `solvent` VARCHAR(256) NULL DEFAULT NULL ,
@@ -386,12 +386,12 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`extract_info` (
   PRIMARY KEY (`material_id`) ,
   CONSTRAINT `ext_material`
     FOREIGN KEY (`material_id` )
-    REFERENCES `cyanos`.`material` (`material_id` )
+    REFERENCES `material` (`material_id` )
     ON DELETE NO ACTION
     ON UPDATE CASCADE,
   CONSTRAINT `ext_harvest`
     FOREIGN KEY (`harvest_id` )
-    REFERENCES `cyanos`.`harvest` (`harvest_id` )
+    REFERENCES `harvest` (`harvest_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -400,17 +400,17 @@ COLLATE = utf8_general_ci
 COMMENT = 'Extract Information';
 
 SHOW WARNINGS;
-CREATE INDEX `ext_harvest_idx` ON `cyanos`.`extract_info` (`harvest_id` ASC) ;
+CREATE INDEX `ext_harvest_idx` ON `extract_info` (`harvest_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`inoculation`
+-- Table `inoculation`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`inoculation` ;
+DROP TABLE IF EXISTS `inoculation` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`inoculation` (
+CREATE  TABLE IF NOT EXISTS `inoculation` (
   `inoculation_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `culture_id` VARCHAR(32) NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
@@ -426,7 +426,7 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`inoculation` (
   PRIMARY KEY (`inoculation_id`) ,
   CONSTRAINT `inoc_strain`
     FOREIGN KEY (`culture_id` )
-    REFERENCES `cyanos`.`species` (`culture_id` )
+    REFERENCES `species` (`culture_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -434,20 +434,20 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `parent` ON `cyanos`.`inoculation` (`parent_id` ASC) ;
+CREATE INDEX `parent` ON `inoculation` (`parent_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `inoc_strain_idx` ON `cyanos`.`inoculation` (`culture_id` ASC) ;
+CREATE INDEX `inoc_strain_idx` ON `inoculation` (`culture_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`isolation`
+-- Table `isolation`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`isolation` ;
+DROP TABLE IF EXISTS `isolation` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`isolation` (
+CREATE  TABLE IF NOT EXISTS `isolation` (
   `isolation_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `collection_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
@@ -460,24 +460,24 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`isolation` (
   PRIMARY KEY USING BTREE (`isolation_id`) ,
   CONSTRAINT `isolation_collection`
     FOREIGN KEY (`collection_id` )
-    REFERENCES `cyanos`.`collection` (`collection_id` )
+    REFERENCES `collection` (`collection_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
-CREATE INDEX `isolation_collection_idx` ON `cyanos`.`isolation` (`collection_id` ASC) ;
+CREATE INDEX `isolation_collection_idx` ON `isolation` (`collection_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`news`
+-- Table `news`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`news` ;
+DROP TABLE IF EXISTS `news` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`news` (
+CREATE  TABLE IF NOT EXISTS `news` (
   `subject` VARCHAR(512) NOT NULL DEFAULT '' ,
   `date_added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
   `content` TEXT NULL DEFAULT NULL ,
@@ -489,12 +489,12 @@ DEFAULT CHARACTER SET = utf8;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`project`
+-- Table `project`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`project` ;
+DROP TABLE IF EXISTS `project` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`project` (
+CREATE  TABLE IF NOT EXISTS `project` (
   `project_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `name` VARCHAR(128) NULL DEFAULT NULL ,
   `notes` TEXT NULL DEFAULT NULL ,
@@ -512,12 +512,12 @@ COMMENT = 'Project Code Information';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`queue`
+-- Table `queue`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`queue` ;
+DROP TABLE IF EXISTS `queue` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`queue` (
+CREATE  TABLE IF NOT EXISTS `queue` (
   `queue_name` VARCHAR(128) NOT NULL DEFAULT '' ,
   `queue_type` VARCHAR(64) NOT NULL DEFAULT '' ,
   `item_type` VARCHAR(64) NOT NULL DEFAULT '' ,
@@ -535,12 +535,12 @@ DEFAULT CHARACTER SET = utf8;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`roles`
+-- Table `roles`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`roles` ;
+DROP TABLE IF EXISTS `roles` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`roles` (
+CREATE  TABLE IF NOT EXISTS `roles` (
   `username` VARCHAR(15) NOT NULL DEFAULT '' ,
   `role` VARCHAR(15) NOT NULL DEFAULT '' ,
   `project_id` VARCHAR(32) NOT NULL DEFAULT '' ,
@@ -553,12 +553,12 @@ COMMENT = 'Tomcat role mapping';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`sample`
+-- Table `sample`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`sample` ;
+DROP TABLE IF EXISTS `sample` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`sample` (
+CREATE  TABLE IF NOT EXISTS `sample` (
   `sample_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `material_id` BIGINT(20) UNSIGNED NOT NULL ,
   `collection` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
@@ -579,7 +579,7 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`sample` (
   PRIMARY KEY USING BTREE (`sample_id`) ,
   CONSTRAINT `sample_material`
     FOREIGN KEY (`material_id` )
-    REFERENCES `cyanos`.`material` (`material_id` )
+    REFERENCES `material` (`material_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -588,23 +588,23 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `collection` ON `cyanos`.`sample` (`collection` ASC) ;
+CREATE INDEX `collection` ON `sample` (`collection` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `culture_id` ON `cyanos`.`sample` (`culture_id` ASC) ;
+CREATE INDEX `culture_id` ON `sample` (`culture_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `sample_material_idx` ON `cyanos`.`sample` (`material_id` ASC) ;
+CREATE INDEX `sample_material_idx` ON `sample` (`material_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`sample_acct`
+-- Table `sample_acct`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`sample_acct` ;
+DROP TABLE IF EXISTS `sample_acct` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`sample_acct` (
+CREATE  TABLE IF NOT EXISTS `sample_acct` (
   `sample_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `acct_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
@@ -621,23 +621,23 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
-CREATE INDEX `sample_id` ON `cyanos`.`sample_acct` (`sample_id` ASC) ;
+CREATE INDEX `sample_id` ON `sample_acct` (`sample_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `ref_table` ON `cyanos`.`sample_acct` (`ref_table` ASC) ;
+CREATE INDEX `ref_table` ON `sample_acct` (`ref_table` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `ref_id` ON `cyanos`.`sample_acct` (`ref_id` ASC) ;
+CREATE INDEX `ref_id` ON `sample_acct` (`ref_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`sample_library`
+-- Table `sample_library`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`sample_library` ;
+DROP TABLE IF EXISTS `sample_library` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`sample_library` (
+CREATE  TABLE IF NOT EXISTS `sample_library` (
   `library` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
   `collection` VARCHAR(32) NOT NULL ,
   `default_type` ENUM('extract','fraction','compound') NOT NULL DEFAULT 'fraction' ,
@@ -653,12 +653,12 @@ COMMENT = 'Sample Library infomation';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`separation`
+-- Table `separation`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`separation` ;
+DROP TABLE IF EXISTS `separation` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`separation` (
+CREATE  TABLE IF NOT EXISTS `separation` (
   `separation_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `tag` VARCHAR(128) NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
@@ -680,12 +680,12 @@ COMMENT = 'Fractionation Infomation';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`separation_product`
+-- Table `separation_product`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`separation_product` ;
+DROP TABLE IF EXISTS `separation_product` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_product` (
+CREATE  TABLE IF NOT EXISTS `separation_product` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `separation_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `fraction_number` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
@@ -693,12 +693,12 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_product` (
   PRIMARY KEY USING BTREE (`separation_id`, `material_id`) ,
   CONSTRAINT `fraction_separation`
     FOREIGN KEY (`separation_id` )
-    REFERENCES `cyanos`.`separation` (`separation_id` )
+    REFERENCES `separation` (`separation_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
   CONSTRAINT `fraction_material`
     FOREIGN KEY (`material_id` )
-    REFERENCES `cyanos`.`material` (`material_id` )
+    REFERENCES `material` (`material_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -707,20 +707,20 @@ COLLATE = utf8_general_ci
 COMMENT = 'Fractionation Result Infomation';
 
 SHOW WARNINGS;
-CREATE INDEX `fraction_separation_idx` ON `cyanos`.`separation_product` (`separation_id` ASC) ;
+CREATE INDEX `fraction_separation_idx` ON `separation_product` (`separation_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `fraction_material_idx` ON `cyanos`.`separation_product` (`material_id` ASC) ;
+CREATE INDEX `fraction_material_idx` ON `separation_product` (`material_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`separation_source`
+-- Table `separation_source`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`separation_source` ;
+DROP TABLE IF EXISTS `separation_source` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_source` (
+CREATE  TABLE IF NOT EXISTS `separation_source` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 ,
   `separation_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 ,
   `amount_value` INT(11) NOT NULL DEFAULT 0 ,
@@ -729,12 +729,12 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`separation_source` (
   PRIMARY KEY USING BTREE (`separation_id`, `material_id`) ,
   CONSTRAINT `sep_src_sep`
     FOREIGN KEY (`separation_id` )
-    REFERENCES `cyanos`.`separation` (`separation_id` )
+    REFERENCES `separation` (`separation_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
   CONSTRAINT `sep_src_material`
     FOREIGN KEY (`material_id` )
-    REFERENCES `cyanos`.`material` (`material_id` )
+    REFERENCES `material` (`material_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -743,20 +743,20 @@ COLLATE = utf8_general_ci
 COMMENT = 'Fractionation Source Infomation';
 
 SHOW WARNINGS;
-CREATE INDEX `sep_src_sep_idx` ON `cyanos`.`separation_source` (`separation_id` ASC) ;
+CREATE INDEX `sep_src_sep_idx` ON `separation_source` (`separation_id` ASC) ;
 
 SHOW WARNINGS;
-CREATE INDEX `sep_src_material_idx` ON `cyanos`.`separation_source` (`material_id` ASC) ;
+CREATE INDEX `sep_src_material_idx` ON `separation_source` (`material_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`users`
+-- Table `users`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`users` ;
+DROP TABLE IF EXISTS `users` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`users` (
+CREATE  TABLE IF NOT EXISTS `users` (
   `username` VARCHAR(15) NOT NULL DEFAULT '' ,
   `password` VARCHAR(48) NOT NULL DEFAULT '' ,
   `fullname` VARCHAR(256) NULL DEFAULT '' ,
@@ -770,12 +770,12 @@ COMMENT = 'Cyanos Users';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`config`
+-- Table `config`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`config` ;
+DROP TABLE IF EXISTS `config` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`config` (
+CREATE  TABLE IF NOT EXISTS `config` (
   `element` VARCHAR(45) NOT NULL ,
   `param` VARCHAR(64) NOT NULL DEFAULT ' ' ,
   `param_key` VARCHAR(64) NOT NULL DEFAULT ' ' ,
@@ -785,12 +785,12 @@ ENGINE = MyISAM;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`compound_peaks`
+-- Table `compound_peaks`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`compound_peaks` ;
+DROP TABLE IF EXISTS `compound_peaks` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`compound_peaks` (
+CREATE  TABLE IF NOT EXISTS `compound_peaks` (
   `compound_id` VARCHAR(32) NOT NULL ,
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `retention_time` DECIMAL(10,4) NULL DEFAULT '0.0000' ,
@@ -798,7 +798,7 @@ CREATE  TABLE IF NOT EXISTS `cyanos`.`compound_peaks` (
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   CONSTRAINT `peak_compound_id`
     FOREIGN KEY (`compound_id` )
-    REFERENCES `cyanos`.`compound` (`compound_id` )
+    REFERENCES `compound` (`compound_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
@@ -806,17 +806,17 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `peak_compound_id_idx` ON `cyanos`.`compound_peaks` (`compound_id` ASC) ;
+CREATE INDEX `peak_compound_id_idx` ON `compound_peaks` (`compound_id` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`update_host`
+-- Table `update_host`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`update_host` ;
+DROP TABLE IF EXISTS `update_host` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`update_host` (
+CREATE  TABLE IF NOT EXISTS `update_host` (
   `project_id` VARCHAR(45) NOT NULL ,
   `host_id` VARCHAR(45) NOT NULL ,
   `hostname` VARCHAR(45) NULL ,
@@ -828,12 +828,12 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`queue_subscription`
+-- Table `queue_subscription`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`queue_subscription` ;
+DROP TABLE IF EXISTS `queue_subscription` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`queue_subscription` (
+CREATE  TABLE IF NOT EXISTS `queue_subscription` (
   `queue_name` VARCHAR(128) NOT NULL ,
   `queue_type` VARCHAR(64) NOT NULL ,
   `username` VARCHAR(45) NOT NULL ,
@@ -843,40 +843,40 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`taxon`
+-- Table `taxon`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`taxon` ;
+DROP TABLE IF EXISTS `taxon` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`taxon` (
+CREATE  TABLE IF NOT EXISTS `taxon` (
   `name` VARCHAR(64) NOT NULL ,
   `level` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`name`) )
 ENGINE = InnoDB;
 
 SHOW WARNINGS;
-CREATE INDEX `taxa_level` ON `cyanos`.`taxon` (`level` ASC) ;
+CREATE INDEX `taxa_level` ON `taxon` (`level` ASC) ;
 
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `cyanos`.`taxon_paths`
+-- Table `taxon_paths`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `cyanos`.`taxon_paths` ;
+DROP TABLE IF EXISTS `taxon_paths` ;
 
 SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `cyanos`.`taxon_paths` (
+CREATE  TABLE IF NOT EXISTS `taxon_paths` (
   `parent` VARCHAR(64) NOT NULL ,
   `child` VARCHAR(64) NOT NULL ,
   `depth` INT(11) NULL DEFAULT '0' ,
   CONSTRAINT `taxon_child`
     FOREIGN KEY (`child` )
-    REFERENCES `cyanos`.`taxon` (`name` )
+    REFERENCES `taxon` (`name` )
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `taxon_parent`
     FOREIGN KEY (`parent` )
-    REFERENCES `cyanos`.`taxon` (`name` )
+    REFERENCES `taxon` (`name` )
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -884,21 +884,94 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci;
 
 SHOW WARNINGS;
-CREATE INDEX `taxon_child_idx` ON `cyanos`.`taxon_paths` (`child` ASC) ;
+CREATE INDEX `taxon_child_idx` ON `taxon_paths` (`child` ASC) ;
+
+--
+-- Table structure for table `compound_atoms`
+--
+
+DROP TABLE IF EXISTS `compound_atoms`;
+
+CREATE TABLE IF NOT EXISTS `compound_atoms` (
+  `compound_id` varchar(32) NOT NULL,
+  `atom_number` int(10) unsigned NOT NULL DEFAULT '0',
+  `element` varchar(2) DEFAULT NULL,
+  `coord_x` decimal(8,4) DEFAULT '0.0000',
+  `coord_y` decimal(8,4) DEFAULT '0.0000',
+  `coord_z` decimal(8,4) DEFAULT '0.0000',
+  `charge` tinyint(3) DEFAULT '0',
+  `attached_h` tinyint(3) unsigned DEFAULT '0',
+  PRIMARY KEY (`compound_id`,`atom_number`),
+  CONSTRAINT `compound_atom` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
+  	ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure for table `compound_bonds`
+--
+
+DROP TABLE IF EXISTS `compound_bonds`;
+
+CREATE TABLE IF NOT EXISTS `compound_bonds` (
+  `compound_id` varchar(32) NOT NULL,
+  `bond_id` int(10) unsigned NOT NULL,
+  `bond_order` decimal(4,3) unsigned DEFAULT '0.000',
+  `stereo` tinyint(3) unsigned DEFAULT '0',
+  PRIMARY KEY (`compound_id`,`bond_id`),
+  CONSTRAINT `compound_bond` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
+  	ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure for table `compound_bond_atoms`
+--
+
+DROP TABLE IF EXISTS `compound_bond_atoms`;
+
+CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
+  `compound_id` varchar(32) NOT NULL,
+  `bond_id` int(10) unsigned NOT NULL,
+  `atom_number` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`compound_id`,`bond_id`,`atom_number`),
+  CONSTRAINT `graph_atom_id` FOREIGN KEY (`compound_id`, `atom_number`) 
+  	REFERENCES `compound_atoms` (`compound_id`, `atom_number`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `graph_bond_id` FOREIGN KEY (`compound_id`, `bond_id`) 
+  	REFERENCES `compound_bonds` (`compound_id`, `bond_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `compound_graph` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
+  	ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- -----------------------------------------------------
--- function parseActivity
+-- function degreeSign
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`parseActivity`;
+DROP function IF EXISTS `degreeSign`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `parseActivity`(val VARCHAR(45)) RETURNS float
+CREATE FUNCTION `degreeSign`() RETURNS CHAR(1)
+RETURN CHAR(0xB0 USING utf8)$$
+
+DELIMITER ;
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- function parseActivity
+-- -----------------------------------------------------
+
+USE `cyanos`;
+DROP function IF EXISTS `parseActivity`;
+SHOW WARNINGS;
+
+DELIMITER $$
+USE `cyanos`$$
+
+
+CREATE FUNCTION `parseActivity`(val VARCHAR(45)) RETURNS float
 RETURN CASE 
 		WHEN val LIKE ">%" THEN CAST(TRIM(">" FROM val) AS DECIMAL) + 1 
 		WHEN val LIKE "<%" THEN CAST(TRIM("<" FROM val) AS DECIMAL) - 1 
@@ -913,14 +986,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`lonDMS`;
+DROP function IF EXISTS `lonDMS`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DMS(c_value, prec))$$
 
 DELIMITER ;
@@ -931,14 +1004,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`lonDM`;
+DROP function IF EXISTS `lonDM`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DM(c_value, prec))$$
 
 DELIMITER ;
@@ -949,15 +1022,15 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`lonD`;
+DROP function IF EXISTS `lonD`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
-RETURN IF ( lon < 0, CONCAT('W ', ABS(ROUND(lon,prec)), 'Â°'), CONCAT('E ', ROUND(lon,prec), 'Â°'))$$
+CREATE FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN IF ( lon < 0, CONCAT('W ', ABS(ROUND(lon,prec)), degreeSign()), CONCAT('E ', ROUND(lon,prec), degreeSign()))$$
 
 DELIMITER ;
 SHOW WARNINGS;
@@ -967,14 +1040,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`locationAlpha`;
+DROP function IF EXISTS `locationAlpha`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `locationAlpha`(x_val INT(10), y_val INT(10)) RETURNS varchar(3) CHARSET latin1
+CREATE FUNCTION `locationAlpha`(x_val INT(10), y_val INT(10)) RETURNS varchar(3) CHARSET latin1
 RETURN CONCAT(CHAR(64 + x_val), y_val)$$
 
 DELIMITER ;
@@ -985,14 +1058,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`latDMS`;
+DROP function IF EXISTS `latDMS`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `latDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `latDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DMS(c_value, prec))$$
 
 DELIMITER ;
@@ -1003,14 +1076,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`latDM`;
+DROP function IF EXISTS `latDM`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DM(c_value, prec))$$
 
 DELIMITER ;
@@ -1021,15 +1094,15 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`latD`;
+DROP function IF EXISTS `latD`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
-RETURN IF ( lat < 0, CONCAT('S ', ABS(ROUND(lat,prec)), 'Â°'), CONCAT('N ', ROUND(lat,prec), 'Â°'))$$
+CREATE FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN IF ( lat < 0, CONCAT('S ', ABS(ROUND(lat,prec)), degreeSign()), CONCAT('N ', ROUND(lat,prec), degreeSign()))$$
 
 DELIMITER ;
 SHOW WARNINGS;
@@ -1039,14 +1112,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`isActive`;
+DROP function IF EXISTS `isActive`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `isActive`(val VARCHAR(45), act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
+CREATE FUNCTION `isActive`(val VARCHAR(45), act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
 RETURN IF( CHAR_LENGTH(val) < 1, 0, active( parseActivity(val), act_level, act_op ))$$
 
 DELIMITER ;
@@ -1057,14 +1130,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`active`;
+DROP function IF EXISTS `active`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `active`(val FLOAT, act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
+CREATE FUNCTION `active`(val FLOAT, act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
 RETURN CASE act_op 
 	WHEN 'eq' THEN IF( val = act_level, 1, 0)
 	WHEN 'ne' THEN IF( val <> act_level, 1, 0)
@@ -1081,15 +1154,14 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`DMS`;
+DROP function IF EXISTS `DMS`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
-
-CREATE DEFINER=`root`@`localhost` FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
-RETURN CONCAT( ABS(TRUNCATE(c_value,0)), 'Â° ', 
+CREATE FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( ABS(TRUNCATE(c_value,0)), ,' ', 
 	ABS(TRUNCATE((c_value * 60) % 60,0)), "\' ", 
 	ABS(ROUND((c_value * 3600) % 3600,0)), "\"")$$
 
@@ -1101,15 +1173,15 @@ SHOW WARNINGS;
 -- -----------------------------------------------------
 
 USE `cyanos`;
-DROP function IF EXISTS `cyanos`.`DM`;
+DROP function IF EXISTS `DM`;
 SHOW WARNINGS;
 
 DELIMITER $$
 USE `cyanos`$$
 
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
-RETURN CONCAT( ABS(TRUNCATE(c_value,0)), 'Â° ', 
+CREATE FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
 	ABS(ROUND((c_value * 60) % 60, ABS(ROUND(LOG10(1825 / prec))) )), "\'")$$
 
 DELIMITER ;
@@ -1120,10 +1192,10 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 -- -----------------------------------------------------
--- Data for table `cyanos`.`config`
+-- Data for table `config`
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `cyanos`;
-INSERT INTO `cyanos`.`config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2');
+INSERT INTO `config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2');
 
 COMMIT;

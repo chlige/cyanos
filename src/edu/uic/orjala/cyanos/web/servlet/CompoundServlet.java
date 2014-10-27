@@ -13,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -51,6 +53,7 @@ import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.sql.SQLAssay;
 import edu.uic.orjala.cyanos.sql.SQLAssayData;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
@@ -181,6 +184,15 @@ public class CompoundServlet extends ServletObject {
 				}
 				this.forwardRequest(req, res, "/compound.jsp");
 			} else if (aCompound.first()) {
+				String exportType = req.getParameter("exportType");
+				if ( exportType != null ) {
+					if ( exportType.equals("graph") )
+						exportGraph(aCompound.getID(), getSQLData(req), res);						
+					else 
+						exportMolecule(aCompound, exportType, res);
+					return;
+				}		
+				
 				if ( req.getParameter(UPDATE_ACTION) != null ) 
 					updateCompound(req, aCompound);
 					
@@ -335,7 +347,11 @@ public class CompoundServlet extends ServletObject {
 		//		aWrap.finishHTMLDoc();
 	}
 
-	private void exportSDF(SQLCompound compoundList, HttpServletResponse res) throws IOException {
+	public static Compound getCompound(HttpServletRequest request) throws DataException, SQLException {
+		return SQLCompound.load(getSQLData(request), request.getParameter("id"));
+	}
+	
+	private static void exportSDF(SQLCompound compoundList, HttpServletResponse res) throws IOException {
 		ServletOutputStream out = res.getOutputStream();
 		try {
 			StringBuffer output = new StringBuffer();
@@ -366,11 +382,63 @@ public class CompoundServlet extends ServletObject {
 		return;
 	}
 
-	private static void exportMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		String module = req.getPathInfo();	
+	private static void exportMolecule(Compound compound, String exportType, HttpServletResponse res) throws IOException {
 		ServletOutputStream out = res.getOutputStream();
-		String[] details = module.split("/", 3);
-		if ( details.length < 3 ) {
+		if ( exportType == null ) exportType = "mol";
+
+		if ( compound == null ) {
+			res.setContentType("text/plain");
+			out.println("No compound specified.");
+			out.close();
+			return;
+		}
+
+
+		try {
+			if ( compound.first() ) {
+				if ( compound.hasMDLData() ) {					
+					if ( exportType.equals("mol") ) {
+						res.setHeader("Content-Disposition", String.format("inline; filename=\"%s.%s\"", compound.getID(), exportType)); 
+						res.setContentType("chemical/x-mdl-molfile");
+						out.println(compound.getMDLData());
+					} else {
+						res.setContentType("text/plain");
+						out.println("OTHER TYPES CURRENTLY NOT SUPPORTED");
+						// OTHER TYPES
+						/*
+							MDLReader aReader = new MDLReader(aCompound.getMDLDataStream());
+							ChemFile aChemFile = new ChemFile();
+							aChemFile = (ChemFile) aMDLeader.read(aChemFile);
+							Molecule myMolecule = (Molecule) aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
+							MDLWriter chemExport = new MDLWriter(out);
+							chemExport.write(myMolecule);
+						 */
+					}
+				} else {
+					res.setContentType("text/plain");
+					out.println("No molecular data for this compound.");
+				}
+			} else {
+				res.setContentType("text/plain");
+				out.println("Compound Not Found.");
+			}
+		} catch ( DataException ex ) {
+			res.setContentType("text/plain");
+			out.println("ERROR: " + ex.getMessage());
+			ex.printStackTrace();
+		} 
+		out.flush();
+		return;
+	}
+	
+	
+	private static void exportMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		ServletOutputStream out = res.getOutputStream();
+		String compoundID = req.getParameter("id");
+		String exportType = req.getParameter("type");
+		if ( exportType == null ) exportType = "mol";
+		
+		if ( compoundID == null ) {
 			res.setContentType("text/plain");
 			out.println("No compound specified.");
 			out.close();
@@ -378,52 +446,16 @@ public class CompoundServlet extends ServletObject {
 		}
 
 		try {
-			Pattern cPatt = Pattern.compile("^(.+)\\.(cml|mol)");
-			Matcher cMatch = cPatt.matcher(details[2]);
-			if ( cMatch.matches() ) {
-				Compound aCompound = SQLCompound.load(getSQLData(req), cMatch.group(1));
-				if ( aCompound.first() ) {
-					if ( aCompound.hasMDLData() ) {
-						String exportType = cMatch.group(2);
-						if ( exportType != null && exportType.equals("mol") ) {
-							res.setContentType("chemical/x-mdl-molfile");
-							out.println(aCompound.getMDLData());
-						} else {
-							// OTHER TYPES
-							/*
-							MDLReader aReader = new MDLReader(aCompound.getMDLDataStream());
-							ChemFile aChemFile = new ChemFile();
-							aChemFile = (ChemFile) aMDLeader.read(aChemFile);
-							Molecule myMolecule = (Molecule) aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
-							MDLWriter chemExport = new MDLWriter(out);
-							chemExport.write(myMolecule);
-							 */
-						}
-					} else {
-						res.setContentType("text/plain");
-						out.println("No MDL data for this compound.");
-					}
-				} else {
-					res.setContentType("text/plain");
-					out.println("Compound Not Found.");
-				}
-
-			} else {
-				res.setContentType("text/plain");
-				out.println("Specified compound name not formatted properly.");
-
-			}
-		} catch ( DataException ex ) {
+			exportMolecule(SQLCompound.load(getSQLData(req), compoundID), exportType, res);
+		} catch (DataException e) {
 			res.setContentType("text/plain");
-			out.println("ERROR: " + ex.getMessage());
-			ex.printStackTrace();
+			out.println("ERROR: " + e.getMessage());
+			e.printStackTrace();
 		} catch (SQLException e) {
 			res.setContentType("text/plain");
 			out.println("ERROR: " + e.getMessage());
 			e.printStackTrace();
-		} 
-		out.flush();
-		return;
+		}
 	}
 
 	private void drawMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -624,10 +656,20 @@ public class CompoundServlet extends ServletObject {
 			} else {	
 				setAttribute(req, FIELD_FORMULA, compound, SQLCompound.FORMULA_COLUMN, updateValues);
 
-				Set<String> genStrings = new HashSet<String>(Arrays.asList(req.getParameterValues("genString")));
 				boolean hasMDLData = compound.hasMDLData();
+				boolean genInchi = false;
+				boolean genSMILES = false;
+				
+				String[] gens = req.getParameterValues("genString");
 
-				if ( hasMDLData && genStrings.contains("inchi") ) {
+				if ( hasMDLData && gens != null && gens.length > 0 ) {
+					for ( String gen : gens ) {
+						if ( gen.equals("inchi") ) genInchi = true;
+						if ( gen.equals("smiles") ) genSMILES = true;
+					}
+				}
+				
+				if ( genInchi ) {
 					String inchiString = InchiGenerator.convertMOL(compound.getMDLData());
 					compound.setInChiString(inchiString);
 					compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
@@ -636,7 +678,7 @@ public class CompoundServlet extends ServletObject {
 					setAttribute(req, FIELD_INCHI_KEY, compound, SQLCompound.INCHI_KEY_COLUMN, updateValues);
 				}
 
-				if ( hasMDLData && genStrings.contains("smiles") ) {
+				if ( genSMILES ) {
 					SmilesGenerator smileGen = new SmilesGenerator();
 					smileGen.setUseAromaticityFlag(true);
 					compound.setSmilesString(smileGen.createSMILES(getMolecule(compound)));			
@@ -753,5 +795,52 @@ public class CompoundServlet extends ServletObject {
 */
 		aCompound.refresh();
 		aCompound.setAutoRefresh();
+	}
+	
+	public final static String SQL_GRAPH_COUNTS = "SELECT COUNT(DISTINCT atom_number), COUNT(DISTINCT bond_id) FROM compound_atoms JOIN compound_bonds USING(compound_id) WHERE compound_id=?";
+	
+	public final static String SQL_SELECT_ATOM_GRAPH = "SELECT atom_number,element,coord_x,coord_y,coord_z,charge,attached_h FROM compound_atoms WHERE compound_id=? ORDER BY atom_number ASC";
+	public final static String SQL_SELECT_BOND_GRAPH = "SELECT atomA.atom_number,atomB.atom_number,ROUND(bond_order),stereo FROM compound_bonds "
+			+ "JOIN compound_bond_atoms atomA ON (compound_bonds.compound_id = atomA.compound_id AND compound_bonds.bond_id = atomA.bond_id )"
+			+ "JOIN compound_bond_atoms atomB ON (compound_bonds.compound_id = atomB.compound_id AND compound_bonds.bond_id = atomB.bond_id AND atomA.atom_number < atomB.atom_number)"
+			+ "WHERE compound_bonds.compound_id=? ORDER BY atomA.atom_number, atomB.atom_number ASC";
+
+	public static void exportGraph(String compoundID, SQLData data, HttpServletResponse res) throws IOException, DataException, SQLException {
+		ServletOutputStream out = res.getOutputStream();
+
+		res.setContentType("chemical/x-mdl-molfile");
+		res.setHeader("Content-Disposition", String.format("inline; filename=\"%s.mol\"", compoundID)); 
+
+		PreparedStatement sth = data.prepareStatement(SQL_GRAPH_COUNTS);
+		sth.setString(1, compoundID);
+		ResultSet results = sth.executeQuery();
+		
+		if ( results.first() && results.getInt(1) > 0 ) {
+			out.println(compoundID);
+			out.println(String.format("  %8s%10s2D","cyanos","0307761300"));
+			out.println();
+			out.println(String.format("% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d%6s",results.getInt(1), results.getInt(1), 0, 0, 0, 0, 0, 0, 0, 0, 1, "V2000"));
+			results.close();
+			sth.close();
+			
+			sth = data.prepareStatement(SQL_SELECT_ATOM_GRAPH);
+			sth.setString(1, compoundID);
+			results = sth.executeQuery();
+			while ( results.next() ) {
+				out.println(String.format("% 10.4f% 10.04f% 10.4f %3s 0  0  0% 3d  0  0  0  0  0  0  0  0", 
+						results.getFloat(3), results.getFloat(4), results.getFloat(5), results.getString(2), results.getInt(7)));
+			}
+			results.close();
+			sth.close();
+			sth = data.prepareStatement(SQL_SELECT_BOND_GRAPH);
+			sth.setString(1, compoundID);
+			results = sth.executeQuery();
+			while ( results.next() ) {
+				out.println(String.format("% 3d% 3d% 3d% 3d  0  0  0", results.getInt(1), results.getInt(2), results.getInt(3), results.getInt(4)));
+			}
+			results.close();
+			sth.close();
+			out.println("M  END");				
+		} 
 	}
 }

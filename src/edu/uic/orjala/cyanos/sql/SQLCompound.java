@@ -104,6 +104,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			this.valence = Integer.parseInt(line.substring(48, 51).trim());
 			if ( this.valence == 0 ) {
 				this.valence = this.getValence(Z);
+				System.out.format("Element (%s) Valence(%d)\n", this.symbol, this.valence);
 			}
 		}
 		
@@ -123,8 +124,10 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 					e = e + 10;
 					if ( electrons <= e) { outer = (electrons - (e - 12)); break; }
 				}
-				e = e + 6;
-				if ( electrons <= e) { outer = (electrons - (e - 8));	break; }
+				if ( n > 1 ) {
+					e = e + 6;
+					if ( electrons <= e) { outer = (electrons - (e - 8));	break; }
+				} else if ( electrons <= e ) { outer = electrons; break; }
 				electrons = electrons - e;
 			}
 			return outer;
@@ -135,7 +138,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			for ( Bond bond : bonds ) {
 				totalBonds = totalBonds + bond.bondOrder;
 			}
-			return valence - Math.round(totalBonds);
+			return (8 - valence) - Math.round(totalBonds);
 		}
 	}
 
@@ -180,7 +183,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	
 	private final static String SQL_INSERT_ATOM_GRAPH = "INSERT INTO compound_atoms(compound_id,atom_number,element,coord_x,coord_y,coord_z,charge,attached_h) VALUES(?,?,?,?,?,?,?,?)";
 	private final static String SQL_INSERT_BOND_GRAPH = "INSERT INTO compound_bonds(compound_id,bond_id,bond_order,stereo) VALUES(?,?,?,?)";
-	private final static String SQL_INSERT_BOND_ATOM_GRAPH = "INSERT INTO compound_bond_atoms(compound_id,bond_id,atom_id) VALUES(?,?,?)";
+	private final static String SQL_INSERT_BOND_ATOM_GRAPH = "INSERT INTO compound_bond_atoms(compound_id,bond_id,atom_number) VALUES(?,?,?)";
 	
 	private final static String SQL_CLEAR_ATOM_GRAPH = "DELETE FROM compound_atoms WHERE compound_id=?";
 	private final static String SQL_CLEAR_BOND_GRAPH = "DELETE FROM compound_bonds WHERE compound_id=?";
@@ -539,8 +542,8 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			line = reader.readLine(); // File generation information
 			line = reader.readLine(); // comment
 			line = reader.readLine(); // Counts line
-			int atomCount = Integer.parseInt(line.substring(0, 3));
-			int bondCount = Integer.parseInt(line.substring(3, 6));
+			int atomCount = Integer.parseInt(line.substring(0, 3).trim());
+			int bondCount = Integer.parseInt(line.substring(3, 6).trim());
 			List<Atom> atomList = new ArrayList<Atom>(atomCount);
 			List<Bond> bondList = new ArrayList<Bond>(bondCount);		
 			
@@ -580,7 +583,8 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 				if ( atom.index > 0 ) {
 					sth.setString(1, this.myID);
 					sth.setInt(2, atom.index);
-					sth.setInt(3, atom.Z);
+					// sth.setInt(3, atom.Z);
+					sth.setString(3, atom.symbol);
 					sth.setDouble(4, atom.xcoord);
 					sth.setDouble(5, atom.ycoord);
 					sth.setDouble(6, atom.zcoord);
