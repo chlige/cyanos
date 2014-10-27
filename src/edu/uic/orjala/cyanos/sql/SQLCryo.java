@@ -62,6 +62,20 @@ public class SQLCryo extends SQLObject implements Cryo {
 		return aCryo;
 	}
 	
+	public static SQLCryo loadForStrain(SQLData data, String cultureID) throws DataException, SQLException {
+		SQLCryo cryo = new SQLCryo(data);
+		PreparedStatement aPsth = data.prepareStatement(SELECT_FOR_STRAIN_SQL);
+		aPsth.setString(1, cultureID);
+		cryo.loadUsingPreparedStatement(aPsth);
+		return cryo;
+	}
+	
+	public static Cryo load(SQLData data, String cryoID) throws DataException {
+		SQLCryo cryo = new SQLCryo(data, cryoID);
+		return cryo;
+	}
+
+	
 	public SQLCryo(SQLData data) {
 		super(data);
 		this.initVals();
@@ -89,6 +103,10 @@ public class SQLCryo extends SQLObject implements Cryo {
 			String row = ( this.rowAlpha ? ALPHABET[myRow] : String.valueOf(myRow) );
 			String col = ( this.colAlpha ? ALPHABET[myCol] : String.valueOf(myCol) );
 			return row + col;
+		} else if ( myRow > 0 ) {
+			return String.valueOf(myRow);
+		} else if ( myCol > 0 ) {
+			return String.valueOf(myCol);
 		} else 
 			return null;
 	}
@@ -103,6 +121,13 @@ public class SQLCryo extends SQLObject implements Cryo {
 	
 	public String getCultureID() throws DataException {
 		return this.myData.getString(CULTURE_ID_COLUMN);
+	}
+	
+	public Strain getStrain() throws DataException {
+		String cultureID = this.getCultureID();
+		if ( cultureID != null ) 
+			return SQLStrain.load(myData, cultureID);
+		return null;
 	}
 
 	public String getCollectionID() throws DataException {
@@ -216,7 +241,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 
 	public Inoc thaw() throws DataException {
 		if ( this.myData == null ) return null;
-		Strain myStrain = new SQLStrain(this.myData, this.getCultureID());
+		Strain myStrain = SQLStrain.load(this.myData, this.getCultureID());
 		Inoc anInoc = SQLInoc.createInProject(this.myData, this.getCultureID(), myStrain.getProjectID());
 		if ( anInoc.first() ) {
 			this.myData.setNull(ROW_COLUMN);
@@ -267,5 +292,6 @@ public class SQLCryo extends SQLObject implements Cryo {
 			throw new DataException(e);
 		}
 	}
+	
 
 }

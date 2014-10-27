@@ -58,6 +58,8 @@ public interface Cryo extends BasicObject {
 	
 	Inoc getThawInoc() throws DataException;
 	
+	Strain getStrain() throws DataException;
+	
 	void setRow(String newValue) throws DataException;
 	
 	void setColumn(String newValue) throws DataException;
