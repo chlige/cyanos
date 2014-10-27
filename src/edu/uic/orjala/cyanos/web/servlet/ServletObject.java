@@ -74,8 +74,8 @@ public abstract class ServletObject extends HttpServlet {
 //	protected String configXMLFile;
 //	protected int idtype = SQLData.ID_TYPE_SERIAL;
 
-	final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, yyyy");
-	final static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
+	public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, yyyy");
+	public final static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
 
 	private final static String MODULE_PATH = "java:comp/env/module";
 	
@@ -718,6 +718,19 @@ public abstract class ServletObject extends HttpServlet {
 		RequestDispatcher disp = getServletContext().getRequestDispatcher(path);
 		disp.include(req, res);					
 	}
+
+	public static String shortenString(String aString, int length) {
+		if (aString == null ) 
+			return "";
+		else 
+			aString = aString.split("\n")[0];
+			
+		if ( aString.length() < length)
+			return aString;
+		else 
+			return aString.substring(0, length);
+	}
+
 
 }
 
