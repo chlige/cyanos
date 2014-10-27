@@ -171,6 +171,15 @@ public class UploadServlet extends ServletObject {
 		return worksheet;
 	}
 	
+	public static boolean hasSpreadsheet(HttpServletRequest request) {
+		HttpSession thisSession = request.getSession();
+		if ( request.getParameter(CLEAR_SHEET_ACTION) != null ) {
+			thisSession.removeAttribute(SPREADSHEET);
+			return false;
+		}
+		return ( thisSession.getAttribute(SPREADSHEET) != null);
+	}
+	
 	public static UploadJob getUploadJob(HttpSession session) {
 		return (UploadJob) session.getAttribute(UPLOAD_JOB);
 	} 

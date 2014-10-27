@@ -95,7 +95,7 @@ String contextPath = request.getContextPath();
 <li><a href='<%= contextPath %>/help?search'>Search</a></li>
 </ul></li>
 </ul>
-<div style="float:right;margin-right: 30px;padding: 4px;"><%= (UploadServlet.getSpreadsheet(request) != null ? "SHEET" : "") %><%
+<div style="float:right;margin-right: 30px;padding: 4px;"><%= (UploadServlet.hasSpreadsheet(request) ? "SHEET" : "") %><%
 	UploadJob job = UploadServlet.getUploadJob(session);
 	if ( job != null ) { %>JOB<% } %></div>
 </nav>
