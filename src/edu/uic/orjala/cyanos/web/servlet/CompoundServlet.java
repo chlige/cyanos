@@ -139,7 +139,7 @@ public class CompoundServlet extends ServletObject {
 				this.drawMolecule(req, res);
 				return;
 			} else if ( module.startsWith("/export") ) {
-				this.exportMolecule(req, res);
+				exportMolecule(req, res);
 				return;
 			}
 		} else if ( req.getParameter("div") != null ) {
@@ -157,13 +157,13 @@ public class CompoundServlet extends ServletObject {
 		try {
 		Compound aCompound = null;
 		if ( req.getParameter("id") != null )
-			aCompound = SQLCompound.load(this.getSQLData(req), req.getParameter("id"));
+			aCompound = SQLCompound.load(getSQLData(req), req.getParameter("id"));
 		
 		if ( module == null ) {
 			 if ( req.getParameter("form") != null ) {
 					if ( req.getParameter("form").equals("add") ) {
 						if ( req.getParameter(UPDATE_ACTION) != null ) {
-							aCompound = SQLCompound.create(this.getSQLData(req), req.getParameter("newID"));
+							aCompound = SQLCompound.create(getSQLData(req), req.getParameter("newID"));
 							updateCompound(req, aCompound);
 							req.setAttribute(COMPOUND_OBJ, aCompound);
 							this.forwardRequest(req, res, "/compound.jsp");
@@ -173,7 +173,11 @@ public class CompoundServlet extends ServletObject {
 					}
 			 } else if ( aCompound == null ) {
 				if ( req.getParameter("query") != null ) {
-					req.setAttribute(COMPOUND_RESULTS, SQLCompound.loadLike(this.getSQLData(req), req.getParameter("query")));
+					SQLCompound compoundList = SQLCompound.loadLike(getSQLData(req), req.getParameter("query"));
+					req.setAttribute(COMPOUND_RESULTS, compoundList);
+					if ( "sdf".equals(req.getParameter("export")) ) {
+						exportSDF(compoundList, res);
+					}
 				}
 				this.forwardRequest(req, res, "/compound.jsp");
 			} else if (aCompound.first()) {
@@ -331,7 +335,38 @@ public class CompoundServlet extends ServletObject {
 		//		aWrap.finishHTMLDoc();
 	}
 
-	private void exportMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	private void exportSDF(SQLCompound compoundList, HttpServletResponse res) throws IOException {
+		ServletOutputStream out = res.getOutputStream();
+		try {
+			StringBuffer output = new StringBuffer();
+			while ( compoundList.next() ) {
+				if ( compoundList.hasMDLData() ) {
+					output.append(compoundList.getMDLData());
+					output.append("> <COMPOUND_ID>\n");
+					output.append(compoundList.getID());
+					output.append("\n\n> <NAME>\n");
+					output.append(compoundList.getName());
+					output.append("\n\n> <PROJECT>\n");
+					output.append(compoundList.getProjectID());
+					output.append("\n\n> <NOTES>\n");
+					String notes = compoundList.getNotes();
+					output.append(notes.replaceAll("\n+", "\n"));
+					output.append("\n\n$$$$\n");
+				}
+			}
+			res.setHeader("Content-Disposition", "inline; filename=\"compounds.sdf\"");
+			res.setContentType("chemical/x-mdl-sdfile");
+			out.print(output.toString());
+		} catch ( DataException ex ) {
+			res.setContentType("text/plain");
+			out.println("ERROR: " + ex.getMessage());
+			ex.printStackTrace();
+		} 
+		out.flush();
+		return;
+	}
+
+	private static void exportMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		String module = req.getPathInfo();	
 		ServletOutputStream out = res.getOutputStream();
 		String[] details = module.split("/", 3);
@@ -346,7 +381,7 @@ public class CompoundServlet extends ServletObject {
 			Pattern cPatt = Pattern.compile("^(.+)\\.(cml|mol)");
 			Matcher cMatch = cPatt.matcher(details[2]);
 			if ( cMatch.matches() ) {
-				Compound aCompound = SQLCompound.load(this.getSQLData(req), cMatch.group(1));
+				Compound aCompound = SQLCompound.load(getSQLData(req), cMatch.group(1));
 				if ( aCompound.first() ) {
 					if ( aCompound.hasMDLData() ) {
 						String exportType = cMatch.group(2);
@@ -398,7 +433,7 @@ public class CompoundServlet extends ServletObject {
 		if ( details.length == 3 ) {
 			try {
 
-				Compound aCompound = SQLCompound.load(this.getSQLData(req), details[2]);
+				Compound aCompound = SQLCompound.load(getSQLData(req), details[2]);
 				if ( ! aCompound.hasMDLData() ) {
 					res.sendError(HttpServletResponse.SC_NOT_FOUND);
 					return;
@@ -535,7 +570,7 @@ public class CompoundServlet extends ServletObject {
 	private void handleDivRequest(HttpServletRequest req, HttpServletResponse res) throws DataException, SQLException, ServletException, IOException {
 		res.setContentType("text/html; charset=UTF-8");
 		String divTag = req.getParameter("div");
-		Compound aCompound = SQLCompound.load(this.getSQLData(req), req.getParameter("id"));
+		Compound aCompound = SQLCompound.load(getSQLData(req), req.getParameter("id"));
 		if ( aCompound.first() ) {
 //			CompoundForm aForm = new CompoundForm(aWrap);
 			if ( divTag.equals(DATAFILE_DIV_ID) ) {
@@ -549,21 +584,21 @@ public class CompoundServlet extends ServletObject {
 				out.println(aForm.dataForm(aCompound));
 */
 			} else if ( divTag.equals(SEP_LIST_DIV_ID) ) {
-				req.setAttribute(SeparationServlet.SEARCHRESULTS_ATTR, SQLSeparation.separationsForCompound(this.getSQLData(req), aCompound));
+				req.setAttribute(SeparationServlet.SEARCHRESULTS_ATTR, SQLSeparation.separationsForCompound(getSQLData(req), aCompound));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/separation/separation-list.jsp");
 				disp.forward(req, res);		
 			} else if ( divTag.equals(MATERIAL_LIST_DIV_ID) ) {
-				req.setAttribute(MaterialServlet.SEARCHRESULTS_ATTR, SQLMaterial.materialsForCompound(this.getSQLData(req), aCompound.getID()));
+				req.setAttribute(MaterialServlet.SEARCHRESULTS_ATTR, SQLMaterial.materialsForCompound(getSQLData(req), aCompound.getID()));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/material/material-list.jsp");
 				disp.forward(req, res);				
 			} else if ( divTag.equals(ASSAY_DIV_ID) ) {
 				AssayData data;
 				if ( req.getParameter("target") != null && req.getParameter("target").length() > 0 )
-					data = SQLAssayData.dataForCompoundID(this.getSQLData(req), req.getParameter("id"), req.getParameter("target"));
+					data = SQLAssayData.dataForCompoundID(getSQLData(req), req.getParameter("id"), req.getParameter("target"));
 				else
-					data = SQLAssayData.dataForCompoundID(this.getSQLData(req), req.getParameter("id"));
+					data = SQLAssayData.dataForCompoundID(getSQLData(req), req.getParameter("id"));
 				req.setAttribute(AssayServlet.SEARCHRESULTS_ATTR, data);
-				req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(this.getSQLData(req)));
+				req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(getSQLData(req)));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/assay/assay-data-list.jsp");
 				disp.forward(req, res);
 			} else {

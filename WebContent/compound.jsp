@@ -55,13 +55,15 @@ if ( myObject != null && myObject.first() ) { %>
 <form name="compoundquery">
 <table border=0>
 <tr><td>Query:</td><td>
-<% String queryValue = request.getParameter("query"); if ( queryValue == null ) { queryValue = ""; }%>
-<input type="text" name="query" VALUE="<%= queryValue %>"></td>
+<input type="text" name="query" VALUE="<%= request.getParameter("query") != null ? request.getParameter("query") : "" %>"></td>
 <td>
 <button type='SUBMIT'>Search</button>
 </td></tr>
 </table>
 </form>
+<% if ( request.getParameter("query") != null ) { %>
+<p align="center"><a href="?query=<%= request.getParameter("query") %>&export=sdf">Export Results as SDFile</a></p>
+<% } %>
 </center>
 <jsp:include page="/compound/compound-list.jsp" />
 <% } %>
