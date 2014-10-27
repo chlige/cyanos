@@ -3,18 +3,22 @@
  */
 package edu.uic.orjala.cyanos.sql;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.uic.orjala.cyanos.AccessException;
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.CompoundObject;
-import edu.uic.orjala.cyanos.Compound_UV;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.DataFileObject;
 import edu.uic.orjala.cyanos.ExternalFile;
@@ -31,8 +35,110 @@ import edu.uic.orjala.cyanos.User;
  * @author George Chlipala
  *
  */
-public class SQLCompound extends SQLObject implements Compound_UV, DataFileObject {
+public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	
+	protected class Bond {
+		Atom atomA;
+		Atom atomB;
+		float bondOrder = 0.0f;
+		int stereo;
+		
+		Bond(List<Atom> atoms, String line) {
+			int indexA = Integer.parseInt(line.substring(0, 3).trim());
+			Atom tatomA = atoms.get(indexA - 1);
+			int indexB = Integer.parseInt(line.substring(3, 6).trim());
+			Atom tatomB = atoms.get(indexB - 1);
+
+			if ( tatomA.Z > 1 && tatomB.Z > 1 ) {
+				this.atomA = tatomA;
+				this.atomB = tatomB;
+				atomA.bonds.add(this);
+				atomB.bonds.add(this);
+				this.bondOrder = Float.parseFloat(line.substring(6, 9).trim());
+				this.stereo = Integer.parseInt(line.substring(9, 12).trim());
+				if ( this.bondOrder == 4.0f ) { this.bondOrder = 1.5f; }
+			}
+		}
+	}
+
+	private static final String[] ELEMENTS = { "0", "H", "He", "Li", "Be", "B", "C", "N", "O",
+		"F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr",
+		"Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
+		"Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba",
+		"La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy",	"Ho", "Er", "Tm", "Yb", "Lu", "Hf",
+		"Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra",
+		"Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf",
+		"Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Uut", "Fl", "Uup", "Lv", "Uus", "Uuo" };
+	
+	protected class Atom {
+
+		int index = 0;
+		double xcoord;
+		double ycoord;
+		double zcoord;
+		String symbol;
+		int charge; 
+		int valence;
+		int Z;
+		
+		private final List<Bond> bonds = new ArrayList<Bond>(4);
+		
+		Atom(int index, String line) {
+			this.index = index;
+			this.xcoord = Double.parseDouble(line.substring(0, 10).trim());
+			this.ycoord = Double.parseDouble(line.substring(10, 20).trim());
+			this.zcoord = Double.parseDouble(line.substring(20, 30).trim());
+			this.symbol = line.substring(31,34).trim();
+			for ( int n = 1; n < ELEMENTS.length; n++ ) {
+				if ( ELEMENTS[n].equals(this.symbol) ) {
+					Z = n; 
+					break;
+				}
+			}
+			// 34-36 mass difference (isotopes)
+			this.charge = Integer.parseInt(line.substring(36,39).trim()); 
+			if ( charge > 0 ) charge = 4 - charge;
+			// 39-42 stereo parity
+			// 42-45 hydrogen count (query)
+			// 45-48 stereo care box (query)
+			this.valence = Integer.parseInt(line.substring(48, 51).trim());
+			if ( this.valence == 0 ) {
+				this.valence = this.getValence(Z);
+			}
+		}
+		
+		int getValence(int Z) {
+			// l = {0..n-1}
+			// number e = 2(2l+1)
+			int electrons = Z;
+			int outer = 0;
+			for ( int row = 1; row <= 8; row++ ) {
+				int n = row;
+				int e = 2;
+				if ( n-2 >= 4 ) {
+					e = e + 14;
+					if ( electrons <= e) { outer = electrons;  break; }
+				}
+				if ( n-1 >= 3 ) {
+					e = e + 10;
+					if ( electrons <= e) { outer = (electrons - (e - 12)); break; }
+				}
+				e = e + 6;
+				if ( electrons <= e) { outer = (electrons - (e - 8));	break; }
+				electrons = electrons - e;
+			}
+			return outer;
+		}
+		
+		int getHCount(List<Atom> atomList) {
+			float totalBonds = 0;
+			for ( Bond bond : bonds ) {
+				totalBonds = totalBonds + bond.bondOrder;
+			}
+			return valence - Math.round(totalBonds);
+		}
+	}
+
 	private static final int DEREPLICATION_PERM = Role.WRITE;
 	// Setup the column names here so that changing is easier.	
 	public final static String ID_COLUMN = "compound_id";
@@ -72,6 +178,14 @@ public class SQLCompound extends SQLObject implements Compound_UV, DataFileObjec
 	private final static String SQL_LOAD_LIKE = SQL_BASE + " WHERE compound_id LIKE ? OR name LIKE ? OR formula LIKE ?";
 	private final static String INSERT_NEW_COMPOUND_SQL = "INSERT INTO compound(compound_id) VALUES(?)";
 	
+	private final static String SQL_INSERT_ATOM_GRAPH = "INSERT INTO compound_atoms(compound_id,atom_number,element,coord_x,coord_y,coord_z,charge,attached_h) VALUES(?,?,?,?,?,?,?,?)";
+	private final static String SQL_INSERT_BOND_GRAPH = "INSERT INTO compound_bonds(compound_id,bond_id,bond_order,stereo) VALUES(?,?,?,?)";
+	private final static String SQL_INSERT_BOND_ATOM_GRAPH = "INSERT INTO compound_bond_atoms(compound_id,bond_id,atom_id) VALUES(?,?,?)";
+	
+	private final static String SQL_CLEAR_ATOM_GRAPH = "DELETE FROM compound_atoms WHERE compound_id=?";
+	private final static String SQL_CLEAR_BOND_GRAPH = "DELETE FROM compound_bonds WHERE compound_id=?";
+	private final static String SQL_CLEAR_BOND_ATOM_GRAPH = "DELETE FROM compound_bond_atoms WHERE compound_id=?";
+		
 	@Deprecated
 	private final static String UV_PEAK_SQL = "SELECT wavelength, rel_intensity FROM uv_data WHERE compound_id=?";
 	@Deprecated
@@ -409,12 +523,135 @@ public class SQLCompound extends SQLObject implements Compound_UV, DataFileObjec
 		this.myData.setString(MDL_COLUMN, newValue);
 	}
 	
+	public void updateGraph() throws DataException {
+		String mdlData = this.getMDLData();
+		if ( mdlData != null ) {
+			this.updateGraph(mdlData);
+		}
+	}
+	
+	private void updateGraph(String mdlData) throws DataException {
+		try {
+			BufferedReader reader = new BufferedReader(new StringReader(mdlData));
+			this.clearGraph();
+			String line = null;
+			line = reader.readLine(); // Molecule name
+			line = reader.readLine(); // File generation information
+			line = reader.readLine(); // comment
+			line = reader.readLine(); // Counts line
+			int atomCount = Integer.parseInt(line.substring(0, 3));
+			int bondCount = Integer.parseInt(line.substring(3, 6));
+			List<Atom> atomList = new ArrayList<Atom>(atomCount);
+			List<Bond> bondList = new ArrayList<Bond>(bondCount);		
+			
+			int n = 1;
+			for ( int i = 0; i < atomCount; i++ ) {
+				Atom atom = new Atom(n, reader.readLine());
+				atomList.add(atom);
+				if ( atom.Z > 1 ) {
+					n++;
+				} else {
+					atom.index = 0;
+				}
+			}
+			
+			for ( int i = 0; i < bondCount; i++ ) {
+				Bond bond = new Bond(atomList, reader.readLine());
+				if ( bond.bondOrder > 0.0f ) {
+					bondList.add(bond);
+				}
+			}
+			
+			while ( (line = reader.readLine()) != null ) {
+				if ( line.startsWith("M  CHG") ) {
+					int count = Integer.parseInt(line.substring(6,9).trim());
+					for ( int i = 0; i < count; i++ ) {
+						int pos = 9 + (i * 6);
+						int index = Integer.parseInt(line.substring(pos, pos + 3).trim());
+						Atom atom = atomList.get(index - 1);
+						atom.charge = Integer.parseInt(line.substring(pos + 4, pos + 7).trim());
+					}
+				}
+			}
+
+			PreparedStatement sth = this.myData.prepareStatement(SQL_INSERT_ATOM_GRAPH, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
+			for ( Atom atom : atomList ) {
+				if ( atom.index > 0 ) {
+					sth.setString(1, this.myID);
+					sth.setInt(2, atom.index);
+					sth.setInt(3, atom.Z);
+					sth.setDouble(4, atom.xcoord);
+					sth.setDouble(5, atom.ycoord);
+					sth.setDouble(6, atom.zcoord);
+					sth.setInt(7, atom.charge);
+					sth.setInt(8, atom.getHCount(atomList));
+					sth.addBatch();
+				}
+			}
+			
+			int[] retvals = sth.executeBatch();
+			sth.close();
+			
+			sth = this.myData.prepareStatement(SQL_INSERT_BOND_GRAPH, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
+			PreparedStatement graphSth = this.myData.prepareStatement(SQL_INSERT_BOND_ATOM_GRAPH, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
+			n = 1;
+			for ( Bond bond : bondList ) {
+				if ( bond.bondOrder > 0.0f ) {
+					sth.setString(1, this.myID);
+					sth.setInt(2, n);
+					sth.setFloat(3, bond.bondOrder);
+					sth.setInt(4, bond.stereo);
+					sth.addBatch();
+					graphSth.setString(1, this.myID);
+					graphSth.setInt(2, n);
+					graphSth.setInt(3, bond.atomA.index);
+					graphSth.addBatch();
+					graphSth.setString(1, this.myID);
+					graphSth.setInt(2, n);
+					graphSth.setInt(3, bond.atomB.index);
+					graphSth.addBatch();
+					n++;
+				}
+			}
+			
+			retvals = sth.executeBatch();
+			retvals = graphSth.executeBatch();
+			
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} catch (IOException e) {
+			throw new DataException(e);
+		}
+	}
+	
 	public boolean hasMDLData() throws DataException {
 		return ! this.myData.isNull(MDL_COLUMN);
 	}
 	
 	public void clearMDLData() throws DataException {
 		this.myData.setNull(MDL_COLUMN);
+		try {
+			this.clearGraph();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+	}
+	
+	private boolean clearGraph() throws SQLException, DataException {
+		PreparedStatement sth = this.myData.prepareStatement(SQL_CLEAR_BOND_ATOM_GRAPH);
+		sth.setString(1, this.myID);
+		sth.executeUpdate();
+		sth = this.myData.prepareStatement(SQL_CLEAR_BOND_GRAPH);
+		sth.setString(1, this.myID);
+		sth.executeUpdate();
+		sth = this.myData.prepareStatement(SQL_CLEAR_ATOM_GRAPH);
+		sth.setString(1, this.myID);
+		boolean retval = (sth.executeUpdate() > 0);
+		sth.close();
+		return retval;
 	}
 	
 	public void clearThumbnail() throws DataException {
