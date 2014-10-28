@@ -16,7 +16,11 @@
 <div CLASS="showSection" ID="view_info">
 <table class="species" align='center'>
 <tr><td width='125'>Collection ID:</td><td><%= thisObject.getID() %></td></tr>
-<tr><td>Name:</td><td><%= thisObject.getName() %></td></tr>
+<tr<% if ( update ) {
+	String name = request.getParameter("collectionName");
+	if ( name != null && name.compareTo(thisObject.getName()) != 0 ) {
+		thisObject.setName(name);
+%> class="updated"<% } } %>><td>Name:</td><td><%= thisObject.getName() %></td></tr>
 <tr<% if ( update ) { 
 	String value = request.getParameter("notes");
 	if (value != null && (! value.equals(thisObject.getNotes()) ) ) {

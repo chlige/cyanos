@@ -26,9 +26,10 @@
 <hr width="75%">
 <jsp:include page="/preserve/collection.jsp"/>
 <div class="collapseSection"><a name='collectionList' onClick='loadDiv("collectionList")' class='divTitle'>
-<img align="ABSMIDDLE" id="twist_collectionList" src="/cyanos/images/twist-open.png" /> Preservation List</a>
-<div class="showSection" id="div_collectionList">
+<img align="absmiddle" id="twist_collectionList" src="/cyanos/images/twist-closed.png" /> Preservation List</a>
+<div class="hideSection" id="div_collectionList">
 <jsp:include page="/preserve/list.jsp"/>
+<p align="center"><a href="<%= request.getContextPath()  %>/preserve/add.jsp">Add Preservation</a></p>
 </div></div>
 <% } else { %>
 <p align="CENTER"><font size="+3" >Preservation Search</font>
