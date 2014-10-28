@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="edu.uic.orjala.cyanos.Assay,
 	edu.uic.orjala.cyanos.web.servlet.AssayServlet,
@@ -35,17 +36,22 @@ User userObj = AssayServlet.getUser(request);  %>
 <tr><td width='125'>Assay ID:</td><td><input type='text' name='newID' value="<c:out value='<%= request.getParameter("newID") %>'/>"></td></tr>
 <tr><td width='125'>Assay Name:</td><td><input type='text' name='assayName' value="<c:out value='<%= request.getParameter("assayName") %>'/>"></td></tr>
 <% SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-	String today = format.format(new Date()); %>
-<tr><td>Date:</td><td><input type="text" name="assayDate" onFocus="showDate('div_calendar','assayDate')"  
+	String today = format.format(new Date()); 
+	String assayDate = request.getParameter("assayDate"); 
+	if (assayDate == null ) assayDate = today; 
+%><tr><td>Date:</td><td>
+<cyanos:calendar-field fieldName="assayDate" dateValue="<%= assayDate %>"/>
+<%--
+<input type="text" name="assayDate" onFocus="showDate('div_calendar','assayDate')"  
 	value="<c:out value='<%= request.getParameter("assayDate") %>' default='<%= today %>'/>" 
 	style='padding-bottom: 0px' id="assayDate"/>
-<a onclick="showDate('div_calendar','assatDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
+<a onclick="showDate('div_calendar','assayDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
 <div id="div_calendar" class='calendar'>
 <jsp:include page="/calendar.jsp">
 <jsp:param value="assayDate" name="update_field"/>
 <jsp:param value="div_calendar" name="div"/>
 </jsp:include>
-</div>
+</div>  --%>
 </td></tr>
 <tr><td>Project</td><td>
 <jsp:include page="/includes/project-popup.jsp">

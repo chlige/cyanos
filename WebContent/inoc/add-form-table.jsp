@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Strain,
@@ -32,14 +33,7 @@
 <input id="<%= fieldName  %>" type="text" name="<%= fieldName %>" value="<c:out value="<%= strainName %>"/>" autocomplete='off' onKeyUp="livesearch(this, '<%= fieldName %>', 'div_<%= fieldName %>')" style='padding-bottom: 0px' size="10" onchange="updateDefs(this)"/>
 <div id="div_<%= fieldName %>" class='livesearch'></div></td>
 <% fieldName = String.format("%02d_date", row); %>
-<td><input type="text" name="<%= fieldName %>" onFocus="showDate('cal_<%= fieldName %>','<%= fieldName %>')" style='padding-bottom: 0px' id="<%= fieldName %>" size="10"  value="<c:out value="<%= request.getParameter(fieldName) %>"/>"/>
-<a onclick="showDate('cal_<%= fieldName %>','<%= fieldName %>')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="cal_<%= fieldName %>" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="<%= fieldName %>" name="update_field"/>
-<jsp:param value="cal_<%= fieldName %>" name="div"/>
-</jsp:include>
-</div></td>
+<td><cyanos:calendar-field fieldName="<%= fieldName %>" dateValue="<%= request.getParameter(fieldName) %>"/></td>
 <% fieldName = String.format("%02d_parent", row); %>
 <td><select name="<%= fieldName %>">
 <% 
