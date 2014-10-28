@@ -415,6 +415,13 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 		}
 	}
 	
+	private static final String SQL_NO_GRAPH = "SELECT compound.* FROM compound WHERE mdl_data IS NOT NULL AND compound_id NOT IN (SELECT DISTINCT compound_id FROM compound_atoms) ORDER BY compound_id ASC";
+	
+	public static Compound compoundsWithoutGraph(SQLData data) throws DataException, SQLException {
+		SQLCompound compound = new SQLCompound(data);
+		compound.loadSQL(SQL_NO_GRAPH);
+		return compound;
+	}
 
 	protected SQLCompound(SQLData data) {
 		super(data);
@@ -569,7 +576,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 				if ( line.startsWith("M  CHG") ) {
 					int count = Integer.parseInt(line.substring(6,9).trim());
 					for ( int i = 0; i < count; i++ ) {
-						int pos = 9 + (i * 6);
+						int pos = 9 + (i * 7);
 						int index = Integer.parseInt(line.substring(pos, pos + 3).trim());
 						Atom atom = atomList.get(index - 1);
 						atom.charge = Integer.parseInt(line.substring(pos + 4, pos + 7).trim());

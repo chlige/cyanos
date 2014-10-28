@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -139,7 +140,7 @@ public class CompoundServlet extends ServletObject {
 		
 		if ( module != null ) {
 			if ( module.startsWith("/graphic")) {
-				this.drawMolecule(req, res);
+//				this.drawMolecule(SQLCompound.load(getSQLData(req), req), req, res);
 				return;
 			} else if ( module.startsWith("/export") ) {
 				exportMolecule(req, res);
@@ -192,6 +193,10 @@ public class CompoundServlet extends ServletObject {
 						exportMolecule(aCompound, exportType, res);
 					return;
 				}		
+
+				if ( req.getParameter("graphic") != null ) {
+					drawMolecule(aCompound, req, res);
+				}
 				
 				if ( req.getParameter(UPDATE_ACTION) != null ) 
 					updateCompound(req, aCompound);
@@ -458,119 +463,116 @@ public class CompoundServlet extends ServletObject {
 		}
 	}
 
-	private void drawMolecule(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		String module = req.getPathInfo();	
-		String[] details = module.split("/", 3);
+	private void drawMolecule(Compound aCompound, HttpServletRequest req, HttpServletResponse res) throws IOException {
 		ServletOutputStream httpOut = res.getOutputStream();
-		if ( details.length == 3 ) {
+		res.setContentType("image/png");
+		res.setHeader("Content-Disposition", String.format("inline; filename=\"%s.mol\"", aCompound.getID())); 
+
+		try {
+
+			if ( ! aCompound.hasMDLData() ) {
+				res.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+
+
+			int width = 300;
+			int height = 300;
+			if ( req.getParameter("width") != null )
+				width = Integer.parseInt(req.getParameter("width"));
+			if ( req.getParameter("height") != null )
+				height = Integer.parseInt(req.getParameter("height"));
+
+			BufferedImage anImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D gf = anImage.createGraphics();
+			gf.setBackground(Color.WHITE);
+			gf.setColor(Color.BLACK);
 			try {
-
-				Compound aCompound = SQLCompound.load(getSQLData(req), details[2]);
-				if ( ! aCompound.hasMDLData() ) {
-					res.sendError(HttpServletResponse.SC_NOT_FOUND);
-					return;
-				}
-
-				res.setContentType("image/png");
-
-				int width = 300;
-				int height = 300;
-				if ( req.getParameter("width") != null )
-					width = Integer.parseInt(req.getParameter("width"));
-				if ( req.getParameter("height") != null )
-					height = Integer.parseInt(req.getParameter("height"));
-
-				BufferedImage anImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-				Graphics2D gf = anImage.createGraphics();
-				gf.setBackground(Color.WHITE);
-				gf.setColor(Color.BLACK);
-				try {
-					if ( aCompound.first() ) {
-						if ( aCompound.hasMDLData() ) {
-							MDLReader aReader = new MDLReader(aCompound.getMDLDataStream());
-							ChemFile aChemFile = new ChemFile();
-							try {
-								aChemFile = (ChemFile) aReader.read(aChemFile);
-								//							Molecule myMolecule = (Molecule) aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);	
+				if ( aCompound.first() ) {
+					if ( aCompound.hasMDLData() ) {
+						MDLReader aReader = new MDLReader(aCompound.getMDLDataStream());
+						ChemFile aChemFile = new ChemFile();
+						try {
+							aChemFile = (ChemFile) aReader.read(aChemFile);
+							//							Molecule myMolecule = (Molecule) aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);	
 
 
-								Molecule myMolecule = (Molecule) AtomContainerManipulator.removeHydrogens(aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0));
-								int atomCount = myMolecule.getAtomCount();
-								Atom anAtom;
-								HydrogenAdder hAdder = new HydrogenAdder("org.openscience.cdk.tools.ValencyChecker");
-								for ( int a = 0; a < atomCount; a++ ) {
-									anAtom = (Atom) myMolecule.getAtom(a);
-									int aNumber = anAtom.getAtomicNumber();
-									switch ( aNumber ) {
-									case 7:
-									case 8:
-									case 16:
-										hAdder.addImplicitHydrogensToSatisfyValency(myMolecule, anAtom); break;
-									}
-								}							
+							Molecule myMolecule = (Molecule) AtomContainerManipulator.removeHydrogens(aChemFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0));
+							int atomCount = myMolecule.getAtomCount();
+							Atom anAtom;
+							HydrogenAdder hAdder = new HydrogenAdder("org.openscience.cdk.tools.ValencyChecker");
+							for ( int a = 0; a < atomCount; a++ ) {
+								anAtom = (Atom) myMolecule.getAtom(a);
+								int aNumber = anAtom.getAtomicNumber();
+								switch ( aNumber ) {
+								case 7:
+								case 8:
+								case 16:
+									hAdder.addImplicitHydrogensToSatisfyValency(myMolecule, anAtom); break;
+								}
+							}							
 
-								Dimension imgSize = new Dimension(width, height);
-								int minSize = ( width < height ? width : height);
-								// CDK 1.0.4
-								SimpleRenderer2D molRend = new SimpleRenderer2D();
-								Renderer2DModel rmdl = molRend.getRenderer2DModel();
+							Dimension imgSize = new Dimension(width, height);
+							int minSize = ( width < height ? width : height);
+							// CDK 1.0.4
+							SimpleRenderer2D molRend = new SimpleRenderer2D();
+							Renderer2DModel rmdl = molRend.getRenderer2DModel();
 
-								// CDK 1.2.1
-								/*	Renderer2DModel rmdl = new Renderer2DModel();
+							// CDK 1.2.1
+							/*	Renderer2DModel rmdl = new Renderer2DModel();
 							Java2DRenderer molRend = new Java2DRenderer(rmdl);
-								 */	
-								rmdl.setBackgroundDimension(imgSize);
-								rmdl.setColorAtomsByType(true);
-								rmdl.setBackColor(Color.WHITE);
-								rmdl.setForeColor(Color.BLACK);
-								rmdl.setShowImplicitHydrogens(true);
-								//							rmdl.setShowExplicitHydrogens(true);
-								rmdl.setFont(new Font("SansSerif", Font.PLAIN, minSize / 25));
-								int bondWidth = ( minSize < 1000 ? 3 : 5);
-								bondWidth = ( minSize < 300 ? 1 : 3);
-								rmdl.setBondWidth( bondWidth );
-								GeometryTools.translateAllPositive(myMolecule, rmdl.getRenderingCoordinates());
-								/*
+							 */	
+							rmdl.setBackgroundDimension(imgSize);
+							rmdl.setColorAtomsByType(true);
+							rmdl.setBackColor(Color.WHITE);
+							rmdl.setForeColor(Color.BLACK);
+							rmdl.setShowImplicitHydrogens(true);
+							//							rmdl.setShowExplicitHydrogens(true);
+							rmdl.setFont(new Font("SansSerif", Font.PLAIN, minSize / 25));
+							int bondWidth = ( minSize < 1000 ? 3 : 5);
+							bondWidth = ( minSize < 300 ? 1 : 3);
+							rmdl.setBondWidth( bondWidth );
+							GeometryTools.translateAllPositive(myMolecule, rmdl.getRenderingCoordinates());
+							/*
 								double bondLength = GeometryTools.getBondLengthAverage(myMolecule, rmdl.getRenderingCoordinates());
 								HydrogenPlacer hPlacer = new HydrogenPlacer();
 								hPlacer.placeHydrogens2D(myMolecule, bondLength * 0.75, rmdl.getRenderingCoordinates());
-								 */
-								GeometryTools.scaleMolecule(myMolecule, imgSize, 0.9, rmdl.getRenderingCoordinates());
-								GeometryTools.center(myMolecule, imgSize, rmdl.getRenderingCoordinates());
+							 */
+							GeometryTools.scaleMolecule(myMolecule, imgSize, 0.9, rmdl.getRenderingCoordinates());
+							GeometryTools.center(myMolecule, imgSize, rmdl.getRenderingCoordinates());
 
-								molRend.paintMolecule(myMolecule, gf);
-							} catch (CDKException e) {
-								drawText(gf, "CDKException: " + e.getMessage(), width, height);
-								gf.dispose();
-								e.printStackTrace();
-							} catch (Throwable t) {
-								drawText(gf, "ERROR " + t.getClass().getCanonicalName() + ": " + t.getMessage(), width, height);
-								gf.dispose();
-								t.printStackTrace();						
-							}
-						} else {
-							gf.drawString("No structure.", 14, height / 2);
+							molRend.paintMolecule(myMolecule, gf);
+						} catch (CDKException e) {
+							drawText(gf, "CDKException: " + e.getMessage(), width, height);
+							gf.dispose();
+							e.printStackTrace();
+						} catch (Throwable t) {
+							drawText(gf, "ERROR " + t.getClass().getCanonicalName() + ": " + t.getMessage(), width, height);
+							gf.dispose();
+							t.printStackTrace();						
 						}
 					} else {
-						gf.drawString("Compound Not Found.", 14, height / 2);
+						gf.drawString("No structure.", 14, height / 2);
 					}
-				} catch ( Exception e ) {
-					gf.drawString("ERROR: " + e.getMessage(), 14, height / 2);
-					gf.dispose();
-					e.printStackTrace();
+				} else {
+					gf.drawString("Compound Not Found.", 14, height / 2);
 				}
+			} catch ( Exception e ) {
+				gf.drawString("ERROR: " + e.getMessage(), 14, height / 2);
 				gf.dispose();
-
-
-				if ( ! ImageIO.write(anImage, "PNG", httpOut) )
-					this.log("FAILURE TO WRITE IMAGE.");
-			} catch ( Exception ex ) {
-				this.log(String.format("COMPOUND: %s ERROR: %s", details[2], ex.getLocalizedMessage()));
-				ex.printStackTrace();
-			} finally {
-				httpOut.flush();
-				httpOut.close();
+				e.printStackTrace();
 			}
+			gf.dispose();
+
+
+			if ( ! ImageIO.write(anImage, "PNG", httpOut) )
+				this.log("FAILURE TO WRITE IMAGE.");
+		} catch ( Exception ex ) {
+			this.log(String.format("COMPOUND: %s ERROR: %s", aCompound.getID(), ex.getLocalizedMessage()));
+			ex.printStackTrace();
+		} finally {
+			httpOut.flush();
+			httpOut.close();
 		}
 		return;
 	}
@@ -799,7 +801,7 @@ public class CompoundServlet extends ServletObject {
 	
 	public final static String SQL_GRAPH_COUNTS = "SELECT COUNT(DISTINCT atom_number), COUNT(DISTINCT bond_id) FROM compound_atoms JOIN compound_bonds USING(compound_id) WHERE compound_id=?";
 	
-	public final static String SQL_SELECT_ATOM_GRAPH = "SELECT atom_number,element,coord_x,coord_y,coord_z,charge,attached_h FROM compound_atoms WHERE compound_id=? ORDER BY atom_number ASC";
+	public final static String SQL_SELECT_ATOM_GRAPH = "SELECT atom_number,element,coord_x,coord_y,coord_z,charge FROM compound_atoms WHERE compound_id=? ORDER BY atom_number ASC";
 	public final static String SQL_SELECT_BOND_GRAPH = "SELECT atomA.atom_number,atomB.atom_number,ROUND(bond_order),stereo FROM compound_bonds "
 			+ "JOIN compound_bond_atoms atomA ON (compound_bonds.compound_id = atomA.compound_id AND compound_bonds.bond_id = atomA.bond_id )"
 			+ "JOIN compound_bond_atoms atomB ON (compound_bonds.compound_id = atomB.compound_id AND compound_bonds.bond_id = atomB.bond_id AND atomA.atom_number < atomB.atom_number)"
@@ -816,30 +818,78 @@ public class CompoundServlet extends ServletObject {
 		ResultSet results = sth.executeQuery();
 		
 		if ( results.first() && results.getInt(1) > 0 ) {
-			out.println(compoundID);
-			out.println(String.format("  %8s%10s2D","cyanos","0307761300"));
-			out.println();
-			out.println(String.format("% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d%6s",results.getInt(1), results.getInt(1), 0, 0, 0, 0, 0, 0, 0, 0, 1, "V2000"));
+			int atomCount = results.getInt(1);
+			int bondCount = results.getInt(2);
+			
 			results.close();
 			sth.close();
+
+			ArrayList<String> atomList = new ArrayList<String>(atomCount);
+			ArrayList<String> bondList = new ArrayList<String>(bondCount);
+			ArrayList<String> propList = new ArrayList<String>();
+			ArrayList<String> chargeList = new ArrayList<String>();
 			
 			sth = data.prepareStatement(SQL_SELECT_ATOM_GRAPH);
 			sth.setString(1, compoundID);
 			results = sth.executeQuery();
 			while ( results.next() ) {
-				out.println(String.format("% 10.4f% 10.04f% 10.4f %3s 0  0  0% 3d  0  0  0  0  0  0  0  0", 
-						results.getFloat(3), results.getFloat(4), results.getFloat(5), results.getString(2), results.getInt(7)));
+				atomList.add(String.format("% 10.4f% 10.04f% 10.4f %-3s 0  0  0  0  0  0  0  0  0  0  0  0", 
+						results.getFloat(3), results.getFloat(4), results.getFloat(5), results.getString(2)));
+				int charge = results.getInt(6);
+				if ( charge != 0 ) {
+					chargeList.add(String.format(" %3d %3d",results.getInt(1), charge));
+				}
 			}
+			
 			results.close();
 			sth.close();
 			sth = data.prepareStatement(SQL_SELECT_BOND_GRAPH);
 			sth.setString(1, compoundID);
 			results = sth.executeQuery();
 			while ( results.next() ) {
-				out.println(String.format("% 3d% 3d% 3d% 3d  0  0  0", results.getInt(1), results.getInt(2), results.getInt(3), results.getInt(4)));
+				bondList.add(String.format("% 3d% 3d% 3d% 3d  0  0  0", results.getInt(1), results.getInt(2), results.getInt(3), results.getInt(4)));
 			}
 			results.close();
 			sth.close();
+			
+			if ( chargeList.size() > 0 ) {
+				int chargeSize = chargeList.size();
+				int lineNumber = 1;
+				int lineSize = ( chargeSize >= 8 ? 8 : chargeSize );
+				int item = 1;
+				StringBuffer line = new StringBuffer(String.format("M CHG%3d", lineSize));
+				for ( String charge : chargeList ) {
+					line.append(charge);
+					if ( item == 8 ) {
+						item = 1;
+						propList.add(line.toString());
+						lineNumber++;
+						lineSize = ( chargeSize >= ( lineNumber * 8 ) ? 8 : chargeSize - ((lineNumber - 1) * 8) );
+						line = new StringBuffer(String.format("M CHG%3d", lineSize));
+					} else {
+						item++;
+					}
+				}
+				
+			}
+			
+			out.println(compoundID);
+			out.println(String.format("  %8s%10s2D","cyanos","0307761300"));
+			out.println();
+			out.println(String.format("% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d% 3d%6s", atomCount, bondCount, 0, 0, 0, 0, 0, 0, 0, 0, propList.size() + 1, "V2000"));
+	
+			for (String atom: atomList ) {
+				out.println(atom);
+			}
+			
+			for (String bond: bondList ) {
+				out.println(bond);
+			}
+			
+			for ( String prop: propList ) {
+				out.println(prop);
+			}
+			
 			out.println("M  END");				
 		} 
 	}

@@ -86,8 +86,8 @@ function debug() {
 }
 
 function showCompound(cmpdID, width, height) {
-	var request = "/cyanos/compound/graphic/"+ cmpdID + "?width=" + width + "&height=" + height;
-	window.open(request, "compound", "height=500,width=600");
+	var request = "/cyanos/compound?graphic=png&id="+ cmpdID + "&width=" + width + "&height=" + height;
+	window.open(request, "compound", "height=" + height + ",width=" + width);
 }
 
 function exportCompound(cmpdID, type) {

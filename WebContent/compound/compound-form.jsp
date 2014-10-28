@@ -76,7 +76,7 @@ None
 </div>
 <div class="right30" align="center">
 <form method="post">
-<img src="<%= contextPath %>/compound/graphic/<%= compoundObj.getID() %>" height=300 width=300>
+<img src="<%= contextPath %>/compound?graphic=png&id=<%= compoundObj.getID() %>" height=300 width=300>
 <p>Image size: <input type="text" size="5" name="imgW" value="500"> &times; <input type="text" size="5" name="imgH" value="500">
 <button type="button" onclick='showCompound("<%= compoundObj.getID() %>", this.form.imgW.value, this.form.imgH.value)'>Generate Image</button></p>
 <p><a href="<%= request.getContextPath() %>/compound?exportType=mol&id=<%= compoundObj.getID() %>">Export Structure (MOL)</a>
