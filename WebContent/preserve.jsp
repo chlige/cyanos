@@ -1,12 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
-<%@ page import="edu.uic.orjala.cyanos.Assay,
-	edu.uic.orjala.cyanos.CyanosObject,edu.uic.orjala.cyanos.web.servlet.AssayServlet,
-	edu.uic.orjala.cyanos.web.BaseForm,
-	java.math.BigDecimal,
-	java.util.List,
-	java.text.SimpleDateFormat" %>
+<%@ page import="edu.uic.orjala.cyanos.Cryo, edu.uic.orjala.cyanos.web.servlet.CryoServlet, edu.uic.orjala.cyanos.sql.SQLCryo" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -24,14 +19,16 @@
 <p align="CENTER"><font size="+2" >Preservation Information</font>
 <hr width="75%">
 <jsp:include page="/preserve/form.jsp"/>
-<% } else if ( request.getParameter("collection") != null ) {%>
-<p align="CENTER"><font size="+2" >Preservation Collection</font>
+<% } else if ( request.getParameter("collection") != null ) { 
+	Cryo queryResults = SQLCryo.loadForCollection(CryoServlet.getSQLData(request), request.getParameter("collection"));
+	request.setAttribute("cryoList", queryResults);
+%><p align="CENTER"><font size="+2" >Preservation Collection</font>
 <hr width="75%">
 <jsp:include page="/preserve/collection.jsp"/>
 <div class="collapseSection"><a name='collectionList' onClick='loadDiv("collectionList")' class='divTitle'>
 <img align="ABSMIDDLE" id="twist_collectionList" src="/cyanos/images/twist-open.png" /> Preservation List</a>
 <div class="showSection" id="div_collectionList">
-<jsp:include page="/preserve/collection-list.jsp"/>
+<jsp:include page="/preserve/list.jsp"/>
 </div></div>
 <% } else { %>
 <p align="CENTER"><font size="+3" >Preservation Search</font>
@@ -50,8 +47,10 @@
 </table>
 </form>
 </center>
-<jsp:include page="/preserve/list.jsp" />
-<% } %>
+<% if ( request.getParameter("query") != null ) {
+	Cryo queryResults = SQLCryo.loadForStrain(CryoServlet.getSQLData(request), request.getParameter("query"));	
+	request.setAttribute("cryoList", queryResults);
+%><jsp:include page="/preserve/list.jsp" /><% } } %>
 </div>
 
 </body>

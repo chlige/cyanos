@@ -54,6 +54,15 @@ public class SQLCryo extends SQLObject implements Cryo {
 
 	private static final String SQL_LOAD = "SELECT cryo.* FROM cryo WHERE cryo_id=?";	
 	private final static String SELECT_FOR_STRAIN_SQL = "SELECT * FROM cryo WHERE culture_id=?";
+	private static final String SQL_LOAD_FOR_COLLECTION = "SELECT * FROM cryo WHERE collection=?";
+	
+	public static Cryo loadForCollection(SQLData data, String collectionID) throws DataException, SQLException {
+		SQLCryo cryo = new SQLCryo(data);
+		PreparedStatement aPsth = data.prepareStatement(SQL_LOAD_FOR_COLLECTION);
+		aPsth.setString(1, collectionID);
+		cryo.loadUsingPreparedStatement(aPsth);
+		return cryo;		
+	}
 	
 	public static Cryo create(SQLData data, String inocID) throws DataException {
 		SQLCryo aCryo = new SQLCryo(data);

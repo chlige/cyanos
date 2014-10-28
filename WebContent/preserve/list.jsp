@@ -1,11 +1,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="edu.uic.orjala.cyanos.Cryo, edu.uic.orjala.cyanos.sql.SQLCryo, 
+<%@ page import="edu.uic.orjala.cyanos.Cryo, 
 	edu.uic.orjala.cyanos.Role, edu.uic.orjala.cyanos.web.servlet.CryoServlet,
 	java.text.SimpleDateFormat" %>
-<%	String contextPath = request.getContextPath();
-	if ( request.getParameter("query") != null ) {
-		Cryo queryResults = SQLCryo.loadForStrain(CryoServlet.getSQLData(request), request.getParameter("query"));		
-		SimpleDateFormat dateFormat = CryoServlet.DATE_FORMAT;
+<%	Object attr = request.getAttribute("cryoList");
+if ( attr != null && attr instanceof Cryo ) {
+	Cryo queryResults = (Cryo) attr;
+	SimpleDateFormat dateFormat = CryoServlet.DATE_FORMAT;
 %><table  class="dashboard">
 <tr><th class="header">Strain (Preservation #)</th><th class="header" width='200'>Date</th><th class="header" width='100'>Location</th><th class="header" width='100'>Remove Date</th><th class="header" width="100">Notes</th></tr>
 <% while ( queryResults.next() ) { 

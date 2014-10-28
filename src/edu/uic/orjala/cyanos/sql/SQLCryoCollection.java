@@ -62,6 +62,10 @@ public class SQLCryoCollection extends SQLBoxObject implements CryoCollection {
 	
 	private static final String SQL_LOAD_FOR_TYPE = "SELECT cryo_library.* FROM cryo_library WHERE format=?";
 	
+	public static CryoCollection load(SQLData data, String collectionID) throws DataException {
+		return new SQLCryoCollection(data, collectionID);
+	}
+	
 	public static CryoCollection collectionsForType(SQLData data, String aType) throws DataException {
 		SQLCryoCollection aCol = new SQLCryoCollection(data);
 		try {
