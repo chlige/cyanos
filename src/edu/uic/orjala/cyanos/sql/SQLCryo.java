@@ -49,7 +49,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 	private final static String COLUMN_COLUMN = "col";
 
 
-	private static final String INSERT_CRYO_SQL = "INSERT INTO cryo(source_id, date) VALUES(?, CURRENT_DATE)";
+	private static final String INSERT_CRYO_SQL = "INSERT INTO cryo(source_id, culture_id, date) (SELECT inoculation_id, culture_id, CURRENT_DATE FROM inoculation WHERE inoculation_id = ?)";
 	private final static String SELECT_FROM_COLLECTION_SQL = "SELECT * FROM cryo WHERE collection=? AND row=? AND col=?";
 
 	private static final String SQL_LOAD = "SELECT cryo.* FROM cryo WHERE cryo_id=?";	
@@ -66,11 +66,16 @@ public class SQLCryo extends SQLObject implements Cryo {
 	
 	public static Cryo create(SQLData data, String inocID) throws DataException {
 		SQLCryo aCryo = new SQLCryo(data);
-		PreparedStatement aSth = aCryo.myData.prepareStatement(INSERT_CRYO_SQL);
-		aCryo.makeNewWithAutonumber(aSth);
+		try {
+			PreparedStatement aSth = aCryo.myData.prepareStatement(INSERT_CRYO_SQL);
+			aSth.setString(1, inocID);
+			aCryo.makeNewWithAutonumber(aSth);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
 		return aCryo;
 	}
-	
+
 	public static SQLCryo loadForStrain(SQLData data, String cultureID) throws DataException, SQLException {
 		SQLCryo cryo = new SQLCryo(data);
 		PreparedStatement aPsth = data.prepareStatement(SELECT_FOR_STRAIN_SQL);

@@ -394,6 +394,8 @@
       <url-pattern>/collection.csv</url-pattern>
       <url-pattern>/collection.kml</url-pattern>
       <url-pattern>/cryo/*</url-pattern>
+      <url-pattern>/preserve.jsp</url-pattern>
+      <url-pattern>/preserve/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>culture</role-name>
