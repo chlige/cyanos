@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page import="edu.uic.orjala.cyanos.Harvest,
 	edu.uic.orjala.cyanos.User,
 	edu.uic.orjala.cyanos.Project,
@@ -19,18 +20,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Add Harvest</title>
+<cyanos:header title="Add Harvest"/>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= HarvestServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
-
+<cyanos:menu helpModule="<%= HarvestServlet.HELP_MODULE %>"/>
 <div class='content'>
 <p align="CENTER"><font size="+2" >Add Harvest</font></p>
 <hr width="75%">

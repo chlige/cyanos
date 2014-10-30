@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
 	edu.uic.orjala.cyanos.User,edu.uic.orjala.cyanos.Role" %>
 <% 	String contextPath = request.getContextPath(); 
@@ -7,16 +8,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script type="text/javascript" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<title>Add new compound</title>
+<cyanos:header title="Add new compound"/>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= CompoundServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= CompoundServlet.HELP_MODULE %>"/>
 
 <div class='content'>		
 <% if ( user.couldPerform(User.SAMPLE_ROLE, Role.CREATE) ) {  %>
@@ -40,10 +35,7 @@
 <tr><td>InChI Key:</td><td><input type="text" name="<%= CompoundServlet.FIELD_INCHI_KEY %>" value="<c:out value="<%= request.getParameter(CompoundServlet.FIELD_INCHI_KEY) %>"></c:out>" size="50"></td></tr>
 <tr><td>InChI String:</td><td><textarea name="<%= CompoundServlet.FIELD_INCHI_STRING %>" cols="50" rows="3"><c:out value="<%= request.getParameter(CompoundServlet.FIELD_INCHI_STRING) %>"></c:out></textarea>
 </td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value='<%= request.getParameter("notes") %>'/></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="submit" name="<%= CompoundServlet.UPDATE_ACTION %>">Update</button>
 <input type="RESET"></td></tr>

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.AssayServlet,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.UploadJob,
@@ -11,11 +12,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<jsp:include page="/includes/header-template.jsp"/>
+<cyanos:header/>
 <title>Assay Data Upload</title>
 </head>
 <body>
-<jsp:include page="/includes/menu.jsp"/>
+<cyanos:menu helpModule="assay"/>
 <h1>Assay Data Upload</h1>
 <div class="content">
 <% if ( request.getParameter(UploadServlet.PARSE_ACTION) != null ) {

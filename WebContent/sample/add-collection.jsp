@@ -1,5 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Sample,
 	edu.uic.orjala.cyanos.SampleCollection,
 	edu.uic.orjala.cyanos.web.servlet.SampleServlet,
@@ -7,13 +7,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html style="min-height:100%">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<title>Add new sample collection</title>
+<cyanos:header title="Add new sample collection"/>
 </head>
-
-<jsp:include page="/includes/menu.jsp" />
+<cyanos:menu helpModule="sample"/>
 
 <div class='content' style="padding-bottom: 60px;">
 <p align="CENTER"><font size="+3" >Add a new sample collection</font></p>

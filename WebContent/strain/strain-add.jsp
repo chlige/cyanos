@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Strain,
 	edu.uic.orjala.cyanos.web.servlet.StrainServlet,
 	edu.uic.orjala.cyanos.User,
@@ -12,18 +13,10 @@ User userObj = StrainServlet.getUser(request);  %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<script language="JAVASCRIPT" src="cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<title>Cyanos Database - New Strain</title>
+<cyanos:header title="Add Strain"/>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= StrainServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
-
+<cyanos:menu helpModule="<%= StrainServlet.HELP_MODULE %>"/>
 <div class="content">
 <h1 align="center">New Strain</h1>
 <hr width="90%">
@@ -44,19 +37,7 @@ User userObj = StrainServlet.getUser(request);  %>
 	onChange="if (! this.form.elements['genus'].value ) { this.form.elements['genus'].value = this.value.split(' ')[0]; } "></td><td>
 Genus:</td><td><input id="genus" type="TEXT" name="genus" value="<c:out value='<%= request.getParameter("genus") %>'/>" autocomplete="off" onkeyup="livesearch(this, 'genus', 'validgenus')" style="padding-bottom: 0px">
 <div class="livesearch" id="validgenus"></div></td></tr></table></td></tr>
-<% SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-	String today = format.format(new Date()); %>
-<tr><td>Date Added:</td><td><input type="text" name="addDate" onFocus="showDate('div_calendar','addDate')"  
-	value="<c:out value='<%= request.getParameter("addDate") %>' default='<%= today %>'/>" 
-	style='padding-bottom: 0px' id="addDate"/>
-<a onclick="showDate('div_calendar','addDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="addDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>
-</td></tr>
+<tr><td>Date Added:</td><td><cyanos:calendar-field fieldName="addDate"/></td></tr>
 <tr><td>Default Media:</td><td><input type="text" name="def_media" value="<c:out value='<%= request.getParameter("def_media") %>'/>"></td></tr>
 <% String status = request.getParameter("culture_status"); %>
 <tr><td>Culture status:</td><td><select name="culture_status">

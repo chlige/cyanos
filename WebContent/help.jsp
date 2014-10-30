@@ -1,5 +1,6 @@
 <%@ page buffer="12kb" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.HelpServlet,
@@ -12,18 +13,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<%  String contextPath = request.getContextPath(); %>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<title>Cyanos - Help</title>
+<cyanos:header title="Cyanos - Help"/>
 </head>
 <body>
 
-<jsp:include page="/includes/menu.jsp" />
+<cyanos:menu/>
 
 <div class='content'>
-<% 	String query = request.getParameter("query");
+<%  String contextPath = request.getContextPath(); 
+	String query = request.getParameter("query");
 	String helpPath = (String) request.getAttribute("helpPath"); 
 	if ( request.getParameter("search") != null ) { %>
 <h2 align="center">Search Help Content</h2>

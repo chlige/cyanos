@@ -1,19 +1,15 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page isErrorPage="true" %>
 <%@ page import="java.io.PrintWriter" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<%  String contextPath = request.getContextPath(); %>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Cyanos Database Error</title>
+<cyanos:header title="Cyanos Database Error"/>
 </head>
 <body>
-<jsp:include page="includes/menu.jsp" />
+<cyanos:menu/>
 <div class='content'>
 <h2>An error has been generated</h2>
 <dl>

@@ -1,6 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Collection,
 	edu.uic.orjala.cyanos.sql.SQLCollection,
 	edu.uic.orjala.cyanos.web.AppConfig,
@@ -19,9 +19,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script type="text/javascript" src="<%= contextPath %>/cyanos.js"></script>
-<script type="text/javascript" src="<%= contextPath %>/cyanos-date.js"></script>
+<cyanos:header title="Cyanos - Collection"/>
 <% if ( myConfig.canMap() ) { 
 	request.setAttribute("canMap", Boolean.TRUE); %>
 <script type="text/javascript" src="<%= contextPath %>/cyanos-map.js"></script>
@@ -68,17 +66,10 @@ function setupMap(canvas) {
 </script>
 <% } %>
 <link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<% 	if ( myObject != null && myObject.first() ) { %>
-<title>Collection <%= myObject.getID() %></title>
-<% } else { %>
-<title>Collection Search</title>
-<% } %>
 </head>
 <body>
 
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= CollectionServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= CollectionServlet.HELP_MODULE %>"/>
 
 <div class='content'>
 <% if ( myObject != null && myObject.first() ) { %>

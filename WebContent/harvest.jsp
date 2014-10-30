@@ -1,26 +1,15 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Harvest,edu.uic.orjala.cyanos.web.servlet.HarvestServlet,
 	java.text.SimpleDateFormat" %>
+<% Harvest thisObject = (Harvest) request.getAttribute("harvest"); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script type="text/javascript" src="cyanos-date.js"></script>
-<script type="text/javascript" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<% 	Harvest thisObject = (Harvest) request.getAttribute("harvest");
-if ( thisObject != null && thisObject.first() ) { %>
-<title>Harvest <%= thisObject.getID() %></title>
-<% } else { %>
-<title>Harvest Search</title>
-<% } %>
+<cyanos:header title="Harvest <%= (thisObject != null ? thisObject.getID() : "Search") %>"/>
 </head>
 <body>
-
-<jsp:include page="includes/menu.jsp">
-<jsp:param value="<%= HarvestServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= HarvestServlet.HELP_MODULE %>"/>
 
 <div class='content'>
 <% if ( thisObject != null && thisObject.first() ) { %>

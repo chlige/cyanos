@@ -1,21 +1,17 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.web.AppConfig,
 edu.uic.orjala.cyanos.web.servlet.AdminServlet, 
 edu.uic.orjala.cyanos.ConfigException,edu.uic.orjala.cyanos.web.listener.AppConfigListener" %>
+<%  String contextPath = request.getContextPath(); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<%  String contextPath = request.getContextPath(); %>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Cyanos Database - Administration</title>
+<cyanos:header title="Cyanos - Administration"/>
 </head>
 <body>
-
-<jsp:include page="includes/menu.jsp"/>
-
+<cyanos:menu/>
 <div class='content'>
 <h1>Application Configuration</h1>
 <% AppConfig appConfig = (AppConfig) session.getAttribute(AdminServlet.APP_CONFIG_ATTR);

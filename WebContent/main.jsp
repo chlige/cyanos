@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.CyanosObject,
@@ -10,8 +11,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<jsp:include page="/includes/header-template.jsp"/>
-<title>Cyanos Database v<%= MainServlet.versionString() %></title>
+<cyanos:header title="Cyanos Database v<%= MainServlet.versionString() %>">
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
@@ -21,12 +21,10 @@
 		loginBox.style.display = "block";
 	}
 </script>
+</cyanos:header>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= MainServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= MainServlet.HELP_MODULE %>"/>
 
 <% if ( request.getRemoteUser() == null ) { %>
 <div id="loginCover">

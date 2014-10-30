@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page buffer="12kb" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
@@ -18,17 +19,10 @@
 %><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Add Collection</title>
+<cyanos:header title="Add Collection"/>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= CollectionServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= CollectionServlet.HELP_MODULE %>"/>
 
 <div class='content'>
 <p align="CENTER"><font size="+2" >Add Collection</font></p>
@@ -63,16 +57,7 @@ if (request.getParameter("addCollection") != null) {
 <% String value = request.getParameter("colID"); %>
 <tr><td>Collection ID:</td><td><input type="text" name="colID" value="<c:out value="<%= value %>"/>"></td></tr>
 <% value = request.getParameter("colDate"); if ( value == null ) { value = format.format(new Date()); }  %>
-<tr><td>Collection Date:</td><td><input type="text" name="colDate" onFocus="showDate('div_calendar','colDate')" 
-style='padding-bottom: 0px' value="<%= value %>" id="colDate"/>
-<a onclick="showDate('div_calendar','colDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="colDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>
-</td></tr>
+<tr><td>Collection Date:</td><td><cyanos:calendar-field fieldName="colDate"/></td></tr>
 <% value = request.getParameter("collector"); %>
 <tr><td>Collected by:</td><td><input type="text" name="collector" value="<c:out value="<%= value %>"/>"></td></tr>
 <% value = request.getParameter("loc_name"); %>

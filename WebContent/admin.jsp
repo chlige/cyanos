@@ -1,3 +1,4 @@
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.AdminServlet,
 	edu.uic.orjala.cyanos.User,
 	edu.uic.orjala.cyanos.MutableUser,
@@ -7,11 +8,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<jsp:include page="/includes/header-template.jsp"/>
-<title>Application Administration</title>
+<cyanos:header title="Application Administration"/>
 </head>
 <body>
-<jsp:include page="/includes/menu.jsp"/>
+<cyanos:menu/>
 <div class='content'>
 <h1>Application Administration</h1>
 <hr width="85%"/>

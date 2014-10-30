@@ -20,11 +20,7 @@ User userObj = AssayServlet.getUser(request);  %>
 <title>Cyanos Database - New Assay</title>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp"/>
-<%-- <jsp:param value="<%= AssayServlet. %>" name="module"/> 
-</jsp:include> --%>
-
+<cyanos:menu helpModule="assay"/>
 <div class="content">
 <h1 align="center">New Assay</h1>
 <hr width="90%">

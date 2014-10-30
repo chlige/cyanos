@@ -1,26 +1,17 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Compound,edu.uic.orjala.cyanos.web.servlet.CompoundServlet,java.text.SimpleDateFormat" %>
+<% 	Compound myObject = (Compound) request.getAttribute(CompoundServlet.COMPOUND_OBJ); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script type="text/javascript" src="cyanos.js"></script>
+<cyanos:header title="Compound <%= (myObject != null ? myObject.getID() : "Search") %>">
 <script type="text/javascript" src="jmol/Jmol.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<% 	Compound myObject = (Compound) request.getAttribute(CompoundServlet.COMPOUND_OBJ);
-if ( myObject != null && myObject.first() ) { %>
-<title>Compound <%= myObject.getID() %></title>
-<% } else { %>
-<title>Compound Search</title>
-<% } %>
+</cyanos:header>
 </head>
 <body>
-
-<jsp:include page="includes/menu.jsp">
-<jsp:param value="<%= CompoundServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
-
+<cyanos:menu helpModule="<%= CompoundServlet.HELP_MODULE %>"/>
 <div class='content'>
 <% if ( myObject != null && myObject.first() ) { %>
 <p align="CENTER"><font size="+3" >Compound <%= myObject.getID() %></font>

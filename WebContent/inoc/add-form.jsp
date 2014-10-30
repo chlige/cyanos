@@ -1,17 +1,16 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Inoc,
 	edu.uic.orjala.cyanos.CyanosObject,edu.uic.orjala.cyanos.web.servlet.InocServlet,
 	edu.uic.orjala.cyanos.web.BaseForm,
 	java.text.SimpleDateFormat" %>
+<%	String contextPath = request.getContextPath(); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<%	String contextPath = request.getContextPath(); %>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos-date.js"></script>
+<cyanos:header title="Add Inoculations"/>
 <script language="javascript">
 function updateDefs(strainField) {
 	var xmlHttp;
@@ -77,15 +76,9 @@ function updateDefs(strainField) {
 		}
 	}
 </script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Add Inoculations</title>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= InocServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
-
+<cyanos:menu helpModule="<%= InocServlet.HELP_MODULE %>"/>
 <div class='content'>
 <h2 align="center">Add Inoculations</h2>
 <hr width="75%">

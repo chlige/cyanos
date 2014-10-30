@@ -1,3 +1,4 @@
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.AdminServlet,
 	edu.uic.orjala.cyanos.User,
 	edu.uic.orjala.cyanos.MutableUser,
@@ -15,7 +16,7 @@
 <title>User Administration</title>
 </head>
 <body>
-<jsp:include page="/includes/menu.jsp"/>
+<cyanos:menu/>
 <h1>User Administration</h1>
 <hr>
 <% User thisUser = AdminServlet.getUser(request);

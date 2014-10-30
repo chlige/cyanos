@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Assay,
@@ -10,18 +11,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<script language="JAVASCRIPT" src="cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<%  String contextPath = request.getContextPath();
-	Assay myAssay = (Assay) request.getAttribute(AssayServlet.ASSAY_OBJECT); %>
-<title>Cyanos - Bioassays</title>
+<cyanos:header title="Cyanos - Bioassays"/>
 </head>
-<body>
-
-<jsp:include page="includes/menu.jsp" />
-
+<%  String contextPath = request.getContextPath();
+	Assay myAssay = (Assay) request.getAttribute(AssayServlet.ASSAY_OBJECT); 
+%><body>
+<cyanos:menu helpModule="assay"/>
 <div class='content'>
 <% if ( myAssay != null && myAssay.first() ) { %>
 <p align="CENTER"><font size="+3" ><%= myAssay.getName() %></font></p>
