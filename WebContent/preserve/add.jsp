@@ -18,7 +18,7 @@
 		String notes = request.getParameter("notes");
 		
 		out.print("SOURCE: ");
-		out.println(sourceID); %><%--
+		out.println(sourceID); 
 		List<Cryo> records = new ArrayList<Cryo>();
 				
 		for (String row : request.getParameterValues("colField")) {
@@ -39,6 +39,7 @@
 								cryo.setDate(date);
 								cryo.setNotes(notes);
 								cryo.setLocation(x, y);
+								cryo.setCollection(collectionID);
 								records.add(cryo);
 							}
 						}
@@ -48,6 +49,7 @@
 					cryo.setDate(date);
 					cryo.setNotes(notes);
 					int[] xy = SQLCryo.parseLocation(loc);
+					cryo.setCollection(collectionID);
 					cryo.setLocation(xy[0], xy[1]);
 					records.add(cryo);
 				}
@@ -60,7 +62,6 @@
 			request.setAttribute("cryoList", records); 
 %><jsp:forward page="add-results.jsp"/><%			
 		}
-		 --%><%
 	}
 %><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -182,7 +183,7 @@ function updateDefs(strainField) {
 <title>Cyanos - Add Preservations</title>
 </head>
 <body onLoad="addRow(document.getElementById('addPreservation'),0)">
-<jsp:include page="/includes/menu.jsp" />
+<cyanos:menu/>
 <div class='content'>
 <h1>Add Preservations</h1>
 <form id='addPreservation' method="post">
