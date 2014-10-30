@@ -8,10 +8,12 @@
 	edu.uic.orjala.cyanos.SampleCollection,
 	java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% SampleMoveUpload job = (SampleMoveUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 
+<%
+	SampleMoveUpload job = (SampleMoveUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 
 	SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
 	
-if ( job != null ) { Map<String,String> template = job.getTemplate(); %>
+if ( job != null ) { Map<String,String> template = job.getTemplate();
+%>
 <table>
 <tr><td>Sample ID:</td><td><select name="<%= SampleMoveUpload.SAMPLE_ID %>"><% job.genOptions(out, SampleMoveUpload.SAMPLE_ID); %></select></td></tr>
 <tr><td>Collection:</td><td><select name="<%= SampleMoveUpload.DEST_COLLECTION %>">

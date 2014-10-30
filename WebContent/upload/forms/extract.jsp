@@ -10,10 +10,12 @@
 	edu.uic.orjala.cyanos.sql.SQLExtractProtocol,
 	edu.uic.orjala.cyanos.sql.SQLProtocol, java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% ExtractUpload job = (ExtractUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 
+<%
+	ExtractUpload job = (ExtractUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 
 	SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
 	
-if ( job != null ) { Map<String,String> template = job.getTemplate(); %>
+if ( job != null ) { Map<String,String> template = job.getTemplate();
+%>
 <p align="center">
 <input type="checkbox" name="<%= ExtractUpload.FORCE_UPLOAD %>" value="true" <%= ( template.containsKey(ExtractUpload.FORCE_UPLOAD) ? "checked" : "" ) %>> Force upload.<br> i.e. Overwrite existing collection information.
 </p>

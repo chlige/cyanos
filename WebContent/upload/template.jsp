@@ -7,10 +7,12 @@
 	edu.uic.orjala.cyanos.sql.SQLProtocol,
 	edu.uic.orjala.cyanos.web.UploadForm, java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% SQLData datasource = UploadServlet.getSQLData(request);
-	UploadForm form = (UploadForm) session.getAttribute(UploadServlet.UPLOAD_JOB);
+<%
+	SQLData datasource = UploadServlet.getSQLData(request);
+	UploadForm form = (UploadForm) session.getAttribute(UploadServlet.UPLOAD_FORM);
 	String dataType = request.getParameter("template_type");
-	String jspFile = form.jspForm(); %>
+	String jspFile = form.jspForm();
+%>
 <p align='center'>
 <% if ( jspFile != null ) { 
 	if ( request.getParameter("loadTemplateForm") != null ) { 

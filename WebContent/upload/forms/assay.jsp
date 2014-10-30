@@ -9,10 +9,12 @@
 	edu.uic.orjala.cyanos.Assay,
 	edu.uic.orjala.cyanos.sql.SQLAssayTemplate, java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% AssayUpload job = (AssayUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 
+<%
+	AssayUpload job = (AssayUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 
 	SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
 	
-if ( job != null ) { Map<String,String> template = job.getTemplate(); %>
+if ( job != null ) { Map<String,String> template = job.getTemplate();
+%>
 <script type="text/javascript">
 //<![CDATA[ 
 function setAutoLoc(assay_box) {

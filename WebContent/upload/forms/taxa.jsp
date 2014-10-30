@@ -4,9 +4,11 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.upload.TaxaUpload,
 	java.util.Map, java.util.List" %>
-<% TaxaUpload job = (TaxaUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 	
+<%
+	TaxaUpload job = (TaxaUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 	
 if ( job != null ) { 
-	Map<String,String> template = job.getTemplate(); %>
+	Map<String,String> template = job.getTemplate();
+%>
 <table>
 <tr><td>Name:</td><td><select name="<%= TaxaUpload.PARAM_NAME %>"><% job.genOptions(out, TaxaUpload.PARAM_NAME); %></select></td></tr>
 <tr><td>Level:</td><td><select name="<%= TaxaUpload.PARAM_LEVEL %>"><% job.genOptions(out, TaxaUpload.PARAM_LEVEL); %></select></td></tr>

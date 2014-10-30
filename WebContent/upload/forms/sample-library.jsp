@@ -10,10 +10,12 @@
 	edu.uic.orjala.cyanos.Project,
 	java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% SampleLibraryUpload job = (SampleLibraryUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 
+<%
+	SampleLibraryUpload job = (SampleLibraryUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 
 	SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
 	
-if ( job != null ) { Map<String,String> template = job.getTemplate(); %>
+if ( job != null ) { Map<String,String> template = job.getTemplate();
+%>
 <table>
 <tr><td>Source Material ID:</td><td><select name="<%= SampleLibraryUpload.SOURCE_ID %>"><% job.genOptions(out, SampleLibraryUpload.SOURCE_ID); %></select></td></tr>
 <tr><th colspan="2" align="center">Destination Information</th></tr>

@@ -8,10 +8,12 @@
 	edu.uic.orjala.cyanos.Project,
 	java.util.Map, java.util.Map.Entry, java.util.HashMap,
 	java.util.List, java.util.ListIterator" %>
-<% IsolationUpload job = (IsolationUpload) session.getAttribute(UploadServlet.UPLOAD_JOB); 
+<%
+	IsolationUpload job = (IsolationUpload) session.getAttribute(UploadServlet.UPLOAD_FORM); 
 	SQLData datasource = (SQLData) request.getAttribute(UploadServlet.DATASOURCE); 
 	
-if ( job != null ) { Map<String,String> template = job.getTemplate(); %>
+if ( job != null ) { Map<String,String> template = job.getTemplate();
+%>
  <p align="center">
 <input type="checkbox" name="<%= IsolationUpload.FORCE_UPLOAD %>" value="true" <%= ( template.containsKey(IsolationUpload.FORCE_UPLOAD) ? "checked" : "" ) %>> Force upload.<br> i.e. Overwrite existing collection information.
 </p>
