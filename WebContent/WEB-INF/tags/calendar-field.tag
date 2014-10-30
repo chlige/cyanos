@@ -1,9 +1,17 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ tag language="java" pageEncoding="UTF-8" %>
-<%@ tag import="java.text.DateFormatSymbols" %>
+<%@ tag import="java.text.DateFormatSymbols, java.text.SimpleDateFormat, java.util.Date" %>
 <%@ attribute name="fieldName" required="true" %>
 <%@ attribute name="dateValue" required="false" %>
-<input type="text" name="${fieldName}" onFocus="showDate('cal_${fieldName}','${fieldName}')" style='padding-bottom: 0px' id="${fieldName}" size="10"  value="<c:out value="${dateValue}"/>"/>
+<% if ( jspContext.getAttribute("dateValue") == null ) {
+	String value = request.getParameter((String) jspContext.getAttribute("fieldName"));
+	if ( value == null ) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd"); 
+		value = format.format(new Date());	
+	}
+	jspContext.setAttribute("dateValue", value);	
+} %>
+<input type="text" name="${fieldName}" onFocus="showDate('cal_${fieldName}','${fieldName}')" style='padding-bottom: 0px' id="${fieldName}" size="10"  value="${dateValue}"/>
 <a onclick="showDate('cal_${fieldName}','${fieldName}')"><img align="MIDDLE" border="0" src="<%= request.getContextPath() %>/images/calendar.png"></a>
 <div id="cal_${fieldName}" class='calendar'>
 <form name="cal">
