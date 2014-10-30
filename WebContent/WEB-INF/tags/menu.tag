@@ -81,7 +81,7 @@
 <li><a href='<%= contextPath %>/assay?action=add'>Add New</a></li>
 <li><a href='<%= contextPath %>/assay'>Browse Data</a></li>
 <li class="break"><a href='<%= contextPath %>/assay/protocol'>Manage Templates</a></li>
-<li><a href='<%= contextPath %>/upload?module=assay'>Upload Data</a></li>
+<li><a href='<%= contextPath %>/assay/upload.jsp'>Upload Data</a></li>
 </ul></li>
 <% } %>
 <!-- HELP MENU -->
