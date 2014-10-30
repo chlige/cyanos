@@ -203,18 +203,18 @@ public class SQLAssayData extends SQLObject implements AssayData {
 	 * @see edu.uic.orjala.cyanos.AssayData#getActivityString()
 	 */
 	public String getActivityString() throws DataException {
-//		return String.format(this.myData.getString(ACTIVITY_FORMAT), this.myData.getFloat(VALUE_COLUMN));
+		BigDecimal value = this.getActivity();
 		int sign = this.myData.getInt(VALUE_SIGN_COLUMN);
-		String value = this.getActivity().round(new MathContext(this.myData.getInt(ASSAY_SIG_FIG_COLUMN))).toPlainString();
-		String unit = this.myData.getString(ACTIVITY_FORMAT);
+		String valueString = ( value.compareTo(BigDecimal.ZERO) == 0 ? "0" : value.round(new MathContext(this.myData.getInt(ASSAY_SIG_FIG_COLUMN))).toPlainString());
 		switch (sign) {
-			case 1: value = "> ".concat(value); break;
-			case -1: value = "< ".concat(value); break;
+			case 1: valueString = "> ".concat(valueString); break;
+			case -1: valueString = "< ".concat(valueString); break;
 		}
+		String unit = this.myData.getString(ACTIVITY_FORMAT);
 		if ( unit != null && unit.length() > 0 ) {
-			value = value.concat(" ").concat(unit);
+			valueString = valueString.concat(" ").concat(unit);
 		}
-		return value;
+		return valueString;
 	}
 
 	/* (non-Javadoc)

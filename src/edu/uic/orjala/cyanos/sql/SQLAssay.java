@@ -1,6 +1,7 @@
 package edu.uic.orjala.cyanos.sql;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -462,7 +463,12 @@ public class SQLAssay extends SQLBoxObject implements Assay {
 	 * @see edu.uic.orjala.cyanos.sql.Assay#getActiveLevel()
 	 */
 	public BigDecimal getActiveLevel() throws DataException {
-		return this.myData.getBigDecimal(ACTIVE_LEVEL_COLUMN);
+		BigDecimal value = this.myData.getBigDecimal(ACTIVE_LEVEL_COLUMN);
+		if ( value != null ) {
+			int sf = this.getSigFigs();
+			return value.round(new MathContext(sf));
+		}
+		return null;
 	}
 	
 	/* (non-Javadoc)

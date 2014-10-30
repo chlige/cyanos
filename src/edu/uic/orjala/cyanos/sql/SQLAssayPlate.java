@@ -48,7 +48,7 @@ public class SQLAssayPlate extends SQLBoxObject implements AssayPlate {
 	
 	private final static String SQL_BASE = sqlBase("assay", ALL_COLUMNS);
 
-	private static final String SQL_LOAD_ALL_DATA = SQL_BASE + " WHERE assay_id=?";
+	private static final String SQL_LOAD_ALL_DATA = SQL_BASE + " WHERE assay_id=? ORDER BY row,col ASC";
 	
 	private static final String SQL_INSERT_DATA = "INSERT INTO assay(assay_id,row,col,culture_id) VALUES(?,?,?,?)";
 
@@ -244,16 +244,17 @@ public class SQLAssayPlate extends SQLBoxObject implements AssayPlate {
 	 * @see edu.uic.orjala.cyanos.AssayData#getActivityString()
 	 */
 	public String getActivityString() throws DataException {
+		BigDecimal value = this.getActivity();
 		int sign = this.myData.getInt(VALUE_SIGN_COLUMN);
-		String value = this.getActivity().round(this.sfMC).toPlainString();
+		String valueString = ( value.compareTo(BigDecimal.ZERO) == 0 ? "0" : value.round(this.sfMC).toPlainString());
 		switch (sign) {
-			case 1: value = "> ".concat(value); break;
-			case -1: value = "< ".concat(value); break;
+			case 1: valueString = "> ".concat(valueString); break;
+			case -1: valueString = "< ".concat(valueString); break;
 		}
 		if ( this.actFormat != null && this.actFormat.length() > 0 ) {
-			value = value.concat(" ").concat(this.actFormat);
+			valueString = valueString.concat(" ").concat(this.actFormat);
 		}
-		return value;
+		return valueString;
 	}
 
 	/* (non-Javadoc)
