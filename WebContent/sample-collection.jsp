@@ -1,3 +1,4 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Sample,
@@ -8,23 +9,18 @@
 	edu.uic.orjala.cyanos.sql.SQLSampleCollection,
 	edu.uic.orjala.cyanos.web.servlet.SampleServlet,
 	java.text.SimpleDateFormat, java.util.List" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%  String contextPath = request.getContextPath();
+	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter"); 
+	SampleCollection collObj = (SampleCollection) request.getAttribute(SampleServlet.COLLECTION_ATTR);
+%><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
+<cyanos:header title="Cyanos - Sample Collections"/>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/><%
-String contextPath = request.getContextPath();
-	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter"); 
-	SampleCollection collObj = (SampleCollection) request.getAttribute(SampleServlet.COLLECTION_ATTR);
-if ( collObj != null && collObj.first() ) { 
-%><title>Sample <%= collObj.getID() %></title><%
-} else { 
-%><title>Sample Search</title><%
-} 
-%></head>
+<link rel="stylesheet" type="text/css" href="cyanos.css"/></head>
 <body style="min-height:100%">
-<jsp:include page="includes/menu.jsp" />
+<cyanos:menu helpModule="sample"/>
 
 <div class='content' style="padding-bottom: 60px;"><%
 if ( collObj != null && collObj.first() ) { 

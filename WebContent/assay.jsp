@@ -21,7 +21,7 @@
 <% if ( myAssay != null && myAssay.first() ) { %>
 <p align="CENTER"><font size="+3" ><%= myAssay.getName() %></font></p>
 
-<p align="center"><a href='assay.csv?id=<%= myAssay.getID() %>'>Export Assay Data</a></p>
+<p align="center"><a href='<%= contextPath %>/assay?export=csv&id=<%= myAssay.getID() %>'>Export Assay Data</a></p>
 
 <div id="<%= AssayServlet.INFO_FORM_DIV_ID %>">
 <jsp:include page="/assay/assay-form.jsp" />

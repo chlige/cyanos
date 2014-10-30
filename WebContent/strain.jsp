@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Strain,
@@ -8,26 +9,15 @@
 	edu.uic.orjala.cyanos.web.BaseForm,
 	java.math.BigDecimal,
 	java.text.SimpleDateFormat" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="javascript" src="cyanos.js"></script>
-<script language="javascript" src="cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
 <%  String contextPath = request.getContextPath();
 	Strain strainObject = (Strain) request.getAttribute(StrainServlet.STRAIN_OBJECT);
-if ( strainObject != null && strainObject.first() ) { %>
-<title>Cyanos Database - Strain: <%= strainObject.getID() %></title>
-<% } else { %>
-<title>Cyanos Database - Strain Search</title>
-<% } %>
+%><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<cyanos:header title="Cyanos Database"/>
 </head>
 <body>
-
-<jsp:include page="/includes/menu.jsp">
-<jsp:param value="<%= StrainServlet.HELP_MODULE %>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%= StrainServlet.HELP_MODULE %>"/>
 
 <div class='content'>
 <% if ( strainObject != null && strainObject.first() ) { %>

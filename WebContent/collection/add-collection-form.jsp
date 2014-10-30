@@ -1,3 +1,4 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Harvest,
@@ -35,14 +36,7 @@
 </table>
 <% } %>
 </td></tr>
-<tr><td>Harvest Date:</td><td><input type="text" name="harvDate" onFocus="showDate('div_calendar','harvDate')" style='padding-bottom: 0px' id="harvDate"/>
-<a onclick="showDate('div_calendar','harvDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="harvDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div></td></tr>
+<tr><td>Harvest Date:</td><td><cyanos:calendar-field fieldName="harvDate"/></td></tr>
 <tr><td>Color:</td><td><input type="text" name="color"></td></tr>
 <tr><td>Type:</td><td>
 <% List<String> types = SQLHarvest.types((SQLData)request.getAttribute(HarvestServlet.DATASOURCE)); 
@@ -60,10 +54,7 @@
 		}
 	}
 %></td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="submit" name="addHarvest">Add Harvest</button>
 <input type="RESET"></td></tr>

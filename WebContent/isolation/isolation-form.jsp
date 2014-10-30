@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Isolation,
 	edu.uic.orjala.cyanos.web.BaseForm,
 	edu.uic.orjala.cyanos.web.servlet.CollectionServlet,
@@ -66,15 +67,7 @@
 <input type="hidden" name="id" value="<%= myObject.getID() %>">
 <table class="species" style="width:80%; margin-left:auto; margin-right:auto">
 <% Date strainDate = myObject.getDate(); %>
-<tr><td>Isolation Date:</td><td><input type="text" name="isoDate" onFocus="showDate('div_calendar','isoDate')" style='padding-bottom: 0px' value='<fmt:formatDate value="<%= ( strainDate != null ? strainDate : new Date()) %>" pattern="yyyy-MM-dd"/>' id="colDate"/>
-<a onclick="showDate('div_calendar','isoDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="isoDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>
-</td></tr>
+<tr><td>Isolation Date:</td><td><cyanos:calendar-field fieldName="isoDate"/></td></tr>
 <tr><td>Type:</td><td>
 <select name="type"><% List<String> types = (List<String>) request.getAttribute(CollectionServlet.ATTR_TYPES); 
 	String currentType = myObject.getType();
@@ -89,11 +82,7 @@
 </select>
 <% } %>
 </td></tr>
-<tr><td>Project:</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= myObject.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project:</td><td><cyanos:project-popup fieldName="project" project="<%= myObject.getProjectID() %>"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= myObject.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateCollection" onClick="updateForm(this,'<%= CollectionServlet.INFO_FORM_DIV_ID %>')">Update</button>
 <input type="RESET"></td></tr>

@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Collection,
 	edu.uic.orjala.cyanos.web.BaseForm,
 	edu.uic.orjala.cyanos.web.servlet.CollectionServlet,
@@ -109,26 +110,16 @@ if ( update ) {
 <form name='editStrain' method="post" action="collection">
 <input type="hidden" name="col" value="<%= myObject.getID() %>">
 <table class="species" style="width:80%; margin-left:auto; margin-right:auto">
-<% Date strainDate = myObject.getDate(); %>
-<tr><td>Collection Date:</td><td><input type="text" name="colDate" onFocus="showDate('div_calendar','colDate')" style='padding-bottom: 0px' value='<fmt:formatDate value="<%= ( strainDate != null ? strainDate : new Date()) %>" pattern="yyyy-MM-dd"/>' id="colDate"/>
-<a onclick="showDate('div_calendar','colDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="colDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>
-</td></tr>
+<% Date strainDate = myObject.getDate();
+   String dateString = ( strainDate != null ? CollectionServlet.CALFIELD_FORMAT.format(strainDate) : null );
+%><tr><td>Collection Date:</td><td>
+<cyanos:calendar-field fieldName="colDate" dateValue="<%= dateString %>"/></td></tr>
 <tr><td>Collected by:</td><td><input type="text" name="collector" value="<c:out value="<%= myObject.getCollector() %>"/>"></td></tr>
 <tr><td>Location name:</td><td><input type="text" name="loc_name" value="<c:out value="<%= myObject.getLocationName() %>"/>" size="40"></td></tr>
 <tr><td>Coordinates:</td><td id="coords"><input type="text" id="pos_lat" name="lat" size="10" value="<%= myObject.getLatitudeFloat() %>"> 
 <input type="text" id="pos_long" name="long" size="10" value="<%= myObject.getLongitudeFloat() %>"></td></tr>
 <tr><td>Accuracy (m):</td><td><input id="pos_acc" type="text" name="loc_prec" size="10" value="<c:out value="<%= myObject.getPrecision() %>"/>"></td></tr>
-<tr><td>Project:</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= myObject.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project:</td><td><cyanos:project-popup fieldName="project" project="<%= myObject.getProjectID() %>"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= myObject.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateCollection" onClick="updateForm(this,'<%= CollectionServlet.INFO_FORM_DIV_ID %>')">Update</button>
 <input type="RESET"></td></tr>

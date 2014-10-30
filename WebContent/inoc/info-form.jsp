@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.InocServlet,
 	edu.uic.orjala.cyanos.sql.SQLData,
 	edu.uic.orjala.cyanos.sql.SQLInoc,
@@ -70,15 +71,8 @@ if ( aProj != null && aProj.first() ) { %><a href='project?id=<%= aProj.getID() 
 <% if ( parent != null && parent.first() ) { %><tr><td>Parent:</td><td><a href="inoc?id=<%= parent.getID() %>">Inoc # <%= parent.getID() %> - <%= dateFormat.format(parent.getDate()) %> - <%= CyanosObject.autoFormatAmount(parent.getVolume(), Inoc.VOLUME_TYPE) %></a></td></tr><% } %>
 <tr><td>Media:</td><td><%= thisObject.getMedia() %></td></tr>
 <tr><td>Volume:</td><td><%= CyanosObject.autoFormatAmount(thisObject.getVolume(), Inoc.VOLUME_TYPE) %></td></tr>
-<tr><td>Removed Date:</td><td>
-<% if ( removeDate == null ) { %><input type="text" name="removedDate" onFocus="showDate('div_calendar','removedDate')" style='padding-bottom: 0px' id="removedDate"/>
-<a onclick="showDate('div_calendar','removedDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="removedDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div><% } else { out.print(dateFormat.format(removeDate)); } %></td></tr>
+<tr><td>Removed Date:</td><td><% if ( removeDate == null ) { %><cyanos:calendar-field fieldName="removedDate"/>
+<% } else { out.print(dateFormat.format(removeDate)); } %></td></tr>
 <% String fate = thisObject.getFate(); %>
 <tr><td>Fate:</td><td>
 <% if ( fate == null || fate.equals(Inoc.FATE_STOCK) ) { 
@@ -86,14 +80,9 @@ if ( aProj != null && aProj.first() ) { %><a href='project?id=<%= aProj.getID() 
 %><select name="fate">
 <option value="">NONE</option>
 <% for ( String aFate : fates ) { %>
-	<option value="<%= aFate %>" <%= ( aFate.equals(fate) ? "selected" : "" ) %>><%= aFate.substring(0, 1).toUpperCase().concat(aFate.substring(1).toLowerCase()) %></option>
-<% } %>
-</select><% } else { out.print(fate); } %></td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= thisObject.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<option value="<%= aFate %>" <%= ( aFate.equals(fate) ? "selected" : "" ) %>><%= aFate.substring(0, 1).toUpperCase().concat(aFate.substring(1).toLowerCase()) %></option>
+<% } %></select><% } else { out.print(fate); } %></td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project" project="<%= thisObject.getProjectID() %>"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= thisObject.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateInoc" onClick="updateForm(this,'<%= InocServlet.INFO_FORM_DIV_ID %>')">Update</button>
 <input type="RESET"></td></tr>

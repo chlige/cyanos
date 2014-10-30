@@ -119,16 +119,15 @@ if ( update ) {
 <p align='center'><button type='button' onClick='flipDiv("info")'>Edit Values</button></p>
 </div>
 <div class='hideSection' id="edit_info">
-<form name='editMaterial'>
+<form name='editAssay'>
 <input type="hidden" name="id" value="<%= thisObject.getID() %>">
 <table class="species" align='center'>
 <tr><td width='125'>Assay ID:</td><td><%= thisObject.getID() %></td></tr>
 <tr><td>Assay Name:</td><td><input type="text" name="assayName" value="<%= thisObject.getName() %>" size=50></td></tr>
 <tr><td>Assay Date:</td><td>
 <% Date assayDate = thisObject.getDate();  
-	Calendar assayCal = GregorianCalendar.getInstance();
-	if ( assayDate != null ) { assayCal.setTime(assayDate); }
-%><cyanos:calendar-field fieldName="assayDate" dateValue="<fmt:formatDate value="<%= assayCal.getTime() %>" pattern="yyyy-MM-dd"/>"/>
+	String dateString = ( assayDate != null ? AssayServlet.CALFIELD_FORMAT.format(assayDate) : null );
+%><cyanos:calendar-field fieldName="assayDate" dateValue="<%= dateString %>"/>
 <%--
 <input type="text" name="assayDate" onFocus="showDate('div_calendar','assayDate')" style='padding-bottom: 0px' value='' id="assayDate"/>
 <a onclick="showDate('div_calendar','assayDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
@@ -139,11 +138,7 @@ if ( update ) {
 </jsp:include>
 </div>  --%>
 </td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= thisObject.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project" project="<%= thisObject.getProjectID() %>"/></td></tr>
 <tr><td>Target:</td><td><% String targetValue = thisObject.getTarget(); if ( targetValue == null ) { targetValue = ""; }%>
 <input id="target" type="text" name="target" VALUE="<%= targetValue %>" autocomplete='off' onKeyUp="livesearch(this, 'target', 'div_target')" onBlur="window.setTimeout(closeLS, 250, 'div_target');" style='padding-bottom: 0px'/>
 <div id="div_target" class='livesearch'></div></td></tr>
@@ -162,7 +157,7 @@ for ( String op : operators ) {
 		String thisSize = String.format("%dx%d", lenghts[i], widths[i]); 
 %><option value="<%= thisSize %>" <%= (size.equals(thisSize) ? "selected" : "") %>><%= String.format("%d wells (%s)", lenghts[i] * widths[i], thisSize) %></option>
 <% } %></select></td></tr>
-<tr><td>Unit Format:</td><td><input name="unit" value="<c:out value="<%= thisObject.getUnit() %>"/>"></td></tr>
+<tr><td>Unit:</td><td><input name="unit" value="<c:out value="<%= thisObject.getUnit() %>"/>"></td></tr>
 <tr><td>Significant Figures:</td><td><input name="sigFigs" value="<c:out value="<%= thisObject.getSigFigs() %>"/>"></td></td>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= thisObject.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateAssay" onClick="updateForm(this,'<%= AssayServlet.INFO_FORM_DIV_ID %>')">Update</button>

@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Material,
 	edu.uic.orjala.cyanos.web.servlet.HarvestServlet,
 	edu.uic.orjala.cyanos.web.servlet.InocServlet,
@@ -38,7 +39,6 @@
 <tr><td>Color:</td><td><%= thisObject.getColor() %></td></tr>
 <tr><td>Type:</td><td><%= thisObject.getType() %></td></tr>
 </table>
-
 <p align="center"><b>Sources</b></p>
 <% if ( thisObject.isFieldHarvest() ) { request.setAttribute(CollectionServlet.SEARCHRESULTS_ATTR, thisObject.getCollection()); %>
 <jsp:include page="/collection/collection-list.jsp"></jsp:include>
@@ -47,8 +47,7 @@
 <jsp:param value="1" name="samestyle"/>
 </jsp:include>
 <% } %>
-
-<P></P>
+<p></p>
 <div CLASS="showSection" ID="view_info">
 <table class="species" align='center'>
 <tr
@@ -119,19 +118,8 @@ if ( remoteHost != null ) { %>
 <input type="hidden" name="id" value="<%= thisObject.getID() %>">
 <table class="species" align='center'>
 <tr><td>Prep. Date:</td><td>
-<% 	if ( prepDate == null ) { %>
-<input type="text" name="prepDate" onFocus="showDate('div_calendar','prepDate')" style='padding-bottom: 0px' id="prepDate"/>
-<a onclick="showDate('div_calendar','prepDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="prepDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>	
-<% } else { %>
-<%= dateFormat.format(prepDate) %>
-<% } %>
-</td></tr>
+<% 	if ( prepDate == null ) { %><cyanos:calendar-field fieldName="prepDate"/>
+<% } else { out.print(dateFormat.format(prepDate)); } %></td></tr>
 <tr><td>Cell Mass:</td><td>
 <% BigDecimal massAmount = thisObject.getCellMass();
 	if ( massAmount == null || massAmount.compareTo(BigDecimal.ZERO) == 0 ) { %>
@@ -144,15 +132,8 @@ if ( remoteHost != null ) { %>
 <% BigDecimal volAmount = thisObject.getMediaVolume();
 	if ( volAmount == null || volAmount.compareTo(BigDecimal.ZERO) == 0 ) { %>
 <input type="text" name="mediaVol">
-<% } else { %>
-<%= CyanosObject.autoFormatAmount(volAmount, Harvest.MASS_TYPE) %>
-<% } %>
-</td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= thisObject.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<% } else { out.println(CyanosObject.autoFormatAmount(volAmount, Harvest.MASS_TYPE)); } %></td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project" project="<%= thisObject.getProjectID() %>"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= thisObject.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateHarvest" onClick="updateForm(this,'<%= HarvestServlet.INFO_FORM_DIV_ID %>')">Update</button>
 <input type="RESET"></td></tr>

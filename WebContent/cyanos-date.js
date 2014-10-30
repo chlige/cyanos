@@ -86,9 +86,13 @@ function buildCalendar(fieldTag, divTag, month, year) {
 		calDate.setDate(calDate.getDate() + 1);
 	}
 	
-	for ( var i = calDate.getDay(); i < 7; i++ ) {
-		table.rows[rowIndex].cells[i].innerHTML = "";
-		table.rows[rowIndex].cells[i].className = "";
+	if ( calDate.getDay() > 1 ) {
+		for ( var i = calDate.getDay(); i < 7; i++ ) {
+			table.rows[rowIndex].cells[i].innerHTML = "";
+			table.rows[rowIndex].cells[i].className = "";
+		}
+	} else {
+		rowIndex--;
 	}
 	
 	while ( rowIndex + 1 < table.rows.length ) {

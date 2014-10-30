@@ -1,22 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Material,edu.uic.orjala.cyanos.web.servlet.MaterialServlet,java.text.SimpleDateFormat" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
+<% 	Material materialObj = (Material) request.getAttribute("material"); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<% 	Material materialObj = (Material) request.getAttribute("material");
-if ( materialObj != null && materialObj.first() ) { %>
-<title>Material <%= materialObj.getID() %></title>
-<% } else { %>
-<title>Material Search</title>
-<% } %>
+<cyanos:header title="Material <%= materialObj != null && materialObj.first() ? materialObj.getID() : "Search" %>"/>
 </head>
 <body style="min-height:100%">
 
-<jsp:include page="includes/menu.jsp" />
+<cyanos:menu helpModule="material"/>
 
 <div class='content' style="padding-bottom: 60px;">
 <% if ( materialObj != null && materialObj.first() ) { %>

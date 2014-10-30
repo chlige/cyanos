@@ -50,9 +50,7 @@ User userObj = AssayServlet.getUser(request);  %>
 </div>  --%>
 </td></tr>
 <tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="project" name="fieldName"/>
-</jsp:include>
+<cyanos:project-popup fieldName="project"/>
 </td></tr>
 <tr><td>Target:</td><td><% String targetValue = request.getParameter("target"); if ( targetValue == null ) { targetValue = ""; }%>
 <input id="target" type="text" name="target" VALUE="<%= targetValue %>" autocomplete='off' onKeyUp="livesearch(this, 'target', 'div_target')" onBlur="window.setTimeout(closeLS, 250, 'div_target');" style='padding-bottom: 0px'/>

@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Project,
@@ -7,21 +8,15 @@
 	edu.uic.orjala.cyanos.xml.ProjectUpdateXMLHandler,
 	java.text.SimpleDateFormat,
 	java.io.PrintWriter" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%	String contextPath = request.getContextPath();
+	Project myObject = (Project) request.getAttribute(ProjectServlet.PROJECT_OBJECT); 
+%><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<%
-	String contextPath = request.getContextPath();
-	Project myObject = (Project) request.getAttribute(ProjectServlet.PROJECT_OBJECT);
-%>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="<%=contextPath %>/cyanos.css"/>
-<title>Cyanos Database - Update Project</title>
+<cyanos:header title="Cyanos - Update Project"/>
 </head>
 <body>
-
-<jsp:include page="includes/menu.jsp" />
+<cyanos:menu/>
 
 <div class='content'>
 <%

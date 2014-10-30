@@ -1,21 +1,14 @@
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Sample,edu.uic.orjala.cyanos.web.servlet.SampleServlet,java.text.SimpleDateFormat" %>
+<% 	Sample sampleObj = (Sample) request.getAttribute("sample"); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html style="min-height:100%">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<% 	Sample sampleObj = (Sample) request.getAttribute("sample");
-if ( sampleObj != null && sampleObj.first() ) { %>
-<title>Sample <%= sampleObj.getID() %></title>
-<% } else { %>
-<title>Sample Search</title>
-<% } %>
+<cyanos:header title="Cyanos - Sample <%= sampleObj != null && sampleObj.first() ? sampleObj.getID() : " Search" %>"/>
 </head>
-
-<jsp:include page="includes/menu.jsp" />
+<cyanos:menu helpModule="sample"/>
 
 <div class='content' style="padding-bottom: 60px;">
 <% if ( sampleObj != null && sampleObj.first() ) { %>

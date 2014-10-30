@@ -11,7 +11,12 @@
 <body>
 <cyanos:menu/>
 <div class='content'>
-<h2>An error has been generated</h2>
+<h1 style="color:red">An error has occurred</h1>
+<h2 style="text-align:center; font-style:italic; font-weight:normal; color:#555"><%= exception.getMessage() %></h2>
+
+<div class="collapseSection" style="background-color:white; border: 0px"><a name='debug' class='twist' onClick='loadDiv("debug")' class='divTitle'>
+<img align="middle" id="twist_debug" src="<%= request.getContextPath() %>/images/twist-closed.png" /> Exception Report</a>
+<div class="hideSection" id="div_debug">
 <dl>
 <dt><b>Exception: </b> <%= exception.getClass().getCanonicalName() %></dt>
 <dd>
@@ -28,6 +33,6 @@
 <% } %>
 <!-- <c:out value="<%= exception.toString() %>"></c:out> -->
 </dl>
-</div>
+</div></div></div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.BasicObject,
 	edu.uic.orjala.cyanos.Harvest,
 	edu.uic.orjala.cyanos.Role,
@@ -26,16 +27,7 @@
 <% if ( request.getParameter("showExtractForm") != null ) { %>
 <table class="species" align="center">
 <tr><td>Label:</td><td><input type="text" name="label" value="<%= source.getStrainID() %>"></td></tr>
-<tr><td>Date:</td><td>
-<input type="text" name="extractDate" onFocus="showDate('div_calendar_extract','extractDate')" style='padding-bottom: 0px' id="extractDate"/>
-<a onclick="showDate('div_calendar_extract','extractDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar_extract" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="extractDate" name="update_field"/>
-<jsp:param value="div_calendar_extract" name="div"/>
-</jsp:include>
-</div>	
-</td></tr>
+<tr><td>Date:</td><td><cyanos:calendar-field fieldName="extractDate"/></td></tr>
 <tr><td>Amount:</td><td><input type="text" name="amount"></td></tr>
 <% List<ExtractProtocol> protocols = (List<ExtractProtocol>) request.getAttribute("protocols"); 
 if ( protocols != null && protocols.size() > 0 ) { %>

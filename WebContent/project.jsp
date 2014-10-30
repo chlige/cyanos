@@ -1,27 +1,21 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Project,
 	edu.uic.orjala.cyanos.CyanosObject,edu.uic.orjala.cyanos.web.servlet.ProjectServlet,
 	edu.uic.orjala.cyanos.web.BaseForm,
 	java.text.SimpleDateFormat" %>
+<%  String contextPath = request.getContextPath();
+	Project myObject = (Project) request.getAttribute(ProjectServlet.PROJECT_OBJECT); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<%  String contextPath = request.getContextPath();
-	Project myObject = (Project) request.getAttribute(ProjectServlet.PROJECT_OBJECT);
-if ( myObject != null && myObject.first() ) { %>
-<title>Cyanos Database - Project: <%= myObject.getID() %></title>
-<% } else { %>
-<title>Cyanos Database - Project List</title>
-<% } %>
+<cyanos:header title="Cyanos - Project <%= myObject != null && myObject.first() ? myObject.getID() : "List"%>"/>
 </head>
 <body>
 
-<jsp:include page="/includes/menu.jsp" />
+<cyanos:menu helpModule="project"/>
 
 <div class='content'>
 <% if ( myObject != null && myObject.first() ) { %>

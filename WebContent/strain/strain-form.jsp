@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page import="edu.uic.orjala.cyanos.Strain,
 	edu.uic.orjala.cyanos.web.servlet.StrainServlet,
 	edu.uic.orjala.cyanos.web.servlet.TaxonServlet,
@@ -111,19 +112,13 @@ if ( taxon != null && taxon.first() ) { Taxon lineage = taxon.getLinage(); linea
 <td>Isolation:</td><td><input type="text" id="isolation" name="isolation"  value="<c:out value='<%= strainObj.getSourceIsolationID() %>'/>" autocomplete="off" onkeyup="livesearch(this, 'isolation', 'validisos')" style="padding-bottom: 0px">
 <div class="livesearch" id="validisos"></div></td></tr></table>
 </td></tr>
-<tr><td>Scientific name:</td><td><input type='text' name='sci_name' value='<%= strainObj.getName() %>'>
-<br>Genus: <input id="genus" type="TEXT" name="genus" value="<%= strainObj.getGenus() %>" autocomplete="off" onkeyup="livesearch(this, 'genus', 'validgenus')" style="padding-bottom: 0px">
-<div class="livesearch" id="validgenus"></div></td></tr>
-<% Date strainDate = strainObj.getDate(); %>
-<tr><td>Date Added:</td><td><input type="text" name="addDate" onFocus="showDate('div_calendar','addDate')" style='padding-bottom: 0px' value='<fmt:formatDate value="<%= ( strainDate != null ? strainDate : new Date()) %>" pattern="yyyy-MM-dd"/>' id="addDate"/>
-<a onclick="showDate('div_calendar','addDate')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="div_calendar" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="addDate" name="update_field"/>
-<jsp:param value="div_calendar" name="div"/>
-</jsp:include>
-</div>
-</td></tr>
+<tr><td>Scientific name:</td><td><input type='text' name='sci_name' value='<%= strainObj.getName() %>' size='25'>
+Taxon:  <div style="display: inline-block;"><input id="genus" type="TEXT" name="genus" value="<%= strainObj.getGenus() %>" autocomplete="off" onkeyup="livesearch(this, 'genus', 'validgenus')" style="padding-bottom: 0px">
+ <div class="livesearch" id="validgenus"></div></div></td></tr>
+<% Date strainDate = strainObj.getDate(); 
+	String dateString = ( strainDate != null ? StrainServlet.CALFIELD_FORMAT.format(strainDate) : null );
+%><tr><td>Date Added:</td><td>
+<cyanos:calendar-field fieldName="addDate" dateValue="<%= dateString %>"/></td></tr>
 <tr><td>Default Media:</td><td><input type="text" name="def_media" value="<c:out value="<%= strainObj.getDefaultMedia() %>"/>"></td></tr>
 <% String status = strainObj.getStatus(); %>
 <tr><td>Culture status:</td><td><select name="culture_status">
@@ -133,11 +128,7 @@ if ( taxon != null && taxon.first() ) { Taxon lineage = taxon.getLinage(); linea
 <option value="<%= Strain.REMOVED_STATUS %>" <%= ( Strain.REMOVED_STATUS.equalsIgnoreCase(status) ? "selected" : "" ) %>>Removed</option>
 <option value="<%= Strain.FIELD_HARVEST_STATUS %>" <%= ( Strain.FIELD_HARVEST_STATUS.equalsIgnoreCase(status) ? "selected" : "") %>>Field Collection</option>
 </select></td></tr>
-<tr><td>Project</td><td>
-<jsp:include page="/includes/project-popup.jsp">
-<jsp:param value="<%= strainObj.getProjectID() %>" name="project"/>
-<jsp:param value="project" name="fieldName"/></jsp:include>
-</td></tr>
+<tr><td>Project</td><td><cyanos:project-popup fieldName="project" project="<%= strainObj.getProjectID() %>"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= strainObj.getNotes() %>" default="" /></textarea></td></tr>
 <tr><td colspan="2" align="CENTER"><button type="button" name="updateStrain" onClick="updateForm(this,'<%= StrainServlet.INFO_FORM_DIV_ID %>')">Update</button>
 <input type="RESET"></td></tr>

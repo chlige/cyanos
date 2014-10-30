@@ -53,18 +53,9 @@ while ( anIter.hasNext() ) {
 <td><% String fate = thisInoc.getFate(); 
 if ( thisInoc.getHarvestID() != null ) { out.print("Harvested");
 } else if ( fate != null ) { out.print(fate.substring(0, 1).toUpperCase()); out.print(fate.substring(1).toLowerCase());  } %></td>
-<td>
-<% if ( confirm ) {
+<td><% if ( confirm ) {
 	out.println(dateFormat.format(thisInoc.getRemoveDate())); 
-} else {  %>
-<input type="text" name="<%= fieldName %>" onFocus="showDate('cal_<%= fieldName %>','<%= fieldName %>')" style='padding-bottom: 0px' id="<%= fieldName %>" value='<fmt:formatDate value="<%= killDate %>" pattern="yyyy-MM-dd"/>' size="10"/>
-<a onclick="showDate('cal_<%= fieldName %>','<%= fieldName %>')"><img align="MIDDLE" border="0" src="<%= contextPath %>/images/calendar.png"></a>
-<div id="cal_<%= fieldName %>" class='calendar'>
-<jsp:include page="/calendar.jsp">
-<jsp:param value="<%= fieldName %>" name="update_field"/>
-<jsp:param value="cal_<%= fieldName %>" name="div"/>
-</jsp:include>
-</div><% } %></td>
+} else {  %><cyanos:calendar-field fieldName="<%= fieldName %>"/><% } %></td>
 </tr><% } } %></table>
 <% if ( ! confirm ) { %>
 <p align="center"><button type="submit" name="action" value="kill">Confirm Selected</button><button type="reset">Reset</button></p>

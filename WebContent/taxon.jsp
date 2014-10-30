@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Taxon,
 	edu.uic.orjala.cyanos.CyanosObject,
@@ -30,22 +31,14 @@
 			}
 		}
 		out.println("</div>");
-	}%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+	}
+%><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<%
-	String contextPath = request.getContextPath();
-%>
-<title>Cyanos Database - Taxa Browser</title>
+<cyanos:header title="Cyanos - Taxon Broswer"/>
 </head>
 <body>
-<jsp:include page="includes/menu.jsp">
-<jsp:param value="<%=TaxonServlet.HELP_MODULE%>" name="module"/>
-</jsp:include>
+<cyanos:menu helpModule="<%=TaxonServlet.HELP_MODULE%>"/>
 <div class='content'>
 <h1>Taxon Browser</h1>
 <hr width="80%">
