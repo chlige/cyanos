@@ -96,35 +96,35 @@ public class AssayServlet extends ServletObject {
 			
 			String servletPath = req.getServletPath();
 			
-			if ( servletPath.endsWith("export") || servletPath.endsWith(".csv") ) {
+			if ( req.getParameter("export") != null	|| servletPath.endsWith("export") || servletPath.endsWith(".csv") ) {
 					res.setContentType("text/plain");
 					if ( req.getParameter("id") != null )
-						this.exportAssay(req, res);
+						exportAssay(req, res);
 					else
-						this.exportAssayList(req, res);
+						exportAssayList(req, res);
 					return;
 			} else if ( servletPath.endsWith("protocol") ) {
 				if ( req.getParameter("name") != null ) {
 					String protoName = req.getParameter("name");
 					if ( req.getParameter("createProtocol") != null ) {
-						SQLAssayTemplate proto = SQLAssayTemplate.create(this.getSQLData(req), protoName);
+						SQLAssayTemplate proto = SQLAssayTemplate.create(getSQLData(req), protoName);
 						req.setAttribute(PROTOCOL_OBJ, proto);
 						if ( req.getParameter(UPDATE_ACTION) != null )
 							proto.save();
 					} else if ( req.getParameter("confirmDelete") != null ) {
-						SQLAssayTemplate.delete(this.getSQLData(req), protoName);
+						SQLAssayTemplate.delete(getSQLData(req), protoName);
 					} else
-						req.setAttribute(PROTOCOL_OBJ, SQLSeparationTemplate.load(this.getSQLData(req), protoName));
+						req.setAttribute(PROTOCOL_OBJ, SQLSeparationTemplate.load(getSQLData(req), protoName));
 				} 
-				req.setAttribute(ALL_PROTOCOLS, SQLSeparationTemplate.listProtocols(this.getSQLData(req)));
+				req.setAttribute(ALL_PROTOCOLS, SQLSeparationTemplate.listProtocols(getSQLData(req)));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/assay/assay-protocol.jsp");
 				disp.forward(req, res);		
 				return;
 			} else if ( "add".equals(req.getParameter("action")) ) {
-				if ( this.getUser(req).isAllowed(User.BIOASSAY_ROLE, User.NULL_PROJECT, Role.CREATE) ) {
+				if ( getUser(req).isAllowed(User.BIOASSAY_ROLE, User.NULL_PROJECT, Role.CREATE) ) {
 					if ( req.getParameter(UPDATE_ACTION) != null ) {
 						try {
-							Assay assayObj = SQLAssay.create(this.getSQLData(req), req.getParameter("newID"));
+							Assay assayObj = SQLAssay.create(getSQLData(req), req.getParameter("newID"));
 							req.setAttribute(ASSAY_OBJECT, assayObj);	
 							this.forwardRequest(req, res, "/assay.jsp");
 						} catch (DataException e) {
@@ -138,17 +138,17 @@ public class AssayServlet extends ServletObject {
 				}
 				return;
 			} else if ( req.getParameter("id") != null ) {
-				Assay thisAssay = SQLAssay.load(this.getSQLData(req), req.getParameter("id"));
+				Assay thisAssay = SQLAssay.load(getSQLData(req), req.getParameter("id"));
 				req.setAttribute(AssayServlet.ASSAY_OBJECT, thisAssay);
 			} else {
 				if ( req.getParameter("assaySearch") != null ) {
 					String target = req.getParameter("target");
 					if ( target.length() == 0 ) 
-						req.setAttribute(SEARCHRESULTS_ATTR, SQLAssay.assays(this.getSQLData(req)));
+						req.setAttribute(SEARCHRESULTS_ATTR, SQLAssay.assays(getSQLData(req)));
 					else
-						req.setAttribute(SEARCHRESULTS_ATTR, SQLAssay.assaysForTarget(this.getSQLData(req), req.getParameter("target")));
+						req.setAttribute(SEARCHRESULTS_ATTR, SQLAssay.assaysForTarget(getSQLData(req), req.getParameter("target")));
 				}
-				req.setAttribute(TARGET_LIST, SQLAssay.targets(this.getSQLData(req)));
+				req.setAttribute(TARGET_LIST, SQLAssay.targets(getSQLData(req)));
 			}
 			
 		 this.forwardRequest(req, res, "/assay.jsp");
@@ -176,10 +176,10 @@ public class AssayServlet extends ServletObject {
 			if ( req.getParameter("livesearch") != null ) {
 				String searchTag = req.getParameter("livesearch");
 				if ( searchTag.equals(LS_TARGET) ) {
-					out.println(this.livesearchQuery(this.getSQLData(req), divTag, searchTag, req.getParameter(searchTag)));
+					out.println(this.livesearchQuery(getSQLData(req), divTag, searchTag, req.getParameter(searchTag)));
 				}
 			}
-			Assay myAssay = SQLAssay.load(this.getSQLData(req), req.getParameter("id"));
+			Assay myAssay = SQLAssay.load(getSQLData(req), req.getParameter("id"));
 			if ( myAssay.first() ) {
 				if ( myAssay.isAllowed(Role.READ) ) {
 					if ( divTag.equals(DATA_FILE_DIV_ID) ) {
@@ -413,12 +413,14 @@ public class AssayServlet extends ServletObject {
 	}
 */
 	
-	private void exportAssay(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+	private static void exportAssay(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
+
 		
 		try { 
-			Assay myAssay = SQLAssay.load(this.getSQLData(req), req.getParameter("id"));
+			Assay myAssay = SQLAssay.load(getSQLData(req), req.getParameter("id"));
+			res.setHeader("Content-Disposition", "inline; filename=\"" + myAssay.getID() + ".csv\"");
 
 			if ( myAssay.first() ) {
 				if ( myAssay.isAllowed(Role.READ) ) {
@@ -432,13 +434,15 @@ public class AssayServlet extends ServletObject {
 					sheetOut.println("Activity");
 					
 					AssayPlate myData = myAssay.getAssayData();
-					myData.beforeFirstRow();
+					myData.beforeFirst();
 					String assayID = myAssay.getID();
-					myData.firstColumn();
-					while ( myData.nextLocationByRow() ) {
-						if ( ! myData.currentLocationExists() ) continue;
+					while ( myData.next() ) {
+						System.err.print("ASSAY (");
+						System.err.print(myData.getLocation());
+						System.err.print(") ");
+						System.err.println(myData.getLabel());
 						sheetOut.print(assayID);
-						sheetOut.print(myData.currentLocation());
+						sheetOut.print(myData.getLocation());
 						sheetOut.print(myData.getStrainID());
 						Sample aSample = myData.getSample();
 						if ( aSample != null )
@@ -450,7 +454,7 @@ public class AssayServlet extends ServletObject {
 							sheetOut.print(name.replaceAll("[\n\r]", " "));
 						else
 							sheetOut.print("");
-						sheetOut.print(String.format("%f", myData.getConcentration()));
+						sheetOut.print(myData.getConcentrationString());
 						sheetOut.println(myData.getActivityString());
 					}
 				}
@@ -467,16 +471,17 @@ public class AssayServlet extends ServletObject {
 	}
 	
 	
-	private void exportAssayList(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+	private static void exportAssayList(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
+		res.setHeader("Content-Disposition", "inline; filename=\"assay-list.csv\"");
 		try {
 			Assay myAssay;
 			
 			if ( req.getParameter("target") != null ) {
-				myAssay = SQLAssay.assaysForTarget(this.getSQLData(req), req.getParameter("target"));
+				myAssay = SQLAssay.assaysForTarget(getSQLData(req), req.getParameter("target"));
 			} else {
-				myAssay = SQLAssay.assays(this.getSQLData(req));
+				myAssay = SQLAssay.assays(getSQLData(req));
 			} 
 			
 			if ( myAssay.first() ) {
