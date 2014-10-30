@@ -75,12 +75,13 @@ public abstract class ServletObject extends HttpServlet {
 //	protected int idtype = SQLData.ID_TYPE_SERIAL;
 
 	public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, yyyy");
+	public final static SimpleDateFormat CALFIELD_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	public final static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("MMMMM d, yyyy hh:mm a");
 
 	private final static String MODULE_PATH = "java:comp/env/module";
 	
 	public static final String SPREADSHEET = "spreadsheet";
-	public static final String UPLOAD_JOB = "upload";
+	public static final String UPLOAD_FORM = "uploadForm";
 	public static final String DATASOURCE = "datasource";
 	
 	public static final String SESS_ATTR_DATE_FORMAT = "dateFormatter";

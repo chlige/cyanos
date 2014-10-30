@@ -36,7 +36,7 @@ public class UploadStatusServlet extends UploadServlet {
 		PrintWriter out = res.getWriter();
 		HttpSession thisSession = req.getSession();
 
-		UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_JOB);
+		UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);
 
 		if ( req.getParameter("results") != null ) {
 			String results = (String)thisSession.getAttribute(RESULTS);

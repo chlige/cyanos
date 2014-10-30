@@ -83,6 +83,8 @@ public class UploadServlet extends ServletObject {
 	public static final String ROW_BEHAVIOR_INCLUDE = "include";
 	public static final String ROW_BEHAVIOR_IGNORE = "ignore";
 	
+	private static final String UPLOAD_JOB = "uploadJob";
+	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.servlet.ServletObject#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
@@ -190,10 +192,11 @@ public class UploadServlet extends ServletObject {
 		session.setAttribute(UPLOAD_JOB, job);
 	}
 	
-	private void clearSession(HttpServletRequest req) {
+	private static void clearSession(HttpServletRequest req) {
 		HttpSession thisSession = req.getSession();
 		thisSession.removeAttribute(SPREADSHEET);
 		thisSession.removeAttribute(RESULTS);
+		thisSession.removeAttribute(UPLOAD_FORM);
 		thisSession.removeAttribute(UPLOAD_JOB);
 	}
 	
@@ -306,7 +309,7 @@ public class UploadServlet extends ServletObject {
 		
 		// Clear the uploaded worksheet, if requested
 		if ( req.getParameter(PARSE_ACTION) != null ) {
-			UploadModule form = (UploadModule) thisSession.getAttribute(UPLOAD_JOB);
+			UploadModule form = (UploadModule) thisSession.getAttribute(UPLOAD_FORM);
 			if ( form != null && form.getActiveWorksheet() != null ) {
 				try {
 					form.startParse(req, newSQLData(req, AppConfigListener.getDBConnection()));
@@ -318,8 +321,8 @@ public class UploadServlet extends ServletObject {
 			}
 		}
 
-		if ( thisSession.getAttribute(UPLOAD_JOB) == null && req.getParameter(PARAM_MODULE) != null ) {
-			thisSession.setAttribute(UPLOAD_JOB, this.getUploadForm(req, req.getParameter(PARAM_MODULE)));
+		if ( thisSession.getAttribute(UPLOAD_FORM) == null && req.getParameter(PARAM_MODULE) != null ) {
+			thisSession.setAttribute(UPLOAD_FORM, this.getUploadForm(req, req.getParameter(PARAM_MODULE)));
 		}
 		
 		String path = req.getPathInfo();
@@ -337,7 +340,7 @@ public class UploadServlet extends ServletObject {
 		} else if ( "/status".equals(path) ) {
 			// If status request. Send the status of the current job.
 			out = res.getWriter();
-			UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_JOB);
+			UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);
 			res.setContentType("text/plain");
 			if ( myForm == null ) {
 				out.print("ERROR");
