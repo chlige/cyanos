@@ -40,6 +40,7 @@ public class FractionUpload extends UploadForm {
 	public static final String METHOD_PARAM = "sepMethod";
 	public static final String METHOD_STATIONARY = "sepSPhase";
 	public static final String METHOD_MOBILE = "sepMPhase";
+	public static final String PROJECT_KEY = "project";
 //	public static final String DEST_KEY = "destCol";
 //	public static final String DEST_LOC = "destLoc";
 
@@ -47,7 +48,7 @@ public class FractionUpload extends UploadForm {
 		// DEST_KEY, DEST_LOC, 
 		LABEL_FORMAT_KEY, LABEL_KEY, NOTES_KEY,
 		// PROTOCOL_KEY, 
-		METHOD_PARAM, METHOD_STATIONARY, METHOD_MOBILE };
+		METHOD_PARAM, METHOD_STATIONARY, METHOD_MOBILE, PROJECT_KEY };
 	
 	public final static String TITLE = "Fraction Data";
 
@@ -133,12 +134,17 @@ public class FractionUpload extends UploadForm {
 				String method = template.get(METHOD_PARAM);
 				String mphase = template.get(METHOD_MOBILE);
 				String sphase = template.get(METHOD_STATIONARY);
-
+				String projectID = template.get(PROJECT_KEY);				
+				
 				String txnNote = "Separation loaded by: " + this.getSQLDataSource().getUser().getUserID();
 				String frNote = "Fraction loaded by: " + this.getSQLDataSource().getUser().getUserID();
 	//			String frCollection = "frLoad-" + this.myUser.getUserID();
 
-				mySep = SQLSeparation.create(this.myData);
+				if ( projectID != null && projectID.length() > 0 ) {
+					mySep = SQLSeparation.createInProject(this.myData, projectID);
+				} else {
+					mySep = SQLSeparation.create(this.myData);					
+				}
 //				if ( aTemplate != null ) {
 //					mySep.setProtocol(aTemplate);
 //				}
@@ -192,7 +198,11 @@ public class FractionUpload extends UploadForm {
 								output.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
 							}
 							if ( rowIter.hasNext() ) {
-								mySep = SQLSeparation.create(this.myData);
+								if ( projectID != null && projectID.length() > 0 ) {
+									mySep = SQLSeparation.createInProject(this.myData, projectID);
+								} else {
+									mySep = SQLSeparation.create(this.myData);					
+								}
 //								if ( aTemplate != null ) {
 //									mySep.setProtocol(aTemplate);
 //								}
