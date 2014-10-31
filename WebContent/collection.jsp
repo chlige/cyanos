@@ -14,8 +14,7 @@
 	Map<String,String> layers = myConfig.getMapServerLayers();
 	SQLData data = (SQLData) request.getAttribute(CollectionServlet.DATASOURCE);
 	Collection myObject = (Collection) request.getAttribute(CollectionServlet.ATTR_COLLECTION);
-	MapBounds bounds = (MapBounds) request.getAttribute(CollectionServlet.ATTR_MAP_BOUNDS); 
-%>
+	MapBounds bounds = (MapBounds) request.getAttribute(CollectionServlet.ATTR_MAP_BOUNDS); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -28,12 +27,9 @@
 function setupMap(canvas) { 
 	var map = setupOLMap(canvas);
  	var layer;
-<% if ( myConfig.getMapParameter(AppConfig.MAP_OSM_LAYER) != null ) { 
-%>	addOSMLayers(map);
+<% if ( myConfig.getMapParameter(AppConfig.MAP_OSM_LAYER) != null ) { %> addOSMLayers(map);
+<% } if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { %>	addNASALayers(map);
 <% } 
-	if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { 
-%>	addNASALayers(map);
-<% } 		
 	Set<String> keys = new TreeSet<String>(layers.keySet());
 	Iterator<String> keyIter = keys.iterator();
 	while ( keyIter.hasNext() ) {
@@ -48,29 +44,23 @@ function setupMap(canvas) {
 	String googleMapKey = myConfig.getGoogleMapKey();
 	if ( googleMapKey != null) {
 		out.println(" addGoogleLayers(map);");
-	}
-%>	addCollectionLayer(map, "<%= CollectionServlet.getKMLURL(request) %>");
-<% 
-	if ( bounds != null ) { 
+	} %>	addCollectionLayer(map, "<%= CollectionServlet.getKMLURL(request) %>");
+<%  if ( bounds != null ) { 
 %>	var bounds = new OpenLayers.Bounds(<%= String.format("%.4f, %.4f, %.4f, %.4f", bounds.getMinLongitude(), bounds.getMinLatitude(), 
 			bounds.getMaxLongitude(), bounds.getMaxLatitude()) %>);
-<%
-} else if ( request.getParameter("lat") != null && request.getParameter("long") != null ) { 
+<% } else if ( request.getParameter("lat") != null && request.getParameter("long") != null ) { 
 		float lat = SQLCollection.parseCoordinate(request.getParameter("lat"));
 		float lon = SQLCollection.parseCoordinate(request.getParameter("long"));	
 %>	var bounds = new OpenLayers.Bounds();
 	bounds.extend(new OpenLayers.LonLat(<%= lon %>, <%= lat %>));
-<% } 
-%>	setMapBounds(bounds);
+<% } %>	setMapBounds(bounds);
 }
 </script>
 <% } %>
 <link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
 </head>
 <body>
-
 <cyanos:menu helpModule="<%= CollectionServlet.HELP_MODULE %>"/>
-
 <div class='content'>
 <% if ( myObject != null && myObject.first() ) { %>
 <p align="CENTER"><font size="+3" >Collection <%= myObject.getID() %></font>

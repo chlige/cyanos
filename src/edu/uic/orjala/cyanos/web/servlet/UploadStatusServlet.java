@@ -10,19 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.uic.orjala.cyanos.web.UploadForm;
+import edu.uic.orjala.cyanos.web.UploadJob;
 
 /**
  * Servlet implementation class UploadStatusServlet
  */
 public class UploadStatusServlet extends UploadServlet {
 	private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor. 
-     */
-    public UploadStatusServlet() {
-        // TODO Auto-generated constructor stub
-    }
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
@@ -36,7 +30,6 @@ public class UploadStatusServlet extends UploadServlet {
 		PrintWriter out = res.getWriter();
 		HttpSession thisSession = req.getSession();
 
-		UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);
 
 		if ( req.getParameter("results") != null ) {
 			String results = (String)thisSession.getAttribute(RESULTS);
@@ -51,18 +44,43 @@ public class UploadStatusServlet extends UploadServlet {
 			disp.forward(req, res);
 		} else {
 			res.setContentType("text/plain");
-			if ( myForm == null ) {
-				out.print("ERROR");
-			} else if ( myForm.isDone() ) {
-				out.print("DONE");
-			} else if ( myForm.isWorking()) {
-				out.print(String.format("%.0f", myForm.status() * 100));
+			UploadJob job = UploadServlet.getUploadJob(thisSession);
+			
+			if ( job != null ) {
+				out.println(getStatus(job));				
 			} else {
-				out.print("STOP");
+				UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);	
+				out.println(getStatus(myForm));
 			}
+			
+			
 		}
 		out.close();
 		return;	
+	}
+	
+	private static String getStatus(UploadForm form) {
+		if ( form == null ) {
+			return "ERROR";
+		} else if ( form.isDone() ) {
+			return "DONE";
+		} else if ( form.isWorking()) {
+			return String.format("%.0f", form.status() * 100);
+		} else {
+			return "STOP";
+		}		
+	}
+
+	private static String getStatus(UploadJob job) {
+		if ( job == null ) {
+			return "ERROR";
+		} else if ( job.isDone() ) {
+			return "DONE";
+		} else if ( job.isWorking()) {
+			return String.format("%.0f", job.status() * 100);
+		} else {
+			return "STOP";
+		}		
 	}
 
 }

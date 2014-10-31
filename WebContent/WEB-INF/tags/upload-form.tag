@@ -10,7 +10,6 @@
 <%@ attribute name="templateType" required="false" %>
 <% 	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
 	UploadJob job = UploadServlet.getUploadJob(session);
-
 	if ( job != null && ( job.isWorking() || job.resultReport() != null ) ) {		
 %><div align="center">
 <div class="progress" style="width: 200px"><div id="progressText"></div><div id="progressBar"></div></div>
@@ -39,10 +38,7 @@ for ( int i = 0; i < sheets.size(); i++ ) { %>
 	List<String> allTemplates = SQLProtocol.listProtocols(datasource, templateType);
 %><p align="center">
 <input type="checkbox" name="<%=UploadServlet.PARAM_HEADER %>" value="true" onClick="this.form.submit()" <%=( request.getParameter(UploadServlet.PARAM_HEADER) != null ? "checked" : "")%>> Spreadsheet has a header row.</p>
-
-
 <jsp:include page="${jspform}"/>
-
 <p align="center">
 <% String behavior = request.getParameter(UploadServlet.PARAM_ROW_BEHAVIOR);
 	if ( behavior == null ) behavior = UploadServlet.ROW_BEHAVIOR_IGNORE;

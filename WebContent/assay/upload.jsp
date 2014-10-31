@@ -25,8 +25,7 @@
 <%	} else {
 		UploadServlet.startJob(request, new AssayUploadJob());
 	}
-}%>
-<cyanos:upload-form jspform="/assay/upload-form.jsp">
+} %><cyanos:upload-form jspform="/assay/upload-form.jsp">
 <table align="center" class="upload">
 <tr style="text-align:center"><th>Assay ID</th><th>Strain ID</th><th>Location</th><th>Activity</th><th>Material ID</th><th>Sample ID</th><th>Sample Amount</th><th>Label</th><th>Concentration</th></tr>
 <tr style="text-align:center"><td>Required</td><td>Required</td><td>Required</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td><td>Optional</td></tr>
