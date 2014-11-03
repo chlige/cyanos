@@ -40,7 +40,7 @@
 <tr <% if ( updateMap != null && updateMap.contains(CompoundServlet.FIELD_AVG_MASS) ) { %> class="updated" <% } %>>
 <td>Formula Weight:</td><td><%= compoundObj.getAverageMass().toPlainString() %> Da</td></tr>
 <tr <% if ( updateMap != null && updateMap.contains(CompoundServlet.FIELD_MONO_MASS) ) { %> class="updated" <% } %>>
-<td>Formula Weight:</td><td><%= compoundObj.getMonoisotopicMass().toPlainString() %> Da</td></tr>
+<td>Monoisotopic mass:</td><td><%= compoundObj.getMonoisotopicMass().toPlainString() %> Da</td></tr>
 <% String inchiKey = compoundObj.getInChiKey(); if ( inchiKey != null && inchiKey.length() > 0 ) { %>
 <tr <% if ( updateMap != null && updateMap.contains(CompoundServlet.FIELD_INCHI_KEY) ) { %> class="updated" <% } %>>
 <td>InChI Key:</td><td><%= inchiKey %><br>
