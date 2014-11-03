@@ -310,13 +310,19 @@ public class OOXMLHandler extends DefaultHandler {
 		}
 		zipStream.close();
 		
-		this.inFile = SHAREDSTRINGS_FILE;
-		saxParser.parse(xmlData.get(SHAREDSTRINGS_FILENAME), this);
+		InputStream stream = xmlData.get(SHAREDSTRINGS_FILENAME);
+		if ( stream != null ) {
+			this.inFile = SHAREDSTRINGS_FILE;
+			saxParser.parse(stream, this);
+		}
 		
-		this.inFile = STYLE_FILE;
 		this.styles.clear();
 		this.numFormats.clear();
-		saxParser.parse(xmlData.get(STYLE_FILENAME), this);
+		stream = xmlData.get(STYLE_FILENAME);
+		if ( stream != null ) {
+			this.inFile = STYLE_FILE;
+			saxParser.parse(xmlData.get(STYLE_FILENAME), this);
+		}
 		
 		this.sheets.clear();
 		this.inFile = WORKBOOK_FILE;
