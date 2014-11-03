@@ -47,13 +47,11 @@ public class UploadStatusServlet extends UploadServlet {
 			UploadJob job = UploadServlet.getUploadJob(thisSession);
 			
 			if ( job != null ) {
-				out.println(getStatus(job));				
+				out.print(getStatus(job));				
 			} else {
 				UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);	
-				out.println(getStatus(myForm));
-			}
-			
-			
+				out.print(getStatus(myForm));
+			}			
 		}
 		out.close();
 		return;	
