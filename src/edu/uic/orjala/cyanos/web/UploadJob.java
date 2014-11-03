@@ -45,7 +45,7 @@ public abstract class UploadJob implements Runnable {
 	
 	protected Savepoint savepoint = null;
 	
-	protected final List<Integer> rowList = new ArrayList<Integer>();
+	protected final ArrayList<Integer> rowList = new ArrayList<Integer>();
 	
 	protected final StringBuffer resultOutput = new StringBuffer();
 	protected Sheet resultSheet = null;
@@ -124,7 +124,7 @@ public abstract class UploadJob implements Runnable {
 		this.rowList.clear();			
 		boolean hasHeaderRow = req.getParameter(UploadServlet.PARAM_HEADER) != null;
 
-		if ( req.getParameter(UploadServlet.PARAM_ROW_BEHAVIOR) != null && req.getParameter(UploadServlet.PARAM_ROWS) != null ) {
+		if ( req.getParameter(UploadServlet.PARAM_ROWS) != null ) {
 			String[] rows = req.getParameterValues(UploadServlet.PARAM_ROWS);
 			if ( rows != null ) {
 				for ( int i = 0; i < rows.length; i++ ) {
@@ -134,6 +134,7 @@ public abstract class UploadJob implements Runnable {
 			}
 
 			if ( UploadServlet.ROW_BEHAVIOR_IGNORE.equals(req.getParameter(UploadServlet.PARAM_ROW_BEHAVIOR)) ) {
+				System.err.println("DOING FLIP");
 				List<Integer> newRowNum = new ArrayList<Integer>();
 				int startNum = ( hasHeaderRow ? 1 : 0 );
 				int rowCount = this.worksheet.rowCount();
@@ -145,6 +146,13 @@ public abstract class UploadJob implements Runnable {
 				this.rowList.clear();
 				this.rowList.addAll(newRowNum);
 			}
+		} else if ( UploadServlet.ROW_BEHAVIOR_IGNORE.equals(req.getParameter(UploadServlet.PARAM_ROW_BEHAVIOR)) ) {
+			int startNum = ( hasHeaderRow ? 1 : 0 );
+			int rowCount = this.worksheet.rowCount();
+			this.rowList.ensureCapacity(rowCount - startNum);
+			for (int i = startNum; i < rowCount; i++ ) {
+				this.rowList.add(Integer.valueOf(i));
+			}			
 		}
 	}
 

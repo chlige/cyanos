@@ -20,13 +20,15 @@ import org.xml.sax.SAXException;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.UploadJob;
 import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.UploadManager;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 import edu.uic.orjala.cyanos.web.upload.AssayUpload;
 import edu.uic.orjala.cyanos.web.upload.CollectionUpload;
 import edu.uic.orjala.cyanos.web.upload.ExtractUpload;
@@ -124,8 +126,8 @@ public class UploadServlet extends ServletObject {
 		req = MultiPartRequest.parseRequest(req);
 		super.doPost(req, res);
 		try {
-			if ( req instanceof MultiPartRequest ) {
-				FileUpload anItem = ((MultiPartRequest)req).getUpload(PARAM_FILE);			
+			FileUpload anItem = CyanosRequestListener.getUpload(req, PARAM_FILE);
+			if ( anItem != null ) {
 				SpreadSheet aWKS = new SpreadSheet(anItem);
 				if ( aWKS != null  ) {
 					HttpSession thisSession = req.getSession();
@@ -163,23 +165,46 @@ public class UploadServlet extends ServletObject {
 		}
 		SpreadSheet worksheet = (SpreadSheet) thisSession.getAttribute(SPREADSHEET);	
 		if ( worksheet == null ) {
-			request = MultiPartRequest.parseRequest(request);
-			if ( request instanceof MultiPartRequest ) {
-				FileUpload anItem = ((MultiPartRequest)request).getUpload(PARAM_FILE);			
+			FileUpload anItem = getUpload(request, PARAM_FILE);	
+			if ( anItem != null ) {
 				worksheet = new SpreadSheet(anItem);
 				thisSession.setAttribute(SPREADSHEET, worksheet);
 			}
+
 		} 
 		return worksheet;
 	}
 	
-	public static boolean hasSpreadsheet(HttpServletRequest request) {
+	public static boolean hasSpreadsheet(HttpServletRequest request) throws ServletException, IOException {
 		HttpSession thisSession = request.getSession();
 		if ( request.getParameter(CLEAR_SHEET_ACTION) != null ) {
 			thisSession.removeAttribute(SPREADSHEET);
 			return false;
 		}
-		return ( thisSession.getAttribute(SPREADSHEET) != null);
+
+		boolean hasWorkSheet = ( thisSession.getAttribute(SPREADSHEET) != null );
+		
+		if ( ! hasWorkSheet ) {
+			UploadManager manager = CyanosRequestListener.getUploadManager(request);
+			if ( manager != null ) {
+				hasWorkSheet = (manager.getFileCount(PARAM_FILE) > 0 );	
+			}
+		}
+		
+		return hasWorkSheet;
+	}
+	
+	public static void clearUploadJob(HttpSession session) {
+		session.removeAttribute(RESULTS);
+		session.removeAttribute(UPLOAD_FORM);
+		session.removeAttribute(UPLOAD_JOB);
+	}
+	
+	public static void clearSession(HttpSession session) {
+		session.removeAttribute(SPREADSHEET);
+		session.removeAttribute(RESULTS);
+		session.removeAttribute(UPLOAD_FORM);
+		session.removeAttribute(UPLOAD_JOB);
 	}
 	
 	public static UploadJob getUploadJob(HttpSession session) {
@@ -302,7 +327,7 @@ public class UploadServlet extends ServletObject {
 
 		// Clear the uploaded worksheet, if requested
 		if ( req.getParameter(CLEAR_SHEET_ACTION) != null ) {
-			this.clearSession(req);
+			clearSession(req);
 		}
 		
 		HttpSession thisSession = req.getSession();
