@@ -22,7 +22,7 @@
 	DateFormat format = (DateFormat) session.getAttribute(InocServlet.SESS_ATTR_DATE_FORMAT);
 %>
 <table  class="dashboard" id="formTable">
-<tr><td></td><th class="header">Culture ID</th><th class="header">Date</th><th class="header">Parent Stock</th><th class="header">Media</th><th class="header">Volume</th><th class="header">Project</th><th class="header">Notes</th><th class="header">Stock</th></tr>
+<tr><td></td><th class="header">Strain ID</th><th class="header">Date</th><th class="header">Parent Stock</th><th class="header">Media</th><th class="header">Volume</th><th class="header">Project</th><th class="header">Notes</th><th class="header">Stock</th></tr>
 <% for ( int row = 1; row <= rows; row++) { %>
 <tr class="banded" align='center'><td>
 <input type="hidden" name="row" value="<%= String.format("%02d", row) %>"><b><%= row %></b></td>

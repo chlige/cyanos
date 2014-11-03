@@ -188,7 +188,7 @@ function updateDefs(strainField) {
 <h1>Add Preservations</h1>
 <form id='addPreservation' method="post">
 <table class="species" align='center'>
-<tr><td>Source Culture:</td><td><input type="text" name="strainID" onChange="updateDefs(this)"></td></tr>
+<tr><td>Source Strain:</td><td><input type="text" name="strainID" onChange="updateDefs(this)"></td></tr>
 <tr><td>Parent:</td><td><select name="source"></select></td></tr>
 <tr><td>Preservation Date:</td><td><cyanos:calendar-field fieldName="addDate"/></td></tr>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"></textarea></td></tr>

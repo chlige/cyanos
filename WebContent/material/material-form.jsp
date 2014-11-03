@@ -20,7 +20,7 @@
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><%= materialObj.getID() %></td></tr>
 <tr><td>UUID:</td><td><%= materialObj.getRemoteID() %></td>
-<tr><td>Source Culture:</td><td>
+<tr><td>Source Strain:</td><td>
 <% Strain culture = materialObj.getCulture(); if ( culture != null && culture.first() ) { %>
 <a href="<%= contextPath %>/strain?id=<%= culture.getID() %>"><%= culture.getID() %> <i><%=culture.getName() %></i></a>
 <% } else { %>
@@ -109,7 +109,7 @@ class="updated"
 <input type="hidden" name="id" value="<%= materialObj.getID() %>">
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><%= materialObj.getID() %></td></tr>
-<tr><td>Source Culture:</td><td><%= materialObj.getCultureID() %></td></tr>
+<tr><td>Source Strain:</td><td><%= materialObj.getCultureID() %></td></tr>
 <tr><td>Label:</td><td><input type='text' name='label' value='<%= materialObj.getLabel() %>'></td></tr>
 <tr><td>Date:</td><td><%= dateFormat.format(materialObj.getDate()) %></td></tr>
 <tr><td>Amount:</td><td><%= materialObj.displayAmount() %></td></tr>

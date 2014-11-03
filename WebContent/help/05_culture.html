@@ -58,13 +58,13 @@ Rows can be deleted from the form by clicking the (<font color="red"><b>X</b></f
   
 <p>Each row in the form has the following entry fields.</P>
 <TABLE><TR><TD><B>Date</B></TD><TD>Inoculation date</TD></TR>
-<TR><TD><B>Project</B></TD><TD>Project code to associate with the inoculation.<BR>If the <I>Inherit</I> field is selected, the inoculation record will inhert the project code first form the parent inoculation (if designated) then the culture ID.</TD></TR>
+<TR><TD><B>Project</B></TD><TD>Project code to associate with the inoculation.<BR>If the <I>Inherit</I> field is selected, the inoculation record will inhert the project code first form the parent inoculation (if designated) then the strain ID.</TD></TR>
 <TR><TD><B>Parent Stock</B></TD><TD>Parent/source inoculation for this inoculation.<BR>
-This field is generated when the culture ID for the row is changed.</TD></TR>
+This field is generated when the strain ID for the row is changed.</TD></TR>
 <TR><TD><B>Volume</B></TD><TD>The volume of media inoculated.  The default unit is liters.  Other scales, e.g. mL, can be specified in the field.<BR>
 Preceeding the volume field is the quantity field which allows one to specifiy multiple instances of the same inoculation, e.g. 2 x 150 mL.</TD></TR>
 <TR><TD><B>Media</B></TD><TD>Media of the inoculation.<BR>
-If this field is empty and the culture ID is changed, the default media of the strain will be put in the field.</TD></TR>
+If this field is empty and the strain ID is changed, the default media of the strain will be put in the field.</TD></TR>
 <TR><TD><B>Notes</B></TD><TD>Any notes or details to include with the inoculation record</TD></TR>
 <TR><TD><B>Stock</B></TD><TD>Select this checkbox to designate the inoculation as a stock culture.  This will set the fate of the inoculation record as stock and make it unavailable for harvest.</TD></TR>
 </TABLE>
@@ -83,7 +83,7 @@ If this field is empty and the culture ID is changed, the default media of the s
 <LI>Select the desired inoculations to harvest via the checkbox at the end of the row.</LI>
 <LI>Click the <SPAN CLASS='exampleButton'><B>Harvest</B></SPAN> button.  This will open the <I>Add New Harvest</I> form.<BR><IMG SRC='harvest02.png' BORDER=0></LI>
 <LI>Use the form to set the characters of the harvest.<BR>
-<TABLE><TR><TD><B>Culture ID</B></TD><TD>Culture/Strain ID of the strain.</TD></TR>
+<TABLE><TR><TD><B>Strain ID</B></TD><TD>Culture/Strain ID of the strain.</TD></TR>
 <TR><TD><B>Date</B></TD><TD>Harvest date</TD></TR>
 <TR><TD><B>Project</B></TD><TD>Project code to associate with the harvest record.</TD></TR>
 <TR><TD><B>Color</B></TD><TD>Color of the cell material</TD></TR>
@@ -103,7 +103,7 @@ The default unit is grams.  Other scales, e.g. mg, can be specified in the field
 <OL><LI>Access the <I>Harvests</I> section of the collections data page.</LI>
 <LI>Click on the <FONT COLOR='green'><U>Add a New Harvest</U></FONT> link at the bottom of the harvest table to open the <I>Add New Harvest</I> form.</LI>
 <LI>Use the form to set the characters of the harvest.<BR>
-<TABLE><TR><TD><B>Culture ID</B></TD><TD>Culture/Strain ID of the strain.<BR><B>NOTE: Do not leave this field blank as it is not possible to link to a strain record once the harvest record is created!</B></TD></TR>
+<TABLE><TR><TD><B>Strain ID</B></TD><TD>Culture/Strain ID of the strain.<BR><B>NOTE: Do not leave this field blank as it is not possible to link to a strain record once the harvest record is created!</B></TD></TR>
 <TR><TD><B>Date</B></TD><TD>Harvest date</TD></TR>
 <TR><TD><B>Project</B></TD><TD>Project code to associate with the harvest record.</TD></TR>
 <TR><TD><B>Color</B></TD><TD>Color of the cell material</TD></TR>

@@ -28,7 +28,7 @@
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><%= thisObject.getID() %></td></tr>
 <tr><td>UUID:</td><td><%= thisObject.getRemoteID() %></td>
-<tr><td>Source Culture:</td><td>
+<tr><td>Source Strain:</td><td>
 <% Strain culture = thisObject.getStrain(); if ( culture != null && culture.first() ) { %>
 <a href="<%= contextPath %>/strain?id=<%= culture.getID() %>"><%= culture.getID() %> <i><%=culture.getName() %></i></a>
 <% } else { %>

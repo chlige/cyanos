@@ -45,7 +45,7 @@
 <li><a href='<%= contextPath %>/upload?module=isolation'>Upload Isolation Data</a></li>
 </ul></li>
 
-<li><a onClick='toggleMenu("strainMenu")'>Culture</a>
+<li><a onClick='toggleMenu("strainMenu")'>Cultures</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/strain'>Search Strains</a></li>
 <li><a href='<%= contextPath %>/taxabrowser'>Taxa Browser</a></li>
@@ -93,9 +93,13 @@
 <li><a href='<%= contextPath %>/help?find'>Find a Topic</a></li>
 <li><a href='<%= contextPath %>/help?search'>Search</a></li>
 </ul></li>
-</ul>
-<div style="float:right;margin-right: 30px;padding: 4px;"><%= (UploadServlet.hasSpreadsheet(request) ? "SHEET" : "") %><%
+<li style="float:right; padding-top: 6px; margin-right:30px; border:0px;">
+<% if (UploadServlet.hasSpreadsheet(request) ) { %>
+<a href="<%= contextPath %>/spreadsheet.jsp" style="width:20px; display:inline"><img title="View loaded spreadsheet" src="<%= contextPath %>/images/icons/spreadsheet.png" height="20px"></a>
+<% }
 	UploadJob job = UploadServlet.getUploadJob(session);
-	if ( job != null ) { %>JOB<% } %></div>
+	if ( job != null ) { %><img title="A job is running" src="<%= contextPath %>/images/icons/job-running.png" height="20px"><% } %>
+</li>
+</ul>
 </nav>
 <div style='height:20px'></div>

@@ -21,7 +21,7 @@
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><%= thisObject.getID() %></td></tr>
 <%--  <tr><td>UUID:</td><td><%= thisObject.getRemoteID() %></td> --%>
-<tr><td>Source Culture:</td><td><% Strain culture = thisObject.getStrain(); if ( culture != null && culture.first() ) { %>
+<tr><td>Source Strain:</td><td><% Strain culture = thisObject.getStrain(); if ( culture != null && culture.first() ) { %>
 <a href="<%= contextPath %>/strain?id=<%= culture.getID() %>"><%= culture.getID() %> <i><%=culture.getName() %></i></a>
 <% } else { out.print(thisObject.getCultureID()); } %></td></tr>
 <tr><td>Preservation Date:</td><td><%= dateFormat.format(thisObject.getDate()) %></td></tr>
@@ -39,7 +39,7 @@
 <form name='editMaterial'>
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><input type="hidden" name="id" value="<%= thisObject.getID() %>"><%= thisObject.getID() %></td></tr>
-<tr><td>Source Culture:</td><td><% if ( culture != null && culture.first() ) { %><%= culture.getID() %> <i><%=culture.getName() %></i><% } else { out.print(thisObject.getCultureID()); } %></td></tr>
+<tr><td>Source Strain:</td><td><% if ( culture != null && culture.first() ) { %><%= culture.getID() %> <i><%=culture.getName() %></i><% } else { out.print(thisObject.getCultureID()); } %></td></tr>
 <tr><td>Preservation Date:</td><td><%= dateFormat.format(thisObject.getDate()) %></td></tr>
 <% if ( parent != null && parent.first() ) { %><tr><td>Parent:</td><td><a href="inoc?id=<%= parent.getID() %>">Inoc # <%= parent.getID() %> - <%= dateFormat.format(parent.getDate()) %> - <%= parent.getVolumeString() %></a></td></tr><% } %>
 <tr><td valign=top>Notes:</td><td><textarea rows="7" cols="70" name="notes"><c:out value="<%= thisObject.getNotes() %>" default="" /></textarea></td></tr>

@@ -24,7 +24,7 @@
 	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter");  %>
 <table  class="dashboard">
 <tr><th class="header" width='100'>Label</th><th class="header" width='100'>Location</th><th class="header" width='150'>Date</th>
-<th class="header" width='100'>Culture ID</th><th class="header" width='100'>Material ID</th><th class="header" width='100'>Sample ID</th>
+<th class="header" width='100'>Strain ID</th><th class="header" width='100'>Material ID</th><th class="header" width='100'>Sample ID</th>
 <th class="header" width='100'>Activity</th><th class="header" width='100'>Concentration</th></tr>
 <% while ( queryResults.next() ) { 
 	MathContext concMC = new MathContext(5);

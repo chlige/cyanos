@@ -247,7 +247,7 @@ public class SampleLibraryUpload extends UploadForm {
 */
 		/*
 		if ( infoType.equals("date") ) {
-			myRow.addItem(this.simpleTemplateRow("Culture ID:", SOURCE_CULTURE_ID, ssColPop));
+			myRow.addItem(this.simpleTemplateRow("Strain ID:", SOURCE_CULTURE_ID, ssColPop));
 			myRow.addItem(this.simpleTemplateRow("Sample Date:", SOURCE_DATE, ssColPop));
 			hideRow.append(this.hideTemplateValues(locationFields));
 			hideRow.append(this.hideTemplateValues(idFields));

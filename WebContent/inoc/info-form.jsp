@@ -25,7 +25,7 @@
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><%= thisObject.getID() %></td></tr>
 <%--  <tr><td>UUID:</td><td><%= thisObject.getRemoteID() %></td> --%>
-<tr><td>Source Culture:</td><td><% Strain culture = thisObject.getStrain(); if ( culture != null && culture.first() ) { %>
+<tr><td>Source Strain:</td><td><% Strain culture = thisObject.getStrain(); if ( culture != null && culture.first() ) { %>
 <a href="<%= contextPath %>/strain?id=<%= culture.getID() %>"><%= culture.getID() %> <i><%=culture.getName() %></i></a>
 <% } else { out.print(thisObject.getStrainID()); } %></td></tr>
 <tr><td>Inoculation Date:</td><td><%= dateFormat.format(thisObject.getDate()) %></td></tr>
@@ -66,7 +66,7 @@ if ( aProj != null && aProj.first() ) { %><a href='project?id=<%= aProj.getID() 
 <form name='editMaterial'>
 <table class="species" align='center'>
 <tr><td width='125'>Serial number:</td><td><input type="hidden" name="id" value="<%= thisObject.getID() %>"><%= thisObject.getID() %></td></tr>
-<tr><td>Source Culture:</td><td><% if ( culture != null && culture.first() ) { %><%= culture.getID() %> <i><%=culture.getName() %></i><% } else { out.print(thisObject.getStrainID()); } %></td></tr>
+<tr><td>Source Strain:</td><td><% if ( culture != null && culture.first() ) { %><%= culture.getID() %> <i><%=culture.getName() %></i><% } else { out.print(thisObject.getStrainID()); } %></td></tr>
 <tr><td>Inoculation Date:</td><td><%= dateFormat.format(thisObject.getDate()) %></td></tr>
 <% if ( parent != null && parent.first() ) { %><tr><td>Parent:</td><td><a href="inoc?id=<%= parent.getID() %>">Inoc # <%= parent.getID() %> - <%= dateFormat.format(parent.getDate()) %> - <%= CyanosObject.autoFormatAmount(parent.getVolume(), Inoc.VOLUME_TYPE) %></a></td></tr><% } %>
 <tr><td>Media:</td><td><%= thisObject.getMedia() %></td></tr>

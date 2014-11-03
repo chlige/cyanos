@@ -25,7 +25,7 @@ User userObj = StrainServlet.getUser(request);  %>
 <form name='editStrain' method="post" action="strain">
 <input type="hidden" name="action" value="add">
 <table class="species" style="width:80%; margin-left:auto; margin-right:auto">
-<tr><td width='125'>Culture ID:</td><td><input type='text' name='newID' value="<c:out value='<%= request.getParameter("newID") %>'/>"></td></tr>
+<tr><td width='125'>Strain ID:</td><td><input type='text' name='newID' value="<c:out value='<%= request.getParameter("newID") %>'/>"></td></tr>
 <tr><td width='125'>Culture source:</td><td><input type='text' name='culture_source' value="<c:out value='<%= request.getParameter("culture_source") %>'/>"></td></tr>
 <tr><td></td><td>
 <table><tr><td>Collection:</td><td><input type="text" id="collection" name="collection"  value="<c:out value='<%= request.getParameter("collection") %>'/>" autocomplete="off" onkeyup="livesearch(this, 'collection', 'validcols')" style="padding-bottom: 0px">
