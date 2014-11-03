@@ -262,7 +262,7 @@ public class SampleServlet extends ServletObject {
 			
 			sheetOut.print("Sample ID");
 			sheetOut.print("Sample Label");
-			sheetOut.print("Culture ID");
+			sheetOut.print("Strain ID");
 			sheetOut.print("Collection ID");
 			if ( isBox ) {
 				sheetOut.print("Location");
@@ -326,7 +326,7 @@ public class SampleServlet extends ServletObject {
 			if ( aCol.getLength() > 0 && aCol.getWidth() > 0 ) isBox = true;
 			aRow.add("Sample ID");
 			aRow.add("Sample Label");
-			aRow.add("Culture ID");
+			aRow.add("Strain ID");
 			aRow.add("Collection ID");
 			if ( isBox ) aRow.add("Location");
 			aRow.add("Date Added");

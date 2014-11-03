@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 import edu.uic.orjala.cyanos.xml.MSXMLHandler;
 import edu.uic.orjala.cyanos.xml.ODSHandler;
 import edu.uic.orjala.cyanos.xml.OOXMLHandler;

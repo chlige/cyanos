@@ -52,6 +52,7 @@ import edu.uic.orjala.cyanos.web.html.TableHeader;
 import edu.uic.orjala.cyanos.web.html.TableRow;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
  * Abstract class for all servlets in application (common methods and attributes)
@@ -732,6 +733,23 @@ public abstract class ServletObject extends HttpServlet {
 			return aString.substring(0, length);
 	}
 
+	public static String getLetterForIndex(int index) {
+		if ( index <= 'Z' ) {
+			return String.format("%c", 'A' + index);
+		} else {
+			int first = 1;
+			while ( index > 'Z' ) {
+				index = index - ('Z' * first);
+				first++;
+			}
+			return String.format("%c%c", ('A' + first - 1), ('A' + index));
+		}
+		
+	}
+	
+	public static FileUpload getUpload(HttpServletRequest request, String name) throws ServletException, IOException {
+		return CyanosRequestListener.getUpload(request, name);
+	}
 
 }
 

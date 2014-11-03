@@ -29,8 +29,8 @@ import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.AppConfigSQL;
 import edu.uic.orjala.cyanos.web.AppConfigXML;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 import edu.uic.orjala.cyanos.web.News;
 
 public class MainServlet extends ServletObject {
@@ -109,7 +109,7 @@ public class MainServlet extends ServletObject {
 				}
 			} else if ( req.getParameter(SETUP_ACTION_UPLOAD) != null && req instanceof MultiPartRequest ) {
 				HttpSession session = req.getSession();
-				FileUpload upload = ((MultiPartRequest)req).getUpload(SETUP_UPLOAD);
+				FileUpload upload = getUpload(req, SETUP_UPLOAD);
 				if ( upload != null ) {
 					try {
 						session.setAttribute(SESS_ATTR_UPLOAD_CONFIG, this.loadXMLFile(upload.getStream()));

@@ -164,7 +164,7 @@ public class SeparationServlet extends ServletObject {
 			if ( thisSep != null && thisSep.first() ) {
 				out.print("Separation ID");
 				out.print(DELIM);
-				out.print("Culture ID");
+				out.print("Strain ID");
 				out.print(DELIM);
 				out.print("Stationary Phase");
 				out.print(DELIM);
@@ -250,7 +250,7 @@ public class SeparationServlet extends ServletObject {
 				out.print(DELIM);
 				out.print("Sample ID");
 				out.print(DELIM);
-				out.print("Culture ID");
+				out.print("Strain ID");
 				out.print(DELIM);
 				out.print("Sample Label");
 				out.print(DELIM);

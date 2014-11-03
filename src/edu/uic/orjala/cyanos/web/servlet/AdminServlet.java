@@ -13,8 +13,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.codec.binary.Base64;
-
 import edu.uic.orjala.cyanos.Assay;
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
@@ -34,7 +32,6 @@ import edu.uic.orjala.cyanos.web.AppConfigXML;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.News;
-import edu.uic.orjala.cyanos.web.forms.ConfigForm;
 import edu.uic.orjala.cyanos.web.forms.UserForm;
 import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
@@ -60,7 +57,11 @@ public class AdminServlet extends ServletObject {
 	 * 
 	 */
 	private static final long serialVersionUID = -1729910187898214608L;
-	public static final String APP_CONFIG_ATTR = ConfigForm.APP_CONFIG_ATTR;
+
+	public static final String DOWNLOAD_CONFIG_ACTION = "downloadConfig";
+	public static final String REVERT_CONFIG_ACTION = "revertConfig";
+	public static final String APP_CONFIG_ATTR = "app-config";
+
 	
 	public static final String PARAM_CONFIG_GEN_KEY_PAIR = "genKeyPair";
 	public static final String PARAM_CONFIG_UPLOAD_FILE = "xmlFile";
@@ -111,7 +112,7 @@ public class AdminServlet extends ServletObject {
 			aWrap.setContentType("text/xml");
 			aWrap.getResponse().reset();				
 			HttpSession sess = req.getSession();
-			AppConfig config = (AppConfig) sess.getAttribute(ConfigForm.APP_CONFIG_ATTR);
+			AppConfig config = (AppConfig) sess.getAttribute(APP_CONFIG_ATTR);
 			if ( config == null ) {
 				config = (AppConfig) aWrap.getAppConfig();
 			}
@@ -149,8 +150,8 @@ public class AdminServlet extends ServletObject {
 			}
 		} else if ( servlet.equals("/admin/config") ) {
 			HttpSession sess = req.getSession();
-			if ( sess.getAttribute(ConfigForm.APP_CONFIG_ATTR) == null || aWrap.hasFormValue(ConfigForm.REVERT_CONFIG_ACTION) ) {
-				sess.setAttribute(ConfigForm.APP_CONFIG_ATTR, new AppConfigSQL()); 
+			if ( sess.getAttribute(APP_CONFIG_ATTR) == null || aWrap.hasFormValue(REVERT_CONFIG_ACTION) ) {
+				sess.setAttribute(APP_CONFIG_ATTR, new AppConfigSQL()); 
 			}
 			AppConfig appConfig = (AppConfig) sess.getAttribute(APP_CONFIG_ATTR);
 			String pubKeyString = appConfig.getUpdateCert();
@@ -162,21 +163,21 @@ public class AdminServlet extends ServletObject {
 				pubKeyString = appConfig.getUpdateCert();
 			}
 			
-			if ( aWrap.hasFormValue(PARAM_CONFIG_UPDATE) ) {
-				String form = aWrap.getFormValue("form");
+			if ( req.getParameter(PARAM_CONFIG_UPDATE) != null ) {
+				String form = req.getParameter("form");
 				if ( form.equalsIgnoreCase(FORM_CONFIG_MAPS) ) 
-					this.updateConfigMaps(aWrap, appConfig);
+					updateConfigMaps(req, appConfig);
 				else if ( form.equalsIgnoreCase(FORM_CONFIG_FILEPATHS) )
-					this.updateConfigFilePaths(aWrap, appConfig);
+					updateConfigFilePaths(req, appConfig);
 				else if ( form.equalsIgnoreCase(FORM_CONFIG_QUEUES) )
-					this.updateConfigQueues(aWrap, appConfig);
+					updateConfigQueues(req, appConfig);
 				else if ( form.equalsIgnoreCase(FORM_CONFIG_MODULES) )
-					this.updateConfigModules(aWrap, appConfig);
+					updateConfigModules(req, appConfig);
 				else if ( form.equalsIgnoreCase(FORM_CONFIG_DATATYPES) )
-					this.updateConfigDataTypes(aWrap, appConfig);
+					updateConfigDataTypes(req, appConfig);
 			}
 			
-			if ( req.getParameter(ConfigForm.DOWNLOAD_CONFIG_ACTION) != null ) {
+			if ( req.getParameter(DOWNLOAD_CONFIG_ACTION) != null ) {
 				ServletContext sc = getServletContext();
 				RequestDispatcher rd = sc.getRequestDispatcher("/admin/get-config");
 				rd.forward(req, aWrap.getResponse());

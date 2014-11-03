@@ -74,10 +74,10 @@ import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.AppConfig;
-import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.forms.DataForm;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 
 public class DataFileServlet extends ServletObject {
@@ -161,7 +161,7 @@ public class DataFileServlet extends ServletObject {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		req = MultiPartRequest.parseRequest(req);
+//		req = MultiPartRequest.parseRequest(req);
 		super.doPost(req, res);
 		this.handleRequest(req, res);
 	}
@@ -177,7 +177,7 @@ public class DataFileServlet extends ServletObject {
 			
 			String requiredRole = getRole(details[2]);
 			try {
-				if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
 
 					AppConfig myConf = this.getAppConfig();
 					String path = myConf.getFilePath(details[2], details[3]);
@@ -215,60 +215,62 @@ public class DataFileServlet extends ServletObject {
 		}
 	}
 	
-	public void uploadFile(MultiPartRequest req, HttpServletResponse res, String dataFileClass, String dataFileType) throws IOException {
-		try {
-			FileUpload newFile = req.getUpload(PARAM_NEW_FILE);
-			String fileName = req.getParameter(PARAM_FILE_PATH) + newFile.getName();
-			String requiredRole = getRole(dataFileClass);
-			if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
+	public void uploadFile(HttpServletRequest req, HttpServletResponse res, String dataFileClass, String dataFileType) throws IOException, ServletException {
+		FileUpload newFile = getUpload(req, PARAM_NEW_FILE);
+		if ( newFile != null ) {
+			try {
+				String fileName = req.getParameter(PARAM_FILE_PATH) + newFile.getName();
+				String requiredRole = getRole(dataFileClass);
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
 
-				AppConfig myConf = this.getAppConfig();
-				String path = myConf.getFilePath(dataFileClass, dataFileType);
+					AppConfig myConf = this.getAppConfig();
+					String path = myConf.getFilePath(dataFileClass, dataFileType);
 
-				SingleFile aFile = new SingleFile(path, fileName);
+					SingleFile aFile = new SingleFile(path, fileName);
 
-				File outputFile;
-				outputFile = aFile.getFileObject();
-				if ( (! outputFile.exists()) && outputFile.createNewFile() ) {
-					BufferedInputStream fileData = new BufferedInputStream(newFile.getStream());
-					FileOutputStream fileOut = new FileOutputStream(outputFile);
-					int d = fileData.read();
-					while ( d != -1 ) {
-						fileOut.write(d);
-						d = fileData.read();
+					File outputFile;
+					outputFile = aFile.getFileObject();
+					if ( (! outputFile.exists()) && outputFile.createNewFile() ) {
+						BufferedInputStream fileData = new BufferedInputStream(newFile.getStream());
+						FileOutputStream fileOut = new FileOutputStream(outputFile);
+						int d = fileData.read();
+						while ( d != -1 ) {
+							fileOut.write(d);
+							d = fileData.read();
+						}
+						fileOut.close();
+						fileData.close();
+						req.setAttribute(ATTR_UPLOAD_MESSAGE, "File uploaded successfully.");
+					} else {
+						req.setAttribute(ATTR_UPLOAD_MESSAGE, "File already exists.");
 					}
-					fileOut.close();
-					fileData.close();
-					req.setAttribute(ATTR_UPLOAD_MESSAGE, "File uploaded successfully.");
 				} else {
-					req.setAttribute(ATTR_UPLOAD_MESSAGE, "File already exists.");
+					req.setAttribute(ATTR_UPLOAD_MESSAGE, "Permission denied.");
 				}
-			} else {
-				req.setAttribute(ATTR_UPLOAD_MESSAGE, "Permission denied.");
+			} catch (DataException e) {
+				res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (SQLException e) {
+				res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
+				e.printStackTrace();
 			}
-		} catch (DataException e) {
-			res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
-			e.printStackTrace();
-		} catch (SQLException e) {
-			res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage());
-			e.printStackTrace();
 		}
 	}
 
 	private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		
+
 		String module = req.getPathInfo();	
 		if ( module != null && module.startsWith("/manager") ) {
 			this.handleManagerReq(req, res);
 		} else if ( module != null && module.startsWith("/upload") ) {
-			if ( req instanceof MultiPartRequest && req.getParameter(ACTION_UPLOAD) != null ) {
-				this.uploadFile((MultiPartRequest) req, res, req.getParameter(DATAFILE_CLASS), req.getParameter(PARAM_DATATYPE));
+			if ( CyanosRequestListener.getUploadCount(req, PARAM_NEW_FILE) > 0  && req.getParameter(ACTION_UPLOAD) != null ) {
+				this.uploadFile(req, res, req.getParameter(DATAFILE_CLASS), req.getParameter(PARAM_DATATYPE));
 			}
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/includes/datafile-upload.jsp");
 			disp.forward(req, res);			
 		} else if ( module != null && module.startsWith("/list") ) {
-			if ( req instanceof MultiPartRequest && req.getParameter(ACTION_UPLOAD) != null ) {
-				this.uploadFile((MultiPartRequest) req, res, req.getParameter(DATAFILE_CLASS), req.getParameter(PARAM_DATATYPE));
+			if ( CyanosRequestListener.getUploadCount(req, PARAM_NEW_FILE) > 0 && req.getParameter(ACTION_UPLOAD) != null ) {
+				this.uploadFile(req, res, req.getParameter(DATAFILE_CLASS), req.getParameter(PARAM_DATATYPE));
 			} else if ( req.getParameter(ACTION_SHOW_BROWSER) != null ) {
 				AppConfig myConf = this.getAppConfig();
 				String path = myConf.getFilePath(req.getParameter(DATAFILE_CLASS), req.getParameter(PARAM_DATATYPE));
@@ -324,7 +326,7 @@ public class DataFileServlet extends ServletObject {
 
 		try {
 			if ( req.getParameter(ACTION_GET_DIRS) != null ) {
-				if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
 					File aDir = new File(path, req.getParameter("path"));
 					File[] kids = aDir.listFiles();
 					Arrays.sort(kids, DataForm.directoryFirstCompare());
@@ -340,7 +342,7 @@ public class DataFileServlet extends ServletObject {
 				} else 
 					res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			} else if ( req.getParameter(ACTION_GET_FILES) != null ) {
-				if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
 					try {
 						this.getFileList(req, res);
 					} catch (ParserConfigurationException e) {
@@ -362,7 +364,7 @@ public class DataFileServlet extends ServletObject {
 				} else 
 					res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			} else if ( req.getParameter(ACTION_UPDATE_FILE) != null ) {
-				if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) {
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) {
 					String filePath = req.getParameter("path");
 					filePath = filePath.replaceAll("/+", "/");
 					if ( filePath.startsWith("/") ) {
@@ -386,7 +388,7 @@ public class DataFileServlet extends ServletObject {
 				} else 
 					res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			} else if ( req.getParameter("getTypes") != null ) {
-				if ( this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
+				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) {
 					String objClass = req.getParameter(PARAM_OBJECT_CLASS);
 					PrintWriter writer = res.getWriter();
 					Map<String,String> dataTypes = this.getAppConfig().getDataTypeMap(objClass);
@@ -526,7 +528,7 @@ public class DataFileServlet extends ServletObject {
 			
 			String path = myConf.getFilePath(details[2], details[3]);
 			String requiredRole = getRole(details[2]);
-			if ( ! this.getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) { 
+			if ( ! getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) { 
 				res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				return;
 			}

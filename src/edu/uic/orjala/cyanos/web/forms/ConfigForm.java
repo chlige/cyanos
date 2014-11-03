@@ -32,7 +32,6 @@ import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 import edu.uic.orjala.cyanos.web.html.Paragraph;
@@ -96,6 +95,7 @@ public class ConfigForm extends BaseForm {
 		output.append("<P ALIGN='CENTER'><FONT SIZE='+1'><B>Configuration</B></FONT></P>");
 
 		if ( this.myWrapper.hasUpload("xmlFile") ) {
+/*
 			FileUpload file = this.myWrapper.getUpload("xmlFile");
 			try {
 				myConfig.loadXML(file.getStream());
@@ -105,6 +105,7 @@ public class ConfigForm extends BaseForm {
 				output.append(this.handleException(e));
 			}
 			this.myWrapper.getSession().setAttribute(APP_CONFIG_ATTR, myConfig);
+*/
 		} 	
 		
 		Form myForm = new Form();
@@ -329,6 +330,7 @@ public class ConfigForm extends BaseForm {
 		}
 		
 		if ( this.hasFormValue("uploadJar") ) {
+		/*
 			FileUpload fileItem = this.myWrapper.getUpload("jarDir");
 			if ( this.jarDir.exists() && (! this.hasFormValue("overwrite")) ) {
 				myForm.setAttribute("ENCTYPE", "multipart/form-data");
@@ -350,6 +352,7 @@ public class ConfigForm extends BaseForm {
 					myForm.addItem(this.handleException(e));
 				}
 			}
+			*/
 		}
 
 		File parentFile = new File(this.jarDir, "cyanos.jar");

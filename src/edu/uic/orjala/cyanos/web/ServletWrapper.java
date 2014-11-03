@@ -18,13 +18,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileUpload;
+
 import edu.uic.orjala.cyanos.AccessException;
 import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLUser;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.html.Div;
 import edu.uic.orjala.cyanos.web.html.Header;
 import edu.uic.orjala.cyanos.web.html.Image;
@@ -206,40 +207,28 @@ public class ServletWrapper implements CyanosWrapper {
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUpload(java.lang.String)
 	 */
 	public FileUpload getUpload(String key) {
-		if ( req instanceof MultiPartRequest ) 
-			return ((MultiPartRequest) req).getUpload(key);
-		else 
-			return null;
+		return null;
 	}
 
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUpload(java.lang.String, int)
 	 */
 	public FileUpload getUpload(String key, int index) {
-		if ( req instanceof MultiPartRequest ) 
-			return ((MultiPartRequest) req).getUpload(key, index);
-		else
-			return null;
+		return null;
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUploadCount(java.lang.String)
 	 */
 	public int getUploadCount(String key) {
-		if ( req instanceof MultiPartRequest ) 
-			return ((MultiPartRequest) req).getUploadCount(key);
-		else
-			return 0;
+		return 0;
 	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.CyanosServlet#getUploads(java.lang.String)
 	 */
 	public List<FileUpload> getUploads(String key) {
-		if ( req instanceof MultiPartRequest ) 
-			return ((MultiPartRequest)req).getUploads(key);
-		else
-			return null;
+		return null;
 	}
 
 

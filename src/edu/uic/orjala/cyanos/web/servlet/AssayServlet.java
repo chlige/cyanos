@@ -427,23 +427,23 @@ public class AssayServlet extends ServletObject {
 					SheetWriter sheetOut = new SheetWriter(out);
 					sheetOut.print("Assay ID");
 					sheetOut.print("Location");
-					sheetOut.print("Culture ID");
+					sheetOut.print("Strain ID");
+					sheetOut.print("Material ID");
 					sheetOut.print("Sample ID");
 					sheetOut.print("Sample Label");
 					sheetOut.print("Concentration (mg/ml)");
-					sheetOut.println("Activity");
+					sheetOut.print("Activity");
+					sheetOut.println("Standard Deviation");
 					
 					AssayPlate myData = myAssay.getAssayData();
 					myData.beforeFirst();
 					String assayID = myAssay.getID();
 					while ( myData.next() ) {
-						System.err.print("ASSAY (");
-						System.err.print(myData.getLocation());
-						System.err.print(") ");
-						System.err.println(myData.getLabel());
 						sheetOut.print(assayID);
 						sheetOut.print(myData.getLocation());
 						sheetOut.print(myData.getStrainID());
+						String materialID = myData.getMaterialID();
+						sheetOut.print((materialID != null ? materialID : ""));
 						Sample aSample = myData.getSample();
 						if ( aSample != null )
 							sheetOut.print(aSample.getID());
@@ -455,7 +455,8 @@ public class AssayServlet extends ServletObject {
 						else
 							sheetOut.print("");
 						sheetOut.print(myData.getConcentrationString());
-						sheetOut.println(myData.getActivityString());
+						sheetOut.print(myData.getActivityString());
+						sheetOut.println(myData.getActivitySD().toPlainString());
 					}
 				}
 			} else {

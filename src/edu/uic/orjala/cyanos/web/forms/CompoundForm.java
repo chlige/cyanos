@@ -18,6 +18,7 @@ import java.util.Arrays;
 
 import javax.xml.soap.SOAPException;
 
+import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.ChemFile;
@@ -43,7 +44,6 @@ import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.html.Div;
 import edu.uic.orjala.cyanos.web.html.Form;
 import edu.uic.orjala.cyanos.web.html.Image;
@@ -655,13 +655,15 @@ public class CompoundForm extends BaseForm {
 				}
 			}
 			if ( this.hasMDLData() ) {
-				FileUpload mdlUpload = this.myWrapper.getUpload(MDL_FILE);
+/*
+ 				FileUpload mdlUpload = this.myWrapper.getUpload(MDL_FILE);
 				try {
 					InchiGenerator iGen = new InchiGenerator(InchiGenerator.FORMAT_MOL, Streams.asString(mdlUpload.getStream()));
 					return iGen.getKey();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+*/
 			}
 			return null;
 		} else 
@@ -709,6 +711,8 @@ public class CompoundForm extends BaseForm {
 	}
 
 	public String setCompoundValues(Compound aCompound) {
+		return null;
+		/*
 		StringBuffer output = new StringBuffer();
 		if ( aCompound.isAllowed(Role.WRITE) ) {
 			try {
@@ -772,6 +776,7 @@ public class CompoundForm extends BaseForm {
 			output.append("<P><B><FONT COLOR='red'>FORBIDDEN:</FONT> Insufficient permission to modify compound record.</B></P>");
 		}
 		return output.toString();
+		*/
 	}
 	
 	public boolean hasMDLData() {

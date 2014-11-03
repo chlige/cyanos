@@ -19,11 +19,8 @@ import java.sql.SQLException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.servlet.RequestDispatcher;
@@ -58,8 +55,8 @@ import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
-import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
  * @author George Chlipala
@@ -129,7 +126,7 @@ public class CompoundServlet extends ServletObject {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		req = MultiPartRequest.parseRequest(req);
+//		req = MultiPartRequest.parseRequest(req);
 		super.doPost(req, res);
 		this.handleRequest(req, res);
 	}
@@ -644,7 +641,7 @@ public class CompoundServlet extends ServletObject {
 		return;
 	}
 
-	private static void updateCompound(HttpServletRequest req, Compound compound) throws DataException, UnsupportedOperationException, SOAPException, CDKException, IOException, ClassNotFoundException {
+	private static void updateCompound(HttpServletRequest req, Compound compound) throws DataException, UnsupportedOperationException, SOAPException, CDKException, IOException, ClassNotFoundException, ServletException {
 		Set<String> updateValues = new HashSet<String>();
 		if ( req.getParameter(CLEAR_ACTION) != null ) {
 			compound.clearMDLData();
@@ -653,8 +650,8 @@ public class CompoundServlet extends ServletObject {
 			setAttribute(req, FIELD_NOTES, compound, SQLCompound.NOTES_COLUMN, updateValues);
 			setAttribute(req, FIELD_PROJECT, compound, SQLCompound.PROJECT_COLUMN, updateValues);
 
-			if ( req instanceof MultiPartRequest && ((MultiPartRequest)req).getUploadCount(MDL_FILE) > 0 ) {
-				updateCompoundUpload((MultiPartRequest) req, compound);
+			if ( CyanosRequestListener.getUploadCount(req, MDL_FILE) > 0 ) {
+				updateCompoundUpload(req, compound);
 			} else {	
 				setAttribute(req, FIELD_FORMULA, compound, SQLCompound.FORMULA_COLUMN, updateValues);
 
@@ -693,55 +690,57 @@ public class CompoundServlet extends ServletObject {
 		req.setAttribute(ATTR_UPDATE_MAP, updateValues);
 	}
 	
-	private static void updateCompoundUpload(MultiPartRequest req, Compound compound) throws IOException, CDKException, DataException, UnsupportedOperationException, SOAPException, ClassNotFoundException {
-		FileUpload mdlUpload = req.getUpload(MDL_FILE);
-		ChemFile aCMLFile = new ChemFile();
-		String reqFormat = req.getParameter(FIELD_FILE_FORMAT);
-		if ( mdlUpload.getContentType().equals("chemical/x-mdl-molfile") || 
-				( reqFormat != null && reqFormat.equals(FORMAT_MDL) && (! mdlUpload.getContentType().equals("chemical/x-cml"))) ) {
-			MDLReader aReader = new MDLReader(mdlUpload.getStream());
-			aCMLFile = (ChemFile) aReader.read(aCMLFile);									
-		} else {
-			CMLReader aCMLReader = new CMLReader(mdlUpload.getStream());
-			aCMLFile = (ChemFile) aCMLReader.read(aCMLFile);									
-		}
-		// TODO should communicate this to the end user.
-		//			if ( aCMLFile.getChemSequenceCount() > 1 ) {
-		//				output.append("<P><B><FONT COLOR='orange'>WARNING:</FONT> Multiple molecules in this file. Using first molecule</B></P>");
-		//			}
-		Molecule molecule = (Molecule) aCMLFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
-		compound.setMDLData(mdlUpload.toString());
-		compound.setInChiString(InchiGenerator.getMOLKey(mdlUpload.toString()));
-		compound.setInChiKey(InchiGenerator.getInChiKey(compound.getInChiString()));
-		
-		SmilesGenerator smileGen = new SmilesGenerator();
-		smileGen.setUseAromaticityFlag(true);
-		compound.setSmilesString(smileGen.createSMILES(molecule));
-		
-		// For CDK v1.0.4
-				HydrogenAdder hAdder = new HydrogenAdder(new ValencyChecker());
-			    hAdder.addExplicitHydrogensToSatisfyValency(molecule);
-			    MFAnalyser formulaMaker = new MFAnalyser(molecule);
+	private static void updateCompoundUpload(HttpServletRequest req, Compound compound) throws IOException, CDKException, DataException, UnsupportedOperationException, SOAPException, ClassNotFoundException, ServletException {
+		FileUpload mdlUpload = getUpload(req, MDL_FILE);
+		if ( mdlUpload != null ) {
+			ChemFile aCMLFile = new ChemFile();
+			String reqFormat = req.getParameter(FIELD_FILE_FORMAT);
+			if ( mdlUpload.getContentType().equals("chemical/x-mdl-molfile") || 
+					( reqFormat != null && reqFormat.equals(FORMAT_MDL) && (! mdlUpload.getContentType().equals("chemical/x-cml"))) ) {
+				MDLReader aReader = new MDLReader(mdlUpload.getStream());
+				aCMLFile = (ChemFile) aReader.read(aCMLFile);									
+			} else {
+				CMLReader aCMLReader = new CMLReader(mdlUpload.getStream());
+				aCMLFile = (ChemFile) aCMLReader.read(aCMLFile);									
+			}
+			// TODO should communicate this to the end user.
+			//			if ( aCMLFile.getChemSequenceCount() > 1 ) {
+			//				output.append("<P><B><FONT COLOR='orange'>WARNING:</FONT> Multiple molecules in this file. Using first molecule</B></P>");
+			//			}
+			Molecule molecule = (Molecule) aCMLFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
+			compound.setMDLData(mdlUpload.toString());
+			compound.setInChiString(InchiGenerator.getMOLKey(mdlUpload.toString()));
+			compound.setInChiKey(InchiGenerator.getInChiKey(compound.getInChiString()));
 
-		//CDK v.1.2.3
-		/*		
+			SmilesGenerator smileGen = new SmilesGenerator();
+			smileGen.setUseAromaticityFlag(true);
+			compound.setSmilesString(smileGen.createSMILES(molecule));
+
+			// For CDK v1.0.4
+			HydrogenAdder hAdder = new HydrogenAdder(new ValencyChecker());
+			hAdder.addExplicitHydrogensToSatisfyValency(molecule);
+			MFAnalyser formulaMaker = new MFAnalyser(molecule);
+
+			//CDK v.1.2.3
+			/*		
  				IMolecularFormula aFormula = MolecularFormulaManipulator.getMolecularFormula(aMolecule);
-		*/
-		// for CDK v1.0.4		
-			    compound.setFormula(formulaMaker.getMolecularFormula());
-			    BigDecimal mass = new BigDecimal(formulaMaker.getNaturalMass());
-			    mass = mass.setScale(4, BigDecimal.ROUND_HALF_UP);
-			    compound.setAverageMass(mass);
-			    
-			    mass = new BigDecimal(formulaMaker.getMass());
-			    mass = mass.setScale(5, BigDecimal.ROUND_HALF_UP);
-			    compound.setMonoisotopicMass(mass);
-		// CDK v1.2.3
-		/*	   
+			 */
+			// for CDK v1.0.4		
+			compound.setFormula(formulaMaker.getMolecularFormula());
+			BigDecimal mass = new BigDecimal(formulaMaker.getNaturalMass());
+			mass = mass.setScale(4, BigDecimal.ROUND_HALF_UP);
+			compound.setAverageMass(mass);
+
+			mass = new BigDecimal(formulaMaker.getMass());
+			mass = mass.setScale(5, BigDecimal.ROUND_HALF_UP);
+			compound.setMonoisotopicMass(mass);
+			// CDK v1.2.3
+			/*	   
 		  		compound.setFormula(MolecularFormulaManipulator.getHillString(aFormula));
 			    compound.setAverageMass(MolecularFormulaManipulator.getNaturalExactMass(aFormula));
 			    compound.setMonoisotopicMass(MolecularFormulaManipulator.getMajorIsotopeMass(aFormula));
-		*/
+			 */
+		}
 	}
 	
 	private static Molecule getMolecule(Compound compound) throws DataException, CDKException {

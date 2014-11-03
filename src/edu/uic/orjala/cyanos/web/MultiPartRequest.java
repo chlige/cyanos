@@ -98,7 +98,6 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 		}
 
 	}
-	
 	private Map<String, String[]> formValues = null;
 	private Map<String, List<FileUpload>> uploadItems = null;
 

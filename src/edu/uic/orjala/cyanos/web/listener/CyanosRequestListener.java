@@ -1,13 +1,17 @@
 package edu.uic.orjala.cyanos.web.listener;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
@@ -15,6 +19,7 @@ import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLUser;
 import edu.uic.orjala.cyanos.web.GuestUser;
+import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
  * Application Lifecycle Listener implementation class CyanosRequestListener
@@ -23,11 +28,12 @@ import edu.uic.orjala.cyanos.web.GuestUser;
 public class CyanosRequestListener implements ServletRequestListener {
 
 	private static final String DATASOURCE = "datasource";
+	private static final String UPLOADS = "uploaded_files";
 	
 	private static final String USER = "user";
 
 	private final static Pattern MOBILE_PATTERN = Pattern.compile("iphone|ipad|ipod|android|blackberry|mini|windows\\sce|palm/i");
-
+	
 	/* (non-Javadoc)
 	 * @see javax.servlet.ServletRequestListener#requestDestroyed(javax.servlet.ServletRequestEvent)
 	 */
@@ -61,17 +67,55 @@ public class CyanosRequestListener implements ServletRequestListener {
 	 */
 	@Override
 	public void requestInitialized(ServletRequestEvent event) {
-//		ServletRequest object = event.getServletRequest();
-//		if ( object instanceof HttpServletRequest ) {
-//			HttpServletRequest req = (HttpServletRequest) object;
-//			try {
-//				getSQLData(req);
-//			} catch (SQLException | DataException e) {
-//				e.printStackTrace();
-//			}
-//		}
+		ServletRequest object = event.getServletRequest();
+		if ( object instanceof HttpServletRequest ) {
+			if ( object.getAttribute(UPLOADS) == null && ServletFileUpload.isMultipartContent((HttpServletRequest)object) ) {
+				try {
+					object.setAttribute(UPLOADS, UploadManager.parseMultipartReq((HttpServletRequest) object));
+				} catch (ServletException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+
+	public static FileUpload getUpload(HttpServletRequest request, String name) throws ServletException, IOException {
+		return getUpload(request, name, 0);
+	}
+	
+	public static FileUpload getUpload(HttpServletRequest request, String name, int index) throws ServletException, IOException {
+		Object obj = request.getAttribute(UPLOADS);
+		if ( obj == null && ServletFileUpload.isMultipartContent(request)) {
+			obj = UploadManager.parseMultipartReq(request);
+			request.setAttribute(UPLOADS, obj);
+		}
+		if ( obj instanceof UploadManager ) {
+			return ((UploadManager)obj).getFile(name, index);
+		}
+		return null;
 	}
 
+	public static UploadManager getUploadManager(HttpServletRequest request) {
+		Object obj = request.getAttribute(UPLOADS);
+		if ( obj instanceof UploadManager ) {
+			return (UploadManager) obj;
+		}
+		return null;
+	}
+	
+	public static int getUploadCount(HttpServletRequest request, String name) {
+		Object obj = request.getAttribute(UPLOADS);
+		if ( obj instanceof UploadManager ) {
+			return ((UploadManager) obj).getFileCount(name);
+		}
+		return 0;		
+	}
+	
 	public static SQLData getSQLData(HttpServletRequest req) throws SQLException, ConfigException, DataException {
 		Object data = req.getAttribute(DATASOURCE);
 		if ( data == null ) {
