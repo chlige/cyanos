@@ -8,10 +8,29 @@
 	java.util.List" %>
 <%@ attribute name="jspform" required="true" %>
 <%@ attribute name="templateType" required="false" %>
-<% 	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
+<%
+	if ( request.getParameter("clearUpload") != null) {
+		UploadServlet.clearSession(session);
+	} else if (request.getParameter("clearResults") != null) {
+		UploadServlet.clearUploadJob(session);
+	}
+
+	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
 	UploadJob job = UploadServlet.getUploadJob(session);
-	if ( job != null && ( job.isWorking() || job.resultReport() != null ) ) {		
-%><div align="center">
+	if (job != null && (job.isWorking() || job.resultReport() != null)) {
+		if (request.getParameter(UploadServlet.SHOW_RESULTS) != null) {
+			if (job.resultSheet() != null) {
+				out.println("<p align='center'><a href='upload/results'>Export Results</a></p>");
+			}
+%><form method="post">
+<p align="center"><button type="submit" name="clearUpload">Clear Uploaded Data</button>
+<br><button type="submit" name="clearResults">Clear Results</button></p>
+</form>
+<%
+		out.println(job.resultReport());  
+		} else {
+%>
+<div align="center">
 <div class="progress" style="width: 200px"><div id="progressText"></div><div id="progressBar"></div></div>
 <form><button id="resultButton" name="showResults" disabled>Show Results</button></form>
 </div>
@@ -19,7 +38,7 @@
 	var updatePath = "<%= request.getContextPath() %>/upload/status";
 	uploadStatus(updatePath, document.getElementById("resultButton"));
 </script>
-<%	} else if ( worksheet != null ) { 
+<%	} } else if ( worksheet != null ) { 
 %><form method="post">
 <div id="uploadForm">
 <p align="center"><b>Select a worksheet:</b>
