@@ -11,7 +11,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Cyanos - Project <%= myObject != null && myObject.first() ? myObject.getID() : "List"%>"/>
+<cyanos:header title="Cyanos - Projects"/>
 </head>
 <body>
 

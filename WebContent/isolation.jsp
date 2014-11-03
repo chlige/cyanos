@@ -5,7 +5,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Isolation <%= isolationObj != null && isolationObj.first() ? isolationObj.getID() : "Search" %>"/>
+<cyanos:header title="Cyanos - Isolations"/>
 </head>
 <body style="min-height:100%">
 <cyanos:menu helpModule="<%= CollectionServlet.HELP_MODULE %>"/>

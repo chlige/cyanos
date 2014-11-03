@@ -7,7 +7,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Inoculation <%= thisObject != null && thisObject.first() ? thisObject.getID() : "Search" %>"/>
+<cyanos:header title="Cyanos - Inoculations"/>
 </head>
 <body>
 
@@ -37,7 +37,7 @@ Inoc children = thisObject.getChildren();
 <center>
 <form name="materialquery">
 <table border=0>
-<tr><td>Culture ID:</td><td>
+<tr><td>Strain ID:</td><td>
 <% String queryValue = request.getParameter("query"); if ( queryValue == null ) { queryValue = ""; }%>
 <input id="query" type="text" name="query" VALUE="<%= queryValue %>" autocomplete='off' onKeyUp="livesearch(this, 'query', 'div_query')" style='padding-bottom: 0px'/>
 <div id="div_query" class='livesearch'></div></td>

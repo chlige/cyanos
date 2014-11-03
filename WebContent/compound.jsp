@@ -6,7 +6,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Compound <%= (myObject != null ? myObject.getID() : "Search") %>">
+<cyanos:header title="Cyanos - Compound">
 <script type="text/javascript" src="jmol/Jmol.js"></script>
 </cyanos:header>
 </head>

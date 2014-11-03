@@ -102,7 +102,7 @@
 <center>
 <form name="sepquery">
 <table border=0>
-<tr><td>Culture ID:</td><td>
+<tr><td>Strain ID:</td><td>
 <% String queryValue = request.getParameter("query"); if ( queryValue == null ) { queryValue = ""; }%>
 <input id="query" type="text" name="query" VALUE="<%= queryValue %>" autocomplete='off' onKeyUp="livesearch(this, 'query', 'div_query')" style='padding-bottom: 0px'/>
 <div id="div_query" class='livesearch'></div></td>

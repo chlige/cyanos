@@ -34,8 +34,7 @@
 </table>
 <br>
   <button type='submit'>Login</button><button type='reset'>Clear form</button>
-</form>
-<p><a href='<%= response.encodeURL("reset") %>'>Reset password</a></p></div>
+</form></div>
 <div id="loginNote" style="visibility: hidden">
 <h2>Login session expired</h2>
 <hr>
