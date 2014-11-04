@@ -15,6 +15,7 @@ import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Separation;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.web.UploadForm;
@@ -24,7 +25,7 @@ import edu.uic.orjala.cyanos.web.html.HtmlList;
  * @author George Chlipala
  *
  */
-public class FractionUpload extends UploadForm {
+public class FractionUpload extends UploadJob {
 
 	public static final String PROTOCOL = "fraction upload";
 
@@ -44,7 +45,7 @@ public class FractionUpload extends UploadForm {
 //	public static final String DEST_KEY = "destCol";
 //	public static final String DEST_LOC = "destLoc";
 
-	public final static String[] templateKeys = { PARAM_HEADER, SAMPLE_ID_KEY, FR_NUMBER_KEY, AMOUNT_KEY, DEFAULT_UNIT_KEY, DATE_KEY, 
+	public final static String[] templateKeys = { SAMPLE_ID_KEY, FR_NUMBER_KEY, AMOUNT_KEY, DEFAULT_UNIT_KEY, DATE_KEY, 
 		// DEST_KEY, DEST_LOC, 
 		LABEL_FORMAT_KEY, LABEL_KEY, NOTES_KEY,
 		// PROTOCOL_KEY, 
@@ -52,61 +53,38 @@ public class FractionUpload extends UploadForm {
 	
 	public final static String TITLE = "Fraction Data";
 
-	private final static String[] templateHeader = {"Material ID", "Fraction Number", "Amount", "Label", 
-		// "Destination Collection", "Library Amount", "Concentration", "Location", 
-		"Notes"};
-	private final static String[] templateType = {"Required<BR>(for sources only)", "Required<BR/>A number for a fraction<i>or</i><br>S = Source material", 
-		"Required<br><i>Only absolute mass values</i>", "Optional<br>(Ignored for source materials)", 
-		// "Required or Static", "Optional or Static", "Optional", "Optional", 
-		"Optional<br>(Ignored for source materials)"};
-
 	// N in the fraction number would cause the uploader to generate a new separation record.  Need to find a good way of documenting that and detailing on the upload page.
-	
-	public static final String JSP_FORM = "/upload/forms/fraction.jsp";
 
-	public FractionUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.SAMPLE_ROLE;
-		this.permission = Role.CREATE;
-	}
-
-	public String worksheetTemplate() {
-		StringBuffer template = new StringBuffer(this.worksheetTemplate(templateHeader, templateType));
-		template.append("<P ALIGN='CENTER'><B>NOTE:</B> A spreadsheet can contain multiple separations.  Separate each with a row where the fraction number is \"NEW\".</P>");
-		return template.toString();
-	}
-
-	public String title() {
-		return TITLE;
+	public FractionUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	public void run() {
 		if ( this.working ) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		// Setup the row iterator.
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.done = 0;
 		this.working = true;
 		Savepoint mySave = null;
 		
 		try {
+			this.myData.setAutoCommit(false);
 			mySave = this.myData.setSavepoint("fraction_upload");
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
-			this.resultOutput = output.toString();
 		}
 
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 
 		String sepDate = this.template.get(DATE_KEY);		
 //		if ( sepDate == null || sepDate.length() < 1 ) {
 		if ( sepDate == null ) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT> Date not valid!</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT> Date not valid!</B></P>");
 			this.working = false;
 		} else {
 			try {
@@ -136,8 +114,8 @@ public class FractionUpload extends UploadForm {
 				String sphase = template.get(METHOD_STATIONARY);
 				String projectID = template.get(PROJECT_KEY);				
 				
-				String txnNote = "Separation loaded by: " + this.getSQLDataSource().getUser().getUserID();
-				String frNote = "Fraction loaded by: " + this.getSQLDataSource().getUser().getUserID();
+				String txnNote = "Separation loaded by: " + this.myData.getUser().getUserID();
+				String frNote = "Fraction loaded by: " + this.myData.getUser().getUserID();
 	//			String frCollection = "frLoad-" + this.myUser.getUserID();
 
 				if ( projectID != null && projectID.length() > 0 ) {
@@ -195,7 +173,11 @@ public class FractionUpload extends UploadForm {
 						} else if ( frNumber.matches("^[nN].*") ) {
 							if ( mySep.getSources().first() ) {
 								this.setFractionNames(mySep, useLabel, frLabelFormat);
-								output.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
+								this.messages.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
+								this.myData.commit();
+								this.myData.releaseSavepoint(mySave);
+								mySave = this.myData.setSavepoint("fraction_upload");
+								currResults.addItem(SUCCESS_TAG + "Committed data of separation");
 							}
 							if ( rowIter.hasNext() ) {
 								if ( projectID != null && projectID.length() > 0 ) {
@@ -212,6 +194,7 @@ public class FractionUpload extends UploadForm {
 								
 								mySep.setDate(sepDate);
 								mySep.setNotes(txnNote);
+								currResults.addItem(SUCCESS_TAG + "Created new separation");
 							}
 						} else if ( frNumber.length() > 0 ) {
 							int frInt = Integer.parseInt(frNumber);
@@ -264,10 +247,10 @@ public class FractionUpload extends UploadForm {
 				}
 				if ( mySep.getSources().first() ) {
 					this.setFractionNames(mySep, useLabel, frLabelFormat);
-					output.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
+					this.messages.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
 				}
 			} catch (Exception e) {
-				output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+				this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 				e.printStackTrace();
 				this.working = false;
 			}
@@ -276,18 +259,21 @@ public class FractionUpload extends UploadForm {
 			if ( this.working ) { 
 				this.myData.commit(); 
 				this.myData.releaseSavepoint(mySave); 
-				output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
 			} else { 
 				this.myData.rollback(mySave); 
-				output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
 			}
+			this.myData.close();
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
-		output.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
-		this.resultOutput = output.toString();
 	}
 	
 	private void setFractionNames(Separation mySep, boolean useLabel, int frLabelFormat) throws DataException {
@@ -383,14 +369,4 @@ public class FractionUpload extends UploadForm {
 	public String[] getTemplateKeys() {
 		return templateKeys;
 	}
-
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
-	}
-	
-	public String getTemplateType() {
-		return PROTOCOL;
-	}
-
 }

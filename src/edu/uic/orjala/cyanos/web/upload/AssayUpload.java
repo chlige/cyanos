@@ -266,7 +266,10 @@ public class AssayUpload extends UploadForm {
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
+			if ( this.working ) { 
+				this.myData.commit(); 
+				output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+			}
 			else { 
 				if ( savepoint != null ) this.myData.rollback(savepoint); 
 				else this.myData.rollback();

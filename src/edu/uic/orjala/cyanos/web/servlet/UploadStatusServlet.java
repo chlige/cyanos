@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.uic.orjala.cyanos.web.UploadForm;
-import edu.uic.orjala.cyanos.web.UploadJob;
+import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 /**
  * Servlet implementation class UploadStatusServlet

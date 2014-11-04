@@ -4,25 +4,20 @@
 package edu.uic.orjala.cyanos.web.upload;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ListIterator;
-
-import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.Collection;
 import edu.uic.orjala.cyanos.DataException;
-import edu.uic.orjala.cyanos.Role;
-import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLCollection;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.SheetValue;
-import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
  * @author George Chlipala
  *
  */
-public class CollectionUpload extends UploadForm {
+public class CollectionUpload extends UploadJob {
 
 	public static final String FORCE_UPLOAD = "forceUpload";
 	public static final String COLLECTION_ID = "collectionID";
@@ -37,95 +32,14 @@ public class CollectionUpload extends UploadForm {
 	public static final String PROJECT_COL = "projectCol";
 	public static final String STATIC_PROJECT = "staticProject";
 	
-	public static final String PROTOCOL = "collection upload";
-
-	public static final String TITLE = "Field Collection Data";
-
-	public static final String[] templateKeys = { PARAM_HEADER, FORCE_UPLOAD, COLLECTION_ID, DATE, COLLECTOR, LOCATION, 
+	public static final String[] templateKeys = { FORCE_UPLOAD, COLLECTION_ID, DATE, COLLECTOR, LOCATION, 
 		PRECISION, STATIC_PRECISION, LATITUDE, LONGITUDE, NOTES, PROJECT_COL, STATIC_PROJECT };
-	private static final String[] templateHeader = {"Collection ID", "Date", "Collected by", "Location Name", "Latitude", "Longitude", "Lat/Long Precision", "Notes"};
-	private static final String[] templateType = {"Required", "Optional", "Optional", "Optional", "Optional", "Optional", "Optional or Static", "Optional"};
+	
+	private static final String TITLE = "Collection Data Upload";
 
-	public static final String JSP_FORM = "/upload/forms/collection.jsp";
-
-	public CollectionUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.CULTURE_ROLE;
-		this.permission = Role.CREATE;
-	}
-
-	public String worksheetTemplate() {
-		return this.worksheetTemplate(templateHeader, templateType);
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.web.upload.UploadForm#templateForm()
-	 */
-	/*
-	public String templateForm() {
-		TableCell myCell;
-		List<String> headerList = this.getHeaderList(template.containsKey(HEADER));
-
-		if ( template.containsKey(HEADER) ) {
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' CHECKED /> Spreadsheet has a header row.");					
-		} else {
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' /> Spreadsheet has a header row.");
-		}
-		myCell.setAttribute("COLSPAN", "2");
-		myCell.setAttribute("ALIGN", "CENTER");
-		TableRow fullRow = new TableRow(myCell);
-
-		if ( template.containsKey(FORCE_UPLOAD) )
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='forceUpload' VALUE='true' CHECKED /> Force upload.<BR/> i.e. Overwrite existing collection information.");
-		else 
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='forceUpload' VALUE='true' /> Force upload.<BR/> i.e. Overwrite existing collection information.");
-		myCell.setAttribute("COLSPAN", "2");
-		myCell.setAttribute("ALIGN", "CENTER");
-		fullRow.addItem(myCell);
-
-		Popup ssColPop = new Popup();
-		Popup optionalPop = new Popup();
-		Popup staticPop = new Popup();
-		optionalPop.addItemWithLabel("-1", "SKIP ITEM");
-		staticPop.addItemWithLabel("-1", "Use Value ->");
-		for ( int i = 0; i < headerList.size(); i++ ) {
-			String index = String.valueOf(i);
-			String value = (String)headerList.get(i);
-			ssColPop.addItemWithLabel(index, value);
-			optionalPop.addItemWithLabel(index, value);
-			staticPop.addItemWithLabel(index, value);
-		}
-
-		// "collectionID", "date", "collector", "location", "latitude", "longitude", "notes"
-
-		fullRow.addItem(this.simpleTemplateRow("Collection ID:", COLLECTION_ID, ssColPop));
-		//		myCell = new TableCell("ID Prefix:");
-		//		String defaultUnit = new String("UIC");
-		//		if ( template.containsKey("prefix")) { defaultUnit = (String)template.get("prefix"); }
-		//		myCell.addItem(String.format("<INPUT TYPE='TEXT' SIZE=5 NAME='prefix' VALUE='%s'/>", defaultUnit));
-		//		fullRow.addItem(myCell);
-
-		fullRow.addItem(this.simpleTemplateRow("Date:", DATE, optionalPop));	
-		fullRow.addItem(this.simpleTemplateRow("Collected By:", COLLECTOR, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Location Name:", LOCATION, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Latitude:", LATITUDE, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Longitude:", LONGITUDE, optionalPop));
-		fullRow.addItem(this.templateRowWithStatic("Lat/Long Precision (m):", PRECISION, STATIC_PRECISION, staticPop));
-		fullRow.addItem(this.projectTemplateRow("Project Code:", PROJECT_COL, staticPop, STATIC_PROJECT));
-		fullRow.addItem(this.simpleTemplateRow("Notes:", NOTES, optionalPop));
-
-		Table formTable = new Table(fullRow);
-		formTable.setAttribute("WIDTH", "85%");
-
-		return formTable.toString();
-	}
-*/
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.web.upload.UploadForm#title()
-	 */
-	public String title() {
-		return TITLE;
+	public CollectionUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	/* (non-Javadoc)
@@ -133,13 +47,11 @@ public class CollectionUpload extends UploadForm {
 	 */
 	public void run() {
 		if ( this.working ) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		this.done = 0;
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 		try {
@@ -237,37 +149,36 @@ public class CollectionUpload extends UploadForm {
 						//TODO If there is no row???
 					}
 				} catch (Exception e) {
-					output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+					this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 					e.printStackTrace();
 				}
 			}		
 		} catch (Exception e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			if ( this.working ) { 
+				this.myData.commit(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+			} else { 
+				this.myData.rollback(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+			}
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
-		output.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
-		this.resultOutput = output.toString();
 	}
 
 	public String[] getTemplateKeys() {
 		return templateKeys;
-	}
-
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
-	}
-	
-	public String getTemplateType() {
-		return PROTOCOL;
 	}
 }

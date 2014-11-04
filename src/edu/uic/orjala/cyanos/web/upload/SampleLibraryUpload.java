@@ -6,29 +6,24 @@ package edu.uic.orjala.cyanos.web.upload;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 import java.util.ListIterator;
-
-import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Material;
-import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Sample;
 import edu.uic.orjala.cyanos.SampleAccount;
-import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.SheetValue;
-import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
  * @author George Chlipala
  *
  */
-public class SampleLibraryUpload extends UploadForm {
+public class SampleLibraryUpload extends UploadJob {
 
 	public static final String TITLE = "Sample Library Data";
 	
@@ -50,27 +45,16 @@ public class SampleLibraryUpload extends UploadForm {
 	public static final String STATIC_PROJECT = "staticProject";
 	public static final String STATIC_COLLECTION = "staticCollection";
 
-	public static final String[] templateKeys = { PARAM_HEADER, SOURCE_ID,
+	public static final String[] templateKeys = { SOURCE_ID,
 		LOAD_DATE, LOAD_AMT_UNIT, LOAD_AMOUNT, LOAD_COL, LOAD_CONC, STATIC_CONC,
 		DEST_COLLECTION, DEST_LOCATION, DEST_LABEL, DEST_NOTES, PROJECT_COL, STATIC_PROJECT, STATIC_COLLECTION};
-
-	private static final String[] templateHeader = {"Source ID", "Date", "Destination Collection", "Amount", "Concentration", "Location", "Label", "Notes", "Project Code"};
-	private static final String[] templateType = {"Required <BR/>Material ID", 
-		"Required", "Required or Static", "Optional or Static", "Optional", "Optional", "Optional", "Optional", "Optional or Static"};
-
-	public static final String JSP_FORM = "/upload/forms/sample-library.jsp";
 
 	/**
 	 * Create a new SampleLibraryUpload.
 	 */
-	public SampleLibraryUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.SAMPLE_ROLE;
-		this.permission = Role.CREATE;
-	}
-
-	public String worksheetTemplate() {
-		return this.worksheetTemplate(templateHeader, templateType);
+	public SampleLibraryUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	/* (non-Javadoc)
@@ -78,13 +62,11 @@ public class SampleLibraryUpload extends UploadForm {
 	 */
 	public void run() {
 		if ( this.working ) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		this.done = 0;
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 		try {
@@ -112,7 +94,8 @@ public class SampleLibraryUpload extends UploadForm {
 			sourceIDCol = Integer.parseInt(template.get(SOURCE_ID)); 
 
 			Date myDate = new Date();
-			String bulkLoadNote = String.format("\nCreated via bulk load by user: %s\n %s",  this.getSQLDataSource().getUser().getUserID(), myDate.toString());
+			String bulkLoadNote = String.format("\nCreated via bulk load by user: %s\n %s",  
+					this.myData.getUser().getUserID(), myDate.toString());
 
 			while (rowIter.hasNext() && this.working ) {
 				Integer row = (Integer)rowIter.next();
@@ -173,20 +156,23 @@ public class SampleLibraryUpload extends UploadForm {
 			}
 
 		} catch (Exception e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			if ( this.working ) { this.myData.commit(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
+			else { this.myData.rollback(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
-		output.append(resultList.toString());
-		this.working = false;
-		this.resultOutput = output.toString();		
+		this.messages.append(resultList.toString());
+		this.working = false;	
 	}
 
 	/*
@@ -293,20 +279,7 @@ public class SampleLibraryUpload extends UploadForm {
 	}
 */
 	
-	public String title() {
-		return TITLE;
-	}
-
 	public String[] getTemplateKeys() {
 		return templateKeys;
-	}
-	
-	public String getTemplateType() {
-		return PROTOCOL;
-	}
-
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
 	}
 }

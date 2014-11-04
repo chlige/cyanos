@@ -2,7 +2,7 @@
 <%@ tag import="edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.Sheet,
 	edu.uic.orjala.cyanos.web.SpreadSheet,
-	edu.uic.orjala.cyanos.web.UploadJob,
+	edu.uic.orjala.cyanos.web.upload.UploadJob,
 	edu.uic.orjala.cyanos.sql.SQLData,
 	edu.uic.orjala.cyanos.sql.SQLProtocol,
 	java.util.List" %>

@@ -19,6 +19,7 @@ import edu.uic.orjala.cyanos.Material.ExtractProtocol;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.SampleAccount;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLExtractProtocol;
 import edu.uic.orjala.cyanos.sql.SQLHarvest;
 import edu.uic.orjala.cyanos.web.BaseForm;
@@ -31,7 +32,7 @@ import edu.uic.orjala.cyanos.web.html.HtmlList;
  * @author George Chlipala
  * 
  */
-public class ExtractUpload extends UploadForm {
+public class ExtractUpload extends UploadJob {
 
 	public static final String PROTOCOL = "extract upload";
 
@@ -55,7 +56,7 @@ public class ExtractUpload extends UploadForm {
 	public static final String PROJECT_COL = "projectCol";
 	public static final String STATIC_PROJECT = "staticProject";
 
-	public static final String[] templateKeys = { PARAM_HEADER, HARVEST_ID,
+	public static final String[] templateKeys = { HARVEST_ID,
 		EXTRACT_DATE, EXTRACT_LABEL, DEFAULT_UNIT, 
 		EXTRACT_NOTES,
 		USE_PROTOCOL, STATIC_PROTOCOL, 
@@ -63,6 +64,9 @@ public class ExtractUpload extends UploadForm {
 		EXTRACT_AMOUNT, HARVEST_CELL_MASS, HARVEST_CELL_UNIT,
 		EXTRACT_PROTOCOL, EXTRACT_SOLVENT, EXTRACT_TYPE, FORCE_UPLOAD,
 		PROJECT_COL, STATIC_PROJECT };
+
+	
+	
 	private static final String[] templateHeader = {"Source Harvest ID", "Date", 
 	//	"Destination Collection", 
 		"Amount", "Cell Mass", 
@@ -75,165 +79,11 @@ public class ExtractUpload extends UploadForm {
 	//	"Optional", 
 		"Optional", "Optional", "Optional or Static"};
 
-	public static final String TITLE = "Extract Data";
-	
-	public static final String JSP_FORM = "/upload/forms/extract.jsp";
+	public static final String TITLE = "Extract Data Upload";
 
-	public ExtractUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.SAMPLE_ROLE;
-		this.permission = Role.CREATE;
-	}
-
-	public String worksheetTemplate() {
-		return this.worksheetTemplate(templateHeader, templateType);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see edu.uic.orjala.cyanos.web.upload.UploadForm#templateForm()
-	 */
-	
-	/*
-	public String templateForm() {
-		TableCell myCell;
-		List<String> headerList = this.getHeaderList(template.containsKey(HEADER));
-
-		if ( template.containsKey(HEADER) ) {
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' CHECKED /> Spreadsheet has a header row.");					
-		} else {
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='header' VALUE='true' onClick='this.form.submit()' /> Spreadsheet has a header row.");
-		}
-		myCell.setAttribute("COLSPAN", "2");
-		myCell.setAttribute("ALIGN", "CENTER");
-		TableRow fullRow = new TableRow(myCell);
-
-		if ( template.containsKey(FORCE_UPLOAD) )
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='forceUpload' VALUE='true' CHECKED /> Force upload.<BR/> i.e. Overwrite existing extract information.");
-		else 
-			myCell = new TableCell("<INPUT TYPE='CHECKBOX' NAME='forceUpload' VALUE='true' /> Force upload.<BR/> i.e. Overwrite existing extract information.");
-		myCell.setAttribute("COLSPAN", "2");
-		myCell.setAttribute("ALIGN", "CENTER");
-		fullRow.addItem(myCell);
-
-		Popup ssColPop = new Popup();
-		Popup optionalPop = new Popup();
-		Popup colPop = new Popup();
-		optionalPop.addItemWithLabel("-1", "SKIP ITEM");
-		colPop.addItemWithLabel("-1", "Use Value ->");
-		for ( int i = 0; i < headerList.size(); i++ ) {
-			String index = String.valueOf(i);
-			String value = (String)headerList.get(i);
-			ssColPop.addItemWithLabel(index, value);
-			optionalPop.addItemWithLabel(index, value);
-			colPop.addItemWithLabel(index, value);
-		}
-
-		// "harvestID", "extractDate", "extractLabel", "defaultUnit", 
-		//				"useProtocol", "staticProtocol", "destCol", "staticDestCol",
-		//				"extractProtocol", "extractSolvent", "extractType"
-
-
-		fullRow.addItem(this.simpleTemplateRow("Harvest ID:", HARVEST_ID, ssColPop));
-
-		/*
-		colPop.setName(DESTINATION);
-		if ( template.containsKey(DESTINATION)) {
-			colPop.setDefault((String)template.get(DESTINATION));
-		}
-		String collections = "";
-		try {
-			SampleCollection myCols = SQLSampleCollection.sampleCollections(this.myData, SQLSampleCollection.ID_COLUMN, SQLSampleCollection.ASCENDING_SORT);
-			myCols.beforeFirst();
-			Popup colList = new Popup();
-			while ( myCols.next() ) {
-				colList.addItemWithLabel(myCols.getID(), myCols.getName());
-			}
-			colList.setName(STATIC_DESTINATION);
-			if ( this.template.containsKey(STATIC_DESTINATION))
-				colList.setDefault(this.template.get(STATIC_DESTINATION));
-			collections = colList.toString();
-		} catch (DataException e) {
-			collections = "<B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B>";
-		}
-
-		myCell = new TableCell("Collection:");
-		myCell.addItem(colPop.toString() + collections );
-		fullRow.addItem(myCell);
-*/
-/*
-//		fullRow.addItem(this.simpleTemplateRow("Location:", DESTINATION_LOC, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Date:", EXTRACT_DATE, ssColPop));	
-		fullRow.addItem(this.templateRowWithUnit("Cell Mass:", HARVEST_CELL_MASS, HARVEST_CELL_UNIT, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Amount:", EXTRACT_AMOUNT, ssColPop));
-
-		myCell = new TableCell("Default Unit:");
-		String defaultUnit = new String("mg");
-		if ( template.containsKey(DEFAULT_UNIT)) { defaultUnit = (String)template.get(DEFAULT_UNIT); }
-		myCell.addItem(String.format("<INPUT TYPE='TEXT' SIZE=5 NAME='%s' VALUE='%s'/>", DEFAULT_UNIT, defaultUnit));
-		fullRow.addItem(myCell);
-
-		fullRow.addItem(this.simpleTemplateRow("Sample Label:", EXTRACT_LABEL, optionalPop));
-		fullRow.addItem(this.simpleTemplateRow("Notes:", EXTRACT_NOTES, optionalPop));
-		fullRow.addItem(this.projectTemplateRow("Project Code:", PROJECT_COL, colPop, STATIC_PROJECT));
-
-		Div protoDiv = new Div("<TABLE><TR><TD>Protocol:</TD><TD>");
-		String protocols = "";
-		colPop.setName(EXTRACT_PROTOCOL);
-		if ( template.containsKey(EXTRACT_PROTOCOL) ) {
-			colPop.setDefault(template.get(EXTRACT_PROTOCOL));
-		}
-		protoDiv.addItem(colPop.toString());
-		try {
-			Popup protocolPop = this.protocolPopup(PROTOCOL);
-			if ( this.template.containsKey(STATIC_PROTOCOL) )
-				protocolPop.setDefault((String)this.template.get(STATIC_PROTOCOL));
-			protocolPop.setName(STATIC_PROTOCOL);
-			protocols = protocolPop.toString();
-		} catch (DataException e) {
-			protocols = "<B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B>";
-		}
-		protoDiv.addItem(protocols);
-		protoDiv.addItem("</TD></TR></TABLE>");
-		protoDiv.setID("protoDiv");
-
-		Div noProtoDiv = new Div("<TABLE>");
-		TableRow protoRow = new TableRow(this.simpleTemplateRow("Extract type:", EXTRACT_TYPE, optionalPop));
-		protoRow.addItem(this.simpleTemplateRow("Extract solvent:", EXTRACT_SOLVENT, optionalPop));
-		noProtoDiv.addItem(protoRow.toString());
-		noProtoDiv.addItem("</TABLE>");
-		noProtoDiv.setID("nonProtoDiv");
-
-		if ( this.template.containsKey(USE_PROTOCOL)) {
-			fullRow.addItem("<TH COLSPAN=4 ALIGN='LEFT'><INPUT TYPE='CHECKBOX' NAME='useProtocol' VALUE='true' onClick=\"if ( this.checked ) { showHide('protoDiv','nonProtoDiv'); } else { showHide('nonProtoDiv','protoDiv'); }\" CHECKED/>Use an Extraction Protocol</TH>");
-			protoDiv.setClass("showSection");
-			noProtoDiv.setClass("hideSection");
-
-		} else {
-			fullRow.addItem("<TH COLSPAN=4 ALIGN='LEFT'><INPUT TYPE='CHECKBOX' NAME='useProtocol' VALUE='true' onClick=\"if ( this.checked ) { showHide('protoDiv','nonProtoDiv'); } else { showHide('nonProtoDiv','protoDiv'); }\"/>Use an Extraction Protocol</TH>");
-			noProtoDiv.setClass("showSection");
-			protoDiv.setClass("hideSection");
-		}
-		StringBuffer thisRow = new StringBuffer("<TD COLSPAN=4 ALIGN='LEFT'>");
-		thisRow.append(protoDiv.toString());
-		thisRow.append(noProtoDiv.toString());
-		thisRow.append("</TD>");
-		fullRow.addItem(thisRow.toString());
-
-		Table formTable = new Table(fullRow);
-		formTable.setAttribute("WIDTH", "85%");
-
-		return formTable.toString();
-	}
-*/
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see edu.uic.orjala.cyanos.web.upload.UploadForm#title()
-	 */
-	public String title() {
-		return TITLE;
+	public ExtractUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	/*
@@ -243,13 +93,11 @@ public class ExtractUpload extends UploadForm {
 	 */
 	public void run() {
 		if (this.working) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		this.done = 0;
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 		try {
@@ -287,9 +135,10 @@ public class ExtractUpload extends UploadForm {
 				protocolName = template.get(STATIC_PROTOCOL);
 				if (!wksProtocol) {
 					try {
-						myProtocol = SQLExtractProtocol.load(getSQLDataSource(), protocolName);
+						myProtocol = SQLExtractProtocol.load(this.myData, protocolName);
 					} catch (DataException e) {
-						output.append(this.handleException(e));
+						this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+						e.printStackTrace();			
 					}
 				}
 			} else {
@@ -370,7 +219,7 @@ public class ExtractUpload extends UploadForm {
 									String aProtocol = this.worksheet.getStringValue(protCol);
 									if (!protocolName.equals(aProtocol)) {
 										protocolName = aProtocol;
-										myProtocol = SQLExtractProtocol.load(getSQLDataSource(), protocolName);
+										myProtocol = SQLExtractProtocol.load(this.myData, protocolName);
 									}
 								}
 								extract.setProtocol(myProtocol);
@@ -447,35 +296,35 @@ public class ExtractUpload extends UploadForm {
 				this.done++;
 			}
 		} catch (Exception e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			if ( this.working ) { 
+				this.myData.commit(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+			} else { 
+				this.myData.rollback(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+			}
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
 		this.resultSheet.insertRow(0);
 		this.resultSheet.addCell("Harvest ID");
 		this.resultSheet.addCell("Extract ID");
 		this.resultSheet.addCell("Status");
-		output.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
-		this.resultOutput = output.toString();
 	}
 
 	public String[] getTemplateKeys() {
 		return templateKeys;
-	}
-	public String getTemplateType() {
-		return PROTOCOL;
-	}
-
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
 	}
 }

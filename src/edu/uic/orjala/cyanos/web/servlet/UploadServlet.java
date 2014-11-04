@@ -23,7 +23,6 @@ import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;
-import edu.uic.orjala.cyanos.web.UploadJob;
 import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
@@ -37,6 +36,7 @@ import edu.uic.orjala.cyanos.web.upload.IsolationUpload;
 import edu.uic.orjala.cyanos.web.upload.SampleLibraryUpload;
 import edu.uic.orjala.cyanos.web.upload.SampleMoveUpload;
 import edu.uic.orjala.cyanos.web.upload.TaxaUpload;
+import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 
 /**
@@ -390,24 +390,6 @@ public class UploadServlet extends ServletObject {
 	}
 	
 	private UploadForm getUploadForm(HttpServletRequest req, String module) {
-		if ( module != null ) {
-			if ( module.equals(ASSAY_UPLOAD_MODULE) )
-				return new AssayUpload(req);
-			else if ( module.equals(SAMPLE_MOVE_UPLOAD_MODULE) )
-				return new SampleMoveUpload(req);
-			else if ( module.equals(SAMPLE_LIBRARY_UPLOAD_MODULE) )
-				return new SampleLibraryUpload(req);
-			else if ( module.equals(EXTRACT_UPLOAD_MODULE) )
-				return new ExtractUpload(req);
-			else if ( module.equals(ISOLATION_UPLOAD_MODULE) )
-				return new IsolationUpload(req);
-			else if ( module.equals(COLLECTION_UPLOAD_MODULE) )
-				return new CollectionUpload(req);
-			else if ( module.equals(FRACTION_UPLOAD_MODULE) )
-				return new FractionUpload(req);
-			else if ( module.equals(TAXA_UPLOAD_MODULE) ) 
-				return new TaxaUpload(req);
-		}
 		return null;
 	}
 

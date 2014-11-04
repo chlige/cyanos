@@ -5,22 +5,18 @@ package edu.uic.orjala.cyanos.web.upload;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ListIterator;
 
-import javax.servlet.http.HttpServletRequest;
-
-import edu.uic.orjala.cyanos.Role;
-import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLTaxon;
-import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
  * @author George Chlipala
  *
  */
-public class TaxaUpload extends UploadForm {
+public class TaxaUpload extends UploadJob {
 
 	public final static String TITLE = "Add Taxa";
 
@@ -28,19 +24,14 @@ public class TaxaUpload extends UploadForm {
 	public final static String PARAM_LEVEL = "taxon_level";
 	public final static String PARAM_PARENT = "taxon_parent";
 	
-	public final static String[] templateKeys = { PARAM_HEADER, PARAM_NAME, PARAM_LEVEL, PARAM_PARENT };
-	private final static String[] templateHeader = {"Name","Level",	"Parent" };
-	private final static String[] templateType = {"Required", "Required<br>e.g. genus, family, kingdom, etc.", "Required<br>Can be blank for a root taxon."};
-
-	public static final String JSP_FORM = "/upload/forms/taxa.jsp";
+	public final static String[] templateKeys = { PARAM_NAME, PARAM_LEVEL, PARAM_PARENT };
 
 	/**
 	 * 
 	 */
-	public TaxaUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.CULTURE_ROLE;
-		this.permission = Role.WRITE;
+	public TaxaUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	/* (non-Javadoc)
@@ -49,13 +40,11 @@ public class TaxaUpload extends UploadForm {
 	@Override
 	public void run() {
 		if ( this.working ) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		this.done = 0;
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 
@@ -101,20 +90,23 @@ public class TaxaUpload extends UploadForm {
 			addTaxon.close();
 			updateNodes.close();
 		} catch (Exception e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			if ( this.working ) { this.myData.commit(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
+			else { this.myData.rollback(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
-		output.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
-		this.resultOutput = output.toString();	
 		this.parseThread = null;
 	}
 
@@ -124,30 +116,6 @@ public class TaxaUpload extends UploadForm {
 	@Override
 	public String[] getTemplateKeys() {
 		return templateKeys;
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.web.UploadForm#worksheetTemplate()
-	 */
-	@Override
-	public String worksheetTemplate() {
-		return this.worksheetTemplate(templateHeader, templateType);
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.web.UploadForm#title()
-	 */
-	@Override
-	public String title() {
-		return TITLE;
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.web.UploadForm#jspForm()
-	 */
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
 	}
 
 }

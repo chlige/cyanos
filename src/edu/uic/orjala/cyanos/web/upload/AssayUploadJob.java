@@ -16,10 +16,10 @@ import edu.uic.orjala.cyanos.Sample;
 import edu.uic.orjala.cyanos.Assay.AssayTemplate;
 import edu.uic.orjala.cyanos.sql.SQLAssay;
 import edu.uic.orjala.cyanos.sql.SQLAssayTemplate;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.web.BaseForm;
-import edu.uic.orjala.cyanos.web.UploadJob;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
@@ -46,12 +46,15 @@ public class AssayUploadJob extends UploadJob {
 	public static final String[] templateKeys = {STRAIN_ID, ASSAY_ID, LOCATION, AUTO_LOC, VALUE, 
 		STDEV, MATERIAL, SAMPLE, SAMPLE_AMT, NAME, 
 		ASSAY_FROM_DB, ASSAY_PROTOCOL, CONC, CONC_UNIT};
+	
+	private static final String TITLE = "Assay Data Upload";
 
 	/**
 	 * 
 	 */
-	public AssayUploadJob() {
-		// TODO Auto-generated constructor stub
+	public AssayUploadJob(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
 
 	/* (non-Javadoc)
@@ -115,7 +118,7 @@ public class AssayUploadJob extends UploadJob {
 			}
 
 			if ( strainIDCol < 0 && valueCol < 0 && materialCol < 0 && sampleCol < 0 && nameCol < 0 ) {
-				this.resultOutput.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR!</FONT> No upload information specified!</B><BR/>");
+				this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR!</FONT> No upload information specified!</B><BR/>");
 				this.working = false;
 				return;
 			}
@@ -246,22 +249,29 @@ public class AssayUploadJob extends UploadJob {
 				}
 			}
 		} catch (Exception e) {
-			this.resultOutput.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); this.resultOutput.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { 
+			if ( this.working ) { 
+				this.myData.commit(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+			} else { 
 				if ( savepoint != null ) this.myData.rollback(savepoint); 
 				else this.myData.rollback();
-				this.resultOutput.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+			}
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			this.resultOutput.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
 
-		this.resultOutput.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
 	}
 
@@ -272,5 +282,4 @@ public class AssayUploadJob extends UploadJob {
 	protected String[] getTemplateKeys() {
 		return templateKeys;
 	}
-
 }

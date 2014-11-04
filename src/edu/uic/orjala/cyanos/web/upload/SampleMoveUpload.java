@@ -4,24 +4,19 @@
 package edu.uic.orjala.cyanos.web.upload;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ListIterator;
 
-import javax.servlet.http.HttpServletRequest;
-
 import edu.uic.orjala.cyanos.DataException;
-import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Sample;
-import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLSample;
-import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
  * @author George Chlipala
  *
  */
-public class SampleMoveUpload extends UploadForm {
+public class SampleMoveUpload extends UploadJob {
 
 	public static final String DEST_COLLECTION = "destID";
 	public static final String DEST_LOCATION = "destLoc";
@@ -33,42 +28,27 @@ public class SampleMoveUpload extends UploadForm {
 
 	public final static String TITLE = "Move Samples";
 
-	public final static String[] templateKeys = { PARAM_HEADER, DEST_COLLECTION, DEST_LOCATION, COLLECTION_FROM_DB, 
+	public final static String[] templateKeys = { DEST_COLLECTION, DEST_LOCATION, COLLECTION_FROM_DB, 
 		LOAD_TYPE, SOURCE_COLLECTION, SOURCE_LOCATION, SAMPLE_ID};
-	private final static String[] templateHeader = {"Sample ID","Destination ID","Location",};
-	private final static String[] templateType = {"Required", "Required", "Required"};
-
-	public static final String JSP_FORM = "/upload/forms/sample-move.jsp";
 
 	/**
 	 * 
 	 */
-	public SampleMoveUpload(HttpServletRequest req) {
-		super(req);
-		this.accessRole = User.SAMPLE_ROLE;
-		this.permission = Role.WRITE;
+	public SampleMoveUpload(SQLData data) {
+		super(data);
+		this.type = TITLE;
 	}
-
-	public String title() {
-		return TITLE;
-	}
-
-	public String worksheetTemplate() {
-		return this.worksheetTemplate(templateHeader, templateType);
-	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
 		if ( this.working ) return;
-		StringBuffer output = new StringBuffer();
-		List<Integer> rowNum = this.rowList();
 		this.done = 0;
-		this.todos = rowNum.size();
+		this.todos = this.rowList.size();
 		this.working = true;
 		// Setup the row iterator.
-		ListIterator<Integer> rowIter = rowNum.listIterator();
+		ListIterator<Integer> rowIter = this.rowList.listIterator();
 		HtmlList resultList = new HtmlList();
 		resultList.unordered();
 
@@ -123,20 +103,23 @@ public class SampleMoveUpload extends UploadForm {
 			}
 
 		} catch (Exception e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
 			this.working = false;
 		}
 		try {
-			if ( this.working ) { this.myData.commit(); output.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); output.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			if ( this.working ) { this.myData.commit(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
+			else { this.myData.rollback(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
 		} catch (SQLException e) {
-			output.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		}
-		output.append(resultList.toString());
+		this.messages.append(resultList.toString());
 		this.working = false;
-		this.resultOutput = output.toString();
 	}
 
 	/*
@@ -203,10 +186,5 @@ public class SampleMoveUpload extends UploadForm {
 
 	public String[] getTemplateKeys() {
 		return templateKeys;
-	}
-
-	@Override
-	public String jspForm() {
-		return JSP_FORM;
 	}
 }
