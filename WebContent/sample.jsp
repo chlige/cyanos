@@ -1,8 +1,10 @@
 <%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
-<%@ page import="edu.uic.orjala.cyanos.Sample,edu.uic.orjala.cyanos.web.servlet.SampleServlet,java.text.SimpleDateFormat" %>
-<% 	Sample sampleObj = (Sample) request.getAttribute("sample"); %>
+<%@ page import="edu.uic.orjala.cyanos.Sample,
+	edu.uic.orjala.cyanos.web.servlet.SampleServlet,
+	java.text.SimpleDateFormat,
+	edu.uic.orjala.cyanos.sql.SQLSample" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html style="min-height:100%">
 <head>
@@ -11,8 +13,11 @@
 <cyanos:menu helpModule="sample"/>
 
 <div class='content' style="padding-bottom: 60px;">
-<% if ( sampleObj != null && sampleObj.first() ) { %>
-<p align="CENTER"><font size="+3" >Sample #<%= sampleObj.getID() %></font>
+<% 	if ( request.getParameter("id") != null ) {
+		Sample sampleObj = SQLSample.load(SampleServlet.getSQLData(request), request.getParameter("id"));
+		if ( sampleObj != null && sampleObj.first() ) { 
+			request.setAttribute("sample", sampleObj);
+%><p align="CENTER"><font size="+3" >Sample #<%= sampleObj.getID() %></font>
 <div id="<%= SampleServlet.DIV_INFO_FORM_ID %>">
 <jsp:include page="/sample/sample-form.jsp" />
 </div>
@@ -27,9 +32,9 @@
 <jsp:param value="Assays" name="loadingDivTitle"/>
 </jsp:include>
 
-<% } else { %>
-<p align="CENTER"><font size="+3" >Sample Search</font>
-<hr width='85%'/></p>
+<% } } else { %>
+<p align="CENTER"><font size="+3" >Sample Search</font></p>
+<hr width='85%'/>
 <center>
 <form name="samplequery">
 <table border=0>

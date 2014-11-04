@@ -13,21 +13,17 @@
 %><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Cyanos - Separation <%= sepObj != null && sepObj.first() ? sepObj.getID() : "Search" %>"/>
+<cyanos:header title="Cyanos - Separations"/>
 </head>
 <body>
 <cyanos:menu helpModule="separation"/>
 <div class='content'>
 <% if ( sepObj != null && sepObj.first() ) { %>
 <p align="CENTER"><font size="+3" >Separation #<%= sepObj.getID() %> 
-<% String tag = sepObj.getTag(); 
-	if ( tag != null && tag.length() > 0 ) { %>
-( <c:out value="<%= tag %>"/>)
-<% } %>
+<% String tag = sepObj.getTag(); if ( tag != null && tag.length() > 0 ) { %>( <c:out value="<%= tag %>"/>)<% } %>
 </font>
 <hr width="90%">
 <jsp:include page="/separation/separation-form.jsp" />
-
 <div CLASS="collapseSection"><A NAME='sep_source' CLASS='twist' onClick='loadDiv("sep_source")' CLASS='divTitle'>
 <img align="ABSMIDDLE" ID="twist_sep_source" SRC="<%= contextPath %>/images/twist-open.png" /> Source Materials</A>
 <div CLASS="showSection" ID="div_sep_source">

@@ -140,7 +140,6 @@ for ( int i = 1; i <= width; i++ ) {
 <form name="samplequery">
 <table border=0>
 <tr><td>Library:</td><td><%
-
 	List<String> libraries = (List<String>) request.getAttribute(SampleServlet.ATTR_LIBRARIES); 
 	String library = request.getParameter(SampleServlet.PARAM_LIBRARY);
 %><select name="<%= SampleServlet.PARAM_LIBRARY %>" onchange="this.form.submit();"><option></option><%
@@ -152,13 +151,13 @@ for ( int i = 1; i <= width; i++ ) {
 </table>
 </form>
 </center>
+<jsp:include page="/sample/sample-collection-list.jsp" />
+
+<div style="margin-top:10px">
 <jsp:include page="/includes/loadableDiv.jsp">
 <jsp:param value="<%= SampleServlet.INTERLACE_DIV_ID %>" name="loadingDivID"/>
 <jsp:param value="Interlace collections" name="loadingDivTitle"/>
-</jsp:include>
-
-<jsp:include page="/sample/sample-collection-list.jsp" /><%
-} 
-%></div>
+</jsp:include></div>
+<% } %></div>
 </body>
 </html>
