@@ -941,6 +941,23 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
   	ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+DROP TABLE IF EXISTS `jobs`;
+
+CREATE TABLE IF NOT EXISTS `jobs` (
+  `job_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner` VARCHAR(32) NULL DEFAULT NULL,
+  `job_type` VARCHAR(45) NULL DEFAULT NULL,
+  `messages` LONGTEXT NULL DEFAULT NULL,
+  `output` LONGTEXT NULL DEFAULT NULL,
+  `progress` DECIMAL(6,5) NULL DEFAULT 0.00000,
+  `startDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `endDate` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`job_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_general_ci
+
 -- -----------------------------------------------------
 -- function degreeSign
 -- -----------------------------------------------------
@@ -1161,7 +1178,7 @@ DELIMITER $$
 USE `cyanos`$$
 
 CREATE FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
-RETURN CONCAT( ABS(TRUNCATE(c_value,0)), ,' ', 
+RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
 	ABS(TRUNCATE((c_value * 60) % 60,0)), "\' ", 
 	ABS(ROUND((c_value * 3600) % 3600,0)), "\"")$$
 
