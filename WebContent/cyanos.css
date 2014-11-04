@@ -139,11 +139,12 @@ th { FONT-WEIGHT: bold; font-style: oblique; font-size: 12px;
 th.header { border-bottom: 2px solid #808080; }
 th.footer { border-top: 2px solid #808080; }
 
+table.month tr td { border: 0px solid white; }
+
 td { FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #000000; 
 	padding: 4px; }
-td.week { border-right: 1px solid #808080; 
-	border-left: 1px solid #808080 }
-td.day { BACKGROUND-COLOR: #BBEEFF; }
+td.week { border-right: 1px solid #808080; border-left: 1px solid #808080; }
+td.day { BACKGROUND-COLOR: #BBEEFF;}
 td.today { BACKGROUND-COLOR: #BBBBFF; }
 td.selDay { BACKGROUND-COLOR: #EEFFCC; font-weight: bold; }
 td.selDay a { font-weight: bold; }
