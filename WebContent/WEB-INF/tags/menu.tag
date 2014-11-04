@@ -2,7 +2,7 @@
 <%@ tag language="java" pageEncoding="UTF-8" %>
 <%@ tag import="java.net.URLEncoder,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
-	edu.uic.orjala.cyanos.web.UploadJob" %>
+	edu.uic.orjala.cyanos.web.upload.UploadJob" %>
 <%@ attribute name="helpModule" required="false" %>
 <% String contextPath = request.getContextPath(); %><nav>
 <label for="show-menu" class="show-menu">Cyanos</label>
@@ -16,7 +16,7 @@
 <% } %>
 
 <% 	if ( request.getRemoteUser() != null ) { 
-%><li><a href='<%= contextPath %>/upload'>Upload Data</a></li>
+%><li><a href='<%= contextPath %>/upload.jsp'>Upload Data</a></li>
 <li><a href='<%= contextPath %>/logout.jsp'>Logout</a></li>
 <%		if ( request.isUserInRole("admin") ) { 
 %>
@@ -41,8 +41,8 @@
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/collection'>Search Collections</a></li>
 <li><a href='<%= contextPath %>/collection?form=add'>Add New Collection</a></li>
-<li class="break"><a href='<%= contextPath %>/upload?module=collection'>Upload Collection Data</a></li>
-<li><a href='<%= contextPath %>/upload?module=isolation'>Upload Isolation Data</a></li>
+<li class="break"><a href='<%= contextPath %>/collection/upload.jsp'>Upload Collection Data</a></li>
+<li><a href='<%= contextPath %>/isolation/upload.jsp'>Upload Isolation Data</a></li>
 </ul></li>
 
 <li><a onClick='toggleMenu("strainMenu")'>Cultures</a>
@@ -62,13 +62,15 @@
 <li class='menu' id='sampleMenu'><a onClick='toggleMenu("sampleMenu")'>Materials</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/material'>Search Materials</a></li>
+<li><a href="<%= contextPath %>/material/upload.jsp">Upload Extract Data</a></li>
 <!--  <li><a href='<%= contextPath %>/material?protocolMgr'>Manage Extract Protocols</a></li>  -->
 <li class="break"><a href='<%= contextPath %>/separation'>Search Separations</a></li>
 <li><a href='<%= contextPath %>/separation/protocol'>Manage Separation Templates</a></li>
-<li><a href='<%= contextPath %>/upload?module=fraction'>Upload New Separation</a></li>
+<li><a href='<%= contextPath %>/separation/upload.jsp'>Upload New Separation</a></li>
 <li class="break"><a href='<%= contextPath %>/sample?newCollection'>Add Sample Collection</a></li>
 <li><a href='<%= contextPath %>/sample'>Browse Samples</a></li>
-<li><a href='<%= contextPath %>/upload/sample'>Upload Sample Data</a></li>
+<li><a href='<%= contextPath %>/sample/upload.jsp'>Upload Sample Data</a></li>
+<li><a href="<%= contextPath %>/sample/move-upload.jsp">Move Samples (upload)</a></li>
 <li class="break"><a href='<%= contextPath %>/compound'>Search Compounds</a></li>
 <li><a href='<%= contextPath %>/compound?form=add'>Add Compound</a></li>
 <li><a href='<%= contextPath %>/dereplication'>Dereplication</a></li>

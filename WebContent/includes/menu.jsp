@@ -1,6 +1,5 @@
 <%@ page import="java.net.URLEncoder,
-	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
-	edu.uic.orjala.cyanos.web.UploadJob" %>
+	edu.uic.orjala.cyanos.web.servlet.UploadServlet,edu.uic.orjala.cyanos.web.upload.UploadJob" %>
 <%
 String contextPath = request.getContextPath();
 %>
