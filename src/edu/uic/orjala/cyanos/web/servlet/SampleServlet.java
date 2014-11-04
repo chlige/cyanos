@@ -97,12 +97,12 @@ public class SampleServlet extends ServletObject {
 
 			Sample aSample = null;
 			if ( req.getParameter(PARAM_SAMPLE_ID) != null ) {
-				aSample = new SQLSample(this.getSQLData(req), req.getParameter(PARAM_SAMPLE_ID));
+				aSample = new SQLSample(getSQLData(req), req.getParameter(PARAM_SAMPLE_ID));
 			}
 
 			//		SampleForm aForm = new SampleForm(aWrap);
 			if ( aSample == null ) {
-				req.setAttribute(ATTR_LIBRARIES, SQLSampleCollection.libraries(this.getSQLData(req)));
+				req.setAttribute(ATTR_LIBRARIES, SQLSampleCollection.libraries(getSQLData(req)));
 				if ( req.getParameter(SampleForm.ACTION_INTERLACE_COLS) != null ) { 
 					this.exportInterlace(req, res);
 					return;
@@ -110,9 +110,9 @@ public class SampleServlet extends ServletObject {
 				if ( req.getParameter(PARAM_COLLECTION_ID) != null ) {
 					String collID = req.getParameter(PARAM_COLLECTION_ID);
 					if ( req.getParameter("addCol") != null && collID.length() > 0 ) {
-						req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.create(this.getSQLData(req), collID));
+						req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.create(getSQLData(req), collID));
 					} else {
-						req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.load(this.getSQLData(req), collID));
+						req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.load(getSQLData(req), collID));
 					}
 				} else {		
 					if ( req.getParameter("newCollection") != null ) {
@@ -120,9 +120,9 @@ public class SampleServlet extends ServletObject {
 						disp.forward(req, res);
 						return;
 					} else if ( req.getParameter(PARAM_LIBRARY) != null && req.getParameter(PARAM_LIBRARY).length() > 0 ) {
-						req.setAttribute(SEARCHRESULTS_ATTR, SQLSampleCollection.loadForLibrary(this.getSQLData(req), req.getParameter(PARAM_LIBRARY)));
+						req.setAttribute(SEARCHRESULTS_ATTR, SQLSampleCollection.loadForLibrary(getSQLData(req), req.getParameter(PARAM_LIBRARY)));
 					} else {
-						req.setAttribute(SEARCHRESULTS_ATTR, SQLSampleCollection.sampleCollections(this.getSQLData(req)));
+						req.setAttribute(SEARCHRESULTS_ATTR, SQLSampleCollection.sampleCollections(getSQLData(req)));
 					}
 				}
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/sample-collection.jsp");
@@ -189,7 +189,7 @@ public class SampleServlet extends ServletObject {
 		//				Form retForm = aForm.protocolForm();
 		//				out.print(retForm.toString());
 		//			} else {
-		Sample aSample = new SQLSample(this.getSQLData(req), req.getParameter("id"));
+		Sample aSample = new SQLSample(getSQLData(req), req.getParameter("id"));
 		if ( aSample.first() ) {
 			if ( divTag.equals(TXN_DIV_ID) ) {
 				req.setAttribute(SAMPLE_ATTR, aSample);
@@ -202,17 +202,17 @@ public class SampleServlet extends ServletObject {
 			} else if ( divTag.equals(DIV_ASSAY_ID) ) {
 				AssayData data;
 				if ( req.getParameter("target") != null && req.getParameter("target").length() > 0 )
-					data = SQLAssayData.dataForSampleID(this.getSQLData(req), req.getParameter("id"), req.getParameter("target"));
+					data = SQLAssayData.dataForSampleID(getSQLData(req), req.getParameter("id"), req.getParameter("target"));
 				else
-					data = SQLAssayData.dataForSampleID(this.getSQLData(req), req.getParameter("id"));
+					data = SQLAssayData.dataForSampleID(getSQLData(req), req.getParameter("id"));
 				req.setAttribute(AssayServlet.SEARCHRESULTS_ATTR, data);
-				req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(this.getSQLData(req)));
+				req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(getSQLData(req)));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/assay/assay-data-list.jsp");
 				disp.forward(req, res);
 			} else if ( divTag.equals(DIV_COMPOUND_ID) ) {
 				req.setAttribute(CompoundServlet.COMPOUND_PARENT, aSample);
 				if ( req.getParameter("showCmpdForm") != null ) 
-					req.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(this.getSQLData(req), SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT));
+					req.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(getSQLData(req), SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT));
 				else 
 					req.setAttribute(CompoundServlet.COMPOUND_RESULTS, aSample.getCompounds());
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/material/link-material-compound.jsp");
@@ -222,8 +222,8 @@ public class SampleServlet extends ServletObject {
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/sample/sample-interlace.jsp");
 			disp.forward(req, res);				
 		} else if ( divTag.equals(DIV_COLLECTION_INFO_FORM_ID) ) {
-			req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.load(this.getSQLData(req), req.getParameter("col")));
-			req.setAttribute(ATTR_LIBRARIES, SQLSampleCollection.libraries(this.getSQLData(req)));
+			req.setAttribute(COLLECTION_ATTR, SQLSampleCollection.load(getSQLData(req), req.getParameter("col")));
+			req.setAttribute(ATTR_LIBRARIES, SQLSampleCollection.libraries(getSQLData(req)));
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/sample/collection-form.jsp");
 			disp.forward(req, res);							
 		}
@@ -240,7 +240,7 @@ public class SampleServlet extends ServletObject {
 		
 		try {
 			if ( req.getParameter("col") != null) {
-				SampleCollection aCol = SQLSampleCollection.load(this.getSQLData(req), req.getParameter("col"));
+				SampleCollection aCol = SQLSampleCollection.load(getSQLData(req), req.getParameter("col"));
 				if ( aCol.first() ) {
 					mySamples = aCol.getSamples();
 					isBox = ( aCol.getLength() > 0 && aCol.getWidth() > 0 );
@@ -249,7 +249,7 @@ public class SampleServlet extends ServletObject {
 					return;
 				}
 			} else if ( req.getParameter("strain")  != null ) {
-				Strain aStrain = SQLStrain.load(this.getSQLData(req), req.getParameter("strain"));
+				Strain aStrain = SQLStrain.load(getSQLData(req), req.getParameter("strain"));
 				if ( aStrain.first() )
 					mySamples = aStrain.getSamples();
 				else {
@@ -634,7 +634,7 @@ public class SampleServlet extends ServletObject {
 			int colShift = 1;
 			
 			for ( String source: sources ) {
-				SampleCollection collection = SQLSampleCollection.load(this.getSQLData(req), source);
+				SampleCollection collection = SQLSampleCollection.load(getSQLData(req), source);
 				if ( collection.first() ) {
 					Sample samples = collection.getSamples();
 					samples.beforeFirst();

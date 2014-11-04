@@ -288,7 +288,6 @@ public class SQLData {
 	}
 
 	protected void loadUsingPreparedStatement(PreparedStatement aStatement) throws DataException {
-		this.close(false);
 		try {
 			this.myData = aStatement.executeQuery();
 		} catch (SQLException e) {
@@ -307,7 +306,6 @@ public class SQLData {
 
 	protected void loadUsingSQL(String sqlString) throws DataException {
 		try {
-			this.close(false);
 			if ( this.conn.getDBC() != null ) {
 				this.mySth = this.prepareStatement(sqlString);
 				this.myData = this.mySth.executeQuery();
@@ -319,7 +317,6 @@ public class SQLData {
 
 	protected void loadUsingSQL(String sqlString, int setType, int setConcurrency) throws DataException {
 		try {
-			this.close(false);
 			if ( this.conn.getDBC() != null ) {
 				this.mySth = this.prepareStatement(sqlString, setType, setConcurrency);
 				this.myData = this.mySth.executeQuery();

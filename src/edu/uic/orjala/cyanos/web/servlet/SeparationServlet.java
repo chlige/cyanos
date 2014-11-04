@@ -78,24 +78,24 @@ public class SeparationServlet extends ServletObject {
 				if ( req.getParameter("name") != null ) {
 					String protoName = req.getParameter("name");
 					if ( req.getParameter("createProtocol") != null ) {
-						SQLSeparationTemplate proto = SQLSeparationTemplate.create(this.getSQLData(req), protoName);
+						SQLSeparationTemplate proto = SQLSeparationTemplate.create(getSQLData(req), protoName);
 						req.setAttribute(PROTOCOL_OBJ, proto);
 						if ( req.getParameter(UPDATE_ACTION) != null )
 							proto.save();
 					} else if ( req.getParameter("confirmDelete") != null ) {
-						SQLSeparationTemplate.delete(this.getSQLData(req), protoName);
+						SQLSeparationTemplate.delete(getSQLData(req), protoName);
 					} else
-						req.setAttribute(PROTOCOL_OBJ, SQLSeparationTemplate.load(this.getSQLData(req), protoName));
+						req.setAttribute(PROTOCOL_OBJ, SQLSeparationTemplate.load(getSQLData(req), protoName));
 				} 
-				req.setAttribute(ALL_PROTOCOLS, SQLSeparationTemplate.listProtocols(this.getSQLData(req)));
+				req.setAttribute(ALL_PROTOCOLS, SQLSeparationTemplate.listProtocols(getSQLData(req)));
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/separation/separation-protocol.jsp");
 				disp.forward(req, res);
 			} else {
 				if ( req.getParameter("id") != null ) {
-					Separation thisSep = new SQLSeparation(this.getSQLData(req), req.getParameter("id"));
+					Separation thisSep = new SQLSeparation(getSQLData(req), req.getParameter("id"));
 					req.setAttribute(SEP_OBJECT, thisSep);
 				} else if ( req.getParameter("query") != null ) {
-					Separation objects = SQLSeparation.findForStrain(this.getSQLData(req), req.getParameter("query"));
+					Separation objects = SQLSeparation.findForStrain(getSQLData(req), req.getParameter("query"));
 					req.setAttribute(SEARCHRESULTS_ATTR, objects);
 				}
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/separation.jsp");
@@ -109,7 +109,6 @@ public class SeparationServlet extends ServletObject {
 		}
 
 	}
-
 	private void handleDivContent(HttpServletRequest request, HttpServletResponse response) throws DataException, IOException, SQLException, ServletException {
 		response.setContentType("text/html; charset=UTF-8");
 		String divTag = request.getParameter("div");
@@ -120,9 +119,9 @@ public class SeparationServlet extends ServletObject {
 //			Form retForm = aForm.protocolForm();
 //			out.print(retForm.toString());
 		} else if ( request.getParameter("livesearch") != null ) {
-			StrainServlet.printCultureIDs(this.getSQLData(request), request, response);
+			StrainServlet.printCultureIDs(getSQLData(request), request, response);
 		} else if ( request.getParameter("id") != null ) {
-			Separation thisSep = new SQLSeparation(this.getSQLData(request), request.getParameter("id"));
+			Separation thisSep = new SQLSeparation(getSQLData(request), request.getParameter("id"));
 			if ( thisSep.first() ) {
 				if ( divTag.equals(DATA_FILE_DIV_ID) ) {
 					RequestDispatcher disp = DataFileServlet.dataFileDiv(request, getServletContext(), thisSep, Separation.DATA_FILE_CLASS);
@@ -136,7 +135,7 @@ public class SeparationServlet extends ServletObject {
 						
 					}
 					if ( request.getParameter("showCmpdForm") != null ) 
-						request.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(this.getSQLData(request), 
+						request.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(getSQLData(request), 
 								SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT));
 					else 
 						request.setAttribute(CompoundServlet.COMPOUND_RESULTS, thisSep.getCompounds());
@@ -160,7 +159,7 @@ public class SeparationServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
 		try {
-			Separation thisSep = SQLSeparation.separations(this.getSQLData(req));
+			Separation thisSep = SQLSeparation.separations(getSQLData(req));
 			if ( thisSep != null && thisSep.first() ) {
 				out.print("Separation ID");
 				out.print(DELIM);
@@ -242,7 +241,7 @@ public class SeparationServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
 		try {
-			Separation thisSep = new SQLSeparation(this.getSQLData(req), req.getParameter("id"));
+			Separation thisSep = new SQLSeparation(getSQLData(req), req.getParameter("id"));
 			if ( thisSep.first() ) {
 				out.print("Separation ID");
 				out.print(DELIM);
