@@ -9,7 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.uic.orjala.cyanos.web.Job;
+import edu.uic.orjala.cyanos.web.JobManager;
 import edu.uic.orjala.cyanos.web.UploadForm;
+import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
 import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 /**
@@ -42,10 +45,25 @@ public class UploadStatusServlet extends UploadServlet {
 		} else if ( req.getParameter("sheet") != null ) {
 			RequestDispatcher disp = this.getServletContext().getRequestDispatcher("/upload/sheet.jsp");
 			disp.forward(req, res);
+		} else if ( req.getParameter("jobid") != null ) {
+			res.setContentType("text/plain");
+			JobManager manager = CyanosSessionListener.getJobManager(req);
+			Job job = manager.getJob(req.getParameter("jobid"));
+			if ( job != null ) {
+				out.print(getStatus(job));
+			}
+			out.close();
+			return;
 		} else {
 			res.setContentType("text/plain");
-			UploadJob job = UploadServlet.getUploadJob(thisSession);
-			
+			Job job = null;
+			if ( req.getParameter("jobid") != null ) {
+				JobManager manager = CyanosSessionListener.getJobManager(thisSession);
+				job = manager.getJob(req.getParameter("jobid"));
+			} else {
+				job = UploadServlet.getUploadJob(thisSession);
+			}
+		
 			if ( job != null ) {
 				out.print(getStatus(job));				
 			} else {
@@ -69,13 +87,13 @@ public class UploadStatusServlet extends UploadServlet {
 		}		
 	}
 
-	private static String getStatus(UploadJob job) {
+	private static String getStatus(Job job) {
 		if ( job == null ) {
 			return "ERROR";
 		} else if ( job.isDone() ) {
 			return "DONE";
 		} else if ( job.isWorking()) {
-			return String.format("%.0f", job.status() * 100);
+			return String.format("%.0f", job.getProgress() * 100);
 		} else {
 			return "STOP";
 		}		

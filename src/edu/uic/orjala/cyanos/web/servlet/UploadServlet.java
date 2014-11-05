@@ -26,16 +26,9 @@ import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
 import edu.uic.orjala.cyanos.web.listener.UploadManager;
 import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
-import edu.uic.orjala.cyanos.web.upload.AssayUpload;
-import edu.uic.orjala.cyanos.web.upload.CollectionUpload;
-import edu.uic.orjala.cyanos.web.upload.ExtractUpload;
-import edu.uic.orjala.cyanos.web.upload.FractionUpload;
-import edu.uic.orjala.cyanos.web.upload.IsolationUpload;
-import edu.uic.orjala.cyanos.web.upload.SampleLibraryUpload;
-import edu.uic.orjala.cyanos.web.upload.SampleMoveUpload;
-import edu.uic.orjala.cyanos.web.upload.TaxaUpload;
 import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 
@@ -195,15 +188,13 @@ public class UploadServlet extends ServletObject {
 	}
 	
 	public static void clearUploadJob(HttpSession session) {
-		session.removeAttribute(RESULTS);
-		session.removeAttribute(UPLOAD_FORM);
+//		session.removeAttribute(RESULTS);
 		session.removeAttribute(UPLOAD_JOB);
 	}
 	
 	public static void clearSession(HttpSession session) {
 		session.removeAttribute(SPREADSHEET);
-		session.removeAttribute(RESULTS);
-		session.removeAttribute(UPLOAD_FORM);
+//		session.removeAttribute(RESULTS);
 		session.removeAttribute(UPLOAD_JOB);
 	}
 	
@@ -214,14 +205,13 @@ public class UploadServlet extends ServletObject {
 	public static void startJob(HttpServletRequest request, UploadJob job) throws DataException, SQLException, ServletException, IOException, ParserConfigurationException, SAXException {
 		job.startParse(request, getActiveWorksheet(request));
 		HttpSession session = request.getSession();
+		CyanosSessionListener.addJob(session, job);
 		session.setAttribute(UPLOAD_JOB, job);
 	}
 	
 	private static void clearSession(HttpServletRequest req) {
 		HttpSession thisSession = req.getSession();
 		thisSession.removeAttribute(SPREADSHEET);
-		thisSession.removeAttribute(RESULTS);
-		thisSession.removeAttribute(UPLOAD_FORM);
 		thisSession.removeAttribute(UPLOAD_JOB);
 	}
 	

@@ -22,7 +22,7 @@
 	if ( job != null && job.isWorking() ) { %>
 <p style="text-align: center; color: red; font-weight:bold">ERROR: Cannot start upload job.  Current upload job running.</p>		
 <%	} else {
-		UploadServlet.startJob(request, new ExtractUpload());
+		UploadServlet.startJob(request, new ExtractUpload(UploadServlet.newSQLData(request)));
 	}
 } %><cyanos:upload-form jspform="/material/extract-upload-form.jsp">
 <table align="center" class="upload">

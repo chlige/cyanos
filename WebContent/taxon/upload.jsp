@@ -20,7 +20,7 @@
 	if ( job != null && job.isWorking() ) { %>
 <p style="text-align: center; color: red; font-weight:bold">ERROR: Cannot start upload job.  Current upload job running.</p>		
 <%	} else {
-		UploadServlet.startJob(request, new TaxaUpload());
+		UploadServlet.startJob(request, new TaxaUpload(UploadServlet.newSQLData(request)));
 	}
 } %><cyanos:upload-form jspform="/taxon/upload-form.jsp">
 <table align="center" class="upload">

@@ -38,4 +38,22 @@ public class JobManager {
 			}
 		}
 	}
+	
+	public boolean hasActiveJobs() {
+		for ( Job job : this.activeJobs.values() ) {
+			if ( job.isWorking() ) return true;
+		}
+		return false;
+	}
+	
+	public boolean hasCompletedJobs() {
+		for ( Job job : this.activeJobs.values() ) {
+			if ( job.isDone() ) return true;
+		}
+		return false;
+	}
+	
+	public Job getJob(String jobid) {
+		return this.activeJobs.get(jobid);
+	}
 }

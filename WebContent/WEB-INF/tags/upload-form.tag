@@ -17,7 +17,11 @@
 
 	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
 	UploadJob job = UploadServlet.getUploadJob(session);
-	if (job != null && (job.isWorking() || job.resultReport() != null)) {
+	if (job != null && (job.isWorking() || job.resultReport() != null)) { %>
+<h2>Upload Job Running.</h2>
+<p align="center"><a href="<%= request.getContextPath() %>/jobs.jsp">View Job Status</a>
+<%--
+<%
 		if (request.getParameter(UploadServlet.SHOW_RESULTS) != null) {
 			if (job.resultSheet() != null) {
 				out.println("<p align='center'><a href='upload/results'>Export Results</a></p>");
@@ -38,7 +42,7 @@
 	var updatePath = "<%= request.getContextPath() %>/upload/status";
 	uploadStatus(updatePath, document.getElementById("resultButton"));
 </script>
-<%	} } else if ( worksheet != null ) { 
+<%	} --%><% } else if ( worksheet != null ) { 
 %><form method="post">
 <div id="uploadForm">
 <p align="center"><b>Select a worksheet:</b>

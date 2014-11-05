@@ -19,7 +19,7 @@
 	if ( job != null && job.isWorking() ) { %>
 <p style="text-align: center; color: red; font-weight:bold">ERROR: Cannot start upload job.  Current upload job running.</p>		
 <%	} else {
-		UploadServlet.startJob(request, new IsolationUpload());
+		UploadServlet.startJob(request, new IsolationUpload(UploadServlet.newSQLData(request)));
 	}
 } %><cyanos:upload-form jspform="/isolation/upload-form.jsp">
 <table align="center" class="upload">
