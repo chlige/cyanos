@@ -103,7 +103,7 @@ public class ExtractUpload extends UploadJob {
 		try {
 
 			this.resultSheet = new Sheet(this.worksheet.columnCount(), this.worksheet.rowCount());
-
+			
 			boolean useProtocol = this.template.containsKey(USE_PROTOCOL);
 			boolean safeUpload = (!this.template.containsKey(FORCE_UPLOAD));
 			int harvestCol = Integer.parseInt(template.get(HARVEST_ID));
@@ -300,28 +300,12 @@ public class ExtractUpload extends UploadJob {
 			e.printStackTrace();
 			this.working = false;
 		}
-		try {
-			if ( this.working ) { 
-				this.myData.commit(); 
-				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
-			} else { 
-				this.myData.rollback(); 
-				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
-			}
-			this.myData.close();
-		} catch (DataException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		} catch (SQLException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		}
 		this.resultSheet.insertRow(0);
 		this.resultSheet.addCell("Harvest ID");
 		this.resultSheet.addCell("Extract ID");
 		this.resultSheet.addCell("Status");
 		this.messages.append(resultList.toString());
-		this.working = false;
+		this.finishJob();
 	}
 
 	public String[] getTemplateKeys() {

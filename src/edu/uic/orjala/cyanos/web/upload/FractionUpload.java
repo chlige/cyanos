@@ -5,20 +5,14 @@ package edu.uic.orjala.cyanos.web.upload;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.List;
 import java.util.ListIterator;
-
-import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Material;
-import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Separation;
-import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
-import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
@@ -255,25 +249,8 @@ public class FractionUpload extends UploadJob {
 				this.working = false;
 			}
 		}
-		try {
-			if ( this.working ) { 
-				this.myData.commit(); 
-				this.myData.releaseSavepoint(mySave); 
-				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
-			} else { 
-				this.myData.rollback(mySave); 
-				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
-			}
-			this.myData.close();
-		} catch (SQLException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		} catch (DataException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		}
 		this.messages.append(resultList.toString());
-		this.working = false;
+		this.finishJob();
 	}
 	
 	private void setFractionNames(Separation mySep, boolean useLabel, int frLabelFormat) throws DataException {

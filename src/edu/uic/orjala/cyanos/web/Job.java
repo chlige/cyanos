@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.Role;
+import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 
 /**
@@ -20,12 +22,13 @@ public class Job {
 
 	protected String id;
 	protected String owner;
-	protected StringBuffer messages;
+	protected final StringBuffer messages = new StringBuffer();
 	protected String output;
+	protected String outputType = "text";
 	protected Date startDate;
 	protected Date endDate;
 	protected String type;
-	protected float progress;
+	protected float progress = 0.0f;
 	
 	protected SQLData myData = null;
 	protected Thread parseThread = null;
@@ -39,20 +42,19 @@ public class Job {
 		this.myData = data;
 	}
 
-	private final static String SQL_SELECT = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate FROM job WHERE job_id =?";
+	private final static String SQL_SELECT = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate,output_type FROM jobs WHERE job_id=?";
 
 	private Job(SQLData data, ResultSet results) throws SQLException {
 		this(data);
-		if ( results.first() ) {
-			this.id = results.getString(1);
-			this.owner = results.getString(2);
-			this.type = results.getString(3);
-			this.messages.append(results.getString(4));
-			this.output = results.getString(5);
-			this.progress = results.getFloat(6);
-			this.startDate = results.getDate(7);
-			this.endDate = results.getDate(8);
-		}
+		this.id = results.getString(1);
+		this.owner = results.getString(2);
+		this.type = results.getString(3);
+		this.messages.append(results.getString(4));
+		this.output = results.getString(5);
+		this.progress = results.getFloat(6);
+		this.startDate = results.getTimestamp(7);
+		this.endDate = results.getTimestamp(8);
+		this.outputType = results.getString(9);
 	}
 	
 	public static Job loadJob(SQLData data, String jobID) throws DataException {
@@ -60,25 +62,32 @@ public class Job {
 			PreparedStatement sth = data.prepareStatement(SQL_SELECT);
 			sth.setString(1, jobID);
 			ResultSet results = sth.executeQuery();
-			Job job = new Job(data, results);
-			results.close();
-			sth.close();
-			return job;
+			results.first();
+			String owner = results.getString(2);
+			if ( data.getUser().isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.READ) || data.getUser().getUserID().equals(owner) ) {
+				Job job = new Job(data, results);
+				results.close();
+				sth.close();
+				return job;
+			} else {
+				return null;
+			}
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
 	}
 	
-	private final static String SQL_INSERT_JOB = "INSERT INTO job(job_type,owner) VALUES(?,?)";
+	private final static String SQL_INSERT_JOB = "INSERT INTO jobs(job_type,owner) VALUES(?,?)";
 	
 	
 	protected void create() throws DataException {
 		try {
-			PreparedStatement sth = myData.prepareStatement(SQL_INSERT_JOB);
+			PreparedStatement sth = myData.prepareStatement(SQL_INSERT_JOB, true);
 			sth.setString(1, this.getType());
 			sth.setString(2, this.myData.getUser().getUserID());
 			if ( sth.executeUpdate() == 1 ) {
 				ResultSet results = sth.getGeneratedKeys();
+				results.first();
 				this.id = results.getString(1);
 				results.close();
 				sth.close();
@@ -95,7 +104,7 @@ public class Job {
 		}
 	}
 	
-	private final static String SQL_UPDATE = "UPDATE job SET messages=?, output=?, endDate=? WHERE job_id=?";
+	private final static String SQL_UPDATE = "UPDATE jobs SET messages=?, output=?, output_type=?, endDate=? WHERE job_id=?";
 	
 	protected void update() throws DataException {
 		if ( this.id != null ) {
@@ -103,8 +112,10 @@ public class Job {
 				PreparedStatement sth = myData.prepareStatement(SQL_UPDATE);
 				sth.setString(1, this.messages.toString());
 				sth.setString(2, this.output);
+				sth.setString(3, outputType);
 				Timestamp endValue = ( this.endDate != null ? new Timestamp(this.endDate.getTime()) : null);
-				sth.setTimestamp(3, endValue);
+				sth.setTimestamp(4, endValue);
+				sth.setString(5, id);
 				sth.executeUpdate();
 				sth.close();
 			} catch (SQLException e) {
@@ -139,7 +150,11 @@ public class Job {
 	
 	public String getOutput() {
 		return this.output;
-	}	
+	}
+	
+	public String getOutputType() {
+		return this.outputType;
+	}
 	
 	/**
 	 * Returns current job progress. 

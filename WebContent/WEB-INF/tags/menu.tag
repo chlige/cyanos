@@ -1,8 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ tag language="java" pageEncoding="UTF-8" %>
 <%@ tag import="java.net.URLEncoder,
-	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
-	edu.uic.orjala.cyanos.web.upload.UploadJob" %>
+	edu.uic.orjala.cyanos.web.servlet.UploadServlet" %>
 <%@ attribute name="helpModule" required="false" %>
 <% String contextPath = request.getContextPath(); %><nav>
 <label for="show-menu" class="show-menu">Cyanos</label>
@@ -99,8 +98,9 @@
 <% if (UploadServlet.hasSpreadsheet(request) ) { %>
 <a href="<%= contextPath %>/spreadsheet.jsp" style="width:20px; display:inline"><img title="View loaded spreadsheet" src="<%= contextPath %>/images/icons/spreadsheet.png" height="20px"></a>
 <% }
-	UploadJob job = UploadServlet.getUploadJob(session);
-	if ( job != null ) { %><img title="A job is running" src="<%= contextPath %>/images/icons/job-running.png" height="20px"><% } %>
+	if ( UploadServlet.hasActiveJobs(session) ) { 
+%><a href="<%= contextPath %>/jobs.jsp" style="width:20px; display:inline"><img title="A job is running" src="<%= contextPath %>/images/icons/job-running.png" height="20px"></a>
+<% } %>
 </li>
 </ul>
 </nav>

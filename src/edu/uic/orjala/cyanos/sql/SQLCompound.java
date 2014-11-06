@@ -166,6 +166,8 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 
 	private final static String DATA_FILE_TABLE = "compound";
 	
+	public final static String TABLE = "compound";
+	
 	private final static String[] ALL_COLUMNS = { ID_COLUMN, NAME_COLUMN, 
 		FORMULA_COLUMN, AVERAGE_MASS_COLUMN, MONOISOTOPIC_MASS_COLUMN,
 		SMILES_COLUMN, INCHI_STRING_COLUMN, INCHI_KEY_COLUMN, MDL_COLUMN,
