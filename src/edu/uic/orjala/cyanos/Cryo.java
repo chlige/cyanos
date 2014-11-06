@@ -48,6 +48,10 @@ public interface Cryo extends BasicObject {
 	
 	String getRow() throws DataException;
 	
+	int getRowIndex() throws DataException;
+	
+	int getColumnIndex() throws DataException;
+	
 	String getColumn() throws DataException;
 	
 	String getCultureID() throws DataException;
@@ -117,6 +121,8 @@ public interface Cryo extends BasicObject {
 	Inoc thaw() throws DataException;
 	
 	void remove() throws DataException;
+	
+	public Date getRemovedDate() throws DataException;
 	
 	public boolean loadFromCollection(CryoCollection aCol, int row, int column) throws DataException;
 	

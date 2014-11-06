@@ -47,6 +47,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 	private final static String DATE_COLUMN = "date";
 	private final static String ROW_COLUMN = "row";
 	private final static String COLUMN_COLUMN = "col";
+	private final static String REMOVE_DATE = "removed";
 
 
 	private static final String INSERT_CRYO_SQL = "INSERT INTO cryo(source_id, culture_id, date) (SELECT inoculation_id, culture_id, CURRENT_DATE FROM inoculation WHERE inoculation_id = ?)";
@@ -54,7 +55,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 
 	private static final String SQL_LOAD = "SELECT cryo.* FROM cryo WHERE cryo_id=?";	
 	private final static String SELECT_FOR_STRAIN_SQL = "SELECT * FROM cryo WHERE culture_id=?";
-	private static final String SQL_LOAD_FOR_COLLECTION = "SELECT * FROM cryo WHERE collection=? ORDER BY row,col ASC";
+	private static final String SQL_LOAD_FOR_COLLECTION = "SELECT * FROM cryo WHERE collection=? AND removed IS NULL ORDER BY row,col ASC";
 	
 	public static Cryo loadForCollection(SQLData data, String collectionID) throws DataException, SQLException {
 		SQLCryo cryo = new SQLCryo(data);
@@ -236,15 +237,11 @@ public class SQLCryo extends SQLObject implements Cryo {
 	 */
 	
 	public boolean isThawed() throws DataException {
-		String anID = this.myData.getString(THAW_COLUMN);
-		if ( anID != null ) return true;
-		return false;
+		return this.myData.getString(THAW_COLUMN) != null;
 	}
 
 	public boolean wasRemoved() throws DataException {
-		String anID = this.myData.getString(ROW_COLUMN);
-		if ( anID == null ) return true;
-		return false;
+		return ( this.getRemovedDate() != null );
 	}
 
 	public boolean isFrozen() throws DataException {
@@ -261,6 +258,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 			this.myData.setNull(ROW_COLUMN);
 			this.myData.setNull(COLUMN_COLUMN);
 			this.myData.setString(THAW_COLUMN, anInoc.getID());
+			this.myData.setDate(REMOVE_DATE, new Date());
 			this.myData.refresh();
 			return anInoc;
 		}
@@ -271,6 +269,7 @@ public class SQLCryo extends SQLObject implements Cryo {
 		if ( this.myData != null ) {
 			this.myData.setNull(ROW_COLUMN);
 			this.myData.setNull(COLUMN_COLUMN);
+			this.myData.setDate(REMOVE_DATE, new Date());
 			this.myData.refresh();
 		}
 	}
@@ -305,6 +304,21 @@ public class SQLCryo extends SQLObject implements Cryo {
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
+	}
+
+	@Override
+	public int getRowIndex() throws DataException {
+		return this.myData.getInt(ROW_COLUMN);
+	}
+
+	@Override
+	public int getColumnIndex() throws DataException {
+		return this.myData.getInt(COLUMN_COLUMN);
+	}
+
+	@Override
+	public Date getRemovedDate() throws DataException {
+		return this.myData.getDate(REMOVE_DATE);
 	}
 	
 
