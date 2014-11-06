@@ -16,6 +16,7 @@ import java.util.ListIterator;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
@@ -45,6 +46,10 @@ public class DereplicationServlet extends ServletObject {
 	private static final String HELP_MODULE = "dereplication";
 //	private static final String QUERY_RESULTS = "dereplication_results";	
 	private List<Class> derepForms = null;
+	
+	public static final String QUERY_ATTRIBUTE = "query";
+	public static final String SEARCH_ACTION = "searchAction";
+
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -467,6 +472,18 @@ public class DereplicationServlet extends ServletObject {
 	
 	public String getHelpModule() {
 		return HELP_MODULE;
+	}
+	
+	public static StringBuffer getQuery(HttpServletRequest request) {
+		Object query = request.getAttribute(DereplicationServlet.QUERY_ATTRIBUTE);
+		if ( query == null ) {
+			query = new StringBuffer();
+			request.setAttribute(QUERY_ATTRIBUTE, query);
+		}
+		if ( query instanceof StringBuffer ) {
+			return (StringBuffer)query;
+		}
+		return null;
 	}
 		
 
