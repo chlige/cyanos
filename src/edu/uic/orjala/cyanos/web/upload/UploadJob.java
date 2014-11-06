@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +48,12 @@ public abstract class UploadJob extends Job implements Runnable {
 	protected final ArrayList<Integer> rowList = new ArrayList<Integer>();
 	
 	protected Sheet resultSheet = null;
+	
+	public static final String OUTPUT_TYPE = "table";
 
 	public UploadJob(SQLData data) {
 		super(data);
+		this.outputType = OUTPUT_TYPE;
 	}
 	
 	/**
@@ -71,7 +75,8 @@ public abstract class UploadJob extends Job implements Runnable {
 	 */
 	public void startParse(HttpServletRequest req, Sheet worksheet) throws DataException, SQLException {
 		if ( this.parseThread == null ) {
-			this.myData = UploadServlet.newSQLData(req);
+//			this.myData = UploadServlet.newSQLData(req);
+			this.create();
 			
 			this.worksheet = worksheet;
 			this.updateTemplate(req);
@@ -185,5 +190,28 @@ public abstract class UploadJob extends Job implements Runnable {
 		}
 		super.update();
 	}	
+	
+	protected void finishJob() {
+		try {
+			this.endDate = new Date();
+			if ( this.working ) { 
+				this.myData.commit(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
+			} else { 
+				this.myData.rollback(); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+			}
+			this.update();
+			this.myData.close();
+		} catch (DataException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
+		} catch (SQLException e) {
+			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+			e.printStackTrace();			
+		} finally {
+			this.working = false;
+		}
+	}
 
 }

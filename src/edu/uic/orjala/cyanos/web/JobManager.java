@@ -6,6 +6,9 @@ package edu.uic.orjala.cyanos.web;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.sql.SQLData;
+
 /**
  * @author George Chlipala
  *
@@ -55,5 +58,13 @@ public class JobManager {
 	
 	public Job getJob(String jobid) {
 		return this.activeJobs.get(jobid);
+	}
+	
+	public Job getJob(String jobid, SQLData data) throws DataException {
+		Job job = this.getJob(jobid);
+		if ( job == null ) {
+			job = Job.loadJob(data, jobid);
+		}
+		return job;
 	}
 }

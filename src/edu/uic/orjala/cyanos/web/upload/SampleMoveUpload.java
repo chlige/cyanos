@@ -107,19 +107,8 @@ public class SampleMoveUpload extends UploadJob {
 			e.printStackTrace();
 			this.working = false;
 		}
-		try {
-			if ( this.working ) { this.myData.commit(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); }
-			else { this.myData.rollback(); this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); }
-			this.myData.close();
-		} catch (DataException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		} catch (SQLException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		}
 		this.messages.append(resultList.toString());
-		this.working = false;
+		this.finishJob();
 	}
 
 	/*

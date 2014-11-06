@@ -18,7 +18,7 @@
 	Sheet worksheet = UploadServlet.getActiveWorksheet(request);
 	UploadJob job = UploadServlet.getUploadJob(session);
 	if (job != null && (job.isWorking() || job.resultReport() != null)) { %>
-<h2>Upload Job Running.</h2>
+<h2 style="text-align:center">Upload Job Running.</h2>
 <p align="center"><a href="<%= request.getContextPath() %>/jobs.jsp">View Job Status</a>
 <%--
 <%
