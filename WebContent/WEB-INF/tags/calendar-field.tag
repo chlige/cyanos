@@ -15,8 +15,8 @@
 <a onclick="showDate('cal_${fieldName}','${fieldName}')"><img align="MIDDLE" border="0" src="<%= request.getContextPath() %>/images/calendar.png"></a>
 <div id="cal_${fieldName}" class='calendar'>
 <form name="cal">
-<input type="hidden" name="update_field" value="${fieldName}">
-<!-- <input type="hidden" name="cal_div" value="cal_${fieldName}">  -->
+<%-- <input type="hidden" name="update_field" value="${fieldName}">
+<input type="hidden" name="cal_div" value="cal_${fieldName}">  --%>
 <p align="center"><select name="month" onChange="updateDateDiv(this,'${fieldName}','cal_${fieldName}')">
 <% String[] monthNames = new DateFormatSymbols().getMonths(); 
 for ( int i = 0; i < 12; i++ ) { %><option value="<%= String.valueOf(i) %>"><%= monthNames[i] %></option>

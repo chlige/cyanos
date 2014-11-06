@@ -5,8 +5,7 @@
 	edu.uic.orjala.cyanos.Project" %>
 <%@ attribute name="project" required="false" %>
 <%@ attribute name="fieldName" required="true" %>
-<%
-	String contextPath = request.getContextPath();
+<%	String contextPath = request.getContextPath();
 	String fieldName = (String) jspContext.getAttribute("fieldName");
 	String projectID = request.getParameter(fieldName);
 	
@@ -16,17 +15,13 @@
 	if ( obj != null && obj instanceof Project ) { 
 		allProjects = (Project) obj;
 	} else {
-		obj = request.getAttribute(ProjectServlet.DATASOURCE);
-		if (obj != null && obj instanceof SQLData) {
-			allProjects = SQLProject.projects((SQLData) obj, SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT);
-			request.setAttribute("allProjects", allProjects);
-		}
+		allProjects = SQLProject.projects(ProjectServlet.getSQLData(request), SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT);
+		request.setAttribute("allProjects", allProjects);
 	}
 	if ( allProjects != null ) {
 %><select name="${fieldName}">
 <option value="">NONE</option>
-<%    
-	allProjects.beforeFirst();
+<%  allProjects.beforeFirst();
 	while ( allProjects.next()) { 
 %><option value="<%= allProjects.getID() %>" <%= (allProjects.getID().equals(projectID) ? "selected" : "") %>><%= allProjects.getName() %></option>
 <% } %></select><% } %>

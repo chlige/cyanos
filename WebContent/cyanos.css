@@ -73,16 +73,25 @@ p.toggle {	margin-left: 7%; font-weight: bold; font-size:14px; }
 table { border-collapse: collapse; }
 table.species { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 table.list { border-collapse: collapse; margin-left:auto; margin-right:auto; }
+
 table.plate { border-collapse: collapse; margin-left:auto; margin-right:auto; }
+table.plate tr td { border: 2px solid #808080; }
+
+table.box { margin-left:auto; margin-right:auto; }
+table.box tr td { border: 2px solid #808080; padding: 15px; text-align:center; background-color: white; }
+
+
 table.balanceSheet { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 table.balanceSheet td { border-bottom: 1px solid #808080; background-color: #FFFFFF; }
-table.plate tr td { border: 2px solid #808080; }
+
 table.spreadsheet { border-collapse: collapse; margin-left:auto; margin-right:auto; }
 table.spreadsheet tr td { border: 1px solid #808080; }
 table.spreadsheet td.rowselect { border: none; }
 table.dashboard { border-collapse: collapse; margin-left:auto; margin-right:auto; }
+
 col.datashort { width: 25%; }
 col.datalong { width: 50%; }
+
 table.upload tr td, table.upload tr th { border: 1px solid #999; padding-left: 10px; padding-right: 10px; }
 table.uploadForm tr td { border-bottom: 2px solid #bbb;}
 table.uploadForm { margin-left: auto; margin-right: auto; border-top: 2px solid #bbb; }

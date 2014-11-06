@@ -599,9 +599,11 @@ function livesearch(field, module, searchTag, divTag) {
 */
 	
 function setLS(fieldTag, fieldValue, divTag) {
-	window.document.getElementById(fieldTag).value= fieldValue; 
+	var field = window.document.getElementById(fieldTag);
+	field.value= fieldValue; 
 	closeLSdiv = true;
 	closeLS(divTag);
+	field.onchange();
 }
 
 function closeLS(divTag) {
