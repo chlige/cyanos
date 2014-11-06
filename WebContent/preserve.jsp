@@ -17,19 +17,11 @@
 <hr width="75%">
 <jsp:include page="/preserve/form.jsp"/>
 <% } else if ( request.getParameter("collection") != null ) { 
-	Cryo queryResults = SQLCryo.loadForCollection(CryoServlet.getSQLData(request), request.getParameter("collection"));
-	request.setAttribute("cryoList", queryResults);
 %><p align="CENTER"><font size="+2" >Preservation Collection</font>
 <hr width="75%">
 <jsp:include page="/preserve/collection.jsp"/>
-<div class="collapseSection"><a name='collectionList' onClick='loadDiv("collectionList")' class='divTitle'>
-<img align="absmiddle" id="twist_collectionList" src="/cyanos/images/twist-closed.png" /> Preservation List</a>
-<div class="hideSection" id="div_collectionList">
-<jsp:include page="/preserve/list.jsp"/>
-<p align="center"><a href="<%= request.getContextPath()  %>/preserve/add.jsp">Add Preservation</a></p>
-</div></div>
-<% } else { %>
-<p style="text-align:center; font-size:14pt;">Preservation Search</p>
+<% } else { 
+%><p style="text-align:center; font-size:14pt;">Preservation Search</p>
 <hr width='85%'/>
 <center>
 <form name="preservequery">

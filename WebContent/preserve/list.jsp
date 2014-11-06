@@ -5,12 +5,13 @@
 <%	Object attr = request.getAttribute("cryoList");
 if ( attr != null && attr instanceof Cryo ) {
 	Cryo queryResults = (Cryo) attr;
+	queryResults.beforeFirst();
 	SimpleDateFormat dateFormat = CryoServlet.DATE_FORMAT;
 %><table  class="dashboard">
 <tr><th class="header">Strain (Preservation #)</th><th class="header" width='200'>Date</th><th class="header" width='100'>Location</th><th class="header" width='100'>Remove Date</th><th class="header" width="100">Notes</th></tr>
 <% while ( queryResults.next() ) { 
 	if ( ! queryResults.isAllowed(Role.READ) ) continue;  
-%><tr align='center'><td><a href="?id=<%= queryResults.getID() %>"><%= queryResults.getCultureID() %> (<%= queryResults.getID() %>)</a></td>
+%><tr align='center' class="banded"><td><a href="?id=<%= queryResults.getID() %>"><%= queryResults.getCultureID() %> (<%= queryResults.getID() %>)</a></td>
 <td><%= dateFormat.format(queryResults.getDate()) %></td>
 <td><a href="?collection=<%= queryResults.getCollectionID() %>"><%= queryResults.getCollectionID() %></a> (<%= queryResults.getLocation() %>)</td>
 <td><%= ( queryResults.isThawed() ? "REMOVED" : "" ) %></td>
