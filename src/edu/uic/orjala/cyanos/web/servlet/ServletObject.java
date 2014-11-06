@@ -41,6 +41,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.GuestUser;
+import edu.uic.orjala.cyanos.web.JobManager;
 import edu.uic.orjala.cyanos.web.ServletWrapper;
 import edu.uic.orjala.cyanos.web.SheetWriter;
 import edu.uic.orjala.cyanos.web.WebModule;
@@ -52,6 +53,7 @@ import edu.uic.orjala.cyanos.web.html.TableHeader;
 import edu.uic.orjala.cyanos.web.html.TableRow;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
+import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
 import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
@@ -749,6 +751,11 @@ public abstract class ServletObject extends HttpServlet {
 	
 	public static FileUpload getUpload(HttpServletRequest request, String name) throws ServletException, IOException {
 		return CyanosRequestListener.getUpload(request, name);
+	}
+	
+	public static boolean hasActiveJobs(HttpSession session) {
+		JobManager manager = CyanosSessionListener.getJobManager(session);
+		return manager.hasActiveJobs();
 	}
 
 }
