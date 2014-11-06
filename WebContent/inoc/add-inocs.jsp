@@ -12,7 +12,7 @@
 	java.text.DateFormat" %>
 <%	String contextPath = request.getContextPath();
 	String[] rows = request.getParameterValues("row");
-	DateFormat format = (DateFormat) session.getAttribute(InocServlet.SESS_ATTR_DATE_FORMAT);
+	DateFormat format = InocServlet.DATE_FORMAT;
 	SQLData data = InocServlet.getSQLData(request);
 %><table class="dashboard">
 <tr><td></td><th class="header">Inoc ID</th><th class="header">Strain ID</th><th class="header">Date</th><th class="header">Parent Stock</th><th class="header">Media</th><th class="header">Volume</th><th class="header">Project</th><th class="header">Notes</th><th class="header">Stock</th></tr>

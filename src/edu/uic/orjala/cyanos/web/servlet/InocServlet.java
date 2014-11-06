@@ -264,7 +264,7 @@ public class InocServlet extends ServletObject {
 						req.setAttribute(StrainServlet.STRAIN_OBJECT, SQLStrain.load(this.getSQLData(req), req.getParameter("strain")));
 						req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.viableInocsForStrain(this.getSQLData(req), req.getParameter("strain")));
 					}					
-					this.forwardRequest(req, res, "/inoc/add-form.jsp");
+					this.forwardRequest(req, res, "/inoc/add.jsp");
 				} else if ( form.equals("kill") ) {
 					String[] ids = req.getParameterValues("inoc");
 					if ( ids != null ) {
