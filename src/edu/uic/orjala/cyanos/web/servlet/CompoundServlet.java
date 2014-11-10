@@ -55,6 +55,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
+import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
@@ -126,11 +127,15 @@ public class CompoundServlet extends ServletObject {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-//		req = MultiPartRequest.parseRequest(req);
+		req = MultiPartRequest.parseRequest(req);
 		super.doPost(req, res);
 		this.handleRequest(req, res);
 	}
 
+	public static Compound compoundsLike(HttpServletRequest request, String query) throws DataException, SQLException {
+		return SQLCompound.loadLike(getSQLData(request), query);
+	}
+	
 	protected void handleRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 
 		String module = req.getPathInfo();	
@@ -175,9 +180,11 @@ public class CompoundServlet extends ServletObject {
 			 } else if ( aCompound == null ) {
 				if ( req.getParameter("query") != null ) {
 					SQLCompound compoundList = SQLCompound.loadLike(getSQLData(req), req.getParameter("query"));
-					req.setAttribute(COMPOUND_RESULTS, compoundList);
 					if ( "sdf".equals(req.getParameter("export")) ) {
 						exportSDF(compoundList, res);
+						return;
+					} else {
+						req.setAttribute(COMPOUND_RESULTS, compoundList);
 					}
 				}
 				this.forwardRequest(req, res, "/compound.jsp");
