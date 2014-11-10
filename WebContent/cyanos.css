@@ -464,6 +464,39 @@ p.mainContent {
   -webkit-transform:rotate(315deg) translate(0, -40px);opacity:1;
 }
 
+.progress {
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  -moz-box-shadow:black 0 0 4px;
+  -webkit-box-shadow:black 0 0 4px;
+  border: 2px solid #101010;
+  position: relative;
+  width:50px;
+  height:20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #FFCC00;
+}
+
+#progressText {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 10;
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+}
+
 /* set up the three ball spinners */
 #spinner {
   position:relative;

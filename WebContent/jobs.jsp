@@ -26,12 +26,14 @@ function jobStatus(jobID) {
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
  			var jobDIV = document.getElementById('job-' + jobID);
  			var subAreas = jobDIV.getElementsByTagName("div")
- 			var progText = jobDiv.getElementsByClassName("progressText")[0];
+ 			var progText = jobDIV.getElementsByClassName("progressText")[0];
 			var response = xmlHttp.responseText;
 			if ( response === "DONE" ) {
 				endProgress(100, resultButton);
 				if ( progText != null ) {
 					progText.innerHTML = "Complete";
+					var progress = jobDIV.getElementsByClassName("progress")[0];
+					progress.style.display="none";
 				}
 			} else if ( response === "ERROR" ) { 
 				endProgress(progressLen, resultButton);
@@ -66,7 +68,7 @@ function jobStatus(jobID) {
 }
 </script>
 <style type="text/css">
-.job { margin-left:auto; margin-right:auto; width: 600px; border: 2px solid gray; background-color: #eee; padding: 10px; display: block; }
+.job { margin-left:auto; margin-right:auto; margin-bottom: 10px; width: 600px; border: 2px solid gray; background-color: #eee; padding: 10px; display: block; }
 .job h3 { font-size: 12pt; font-weight: bold; padding: 0px; margin: 0px; }
 
 .progress {
@@ -109,13 +111,15 @@ function jobStatus(jobID) {
 if ( request.getParameter("jobid") != null ) { 
 	Job job = manager.getJob(request.getParameter("jobid"), UploadServlet.getSQLData(request));
 	if ( job != null ) {
-%><h1>Job <%= job.getID() %> - <i><%= job.getType() %></i></h1>
+%><h1>Job <%= job.getID() %>: <i><%= job.getType() %></i></h1>
 <p align="center">Started: <%= UploadServlet.DATETIME_FORMAT.format(job.getStartDate()) %><br>
 Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) { %><%= UploadServlet.DATETIME_FORMAT.format(endDate) %><% } %><br>
 <% if ( job.getOutput() != null ) { %>Show output<% } %></p>
 <div class="collapseSection" style="background:white;"><a name='job_messages' class='twist' onClick='loadDiv("messages")'>
 <img align="absmiddle" id="twist_messages" src="<%= request.getContextPath() %>/images/twist-closed.png" /> Messages</a>
 <div class="hideSection" id="div_messages"><%= job.getMessages() %></div></div>
+<p align="center"><a href="jobs.jsp">View Active Jobs</a> | <a href="?history">View Previous Jobs</a></p>
+
 <%--  
 <div class="collapseSection" style="background:white;"><a name='job_output' class='twist' onClick='loadDiv("output")'>
 <img align="absmiddle" id="twist_output" src="<%= request.getContextPath() %>/images/twist-closed.png" /> Output</a>
@@ -124,16 +128,25 @@ Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) { %><%= Upload
 <% } else { %>
 <h1>Job <%= request.getParameter("jobid") %></h1>
 <p align="center">Job not found</p>
-<% } } else { %>
+<% } 
+} else { 
+	Collection<Job> jobList;
+	if ( request.getParameter("history") != null ) {  %>
+<h1>Previous Jobs</h1>
+<p align="center"><a href="jobs.jsp">View Active Jobs</a></p>
+<%  	jobList = Job.oldJobs(UploadServlet.getSQLData(request)); %>
+<% } else { %>
 <h1>Active Jobs</h1>
-<% 	Collection<Job> jobList = manager.getActiveJobs();
+<p align="center"><a href="?history">View Previous Jobs</a></p>
+<% 		jobList = manager.getActiveJobs();
+}
 	if ( jobList.size() > 0  ) { 
 		for ( Job job : jobList ) { 
-%><div id="job-<%= job.getID()  %>" class="job"><h3>Job <%= job.getID() %> <i><%= job.getType() %></i></h3>
-Started: <%= job.getStartDate().toString() %><br>
-Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) {%><%= endDate.toString() %><% } %><br>
-<div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div>
-<a href="jobs.jsp?jobid=<%= job.getID() %>" style="margin-left:auto; margin-right:auto; text-align:center">Show Results</a>
+%><div id="job-<%= job.getID()  %>" class="job"><h3>Job <%= job.getID() %>:<i><%= job.getType() %></i></h3>
+Started: <%= UploadServlet.DATETIME_FORMAT.format(job.getStartDate()) %><br>
+Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) {%><%= UploadServlet.DATETIME_FORMAT.format(endDate) %><br>
+<% } else { %><br><div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div><% } %>
+<a href="jobs.jsp?jobid=<%= job.getID() %>" style="margin-left:auto; margin-right:auto; text-align:center; <%= ( endDate == null ? "display:none" : "") %>">View Job Results</a>
 <script>
 	var updatePath = "<%= request.getContextPath() %>/upload/status";
 	uploadStatus(updatePath, document.getElementById("resultButton"));
