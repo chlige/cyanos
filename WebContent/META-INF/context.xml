@@ -21,9 +21,11 @@
     
 <Resource auth="Container" name="jdbc/CyanosDB" 
     	type="javax.sql.DataSource" driverClassName="com.mysql.jdbc.Driver"
-        url="jdbc:mysql://localhost/cyanos?autoReconnect=true&amp;useLocalSessionState=true"
+        url="jdbc:mysql://localhost/cyanos"
         username="cyanos-user" password="bluegreen"
-        maxActive="100" maxWait="5000" maxIdle="2"
+        maxActive="100" maxWait="5000" maxIdle="2" queryTimeout="2" logAbandoned="true"
+        validationQuery="select 1" testOnBorrow="true" testOnReturn="false" testWhileIdle="true"
+        minEvictableIdleTimeMillis="3600000" timeBetweenEvictionRunsMillis="1800000" numTestsPerEvictionRun="10"
         removeAbandoned="true"/>
 
 <!-- 
