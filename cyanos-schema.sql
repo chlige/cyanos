@@ -936,6 +936,14 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+CREATE VIEW `compound_diatomic` AS
+SELECT atom1.compound_id, atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", bond.bond_order, atom2.element as "atom2_element", atom2.charge as "atom2_charge", atom2.attached_h as "atom2_H"
+FROM compound_atoms atom1
+JOIN compound_bond_atoms cab1 ON (atom1.compound_id = cab1.compound_id AND atom1.atom_number = cab1.atom_number)
+JOIN compound_bonds bond ON ( atom1.compound_id = bond.compound_id AND cab1.bond_id = bond.bond_id)
+JOIN compound_bond_atoms cab2 ON (atom1.compound_id = cab2.compound_id AND cab2.bond_id = cab1.bond_id AND cab2.atom_number != atom1.atom_number)
+JOIN compound_atoms atom2 ON (atom1.compound_id = atom2.compound_id AND cab2.atom_number = atom2.atom_number);
+
 DROP TABLE IF EXISTS `jobs`;
 
 CREATE TABLE IF NOT EXISTS `jobs` (
