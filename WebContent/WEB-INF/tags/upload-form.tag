@@ -19,10 +19,10 @@
 	UploadJob job = UploadServlet.getUploadJob(session);
 	if (job != null && (job.isWorking() || job.resultReport() != null)) { %>
 <h2 style="text-align:center">Upload Job Running.</h2>
-<p align="center"><a href="<%= request.getContextPath() %>/jobs.jsp">View Job Status</a>
 <%--
-<%
-		if (request.getParameter(UploadServlet.SHOW_RESULTS) != null) {
+<p align="center"><a href="<%= request.getContextPath() %>/jobs.jsp">View Job Status</a>
+--%>
+<%	if (request.getParameter(UploadServlet.SHOW_RESULTS) != null) {
 			if (job.resultSheet() != null) {
 				out.println("<p align='center'><a href='upload/results'>Export Results</a></p>");
 			}
@@ -30,19 +30,17 @@
 <p align="center"><button type="submit" name="clearUpload">Clear Uploaded Data</button>
 <br><button type="submit" name="clearResults">Clear Results</button></p>
 </form>
-<%
-		out.println(job.resultReport());  
+<%		out.println(job.resultReport());  
 		} else {
-%>
-<div align="center">
+%><div align="center">
 <div class="progress" style="width: 200px"><div id="progressText"></div><div id="progressBar"></div></div>
-<form><button id="resultButton" name="showResults" disabled>Show Results</button></form>
+<form method="post"><button id="resultButton" name="showResults" disabled>Show Results</button></form>
 </div>
 <script>
 	var updatePath = "<%= request.getContextPath() %>/upload/status";
 	uploadStatus(updatePath, document.getElementById("resultButton"));
 </script>
-<%	} --%><% } else if ( worksheet != null ) { 
+<%	} %><% } else if ( worksheet != null ) { 
 %><form method="post">
 <div id="uploadForm">
 <p align="center"><b>Select a worksheet:</b>
