@@ -424,6 +424,14 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 		compound.loadSQL(SQL_NO_GRAPH);
 		return compound;
 	}
+	
+	private static final String SQL_HAS_MDL = "SELECT compound.* FROM compound WHERE mdl_data IS NOT NULL ORDER BY compound_id ASC";
+
+	public static Compound compoundsWithMDLData(SQLData data) throws DataException, SQLException {
+		SQLCompound compound = new SQLCompound(data);
+		compound.loadSQL(SQL_HAS_MDL);
+		return compound;		
+	}
 
 	protected SQLCompound(SQLData data) {
 		super(data);
