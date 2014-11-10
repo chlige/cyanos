@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -119,6 +120,10 @@ public interface Cryo extends BasicObject {
 	boolean isFrozen() throws DataException;
 
 	Inoc thaw() throws DataException;
+	
+	Inoc thaw(BigDecimal volume, String media) throws DataException;
+	
+	Inoc thaw(String volume, String media) throws DataException;
 	
 	void remove() throws DataException;
 	

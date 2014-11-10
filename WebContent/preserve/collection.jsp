@@ -63,16 +63,15 @@
 	
 	Cryo queryResults = SQLCryo.loadForCollection(CryoServlet.getSQLData(request), request.getParameter("collection"));
 	request.setAttribute("cryoList", queryResults);
-	queryResults.first();
 %><table class="box"><tr><th></th><%
 for ( int col = 1; col <= rowLength; col++ ) {
 	%><th><%= col %></th><%	
 } %></tr><%	
-	int currRow = queryResults.getRowIndex();
-	int currCol = queryResults.getColumnIndex();
+	int currRow = ( queryResults.first() ? queryResults.getRowIndex() : rowLength + 1);
+	int currCol = ( queryResults.first() ? queryResults.getColumnIndex() : colLength + 1);
 	SimpleDateFormat dateFormat = new SimpleDateFormat("MMM-DD-YY");
 	for ( int row = 1; row <= colLength; row++ ) { 
-%><tr><th><%= CryoServlet.getLetterForIndex(row - 1) %></th><%
+%><tr style="height:80px"><th><%= CryoServlet.getLetterForIndex(row - 1) %></th><%
 		for ( int col = 1; col <= rowLength; col++ ) {
 %><td><%	if ( col == currCol && row == currRow ) {
 %><a href="?id=<%= queryResults.getID() %>"><%= queryResults.getCultureID() %> (<%= queryResults.getID() %>)</a><br>
@@ -85,7 +84,7 @@ for ( int col = 1; col <= rowLength; col++ ) {
 		} %></tr>
 <% }%></table>
 <p align="center"><a href="<%= request.getContextPath() %>/preserve/add.jsp">Add Preservation</a></p>
-<p align="center"><a href="<%= request.getContextPath() %>/preserve/remove.jsp">Remove Preservations</a></p>
+<p align="center"><a href="<%= request.getContextPath() %>/preserve/remove.jsp?collection=<%= thisObject.getID() %>">Remove Preservations</a></p>
 </div></div>
 
 <div class="collapseSection"><a onClick='loadDiv("collectionList")' class='twist'>

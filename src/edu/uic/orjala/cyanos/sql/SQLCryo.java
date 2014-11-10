@@ -3,6 +3,7 @@
  */
 package edu.uic.orjala.cyanos.sql;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -255,10 +256,10 @@ public class SQLCryo extends SQLObject implements Cryo {
 		Strain myStrain = SQLStrain.load(this.myData, this.getCultureID());
 		Inoc anInoc = SQLInoc.createInProject(this.myData, this.getCultureID(), myStrain.getProjectID());
 		if ( anInoc.first() ) {
+			this.myData.setDate(REMOVE_DATE, new Date());
+			this.myData.setString(THAW_COLUMN, anInoc.getID());
 			this.myData.setNull(ROW_COLUMN);
 			this.myData.setNull(COLUMN_COLUMN);
-			this.myData.setString(THAW_COLUMN, anInoc.getID());
-			this.myData.setDate(REMOVE_DATE, new Date());
 			this.myData.refresh();
 			return anInoc;
 		}
@@ -267,9 +268,9 @@ public class SQLCryo extends SQLObject implements Cryo {
 	
 	public void remove() throws DataException {
 		if ( this.myData != null ) {
+			this.myData.setDate(REMOVE_DATE, new Date());
 			this.myData.setNull(ROW_COLUMN);
 			this.myData.setNull(COLUMN_COLUMN);
-			this.myData.setDate(REMOVE_DATE, new Date());
 			this.myData.refresh();
 		}
 	}
@@ -319,6 +320,27 @@ public class SQLCryo extends SQLObject implements Cryo {
 	@Override
 	public Date getRemovedDate() throws DataException {
 		return this.myData.getDate(REMOVE_DATE);
+	}
+
+	@Override
+	public Inoc thaw(BigDecimal volume, String media) throws DataException {
+		if ( this.myData == null ) return null;
+		Strain myStrain = SQLStrain.load(this.myData, this.getCultureID());
+		Inoc anInoc = SQLInoc.createInProject(this.myData, this.getCultureID(), myStrain.getProjectID(), volume, media);
+		if ( anInoc.first() ) {
+			this.myData.setNull(ROW_COLUMN);
+			this.myData.setNull(COLUMN_COLUMN);
+			this.myData.setString(THAW_COLUMN, anInoc.getID());
+			this.myData.setDate(REMOVE_DATE, new Date());
+			this.myData.refresh();
+			return anInoc;
+		}
+		return null;
+	}
+
+	@Override
+	public Inoc thaw(String volume, String media) throws DataException {
+		return this.thaw(parseAmount(volume, "L"), media);
 	}
 	
 

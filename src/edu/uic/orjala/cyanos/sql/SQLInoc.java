@@ -8,6 +8,7 @@
 package edu.uic.orjala.cyanos.sql;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,6 +52,8 @@ public class SQLInoc extends SQLObject implements Inoc {
 	private static final String INSERT_INOC_SQL = "INSERT INTO inoculation(culture_id,date) VALUES(?,CURRENT_DATE)";
 	private static final String SQL_INSERT_WITH_PROJECT = "INSERT INTO inoculation(culture_id,date,project_id) VALUES(?,CURRENT_DATE,?)";
 	private static final String SQL_INSERT_KID = "INSERT INTO inoculation(culture_id,project_id,parent_id,date) VALUES(?,?,?,CURRENT_DATE)";
+
+	private static final String SQL_INSERT_WITH_PROJECT_VOL_MEDIA = "INSERT INTO inoculation(culture_id,date,project_id,volume_value,volume_scale,media) VALUES(?,CURRENT_DATE,?,?,?,?)";
 
 	/*
 	 * Parameters and SQL for "cleaned-up" database schema.
@@ -171,6 +174,30 @@ public class SQLInoc extends SQLObject implements Inoc {
 			PreparedStatement aSth = anObj.myData.prepareStatement(SQL_INSERT_WITH_PROJECT);
 			aSth.setString(1, strainID);
 			aSth.setString(2, projectID);
+			anObj.makeNewWithAutonumber(aSth);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return anObj;
+	}
+
+	/**
+	 * Creates a new inoculation record in the specified project. 
+	 * This method should be used to ensure data security of new objects.
+	 * 
+	 * @param projectID ID of the project.
+	 * @throws DataException
+	 */
+	public static Inoc createInProject(SQLData data, String strainID, String projectID, BigDecimal volume, String media) throws DataException {
+		SQLInoc anObj = new SQLInoc(data);
+		try { 
+			PreparedStatement aSth = anObj.myData.prepareStatement(SQL_INSERT_WITH_PROJECT_VOL_MEDIA);
+			aSth.setString(1, strainID);
+			aSth.setString(2, projectID);
+			BigInteger unscaledValue = volume.unscaledValue();
+			aSth.setLong(3, unscaledValue.longValue());
+			aSth.setInt(4, -1 * volume.scale());
+			aSth.setString(5, media);
 			anObj.makeNewWithAutonumber(aSth);
 		} catch (SQLException e) {
 			throw new DataException(e);
