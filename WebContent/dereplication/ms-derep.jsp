@@ -55,6 +55,7 @@ org.openscience.cdk.tools.MFAnalyser" %>
 			query.append(String.format("ABS(%s - (%s %s %.5f)) < %.5f", mass, column, sign, anAnalyzer.getMass(), diff));
 		}
 	}
+	query.append(")");
 } %><div class="showSection" id="div_msdata">
 <p align="CENTER">
 <% String msmode = request.getParameter("msMode"); %>

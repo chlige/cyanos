@@ -17,6 +17,7 @@ import java.util.ListIterator;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
@@ -66,6 +67,13 @@ public class DereplicationServlet extends ServletObject {
 		}
 	}
 
+	private void handleRequest(HttpServletRequest request, HttpServletResponse resp) {
+		
+		
+//		request.setParameter("derep-forms", this.dereplicationForms(aWrap));
+		
+	}
+	
 	public void display(CyanosWrapper aWrap) throws Exception {
 		
 		PrintWriter out = aWrap.startHTMLDoc("Dereplication");
@@ -221,6 +229,15 @@ public class DereplicationServlet extends ServletObject {
 
 	}
 	
+	public static StringBuffer getJoinBuffer(HttpServletRequest request) {
+		Object buffer = request.getAttribute("derep-join");
+		if (buffer == null || ! (buffer instanceof StringBuffer) ) {
+			buffer = new StringBuffer();
+			request.setAttribute("derep-join", buffer);
+		}
+		return (StringBuffer)buffer;
+	}
+	
 	private List<DereplicationForm> dereplicationForms(CyanosWrapper aWrap) {
 		List<DereplicationForm> myForms = new ArrayList<DereplicationForm>();
 		ListIterator<Class> anIter = this.derepForms.listIterator();
@@ -236,7 +253,6 @@ public class DereplicationServlet extends ServletObject {
 				e.printStackTrace();
 			}
 		}
-		
 		return myForms;
 	}
 /*		
@@ -474,10 +490,26 @@ public class DereplicationServlet extends ServletObject {
 		return HELP_MODULE;
 	}
 	
+	public static void addQuery(HttpServletRequest request, String query) {
+		StringBuffer queryBuffer = getQuery(request);
+		if ( queryBuffer.length() > 0 )
+			queryBuffer.append(" AND ");
+		queryBuffer.append(query);
+	}
+	
+	public static void addTable(HttpServletRequest request, String table, String onclause) {
+		StringBuffer buffer = getJoinBuffer(request);
+		buffer.append(" JOIN ");
+		buffer.append(table);
+		buffer.append(" ON (");
+		buffer.append(onclause);
+		buffer.append(")");
+	}
+	
 	public static StringBuffer getQuery(HttpServletRequest request) {
 		Object query = request.getAttribute(DereplicationServlet.QUERY_ATTRIBUTE);
 		if ( query == null ) {
-			query = new StringBuffer();
+			query = new StringBuffer("SELECT DISTINCT compound.* FROM compound ");
 			request.setAttribute(QUERY_ATTRIBUTE, query);
 		}
 		if ( query instanceof StringBuffer ) {
@@ -485,6 +517,17 @@ public class DereplicationServlet extends ServletObject {
 		}
 		return null;
 	}
-		
+	
+	public static StringBuffer getHaving(HttpServletRequest request) {
+		Object buffer = request.getAttribute("derep-having");
+		if ( buffer == null ) {
+			buffer = new StringBuffer(" HAVING ");
+			request.setAttribute("derep-having", buffer);
+		}
+		if ( buffer instanceof StringBuffer ) {
+			return (StringBuffer)buffer;
+		}
+		return null;
+	}
 
 }
