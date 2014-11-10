@@ -104,14 +104,14 @@ public abstract class CyanosObject {
 				String[] units = scale.split(" */ *");
 				switch (units[0].charAt(0)) {
 				case KILO_CHAR:	power = 3; break;
-				case MILLI_CHAR:	power = -3; break;
+				case MILLI_CHAR: power = -3; break;
 				case MICRO_CHAR: 
 				case 'u':	power = -6; break;
 				}
 				if ( units.length == 2 ) {
 					switch (units[1].charAt(0)) {
 					case KILO_CHAR:	power -= 6; break;
-					case MILLI_CHAR: 	break;
+					case MILLI_CHAR: break;
 					case MICRO_CHAR:
 					case 'u':	power += 3; break;
 					case 'n':	power += 6; break;
