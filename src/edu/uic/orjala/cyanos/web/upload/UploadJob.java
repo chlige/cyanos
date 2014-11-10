@@ -23,7 +23,7 @@ import edu.uic.orjala.cyanos.web.servlet.UploadServlet;
  * @author George Chlipala
  *
  */
-public abstract class UploadJob extends Job implements Runnable {
+public abstract class UploadJob extends Job {
 	
 	public final static String ERROR_TAG = "<FONT COLOR='red'><B>ERROR:</FONT></B> ";
 	public final static String FAILED_TAG = "<FONT COLOR='red'><B>FAILED:</FONT></B> ";

@@ -7,7 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Role;
@@ -18,7 +20,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
  * @author George Chlipala
  *
  */
-public class Job {
+public class Job implements Runnable {
 
 	protected String id;
 	protected String owner;
@@ -43,7 +45,7 @@ public class Job {
 	}
 
 	private final static String SQL_SELECT = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate,output_type FROM jobs WHERE job_id=?";
-
+	
 	private Job(SQLData data, ResultSet results) throws SQLException {
 		this(data);
 		this.id = results.getString(1);
@@ -76,6 +78,26 @@ public class Job {
 			throw new DataException(e);
 		}
 	}
+	
+	private final static String SQL_OLD_JOBS = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate,output_type FROM jobs WHERE owner=? AND endDate IS NOT NULL";
+
+	public static List<Job> oldJobs(SQLData data) throws DataException {
+		List<Job> jobList = new ArrayList<Job>();
+		try {
+			PreparedStatement sth = data.prepareStatement(SQL_OLD_JOBS);
+			sth.setString(1, data.getUser().getUserID() );
+			ResultSet results = sth.executeQuery();
+			while ( results.next() ) {
+				jobList.add(new Job(data, results));
+			}
+			results.close();
+			sth.close();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return jobList;
+	}
+	
 	
 	private final static String SQL_INSERT_JOB = "INSERT INTO jobs(job_type,owner) VALUES(?,?)";
 	
@@ -192,5 +214,11 @@ public class Job {
 	public void close() throws DataException {
 		this.myData.close();
 		this.myData.closeDBC();
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 }
