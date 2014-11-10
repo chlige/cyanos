@@ -168,6 +168,9 @@ public class FractionUpload extends UploadJob {
 							if ( mySep.getSources().first() ) {
 								this.setFractionNames(mySep, useLabel, frLabelFormat);
 								this.messages.append("<P ALIGN='CENTER'><A HREF='../separation?id=" + mySep.getID() + "'>New Separation</A></P>");	
+								this.messages.append(resultList.toString());
+								resultList = new HtmlList();
+								resultList.unordered();
 								this.myData.commit();
 								this.myData.releaseSavepoint(mySave);
 								mySave = this.myData.setSavepoint("fraction_upload");

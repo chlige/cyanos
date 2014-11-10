@@ -20,6 +20,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.web.BaseForm;
+import edu.uic.orjala.cyanos.web.SheetValue;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
 
 /**
@@ -224,7 +225,11 @@ public class AssayUploadJob extends UploadJob {
 							}
 
 							if ( valueCol > -1 ) {
-								myData.setActivity(this.worksheet.getStringValue(valueCol));
+								SheetValue value = this.worksheet.getValue(valueCol);
+								if ( value.isNumber() )
+									myData.setActivity(value.getNumber().toString());
+								else 
+									myData.setActivity(this.worksheet.getStringValue(valueCol));
 							}
 							if ( stdevCol > -1 ) {
 								myData.setStdev(this.worksheet.getStringValue(stdevCol));
