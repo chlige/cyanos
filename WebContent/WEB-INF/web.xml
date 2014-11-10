@@ -364,6 +364,7 @@
       <url-pattern>/upload/*</url-pattern>
       <url-pattern>/doc/*</url-pattern>
       <url-pattern>/file/manager/*</url-pattern>
+      <url-pattern>/jobs.sh</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>

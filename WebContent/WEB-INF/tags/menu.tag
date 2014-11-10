@@ -16,6 +16,7 @@
 
 <% 	if ( request.getRemoteUser() != null ) { 
 %><li><a href='<%= contextPath %>/upload.jsp'>Upload Data</a></li>
+<li><a href="<%= contextPath %>/jobs.jsp">Job Status</a></li>
 <li><a href='<%= contextPath %>/logout.jsp'>Logout</a></li>
 <%		if ( request.isUserInRole("admin") ) { 
 %>
