@@ -19,6 +19,7 @@ import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLUser;
 import edu.uic.orjala.cyanos.web.GuestUser;
+import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
@@ -112,6 +113,8 @@ public class CyanosRequestListener implements ServletRequestListener {
 		Object obj = request.getAttribute(UPLOADS);
 		if ( obj instanceof UploadManager ) {
 			return ((UploadManager) obj).getFileCount(name);
+		} else if ( request instanceof MultiPartRequest ) {
+			return ((MultiPartRequest) request).getUploadCount(name);
 		}
 		return 0;		
 	}
