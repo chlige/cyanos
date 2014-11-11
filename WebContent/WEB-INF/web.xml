@@ -364,7 +364,7 @@
       <url-pattern>/upload/*</url-pattern>
       <url-pattern>/doc/*</url-pattern>
       <url-pattern>/file/manager/*</url-pattern>
-      <url-pattern>/jobs.sh</url-pattern>
+      <url-pattern>/jobs.jsp</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
@@ -413,8 +413,9 @@
       <url-pattern>/upload/fraction/*</url-pattern>
       <url-pattern>/separation/*</url-pattern>
       <url-pattern>/compound/*</url-pattern>
-      <url-pattern>/dereplication</url-pattern>
-    </web-resource-collection>
+      <url-pattern>/dereplication/*</url-pattern>
+      <url-pattern>/dereplication.jsp</url-pattern>
+      </web-resource-collection>
     <auth-constraint>
       <role-name>sample</role-name>
     </auth-constraint>
