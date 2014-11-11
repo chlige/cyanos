@@ -11,6 +11,7 @@ import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -656,7 +657,7 @@ public class CompoundServlet extends ServletObject {
 			setAttribute(req, FIELD_NAME, compound, SQLCompound.NAME_COLUMN, updateValues);
 			setAttribute(req, FIELD_NOTES, compound, SQLCompound.NOTES_COLUMN, updateValues);
 			setAttribute(req, FIELD_PROJECT, compound, SQLCompound.PROJECT_COLUMN, updateValues);
-
+			
 			if ( CyanosRequestListener.getUploadCount(req, MDL_FILE) > 0 ) {
 				updateCompoundUpload(req, compound);
 			} else {	
@@ -697,57 +698,77 @@ public class CompoundServlet extends ServletObject {
 		req.setAttribute(ATTR_UPDATE_MAP, updateValues);
 	}
 	
+	private static void updateCompoundUpload(Compound compound, Molecule molecule, String mdlData) throws DataException, UnsupportedOperationException, SOAPException, ClassNotFoundException, IOException, CDKException {
+		// TODO should communicate this to the end user.
+		//			if ( aCMLFile.getChemSequenceCount() > 1 ) {
+		//				output.append("<P><B><FONT COLOR='orange'>WARNING:</FONT> Multiple molecules in this file. Using first molecule</B></P>");
+		//			}
+		compound.setMDLData(mdlData);
+		compound.setInChiString(InchiGenerator.getMOLKey(mdlData));
+		compound.setInChiKey(InchiGenerator.getInChiKey(compound.getInChiString()));
+
+		SmilesGenerator smileGen = new SmilesGenerator();
+		smileGen.setUseAromaticityFlag(true);
+		compound.setSmilesString(smileGen.createSMILES(molecule));
+
+		// For CDK v1.0.4
+		HydrogenAdder hAdder = new HydrogenAdder(new ValencyChecker());
+		hAdder.addExplicitHydrogensToSatisfyValency(molecule);
+		MFAnalyser formulaMaker = new MFAnalyser(molecule);
+
+		//CDK v.1.2.3
+		/*		
+				IMolecularFormula aFormula = MolecularFormulaManipulator.getMolecularFormula(aMolecule);
+		 */
+		// for CDK v1.0.4		
+		compound.setFormula(formulaMaker.getMolecularFormula());
+		BigDecimal mass = new BigDecimal(formulaMaker.getNaturalMass());
+		mass = mass.setScale(4, BigDecimal.ROUND_HALF_UP);
+		compound.setAverageMass(mass);
+
+		mass = new BigDecimal(formulaMaker.getMass());
+		mass = mass.setScale(5, BigDecimal.ROUND_HALF_UP);
+		compound.setMonoisotopicMass(mass);
+		// CDK v1.2.3
+		/*	   
+	  		compound.setFormula(MolecularFormulaManipulator.getHillString(aFormula));
+		    compound.setAverageMass(MolecularFormulaManipulator.getNaturalExactMass(aFormula));
+		    compound.setMonoisotopicMass(MolecularFormulaManipulator.getMajorIsotopeMass(aFormula));
+		 */
+		
+	}
+	
 	private static void updateCompoundUpload(HttpServletRequest req, Compound compound) throws IOException, CDKException, DataException, UnsupportedOperationException, SOAPException, ClassNotFoundException, ServletException {
+		String mdlData = null;
+		Molecule molecule = null;
+		String reqFormat = req.getParameter(FIELD_FILE_FORMAT);
+		
+		if ( req instanceof MultiPartRequest ) {
+			edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload file = ((MultiPartRequest)req).getUpload(MDL_FILE);
+			molecule = getMolecule(file.getStream(), file.getContentType(), reqFormat);
+			mdlData = file.getString();
+		}
+		
 		FileUpload mdlUpload = getUpload(req, MDL_FILE);
 		if ( mdlUpload != null ) {
-			ChemFile aCMLFile = new ChemFile();
-			String reqFormat = req.getParameter(FIELD_FILE_FORMAT);
-			if ( mdlUpload.getContentType().equals("chemical/x-mdl-molfile") || 
-					( reqFormat != null && reqFormat.equals(FORMAT_MDL) && (! mdlUpload.getContentType().equals("chemical/x-cml"))) ) {
-				MDLReader aReader = new MDLReader(mdlUpload.getStream());
-				aCMLFile = (ChemFile) aReader.read(aCMLFile);									
-			} else {
-				CMLReader aCMLReader = new CMLReader(mdlUpload.getStream());
-				aCMLFile = (ChemFile) aCMLReader.read(aCMLFile);									
-			}
-			// TODO should communicate this to the end user.
-			//			if ( aCMLFile.getChemSequenceCount() > 1 ) {
-			//				output.append("<P><B><FONT COLOR='orange'>WARNING:</FONT> Multiple molecules in this file. Using first molecule</B></P>");
-			//			}
-			Molecule molecule = (Molecule) aCMLFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
-			compound.setMDLData(mdlUpload.toString());
-			compound.setInChiString(InchiGenerator.getMOLKey(mdlUpload.toString()));
-			compound.setInChiKey(InchiGenerator.getInChiKey(compound.getInChiString()));
-
-			SmilesGenerator smileGen = new SmilesGenerator();
-			smileGen.setUseAromaticityFlag(true);
-			compound.setSmilesString(smileGen.createSMILES(molecule));
-
-			// For CDK v1.0.4
-			HydrogenAdder hAdder = new HydrogenAdder(new ValencyChecker());
-			hAdder.addExplicitHydrogensToSatisfyValency(molecule);
-			MFAnalyser formulaMaker = new MFAnalyser(molecule);
-
-			//CDK v.1.2.3
-			/*		
- 				IMolecularFormula aFormula = MolecularFormulaManipulator.getMolecularFormula(aMolecule);
-			 */
-			// for CDK v1.0.4		
-			compound.setFormula(formulaMaker.getMolecularFormula());
-			BigDecimal mass = new BigDecimal(formulaMaker.getNaturalMass());
-			mass = mass.setScale(4, BigDecimal.ROUND_HALF_UP);
-			compound.setAverageMass(mass);
-
-			mass = new BigDecimal(formulaMaker.getMass());
-			mass = mass.setScale(5, BigDecimal.ROUND_HALF_UP);
-			compound.setMonoisotopicMass(mass);
-			// CDK v1.2.3
-			/*	   
-		  		compound.setFormula(MolecularFormulaManipulator.getHillString(aFormula));
-			    compound.setAverageMass(MolecularFormulaManipulator.getNaturalExactMass(aFormula));
-			    compound.setMonoisotopicMass(MolecularFormulaManipulator.getMajorIsotopeMass(aFormula));
-			 */
+			molecule = getMolecule(mdlUpload.getStream(), mdlUpload.getContentType(), reqFormat);
+			mdlData = mdlUpload.getString();
 		}
+		if ( molecule != null && mdlData != null )
+			updateCompoundUpload(compound, molecule, mdlData);
+	}
+	
+	private static Molecule getMolecule(InputStream stream, String contentType, String reqFormat ) throws CDKException {
+		ChemFile aCMLFile = new ChemFile();
+		if ( contentType.equals("chemical/x-mdl-molfile") || 
+				( reqFormat != null && reqFormat.equals(FORMAT_MDL) && (! contentType.equals("chemical/x-cml"))) ) {
+			MDLReader aReader = new MDLReader(stream);
+			aCMLFile = (ChemFile) aReader.read(aCMLFile);									
+		} else {
+			CMLReader aCMLReader = new CMLReader(stream);
+			aCMLFile = (ChemFile) aCMLReader.read(aCMLFile);									
+		}
+		return (Molecule) aCMLFile.getChemSequence(0).getChemModel(0).getMoleculeSet().getMolecule(0);
 	}
 	
 	private static Molecule getMolecule(Compound compound) throws DataException, CDKException {

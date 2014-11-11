@@ -13,7 +13,7 @@
 	java.util.Set" %>
 <% 	String contextPath = request.getContextPath();
 	Compound compoundObj = (Compound) request.getAttribute(CompoundServlet.COMPOUND_OBJ); 	
-	boolean update = request.getParameter("updateCompound") != null;
+	boolean update = request.getParameter("updateCompound") != null;	
 	Set<String> updateMap = (Set<String>) request.getAttribute(CompoundServlet.ATTR_UPDATE_MAP);
 	if ( compoundObj == null ) { %>
 <p align='center'><b>ERROR:</b> Object not passed</p>
@@ -22,6 +22,11 @@
 <% out.flush(); return; } 	boolean hasMDL = compoundObj.hasMDLData(); %>
 <div CLASS="showSection" ID="view_info">
 <% if ( hasMDL ) { 
+	if ( request.getParameter(CompoundServlet.CLEAR_ACTION) != null ) {
+		compoundObj.clearMDLData();
+		hasMDL = true;
+	}
+
 	if ( request.getParameter("genGraph") != null ) {
 //		try {
 		((SQLCompound)compoundObj).updateGraph();
@@ -96,7 +101,7 @@ None
 <tr><td>Name:</td><td><input type='text' name='<%= CompoundServlet.FIELD_NAME %>' value='<%= compoundObj.getName() %>'></td></tr>
 <tr><td>Structure:</td>
 <% if ( hasMDL )  { %>
-<td><button type="button" name="<%= CompoundServlet.CLEAR_ACTION %>" onClick="updateForm(this,'<%= CompoundServlet.INFO_FORM_DIV_ID %>')">Clear Structure Data</button></td>
+<td><button type="submit" name="<%= CompoundServlet.CLEAR_ACTION %>" <%-- onClick="updateForm(this,'<%= CompoundServlet.INFO_FORM_DIV_ID %>')" --%>>Clear Structure Data</button></td>
 <% } else { %>
 <td><select name="<%= CompoundServlet.FIELD_FILE_FORMAT %>">
 <option value="<%= CompoundServlet.FORMAT_MDL %>">MDL Format</option>

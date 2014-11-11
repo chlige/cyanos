@@ -41,6 +41,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.GuestUser;
+import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.JobManager;
 import edu.uic.orjala.cyanos.web.ServletWrapper;
 import edu.uic.orjala.cyanos.web.SheetWriter;
@@ -756,6 +757,14 @@ public abstract class ServletObject extends HttpServlet {
 	public static boolean hasActiveJobs(HttpSession session) {
 		JobManager manager = CyanosSessionListener.getJobManager(session);
 		return manager.hasActiveJobs();
+	}
+	
+	public static JobManager getJobManager(HttpSession session) {
+		return CyanosSessionListener.getJobManager(session);
+	}
+	
+	public static void addJob(HttpSession session, Job job) {
+		CyanosSessionListener.addJob(session, job);
 	}
 
 }
