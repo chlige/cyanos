@@ -21,7 +21,7 @@ function jobStatus(jobID) {
   	}
   	
 	if (xmlHttp != null) {
- 		xmlHttp.open("GET", "status?jobid=" + jobID, false);
+ 		xmlHttp.open("GET", "upload/status?jobid=" + jobID, false);
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
  			var jobDIV = document.getElementById('job-' + jobID);
@@ -84,7 +84,7 @@ function jobStatus(jobID) {
   margin-right: auto;
 }
 
-#progressBar {
+.progressBar {
   position: absolute;
   top: 0;
   left: 0;
@@ -92,7 +92,7 @@ function jobStatus(jobID) {
   background: #FFCC00;
 }
 
-#progressText {
+.progressText {
   position: absolute;
   top: 0;
   left: 0;
@@ -147,10 +147,7 @@ Started: <%= UploadServlet.DATETIME_FORMAT.format(job.getStartDate()) %><br>
 Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) {%><%= UploadServlet.DATETIME_FORMAT.format(endDate) %><br>
 <% } else { %><br><div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div><% } %>
 <a href="jobs.jsp?jobid=<%= job.getID() %>" style="margin-left:auto; margin-right:auto; text-align:center; <%= ( endDate == null ? "display:none" : "") %>">View Job Results</a>
-<script>
-	var updatePath = "<%= request.getContextPath() %>/upload/status";
-	uploadStatus(updatePath, document.getElementById("resultButton"));
-</script>
+<script>jobStatus("<%= job.getID() %>");</script>
 </div>
 <% } 
 	} else { %><p style="text-align:center; font-weight:bold;">No Active Jobs</p>
