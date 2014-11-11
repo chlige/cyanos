@@ -77,7 +77,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 		double ycoord;
 		double zcoord;
 		String symbol;
-		int charge; 
+		int charge = 0;
 		int valence;
 		int Z;
 		
@@ -104,7 +104,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			this.valence = Integer.parseInt(line.substring(48, 51).trim());
 			if ( this.valence == 0 ) {
 				this.valence = this.getValence(Z);
-				System.out.format("Element (%s) Valence(%d)\n", this.symbol, this.valence);
+//				System.out.format("Element (%s) Valence(%d)\n", this.symbol, this.valence);
 			}
 		}
 		
@@ -138,7 +138,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			for ( Bond bond : bonds ) {
 				totalBonds = totalBonds + bond.bondOrder;
 			}
-			return (8 - valence) - Math.round(totalBonds);
+			return (8 - valence) - Math.round(totalBonds) + charge;
 		}
 	}
 
@@ -262,6 +262,13 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	public static SQLCompound compoundsWhere(SQLData data, String whereString, String column, String sortDirection) throws DataException {
 		SQLCompound newObj = new SQLCompound(data);
 		String sqlString = String.format(SQL_LOAD_WHERE, whereString, column, sortDirection);
+		newObj.loadSQL(sqlString);
+		return newObj;
+	}
+	
+	public static SQLCompound compoundQuery(SQLData data, String sqlQuery) throws DataException {
+		SQLCompound newObj = new SQLCompound(data);
+		String sqlString = "SELECT DISTINCT compound.* FROM compound ".concat(sqlQuery);
 		newObj.loadSQL(sqlString);
 		return newObj;
 	}
@@ -586,10 +593,10 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 				if ( line.startsWith("M  CHG") ) {
 					int count = Integer.parseInt(line.substring(6,9).trim());
 					for ( int i = 0; i < count; i++ ) {
-						int pos = 9 + (i * 7);
-						int index = Integer.parseInt(line.substring(pos, pos + 3).trim());
+						int pos = 9 + (i * 8);
+						int index = Integer.parseInt(line.substring(pos+1, pos + 4).trim());
 						Atom atom = atomList.get(index - 1);
-						atom.charge = Integer.parseInt(line.substring(pos + 4, pos + 7).trim());
+						atom.charge = Integer.parseInt(line.substring(pos + 5, pos + 8).trim());
 					}
 				}
 			}
@@ -607,6 +614,8 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 					sth.setDouble(6, atom.zcoord);
 					sth.setInt(7, atom.charge);
 					sth.setInt(8, atom.getHCount(atomList));
+					System.err.format("Atom: %d (%s) %d H\n", atom.index, 
+							atom.symbol, atom.getHCount(atomList));
 					sth.addBatch();
 				}
 			}
