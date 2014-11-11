@@ -17,7 +17,7 @@ import edu.uic.orjala.cyanos.web.Job;
  * @author George Chlipala
  *
  */
-public class RebuidCompoundGraphJob extends Job {
+public class RebuildCompoundGraphJob extends Job {
 	
 	private static final String THREAD_LABEL = "regenCompoundGraph";
 	protected int todos = 0;
@@ -26,8 +26,9 @@ public class RebuidCompoundGraphJob extends Job {
 	/**
 	 * @param data
 	 */
-	public RebuidCompoundGraphJob(SQLData data) {
+	public RebuildCompoundGraphJob(SQLData data) {
 		super(data);
+		this.type = "Rebuild Chemical Structure Index";
 	}
 	
 	/**
@@ -64,6 +65,7 @@ public class RebuidCompoundGraphJob extends Job {
 				this.myData.commit();
 				this.myData.releaseSavepoint(savepoint);
 				this.messages.append(" <b>Updated</b><br>");
+				this.done++;
 			}
 		} catch (Exception e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
@@ -92,7 +94,7 @@ public class RebuidCompoundGraphJob extends Job {
 				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION COMPLETE</B> CHANGES COMMITTED.</P>"); 
 			} else { 
 				this.myData.rollback(); 
-				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Upload incomplete!</P>"); 
+				this.messages.append("<P ALIGN='CENTER'><B>EXECUTION HALTED</B> Job incomplete!</P>"); 
 			}
 			this.update();
 			this.myData.close();
