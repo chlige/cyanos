@@ -2,8 +2,8 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.DereplicationServlet,
 edu.uic.orjala.cyanos.sql.SQLCompound,
 org.openscience.cdk.Molecule,
-org.openscience.cdk.tools.MFAnalyser" %>
-<div class="selectSection">
+org.openscience.cdk.tools.MFAnalyser, java.util.List, java.util.ArrayList" %>
+<div class="selectSection" >
 <a class="twist">
 <input type="checkbox" name="msdata" onclick="selectDiv(this)" <%= request.getParameter("msdata") != null ? "checked" : "" %>> Mass Spec</a>
 <% if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request.getParameter("msdata") != null ) {
@@ -56,7 +56,7 @@ org.openscience.cdk.tools.MFAnalyser" %>
 		}
 	}
 	query.append(")");
-} %><div class="showSection" id="div_msdata">
+} %><div class="<%= request.getParameter("msdata") != null ? "show" : "hide" %>Section" id="div_msdata">
 <p align="CENTER">
 <% String msmode = request.getParameter("msMode"); %>
 <select name="msMode">
@@ -70,14 +70,25 @@ org.openscience.cdk.tools.MFAnalyser" %>
 <option value="Da" <%= "Da".equals(diffUnit) ? "selected" : ""%>>Da</option>
 </select></p>
 
-<h3>Adducts</h3>
-<% String[] adducts = request.getParameterValues("adduct"); %>
-<table>
+<h3 style="text-align:center">Adducts</h3>
+<% String[] adducts = request.getParameterValues("adduct");  
+	List<String> addList = new ArrayList<String>(5);
+	
+	if ( adducts != null ) {
+		for ( String adduct : adducts) {
+			addList.add(adduct);	
+		}
+	} else {
+		addList.add("M");
+		addList.add("H");
+	}
+%>
+<table align="center">
 <tbody>
-<tr align="center"><td>M<input type="checkbox" name="adduct" value="M"></td>
-<td>H<input type="checkbox" name="adduct" value="H"></td>
-<td>Na<input type="checkbox" name="adduct" value="Na"></td>
-<td>NH<sub>4</sub><input type="checkbox" name="adduct" value="NH4"></td>
-<td>K<input type="checkbox" name="adduct" value="K"></td>
+<tr align="center"><td>M<input type="checkbox" name="adduct" value="M" <%= ( addList.contains("M") ? "checked" : "") %>></td>
+<td>&plusmn;H<input type="checkbox" name="adduct" value="H" <%= ( addList.contains("H") ? "checked" : "") %>></td>
+<td>Na<input type="checkbox" name="adduct" value="Na" <%= ( addList.contains("Na") ? "checked" : "") %>></td>
+<td>NH<sub>4</sub><input type="checkbox" name="adduct" value="NH4" <%= ( addList.contains("NH4") ? "checked" : "") %>></td>
+<td>K<input type="checkbox" name="adduct" value="K" <%= ( addList.contains("K") ? "checked" : "") %>></td>
 <td>Custom: <input type="text" name="customAdduct"></td></tr></tbody></table>
 </div></div>
