@@ -11,7 +11,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Cyanos Database v<%= MainServlet.versionString() %>">
+<cyanos:header title="Cyanos Database v1.6">
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
@@ -61,7 +61,7 @@
 </div>
 
 <div class="right75">
-<h1 style="text-align:center">Cyanos Database v<%= MainServlet.versionString() %></h1>
+<h1 style="text-align:center">Cyanos Database v1.6</h1>
 <hr width="85%">
 <% 	News news = (News) request.getAttribute(MainServlet.ATTR_NEWS); 
 	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter");
@@ -75,6 +75,7 @@
 </dl>
 <hr width='85%'/>
 <% } %>
+<%--
 <h2 align="center">Strain Search</h2>
 <center>
 <form name="strainquery" action="strain">
@@ -90,7 +91,26 @@
 </center>
 <jsp:include page="/strain/strain-list.jsp" />
 </div>
+ --%>
+<p style="text-align: left">The CYANOS database system was developed to facilitate data management and mining for natural product drug discovery efforts. 
+The following schematic displays the various object classes that CYANOS can manage and their relationship.  
+Click on an object class to manage the data</p> 
+<p><img src="help/intro01.jpg" width="700" style="display:block; margin-left:auto; margin-right:auto; border: 1px solid gray; padding:5px;" alt="Cyanos Workflow" usemap="#workflow_Map">
+<map name="workflow_Map">
+<area shape="rect" title="Manage Preservation Data" coords="50,232,183,311" href="preserve.jsp">
+<area shape="rect" title="Manage Sample Library Data" coords="229,224,373,312" href="sample">
+<area shape="rect" title="Manage Assay Data" coords="422,232,565,298" href="assay">
+<area shape="rect" title="Manage Compound Data" coords="466,49,700,224" href="compound">
+<area shape="rect" title="Manage Separation Data" coords="265,15,398,83" href="separation">
+<area shape="rect" title="Manage Material Data" coords="265,113,436,202" href="material">
+<area shape="rect" title="Manage Collection Data" coords="109,0,199,83" href="collection">
+<area shape="rect" title="Manage Harvest Data" coords="183,113,245,202" href="harvest">
+<area shape="rect" title="Manage Inoculation Data" coords="79,113,162,190" href="inoc">
+<area shape="rect" title="Manage Strain Data" coords="0,113,70,191" href="strain">
+<area shape="rect" title="Manage Isolation Data" coords="0,34,71,84" href="isolation.jsp">
+</map>
 
+</p>
 </div>
 </body>
 </html>
