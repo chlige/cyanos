@@ -63,11 +63,6 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
-DROP SCHEMA IF EXISTS `cyanos` ;
-CREATE SCHEMA IF NOT EXISTS `cyanos` DEFAULT CHARACTER SET utf8 ;
-SHOW WARNINGS;
-USE `cyanos` ;
-
 -- -----------------------------------------------------
 -- Table `assay`
 -- -----------------------------------------------------
@@ -187,7 +182,7 @@ DROP TABLE IF EXISTS `cryo` ;
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `cryo` (
   `cryo_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `collection` VARCHAR(16) NOT NULL DEFAULT NULL,
+  `collection` VARCHAR(16) NOT NULL DEFAULT '',
   `row` INT(10) NULL DEFAULT '0',
   `col` INT(10) NULL DEFAULT '0',
   `date` DATE NULL DEFAULT '1970-01-01',
@@ -699,13 +694,6 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci
 COMMENT = 'Fractionation Result Infomation';
-
-SHOW WARNINGS;
-CREATE INDEX `fraction_separation_idx` ON `separation_product` (`separation_id` ASC) ;
-
-SHOW WARNINGS;
-CREATE INDEX `fraction_material_idx` ON `separation_product` (`material_id` ASC) ;
-
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
@@ -735,12 +723,6 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_general_ci
 COMMENT = 'Fractionation Source Infomation';
-
-SHOW WARNINGS;
-CREATE INDEX `sep_src_sep_idx` ON `separation_source` (`separation_id` ASC) ;
-
-SHOW WARNINGS;
-CREATE INDEX `sep_src_material_idx` ON `separation_source` (`material_id` ASC) ;
 
 SHOW WARNINGS;
 
@@ -935,6 +917,7 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
   	ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP VIEW IF EXISTS `compound_diatomic`;
 
 CREATE VIEW `compound_diatomic` AS
 SELECT atom1.compound_id, atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", bond.bond_order, atom2.element as "atom2_element", atom2.charge as "atom2_charge", atom2.attached_h as "atom2_H"
@@ -965,13 +948,10 @@ COLLATE = utf8_general_ci
 -- function degreeSign
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `degreeSign`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
-
 
 CREATE FUNCTION `degreeSign`() RETURNS CHAR(1)
 RETURN CHAR(0xB0 USING utf8)$$
@@ -983,13 +963,10 @@ SHOW WARNINGS;
 -- function parseActivity
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `parseActivity`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
-
 
 CREATE FUNCTION `parseActivity`(val VARCHAR(45)) RETURNS float
 RETURN CASE 
@@ -1005,12 +982,10 @@ SHOW WARNINGS;
 -- function lonDMS
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `lonDMS`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
@@ -1023,12 +998,10 @@ SHOW WARNINGS;
 -- function lonDM
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `lonDM`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
@@ -1041,13 +1014,10 @@ SHOW WARNINGS;
 -- function lonD
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `lonD`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
-
 
 CREATE FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN IF ( lon < 0, CONCAT('W ', ABS(ROUND(lon,prec)), degreeSign()), CONCAT('E ', ROUND(lon,prec), degreeSign()))$$
@@ -1059,13 +1029,10 @@ SHOW WARNINGS;
 -- function locationAlpha
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `locationAlpha`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
-
 
 CREATE FUNCTION `locationAlpha`(x_val INT(10), y_val INT(10)) RETURNS varchar(3) CHARSET latin1
 RETURN CONCAT(CHAR(64 + x_val), y_val)$$
@@ -1077,11 +1044,9 @@ SHOW WARNINGS;
 -- function latDMS
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `latDMS`;
 SHOW WARNINGS;
 
-DELIMITER $$
 USE `cyanos`$$
 
 
@@ -1095,12 +1060,10 @@ SHOW WARNINGS;
 -- function latDM
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `latDM`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
@@ -1113,12 +1076,10 @@ SHOW WARNINGS;
 -- function latD
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `latD`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
@@ -1131,12 +1092,10 @@ SHOW WARNINGS;
 -- function isActive
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `isActive`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `isActive`(val VARCHAR(45), act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
@@ -1149,12 +1108,10 @@ SHOW WARNINGS;
 -- function active
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `active`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 
 CREATE FUNCTION `active`(val FLOAT, act_level FLOAT, act_op VARCHAR(2)) RETURNS tinyint(1)
@@ -1173,12 +1130,10 @@ SHOW WARNINGS;
 -- function DMS
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `DMS`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
 
 CREATE FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
@@ -1192,13 +1147,10 @@ SHOW WARNINGS;
 -- function DM
 -- -----------------------------------------------------
 
-USE `cyanos`;
 DROP function IF EXISTS `DM`;
 SHOW WARNINGS;
 
 DELIMITER $$
-USE `cyanos`$$
-
 
 CREATE FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
 RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
@@ -1215,7 +1167,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- Data for table `config`
 -- -----------------------------------------------------
 START TRANSACTION;
-USE `cyanos`;
+
 INSERT INTO `config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2');
 
 COMMIT;
