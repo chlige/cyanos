@@ -218,6 +218,10 @@ public class SQLSeparation extends SQLObject implements Separation {
 		aData.close();
 		return tags;
 	}
+	
+	public static SQLSeparation load(SQLData data, String id) throws DataException {
+		return new SQLSeparation(data, id);
+	}
 
 	public SQLSeparation(SQLData data) {
 		super(data);
