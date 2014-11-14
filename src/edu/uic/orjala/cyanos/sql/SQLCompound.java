@@ -273,6 +273,21 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 		return newObj;
 	}
 	
+	public static SQLCompound compoundQuery(SQLData data, String[] columns, String sqlQuery) throws DataException {
+		SQLCompound newObj = new SQLCompound(data);
+		StringBuffer sqlString = new StringBuffer("SELECT DISTINCT compound.*");
+		if ( columns != null ) {
+			for (String col: columns) {
+				sqlString.append(", ");
+				sqlString.append(col);
+			}
+		}
+		sqlString.append(" FROM compound ");
+		sqlString.append(sqlQuery);
+		newObj.loadSQL(sqlString.toString());
+		return newObj;
+	}
+	
 	/**
 	 * Retrieve compounds for a Strain.
 	 * 

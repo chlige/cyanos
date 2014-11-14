@@ -920,12 +920,52 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
 DROP VIEW IF EXISTS `compound_diatomic`;
 
 CREATE VIEW `compound_diatomic` AS
-SELECT atom1.compound_id, atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", bond.bond_order, atom2.element as "atom2_element", atom2.charge as "atom2_charge", atom2.attached_h as "atom2_H"
+SELECT atom1.compound_id, atom1.atom_number as "atom1_number", atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", bond.bond_order, atom2.atom_number as "atom2_number", atom2.element as "atom2_element", atom2.charge as "atom2_charge", atom2.attached_h as "atom2_H"
 FROM compound_atoms atom1
 JOIN compound_bond_atoms cab1 ON (atom1.compound_id = cab1.compound_id AND atom1.atom_number = cab1.atom_number)
 JOIN compound_bonds bond ON ( atom1.compound_id = bond.compound_id AND cab1.bond_id = bond.bond_id)
 JOIN compound_bond_atoms cab2 ON (atom1.compound_id = cab2.compound_id AND cab2.bond_id = cab1.bond_id AND cab2.atom_number != atom1.atom_number)
 JOIN compound_atoms atom2 ON (atom1.compound_id = atom2.compound_id AND cab2.atom_number = atom2.atom_number);
+
+DROP VIEW IF EXISTS `compound_triatomic`
+
+CREATE VIEW `compound_triatomic` AS
+SELECT atom1.compound_id, atom1.atom_number as "atom1_number", atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", 
+bond1.bond_order as "bond1_order", 
+atom2.atom_number as "atom2_number", atom2.element as "atom2_element", atom2.charge as "atom2_charge", atom2.attached_h as "atom2_H",
+bond2.bond_order as "bond2_order",
+atom3.atom_number as "atom3_number", atom3.element as "atom3_element", atom3.charge as "atom3_charge", atom3.attached_h as "atom3_H"
+FROM compound_atoms atom1
+JOIN compound_bond_atoms cab1 ON (atom1.compound_id = cab1.compound_id AND atom1.atom_number = cab1.atom_number)
+JOIN compound_bonds bond1 ON ( atom1.compound_id = bond1.compound_id AND cab1.bond_id = bond1.bond_id)
+JOIN compound_bond_atoms cab2 ON (atom1.compound_id = cab2.compound_id AND cab2.bond_id = cab1.bond_id AND cab2.atom_number != atom1.atom_number)
+JOIN compound_atoms atom2 ON (atom1.compound_id = atom2.compound_id AND cab2.atom_number = atom2.atom_number)
+JOIN compound_bond_atoms cab3 ON (atom1.compound_id = cab3.compound_id AND cab3.atom_number = atom2.atom_number AND cab3.bond_id != bond1.bond_id)
+JOIN compound_bonds bond2 ON (atom1.compound_id = bond2.compound_id AND bond2.bond_id = cab3.bond_id)
+JOIN compound_bond_atoms cab4 ON (atom1.compound_id = cab4.compound_id AND cab4.bond_id = bond2.bond_id AND cab4.atom_number != atom2.atom_number)
+JOIN compound_atoms atom3 ON (atom1.compound_id = atom3.compound_id AND cab4.atom_number = atom3.atom_number);
+
+DROP TABLE IF EXISTS `elements`;
+
+CREATE TABLE `elements` (
+	`element` VARCHAR(2) NOT NULL,
+	`atomic_number` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	`valence` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0'
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;
+
+INSERT INTO `elements`(`element`,`atomic_number`,`valence`) VALUES('C','6','4'),('N','7','5'),('O','8','6');
+
+DROP VIEW IF EXISTS `compound_atom_valence`;
+
+CREATE VIEW `compound_atom_valence` AS
+SELECT atom.compound_id, atom.atom_number, atom.element, atom.charge, atom.attached_h, elements.valence, count(bond.bond_id) AS "bonds", SUM(bond.bond_order) AS "sum_order"
+FROM compound_atoms atom 
+JOIN elements ON (atom.element = elements.element)
+JOIN compound_bond_atoms cab ON ( atom.compound_id = cab.compound_id AND atom.atom_number = cab.atom_number)
+JOIN compound_bonds bond ON ( atom.compound_id = bond.compound_id AND bond.bond_id = cab.bond_id )
+GROUP BY atom.compound_id, atom.atom_number;
 
 DROP TABLE IF EXISTS `jobs`;
 

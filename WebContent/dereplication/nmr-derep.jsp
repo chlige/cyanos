@@ -9,50 +9,59 @@ if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request
 	DereplicationServlet.parseGraph(request, "ch2_methyl", "compound_diatomic as ch2me", 
 			"ch2me.compound_id = compound.compound_id", 
 			"ch2me.atom1_h = 3 AND ch2me.atom1_element = 'C' AND ch2me.atom2_h=2 AND ch2me.atom2_element = 'C'", 
-			"COUNT(ch2me.atom1_element)");
+			"COUNT(DISTINCT ch2me.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "ch_methyl", "compound_diatomic as chme", 
 			"chme.compound_id = compound.compound_id", 
 			"chme.atom1_h = 3 AND chme.atom1_element = 'C' AND chme.atom2_h=1 AND chme.atom2_element = 'C'", 
-			"COUNT(chme.atom1_element)");
+			"COUNT(DISTINCT chme.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "c_methyl", "compound_diatomic as cme", 
 			"cme.compound_id = compound.compound_id", 
 			"cme.atom1_h = 3 AND cme.atom1_element = 'C' AND cme.atom2_h=0 AND cme.atom2_element = 'C'", 
-			"COUNT(cme.atom1_element)");
+			"COUNT(DISTINCT cme.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "ome", "compound_diatomic as ome", 
 			"ome.compound_id = compound.compound_id", 
 			"ome.atom1_h = 3 AND ome.atom1_element = 'C' AND ome.atom2_element = 'O'", 
-			"COUNT(ome.atom1_element)");
+			"COUNT(DISTINCT ome.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "nme", "compound_diatomic as nme", 
 			"nme.compound_id = compound.compound_id", 
 			"nme.atom1_h = 3 AND nme.atom1_element = 'C' AND nme.atom2_element = 'N'", 
-			"COUNT(nme.atom1_element)");
+			"COUNT(DISTINCT nme.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "exo_me", "compound_diatomic as exoch2", 
 			"exoch2.compound_id = compound.compound_id", 
 			"exoch2.atom1_h = 2 AND exoch2.atom1_element = 'C' AND exoch2.atom2_element = 'C' AND exoch2.bond_order = 2 AND exoch2.atom2_h = 0", 
-			"COUNT(exoch2.atom1_element)");
+			"COUNT(DISTINCT exoch2.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "ene_disub", "compound_diatomic as ene_disub", 
 			"ene_disub.compound_id = compound.compound_id", 
 			"ene_disub.atom1_h = 1 AND ene_disub.atom1_element = 'C' AND ene_disub.atom2_element = 'C' AND ene_disub.bond_order = 2 AND ene_disub.atom2_h = 1", 
-			"COUNT(ene_disub.atom1_element)");
+			"COUNT(DISTINCT ene_disub.atom1_number)");
 	
 	DereplicationServlet.parseGraph(request, "exo_vinyl", "compound_diatomic as vinyl", 
 			"vinyl.compound_id = compound.compound_id", 
 			"vinyl.atom1_h = 2 AND vinyl.atom1_element = 'C' AND vinyl.atom2_element = 'C' AND vinyl.bond_order = 2 AND vinyl.atom2_h = 1", 
-			"COUNT(vinyl.atom1_element)");
+			"COUNT(DISTINCT vinyl.atom1_number)");
 
 	DereplicationServlet.parseGraph(request, "aldehyde", "compound_diatomic as al", 
 			"al.compound_id = compound.compound_id", 
 			"al.atom1_h = 1 AND al.atom1_element = 'C' AND al.atom2_element = 'O' AND al.bond_order = 2", 
-			"COUNT(al.atom1_element)");
+			"COUNT(DISTINCT al.atom1_number)");
+	
+	DereplicationServlet.parseGraph(request, "amide", "compound_triatomic as amide", 
+			"amide.compound_id = compound.compound_id", 
+			"amide.atom1_h = 3 AND amide.atom1_element = 'C' AND amide.atom2_element = 'N' and amide.atom3_element = 'O' AND bond2_order = 2",
+			"COUNT(DISTINCT amide.atom1_number)");
 
-} %>
-<div class="<%= request.getParameter("nmrdata") != null ? "show" : "hide" %>Section" id="div_nmrdata">
+	DereplicationServlet.parseGraph(request, "acetyl", "compound_triatomic as oac", 
+			"oac.compound_id = compound.compound_id", 
+			"oac.atom1_h = 3 AND oac.atom1_element = 'C' AND oac.atom2_element = 'C' and oac.atom3_element = 'O' AND bond2_order = 2",
+			"COUNT(DISTINCT oac.atom1_number)");
+	
+} %><div class="<%= request.getParameter("nmrdata") != null ? "show" : "hide" %>Section" id="div_nmrdata">
 <p align="center" style="font-size:12pt; font-style:italic;">Give number or range for signals observed, e.g. 3, 2-5, or 1+.  Blank fields will be ignored.</p>
 <table class="dashboard">
 <tr><th class="header">Methyl</th><td width="10px"></td><th class="header">sp2 Carbons</th></tr>
