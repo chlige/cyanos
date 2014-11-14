@@ -137,6 +137,15 @@ public class InocServlet extends ServletObject {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		super.doGet(req, res);
 		this.handleRequest(req, res);
+		try {
+			getSQLData(req).close();
+		} catch (DataException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -146,6 +155,15 @@ public class InocServlet extends ServletObject {
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		super.doPost(req, res);
 		this.handleRequest(req, res);
+		try {
+			getSQLData(req).close();
+		} catch (DataException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
@@ -159,19 +177,19 @@ public class InocServlet extends ServletObject {
 		if ( req.getParameter("livesearch") != null ) {
 			this.lsCultureID(req, res);
 		} else if ( divID.equals(HarvestForm.SOURCE_DIV) && req.getParameter("strain") != null ) {
-			req.setAttribute(InocServlet.SEARCHRESULTS_ATTR, SQLInoc.openInocsForStrain(this.getSQLData(req), req.getParameter("strain")));
+			req.setAttribute(InocServlet.SEARCHRESULTS_ATTR, SQLInoc.openInocsForStrain(getSQLData(req), req.getParameter("strain")));
 			this.forwardRequest(req, res, "/harvest/inoc-list.jsp");
 		} else if ( divID.equals(INFO_FORM_DIV_ID) ) {
-			req.setAttribute(ATTR_INOC_OBJECT, SQLInoc.load(this.getSQLData(req), req.getParameter("id")));
+			req.setAttribute(ATTR_INOC_OBJECT, SQLInoc.load(getSQLData(req), req.getParameter("id")));
 			this.forwardRequest(req, res, "/inoc/info-form.jsp");
 		} else if ( divID.equals(CHILDREN_DIV_ID) ) {
-			Inoc thisInoc = SQLInoc.load(this.getSQLData(req), req.getParameter("id"));
+			Inoc thisInoc = SQLInoc.load(getSQLData(req), req.getParameter("id"));
 			req.setAttribute(SEARCHRESULTS_ATTR, thisInoc.getChildren());
 			this.forwardRequest(req, res, "/inoc/inoc-list.jsp");
 		} else if ( divID.equals("addTable") ) {
 			if ( req.getParameter("strain") != null ) {
-				req.setAttribute(StrainServlet.STRAIN_OBJECT, SQLStrain.load(this.getSQLData(req), req.getParameter("strain")));
-				req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.viableInocsForStrain(this.getSQLData(req), req.getParameter("strain")));
+				req.setAttribute(StrainServlet.STRAIN_OBJECT, SQLStrain.load(getSQLData(req), req.getParameter("strain")));
+				req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.viableInocsForStrain(getSQLData(req), req.getParameter("strain")));
 			}
 			this.forwardRequest(req, res, "/inoc/add-form-table.jsp");
 		}
@@ -182,7 +200,7 @@ public class InocServlet extends ServletObject {
 		String field = req.getParameter("livesearch");
 		String[] likeColumns = { SQLStrain.ID_COLUMN };
 		String[] likeValues = { String.format("%s%%", req.getParameter(field)) };
-		Strain strains = SQLStrain.strainsLike(this.getSQLData(req), likeColumns, likeValues, SQLStrain.ID_COLUMN, SQLStrain.ASCENDING_SORT);
+		Strain strains = SQLStrain.strainsLike(getSQLData(req), likeColumns, likeValues, SQLStrain.ID_COLUMN, SQLStrain.ASCENDING_SORT);
 
 		PrintWriter out = res.getWriter();
 		if ( strains.first() ) {
@@ -201,9 +219,9 @@ public class InocServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 
 		if ( jsonType.equals("strain") ) {
-			Strain strain = SQLStrain.load(this.getSQLData(req), req.getParameter("strain"));
+			Strain strain = SQLStrain.load(getSQLData(req), req.getParameter("strain"));
 			if ( strain.first() ) {
-			Inoc myInocs = SQLInoc.viableInocsForStrain(this.getSQLData(req), req.getParameter("strain"));
+			Inoc myInocs = SQLInoc.viableInocsForStrain(getSQLData(req), req.getParameter("strain"));
 			out.println("{");
 			out.print("\"media\": \"");
 			out.print(strain.getDefaultMedia());
@@ -253,16 +271,16 @@ public class InocServlet extends ServletObject {
 			} 
 			
 			if ( req.getParameter("id") != null ) 
-				req.setAttribute(ATTR_INOC_OBJECT, SQLInoc.load(this.getSQLData(req), req.getParameter("id")));	
+				req.setAttribute(ATTR_INOC_OBJECT, SQLInoc.load(getSQLData(req), req.getParameter("id")));	
 			else if ( req.getParameter("query") != null )
-				req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.inocsForStrain(this.getSQLData(req), req.getParameter("query")));
+				req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.inocsForStrain(getSQLData(req), req.getParameter("query")));
 
 			if ( req.getParameter("form") != null ) {
 				String form = req.getParameter("form");
 				if ( form.equals("add") ) {
 					if ( req.getParameter("strain") != null ) {
-						req.setAttribute(StrainServlet.STRAIN_OBJECT, SQLStrain.load(this.getSQLData(req), req.getParameter("strain")));
-						req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.viableInocsForStrain(this.getSQLData(req), req.getParameter("strain")));
+						req.setAttribute(StrainServlet.STRAIN_OBJECT, SQLStrain.load(getSQLData(req), req.getParameter("strain")));
+						req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.viableInocsForStrain(getSQLData(req), req.getParameter("strain")));
 					}					
 					this.forwardRequest(req, res, "/inoc/add.jsp");
 				} else if ( form.equals("kill") ) {
@@ -270,13 +288,13 @@ public class InocServlet extends ServletObject {
 					if ( ids != null ) {
 						List<Inoc> inocs = new ArrayList<Inoc>(ids.length);
 						for ( String id : ids ) {
-							inocs.add(SQLInoc.load(this.getSQLData(req), id));
+							inocs.add(SQLInoc.load(getSQLData(req), id));
 						}
 						req.setAttribute(ATTR_INOC_LIST, inocs); 
 					}
 					this.forwardRequest(req, res, "/inoc/kill-form.jsp");
 				} else if ( form.equals("harvest") ) {
-					req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.openInocsForStrain(this.getSQLData(req), req.getParameter("strain")));
+					req.setAttribute(SEARCHRESULTS_ATTR, SQLInoc.openInocsForStrain(getSQLData(req), req.getParameter("strain")));
 					this.forwardRequest(req, res, "/harvest/add-harvest.jsp");
 				}
 			} else {
