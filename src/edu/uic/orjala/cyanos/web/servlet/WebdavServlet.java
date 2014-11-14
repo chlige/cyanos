@@ -26,12 +26,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -64,6 +66,22 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import edu.uic.orjala.cyanos.Assay;
+import edu.uic.orjala.cyanos.Compound;
+import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.DataFileObject;
+import edu.uic.orjala.cyanos.Material;
+import edu.uic.orjala.cyanos.Sample;
+import edu.uic.orjala.cyanos.Separation;
+import edu.uic.orjala.cyanos.Strain;
+import edu.uic.orjala.cyanos.sql.SQLAssay;
+import edu.uic.orjala.cyanos.sql.SQLCompound;
+import edu.uic.orjala.cyanos.sql.SQLData;
+import edu.uic.orjala.cyanos.sql.SQLMaterial;
+import edu.uic.orjala.cyanos.sql.SQLSample;
+import edu.uic.orjala.cyanos.sql.SQLSeparation;
+import edu.uic.orjala.cyanos.sql.SQLStrain;
 
 
 
@@ -323,8 +341,7 @@ public class WebdavServlet extends ServletObject {
             documentBuilder.setEntityResolver(
                     new WebdavResolver(this.getServletContext()));
         } catch(ParserConfigurationException e) {
-            throw new ServletException
-                (sm.getString("webdavservlet.jaxpfailed"));
+            throw new ServletException("webdavservlet.jaxpfailed");
         }
         return documentBuilder;
     }
@@ -420,8 +437,7 @@ public class WebdavServlet extends ServletObject {
     	        String headerValue = request.getHeader("If-Match");
     	        if (headerValue != null) {
     	            if (headerValue.indexOf('*') == -1) {
-    	                StringTokenizer commaTokenizer = new StringTokenizer
-    	                    (headerValue, ",");
+    	                StringTokenizer commaTokenizer = new StringTokenizer(headerValue, ",");
     	                boolean conditionSatisfied = false;
     	                while (!conditionSatisfied && commaTokenizer.hasMoreTokens()) {
     	                    String currentToken = commaTokenizer.nextToken();
@@ -534,11 +550,10 @@ public class WebdavServlet extends ServletObject {
      *
      * @param request The servlet request we are processing
      */
-    protected String getRelativePath(HttpServletRequest request) {
+    protected static String getRelativePath(HttpServletRequest request) {
         // Are we being processed by a RequestDispatcher.include()?
         if (request.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR) != null) {
-            String result = (String) request.getAttribute(
-                                            Globals.INCLUDE_PATH_INFO_ATTR);
+            String result = (String) request.getAttribute(Globals.INCLUDE_PATH_INFO_ATTR);
             if ((result == null) || (result.equals("")))
                 result = "/";
             return (result);
@@ -557,8 +572,7 @@ public class WebdavServlet extends ServletObject {
     /**
      * Determines the prefix for standard directory GET listings.
      */
-    @Override
-    protected String getPathPrefix(final HttpServletRequest request) {
+    protected static String getPathPrefix(final HttpServletRequest request) {
         // Repeat the servlet path (e.g. /webdav/) in the listing path
         String contextPath = request.getContextPath();
         if (request.getServletPath() !=  null) {
@@ -581,30 +595,17 @@ public class WebdavServlet extends ServletObject {
 
         resp.addHeader("DAV", "1,2");
 
-        StringBuffer methodsAllowed = determineMethodsAllowed(resources,
-                                                              req);
+        StringBuffer methodsAllowed = determineMethodsAllowed(req);
 
         resp.addHeader("Allow", methodsAllowed.toString());
         resp.addHeader("MS-Author-Via", "DAV");
 
     }
 
-
     /**
      * PROPFIND Method.
      */
-    protected void doPropfind(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (!listings) {
-            // Get allowed methods
-            StringBuffer methodsAllowed = determineMethodsAllowed(resources,
-                                                                  req);
-
-            resp.addHeader("Allow", methodsAllowed.toString());
-            resp.sendError(WebdavStatus.SC_METHOD_NOT_ALLOWED);
-            return;
-        }
+    protected void doPropfind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String path = getRelativePath(req);
         if (path.endsWith("/"))
@@ -701,43 +702,7 @@ public class WebdavServlet extends ServletObject {
         }
 
         boolean exists = true;
-        Object object = null;
-        try {
-            object = resources.lookup(path);
-        } catch (NamingException e) {
-            exists = false;
-            int slash = path.lastIndexOf('/');
-            if (slash != -1) {
-                String parentPath = path.substring(0, slash);
-                Vector currentLockNullResources =
-                    (Vector) lockNullResources.get(parentPath);
-                if (currentLockNullResources != null) {
-                    Enumeration lockNullResourcesList =
-                        currentLockNullResources.elements();
-                    while (lockNullResourcesList.hasMoreElements()) {
-                        String lockNullPath = (String)
-                            lockNullResourcesList.nextElement();
-                        if (lockNullPath.equals(path)) {
-                            resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
-                            resp.setContentType("text/xml; charset=UTF-8");
-                            // Create multistatus object
-                            XMLWriter generatedXML =
-                                new XMLWriter(resp.getWriter());
-                            generatedXML.writeXMLHeader();
-                            generatedXML.writeElement("D", DEFAULT_NAMESPACE,
-                                    "multistatus", XMLWriter.OPENING);
-                            parseLockNullProperties
-                                (req, generatedXML, lockNullPath, type,
-                                 properties);
-                            generatedXML.writeElement("D", "multistatus",
-                                    XMLWriter.CLOSING);
-                            generatedXML.sendData();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
+        Object object = getObject(req);
 
         if (!exists) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, path);
@@ -779,7 +744,8 @@ public class WebdavServlet extends ServletObject {
                 }
 
                 if ((object instanceof DirContext) && (depth > 0)) {
-
+                	// This 
+                	
                     try {
                         NamingEnumeration enumeration = resources.list(currentPath);
                         while (enumeration.hasMoreElements()) {
@@ -834,21 +800,12 @@ public class WebdavServlet extends ServletObject {
         generatedXML.writeElement("D", "multistatus", XMLWriter.CLOSING);
 
         generatedXML.sendData();
-
     }
-
-
+    
     /**
      * PROPPATCH Method.
      */
-    protected void doProppatch(HttpServletRequest req,
-                               HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
-            resp.sendError(WebdavStatus.SC_FORBIDDEN);
-            return;
-        }
+    protected void doProppatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         if (isLocked(req)) {
             resp.sendError(WebdavStatus.SC_LOCKED);
@@ -863,88 +820,16 @@ public class WebdavServlet extends ServletObject {
     /**
      * MKCOL Method.
      */
-    protected void doMkcol(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
+    protected void doMkcol(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             resp.sendError(WebdavStatus.SC_FORBIDDEN);
             return;
-        }
-
-        if (isLocked(req)) {
-            resp.sendError(WebdavStatus.SC_LOCKED);
-            return;
-        }
-
-        String path = getRelativePath(req);
-
-        boolean exists = true;
-        Object object = null;
-        try {
-            object = resources.lookup(path);
-        } catch (NamingException e) {
-            exists = false;
-        }
-
-        // Can't create a collection if a resource already exists at the given
-        // path
-        if (exists) {
-            // Get allowed methods
-            StringBuffer methodsAllowed = determineMethodsAllowed(resources,
-                                                                  req);
-
-            resp.addHeader("Allow", methodsAllowed.toString());
-
-            resp.sendError(WebdavStatus.SC_METHOD_NOT_ALLOWED);
-            return;
-        }
-
-        if (req.getInputStream().available() > 0) {
-            DocumentBuilder documentBuilder = getDocumentBuilder();
-            try {
-                Document document = documentBuilder.parse
-                    (new InputSource(req.getInputStream()));
-                // TODO : Process this request body
-                resp.sendError(WebdavStatus.SC_NOT_IMPLEMENTED);
-                return;
-
-            } catch(SAXException saxe) {
-                // Parse error - assume invalid content
-                resp.sendError(WebdavStatus.SC_BAD_REQUEST);
-                return;
-            }
-        }
-
-        boolean result = true;
-        try {
-            resources.createSubcontext(path);
-        } catch (NamingException e) {
-            result = false;
-        }
-
-        if (!result) {
-            resp.sendError(WebdavStatus.SC_CONFLICT,
-                           WebdavStatus.getStatusText
-                           (WebdavStatus.SC_CONFLICT));
-        } else {
-            resp.setStatus(WebdavStatus.SC_CREATED);
-            // Removing any lock-null resource which would be present
-            lockNullResources.remove(path);
-        }
-
     }
 
 
     /**
      * DELETE Method.
      */
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
-            resp.sendError(WebdavStatus.SC_FORBIDDEN);
-            return;
-        }
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         if (isLocked(req)) {
             resp.sendError(WebdavStatus.SC_LOCKED);
@@ -985,15 +870,9 @@ public class WebdavServlet extends ServletObject {
     /**
      * COPY Method.
      */
-    protected void doCopy(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
-            resp.sendError(WebdavStatus.SC_FORBIDDEN);
-            return;
-        }
-
-        copyResource(req, resp);
+    protected void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+ 
+    	copyResource(req, resp);
 
     }
 
@@ -1001,13 +880,7 @@ public class WebdavServlet extends ServletObject {
     /**
      * MOVE Method.
      */
-    protected void doMove(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
-            resp.sendError(WebdavStatus.SC_FORBIDDEN);
-            return;
-        }
+    protected void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         if (isLocked(req)) {
             resp.sendError(WebdavStatus.SC_LOCKED);
@@ -1026,13 +899,7 @@ public class WebdavServlet extends ServletObject {
     /**
      * LOCK Method.
      */
-    protected void doLock(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-
-        if (readOnly) {
-            resp.sendError(WebdavStatus.SC_FORBIDDEN);
-            return;
-        }
+    protected void doLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         if (isLocked(req)) {
             resp.sendError(WebdavStatus.SC_LOCKED);
@@ -1741,8 +1608,8 @@ public class WebdavServlet extends ServletObject {
             }
         }
 
-        if (debug > 0)
-            log("Dest path :" + destinationPath);
+//        if (debug > 0)
+//           log("Dest path :" + destinationPath);
 
         // Check destination path to protect special sub-directories
         if (isSpecialPath(destinationPath)) {
@@ -2742,37 +2609,148 @@ public class WebdavServlet extends ServletObject {
      * Determines the methods normally allowed for the resource.
      *
      */
-    private StringBuffer determineMethodsAllowed(DirContext resources,
-                                                 HttpServletRequest req) {
+    private StringBuffer determineMethodsAllowed(HttpServletRequest req) {
 
-        StringBuffer methodsAllowed = new StringBuffer();
-        boolean exists = true;
-        Object object = null;
-        try {
-            String path = getRelativePath(req);
-
-            object = resources.lookup(path);
-        } catch (NamingException e) {
-            exists = false;
-        }
-
-        if (!exists) {
-            methodsAllowed.append("OPTIONS, MKCOL, PUT, LOCK");
+    	StringBuffer methodsAllowed = new StringBuffer();
+        String path = getRelativePath(req);
+        int type = getObjectType(req);        
+        
+        if ( type != OBJECT_NOT_VALID ) {
+            methodsAllowed.append("OPTIONS, PUT, LOCK");
             return methodsAllowed;
         }
 
         methodsAllowed.append("OPTIONS, GET, HEAD, POST, DELETE, TRACE");
         methodsAllowed.append(", PROPPATCH, COPY, MOVE, LOCK, UNLOCK");
+        
+        methodsAllowed.append(", PROPFIND");
 
-        if (listings) {
-            methodsAllowed.append(", PROPFIND");
-        }
-
-        if (!(object instanceof DirContext)) {
+        if ( type == OBJECT_LEAF ) {
             methodsAllowed.append(", PUT");
         }
 
         return methodsAllowed;
+    }
+    
+    private static final int OBJECT_NOT_VALID = -1;
+    private static final int OBJECT_LEAF = 0;
+    private static final int OBJECT_NODE = 1;
+    
+    private static final String ATTR_OBJECT = "data-object";
+    
+    private static DataFileObject getObject(HttpServletRequest req) throws DataException, SQLException {
+    	Object object = req.getAttribute(ATTR_OBJECT);
+
+    	if ( object == null ) {
+    		SQLData data = getSQLData(req);
+        	String path = getRelativePath(req);
+           	String[] items = path.split("/");
+           	String[] paths = new String[items.length - 1];
+           	object = getObject(data, paths);
+           	
+        	if ( object != null && object instanceof DataFileObject )
+        		req.setAttribute(ATTR_OBJECT, object);
+    	}
+    	
+    	if ( object instanceof DataFileObject )
+    		return (DataFileObject)object;
+
+    	return null;
+	}
+    
+    private static Object getObject(SQLData data, String[] path) throws DataException {
+    	if ( path.length < 2 ) {
+    		return null;
+    	} else if ( path.length == 2 ) {
+			return getObject(data, path[0], path[1]);
+    	} else if ( path.length > 3 ) {
+    		if ( path[0].equalsIgnoreCase(Strain.DATA_FILE_CLASS) && path[3].equalsIgnoreCase(Material.DATA_FILE_CLASS) ) {
+   				String[] newPath = new String[path.length - 2];
+				System.arraycopy(path, 2, newPath, 0, path.length - 2);
+				return getObject(data, newPath);
+    		} else if ( path[0].equalsIgnoreCase(Material.DATA_FILE_CLASS) && 
+    				( path[3].equalsIgnoreCase(Sample.DATA_FILE_CLASS) || path[3].equalsIgnoreCase(Separation.DATA_FILE_CLASS) ) ) {
+   				String[] newPath = new String[path.length - 2];
+				System.arraycopy(path, 2, newPath, 0, path.length - 2);
+				return getObject(data, newPath);    			
+    		}
+    	} else if ( path.length > 2 ) {
+    		if ( path[0].equalsIgnoreCase(Strain.DATA_FILE_CLASS) && path[3].equalsIgnoreCase(Material.DATA_FILE_CLASS) ) {
+    			return null;
+    		} else if ( path[0].equalsIgnoreCase(Material.DATA_FILE_CLASS) && 
+    				( path[3].equalsIgnoreCase(Sample.DATA_FILE_CLASS) || path[3].equalsIgnoreCase(Separation.DATA_FILE_CLASS) ) ) {
+    			return null;
+    		}
+    		DataFileObject object = getObject(data, path[0], path[1]);
+    		// TODO get file.
+    	}
+    	return null;
+    }
+
+	private static final String ID_SEP = ":";
+    
+    private static DataFileObject getObject(SQLData data, String type, String id) throws DataException {
+   		if ( type.equalsIgnoreCase(Strain.DATA_FILE_CLASS) ) {
+			return SQLStrain.load(data, id);
+		} else if ( type.equalsIgnoreCase(Assay.DATA_FILE_CLASS) ) {
+			return SQLAssay.load(data, id);
+		} else if ( type.equalsIgnoreCase(Compound.DATA_FILE_CLASS)) {
+			return SQLCompound.load(data, id);
+		} else if ( type.equalsIgnoreCase(Material.DATA_FILE_CLASS) ) {
+			int pos = id.indexOf(ID_SEP);
+			if ( pos > 0 ) { id = id.substring(pos + 1); }
+			return SQLMaterial.load(data, id);
+		} else if ( type.equalsIgnoreCase(Separation.DATA_FILE_CLASS) ) {
+			int pos = id.indexOf(ID_SEP);
+			if ( pos > 0 ) { id = id.substring(pos + 1); }
+			return SQLSeparation.load(data, id);
+		} else if ( type.equalsIgnoreCase(Sample.DATA_FILE_CLASS) ) {
+			int pos = id.indexOf(ID_SEP);
+			if ( pos > 0 ) { id = id.substring(pos + 1); }
+			return SQLSample.load(data, id);
+		}
+   		return null;
+    }
+    
+    private static int getObjectType(HttpServletRequest req) {
+    	String path = getRelativePath(req);
+       	String[] items = path.split("/");
+
+       	if ( items.length == 1 ) {
+       		// The root of the tree
+       		return OBJECT_NODE;
+       	} else if ( items.length == 2 ) {
+       		// Checks for the base directories (valid classes that can have data files.
+       		// Perhaps should find a way to make dynamic (properties file in application directory)
+        	String type = items[1];
+    		if (type.equalsIgnoreCase(Strain.DATA_FILE_CLASS) || type.equalsIgnoreCase(Strain.DATA_FILE_CLASS) 
+    				|| type.equalsIgnoreCase(Assay.DATA_FILE_CLASS) || type.equalsIgnoreCase(Separation.DATA_FILE_CLASS) 
+    				|| type.equalsIgnoreCase(Sample.DATA_FILE_CLASS) || type.equalsIgnoreCase(Compound.DATA_FILE_CLASS) ) {
+    			return OBJECT_NODE;
+    		} else {
+    			return OBJECT_NOT_VALID;
+    		}
+    	} else if ( items.length == 3 ) {
+    		// This checks to see if the object is valid.
+        	DataFileObject object = getObject(req);
+        	return ( object != null ? OBJECT_NODE : OBJECT_NOT_VALID );
+    	} else if ( items.length == 4 ) {
+    		// First checks if the parent object is valid.
+    		// Then if it is a strain or material object can have a child objects (materials for strain and samples for materials)
+        	DataFileObject object = getObject(req);
+        	if ( object != null ) {
+            	String type = items[1];
+            	if ( type.equalsIgnoreCase(Strain.DATA_FILE_CLASS) ) {
+            		
+            	} else if ( type.equalsIgnoreCase(Material.DATA_FILE_CLASS) ) {
+            		
+            	}
+        	} else {
+        		return OBJECT_NOT_VALID;
+        	}
+    	} else if ( items.length > 4 ) {
+        	DataFileObject object = getObject(req);
+    	}
     }
 
     // --------------------------------------------------  LockInfo Inner Class
@@ -2914,8 +2892,7 @@ public class WebdavServlet extends ServletObject {
         }
      
         public InputSource resolveEntity (String publicId, String systemId) {
-            context.log(sm.getString("webdavservlet.enternalEntityIgnored",
-                    publicId, systemId));
+            context.log("webdavservlet.enternalEntityIgnored");
             return new InputSource(
                     new StringReader("Ignored external entity"));
         }
