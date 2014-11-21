@@ -4,6 +4,14 @@
 <a class="twist">
 <input type="checkbox" name="nmrdata" onclick="selectDiv(this)" <%= request.getParameter("nmrdata") != null ? "checked" : "" %>> NMR</a>
 <%
+List<String> aromSubs = new ArrayList<String>();
+String[] aroms = request.getParameterValues("arom_sub");
+if ( aroms != null ) {
+	   for (String a : aroms ) {
+			aromSubs.add(a);
+	   }
+}
+
 if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request.getParameter("nmrdata") != null ) {
 
 	DereplicationServlet.parseGraph(request, "ch2_methyl", "compound_diatomic as ch2me", 
@@ -61,6 +69,36 @@ if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request
 			"oac.atom1_h = 3 AND oac.atom1_element = 'C' AND oac.atom2_element = 'C' and oac.atom3_element = 'O' AND bond2_order = 2",
 			"COUNT(DISTINCT oac.atom1_number)");
 	
+	String value = request.getParameter("arom");
+	if ( value != null && value.length() > 0 ) {
+		DereplicationServlet.addTable(request, "compound_aromatic_h AS arom", "arom.compound_id = compound.compound_id");
+		if ( value.endsWith("+") ) {
+			DereplicationServlet.addQuery(request, "arom.aromatic_h >= ".concat(value.substring(0, value.length() - 1)));
+		} else if ( value.matches("([0-9]+)\\-([0-9]+)") ) {
+			String[] vals = value.split("\\-");
+			DereplicationServlet.addQuery(request,"arom.aromatic_h >= ".concat(vals[0]));
+			DereplicationServlet.addQuery(request, "arom.aromatic_h  <= ".concat(vals[1]));
+		} else if ( value.startsWith("-") ) {
+			DereplicationServlet.addQuery(request, "arom.aromatic_h  <= ".concat(value.substring(1)));				
+		} else if ( value.length() > 0 ) {
+			DereplicationServlet.addQuery(request, "arom.aromatic_h  = ".concat(value));
+		}
+	}
+	
+	if ( aroms != null ) {
+		DereplicationServlet.addTable(request, "compound_aromatic_ring AS arom_sub", "arom_sub.compound_id = compound.compound_id");
+		if ( aromSubs.contains("0") ) {
+			DereplicationServlet.addQuery(request, "arom_sub.atom1_H = 0 AND arom_sub.atom2_H = 2 AND arom_sub.atom3_H = 1 AND arom_sub.atom4_H = 1 AND arom_sub.atom5_H = 1 AND arom_sub.atom6_H = 1");
+		} else {
+			StringBuffer query = new StringBuffer("arom_sub.atom1_H = 0");
+			String[] atoms = {"2", "3", "4", "5", "6"};
+			for ( String pos : atoms ) {
+				query.append(String.format(" AND arom_sub.arom%s_H = %d", pos, (aromSubs.contains(pos) ? 0 : 1)));
+			}
+			DereplicationServlet.addQuery(request, query.toString());
+		}
+	}
+	
 } %><div class="<%= request.getParameter("nmrdata") != null ? "show" : "hide" %>Section" id="div_nmrdata">
 <p align="center" style="font-size:12pt; font-style:italic;">Give number or range for signals observed, e.g. 3, 2-5, or 1+.  Blank fields will be ignored.</p>
 <table class="dashboard">
@@ -81,14 +119,6 @@ if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request
 <td><cyanos:text-field name="ene_disub" size="5">title="Give number or range, e.g. 3, 2-5, or 1+"</cyanos:text-field></td><td><cyanos:text-field size="5" name="exo_vinyl"/></td></tr>
 </table></td></tr>
 <tr><th class="header">Aromatic Rings</th><td width="10px"></td><th class="header">Miscellaneous</th></tr>
-<% List<String> aromSubs = new ArrayList<String>();
-   String[] aroms = request.getParameterValues("arom_sub");
-   if ( aroms != null ) {
-	   for (String a : aroms ) {
-			aromSubs.add(a);
-	   }
-   }
-%>
 <tr><td><table class="species">
 <tr align="center"><td>Aromatic Protons</td><td rowspan="2"><img src="<%= request.getContextPath() %>/images/arom_sub.png"></td><td>Substitutions</td></tr>
 <tr align="center"><td><cyanos:text-field name="arom" size="5">title="Give number or range, e.g. 3, 2-5, or 1+"</cyanos:text-field></td>
