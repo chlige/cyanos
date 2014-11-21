@@ -91,6 +91,11 @@ public abstract class SQLObject extends CyanosObject implements BasicObject {
 		this.myData = data.duplicate();
 	}
 	
+	public void close() throws DataException {
+		if ( this.myData != null ) 
+			this.myData.close();
+	}
+	
 	protected void finalize() throws Throwable {
 		try {
 			if ( this.myData != null ) this.myData.close();
