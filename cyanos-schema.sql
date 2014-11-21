@@ -927,7 +927,7 @@ JOIN compound_bonds bond ON ( atom1.compound_id = bond.compound_id AND cab1.bond
 JOIN compound_bond_atoms cab2 ON (atom1.compound_id = cab2.compound_id AND cab2.bond_id = cab1.bond_id AND cab2.atom_number != atom1.atom_number)
 JOIN compound_atoms atom2 ON (atom1.compound_id = atom2.compound_id AND cab2.atom_number = atom2.atom_number);
 
-DROP VIEW IF EXISTS `compound_triatomic`
+DROP VIEW IF EXISTS `compound_triatomic`;
 
 CREATE VIEW `compound_triatomic` AS
 SELECT atom1.compound_id, atom1.atom_number as "atom1_number", atom1.element as "atom1_element", atom1.charge as "atom1_charge", atom1.attached_h as "atom1_H", 
@@ -944,6 +944,48 @@ JOIN compound_bond_atoms cab3 ON (atom1.compound_id = cab3.compound_id AND cab3.
 JOIN compound_bonds bond2 ON (atom1.compound_id = bond2.compound_id AND bond2.bond_id = cab3.bond_id)
 JOIN compound_bond_atoms cab4 ON (atom1.compound_id = cab4.compound_id AND cab4.bond_id = bond2.bond_id AND cab4.atom_number != atom2.atom_number)
 JOIN compound_atoms atom3 ON (atom1.compound_id = atom3.compound_id AND cab4.atom_number = atom3.atom_number);
+
+DROP VIEW IF EXISTS `compound_bond_links`;
+
+CREATE VIEW `compound_bond_links` AS
+ select `bond`.`compound_id` AS `compound_id`,`bond`.`bond_id` AS `bond_id`,`bond`.`bond_order` AS `bond_order`,`bond`.`stereo` AS `stereo`,`cab1`.`atom_number` AS `atom1_number`,`cab2`.`atom_number` AS `atom2_number` 
+ from ((`compound_bonds` `bond` 
+ join `compound_bond_atoms` `cab1` on(((`bond`.`compound_id` = `cab1`.`compound_id`) and (`bond`.`bond_id` = `cab1`.`bond_id`)))) 
+ join `compound_bond_atoms` `cab2` on(((`bond`.`compound_id` = `cab2`.`compound_id`) and (`bond`.`bond_id` = `cab2`.`bond_id`) and (`cab1`.`atom_number` <> `cab2`.`atom_number`))))
+
+DROP VIEW IF EXISTS `compound_aromatic_h`;
+
+CREATE VIEW `compound_aromatic_h` AS
+ select `atom1`.`compound_id` AS `compound_id`,sum((((((`atom1`.`attached_h` + `atom2`.`attached_h`) + `atom3`.`attached_h`) + `atom4`.`attached_h`) + `atom5`.`attached_h`) + `atom6`.`attached_h`)) AS `aromatic_h` 
+ from (((((((((((`compound_atoms` `atom1` 
+ join `compound_bond_links` `bond1` on(((`bond1`.`compound_id` = `atom1`.`compound_id`) and (`atom1`.`atom_number` = `bond1`.`atom1_number`)))) 
+ join `compound_atoms` `atom2` on(((`atom2`.`compound_id` = `atom1`.`compound_id`) and (`atom2`.`atom_number` = `bond1`.`atom2_number`)))) 
+ join `compound_bond_links` `bond2` on(((`bond2`.`compound_id` = `atom1`.`compound_id`) and (`atom2`.`atom_number` = `bond2`.`atom1_number`) and (`bond2`.`atom2_number` <> `atom1`.`atom_number`)))) 
+ join `compound_atoms` `atom3` on(((`atom3`.`compound_id` = `atom1`.`compound_id`) and (`atom3`.`atom_number` = `bond2`.`atom2_number`)))) 
+ join `compound_bond_links` `bond3` on(((`bond3`.`compound_id` = `atom1`.`compound_id`) and (`atom3`.`atom_number` = `bond3`.`atom1_number`) and (`bond3`.`atom2_number` <> `atom2`.`atom_number`)))) 
+ join `compound_atoms` `atom4` on(((`atom4`.`compound_id` = `atom1`.`compound_id`) and (`atom4`.`atom_number` = `bond3`.`atom2_number`)))) 
+ join `compound_bond_links` `bond4` on(((`bond4`.`compound_id` = `atom1`.`compound_id`) and (`atom4`.`atom_number` = `bond4`.`atom1_number`) and (`bond4`.`atom2_number` <> `atom3`.`atom_number`)))) 
+ join `compound_atoms` `atom5` on(((`atom5`.`compound_id` = `atom1`.`compound_id`) and (`atom5`.`atom_number` = `bond4`.`atom2_number`)))) 
+ join `compound_bond_links` `bond5` on(((`bond5`.`compound_id` = `atom1`.`compound_id`) and (`atom5`.`atom_number` = `bond5`.`atom1_number`) and (`bond5`.`atom2_number` <> `atom4`.`atom_number`)))) 
+ join `compound_atoms` `atom6` on(((`atom6`.`compound_id` = `atom1`.`compound_id`) and (`atom6`.`atom_number` = `bond5`.`atom2_number`)))) 
+ join `compound_bond_links` `bond6` on(((`bond6`.`compound_id` = `atom1`.`compound_id`) and (`atom6`.`atom_number` = `bond6`.`atom1_number`) and (`bond6`.`atom2_number` = `atom1`.`atom_number`)))) 
+ where ((`atom1`.`atom_number` < `atom6`.`atom_number`) and (`atom1`.`atom_number` < `atom2`.`atom_number`) and (`atom2`.`atom_number` < `atom6`.`atom_number`) and ((((((`bond1`.`bond_order` + `bond2`.`bond_order`) + `bond3`.`bond_order`) + `bond4`.`bond_order`) + `bond5`.`bond_order`) + `bond6`.`bond_order`) = 9)) 
+ group by `atom1`.`compound_id`;
+ 
+DROP VIEW IF EXISTS `compound_aromatic_ring`;
+
+CREATE VIEW `compound_aromatic_ring` AS 
+ select `atom1`.`compound_id` AS `compound_id`,`atom1`.`atom_number` AS `atom1_number`,`atom1`.`element` AS `atom1_element`,`atom1`.`attached_h` AS `atom1_H`,`atom2`.`atom_number` AS `atom2_number`,`atom2`.`element` AS `atom2_element`,`atom2`.`attached_h` AS `atom2_H`,`atom3`.`atom_number` AS `atom3_number`,`atom3`.`element` AS `atom3_element`,`atom3`.`attached_h` AS `atom3_H`,`atom4`.`atom_number` AS `atom4_number`,`atom4`.`element` AS `atom4_element`,`atom4`.`attached_h` AS `atom4_H`,`atom5`.`atom_number` AS `atom5_number`,`atom5`.`element` AS `atom5_element`,`atom5`.`attached_h` AS `atom5_H`,`atom6`.`atom_number` AS `atom6_number`,`atom6`.`element` AS `atom6_element`,`atom6`.`attached_h` AS `atom6_H` 
+ from (((((((((((`compound_atoms` `atom1` 
+ join `compound_bond_links` `bond1` on(((`bond1`.`compound_id` = `atom1`.`compound_id`) and (`atom1`.`atom_number` = `bond1`.`atom1_number`)))) 
+ join `compound_atoms` `atom2` on(((`atom2`.`compound_id` = `atom1`.`compound_id`) and (`atom2`.`atom_number` = `bond1`.`atom2_number`)))) 
+ join `compound_bond_links` `bond2` on(((`bond2`.`compound_id` = `atom1`.`compound_id`) and (`atom2`.`atom_number` = `bond2`.`atom1_number`) and (`bond2`.`atom2_number` <> `atom1`.`atom_number`)))) 
+ join `compound_atoms` `atom3` on(((`atom3`.`compound_id` = `atom1`.`compound_id`) and (`atom3`.`atom_number` = `bond2`.`atom2_number`)))) join `compound_bond_links` `bond3` on(((`bond3`.`compound_id` = `atom1`.`compound_id`) and (`atom3`.`atom_number` = `bond3`.`atom1_number`) and (`bond3`.`atom2_number` <> `atom2`.`atom_number`)))) 
+ join `compound_atoms` `atom4` on(((`atom4`.`compound_id` = `atom1`.`compound_id`) and (`atom4`.`atom_number` = `bond3`.`atom2_number`)))) join `compound_bond_links` `bond4` on(((`bond4`.`compound_id` = `atom1`.`compound_id`) and (`atom4`.`atom_number` = `bond4`.`atom1_number`) and (`bond4`.`atom2_number` <> `atom3`.`atom_number`)))) 
+ join `compound_atoms` `atom5` on(((`atom5`.`compound_id` = `atom1`.`compound_id`) and (`atom5`.`atom_number` = `bond4`.`atom2_number`)))) join `compound_bond_links` `bond5` on(((`bond5`.`compound_id` = `atom1`.`compound_id`) and (`atom5`.`atom_number` = `bond5`.`atom1_number`) and (`bond5`.`atom2_number` <> `atom4`.`atom_number`)))) 
+ join `compound_atoms` `atom6` on(((`atom6`.`compound_id` = `atom1`.`compound_id`) and (`atom6`.`atom_number` = `bond5`.`atom2_number`)))) join `compound_bond_links` `bond6` on(((`bond6`.`compound_id` = `atom1`.`compound_id`) and (`atom6`.`atom_number` = `bond6`.`atom1_number`) and (`bond6`.`atom2_number` = `atom1`.`atom_number`)))) 
+ where ((((((`bond1`.`bond_order` + `bond2`.`bond_order`) + `bond3`.`bond_order`) + `bond4`.`bond_order`) + `bond5`.`bond_order`) + `bond6`.`bond_order`) = 9);
+
 
 DROP TABLE IF EXISTS `elements`;
 
