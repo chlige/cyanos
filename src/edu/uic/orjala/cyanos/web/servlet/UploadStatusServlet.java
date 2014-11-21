@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -13,7 +14,6 @@ import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.JobManager;
 import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
-import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 /**
  * Servlet implementation class UploadStatusServlet

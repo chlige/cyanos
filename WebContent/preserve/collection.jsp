@@ -69,7 +69,7 @@ for ( int col = 1; col <= rowLength; col++ ) {
 } %></tr><%	
 	int currRow = ( queryResults.first() ? queryResults.getRowIndex() : rowLength + 1);
 	int currCol = ( queryResults.first() ? queryResults.getColumnIndex() : colLength + 1);
-	SimpleDateFormat dateFormat = new SimpleDateFormat("MMM-DD-YY");
+	SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
 	for ( int row = 1; row <= colLength; row++ ) { 
 %><tr style="height:80px"><th><%= CryoServlet.getLetterForIndex(row - 1) %></th><%
 		for ( int col = 1; col <= rowLength; col++ ) {

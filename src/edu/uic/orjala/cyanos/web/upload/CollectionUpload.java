@@ -3,7 +3,6 @@
  */
 package edu.uic.orjala.cyanos.web.upload;
 
-import java.sql.SQLException;
 import java.util.ListIterator;
 
 import edu.uic.orjala.cyanos.Collection;
