@@ -25,14 +25,6 @@ import edu.uic.orjala.cyanos.web.servlet.UploadServlet;
  */
 public abstract class UploadJob extends Job {
 	
-	public final static String ERROR_TAG = "<FONT COLOR='red'><B>ERROR:</FONT></B> ";
-	public final static String FAILED_TAG = "<FONT COLOR='red'><B>FAILED:</FONT></B> ";
-	public final static String WARNING_TAG = "<FONT COLOR='orange'><B>WARNING:</FONT></B> ";
-	public final static String SUCCESS_TAG = "<FONT COLOR='green'><B>SUCCESS:</FONT></B> ";
-	public final static String FOUND_TAG = "<FONT COLOR='blue'><B>FOUND:</FONT></B> ";
-	public final static String SKIP_TAG = "<FONT COLOR='purple'><B>SKIPPED:</FONT></B> ";
-	public final static String NOTICE_TAG = "<FONT COLOR='gray'><B>NOTICE:</FONT></B> ";
-	
 	public static final int ROW_BEHAVIOR_INCLUDE = 1;
 	public static final int ROW_BEHAVIOR_IGNORE = 2;
 	
@@ -102,10 +94,6 @@ public abstract class UploadJob extends Job {
 				template.put(keys[i], req.getParameter(keys[i]));
 			}
 		}
-		
-		if ( this.worksheet != null ) {
-		}
-		
 	}
 	
 	private void setupRowList(HttpServletRequest req) {

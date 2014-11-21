@@ -127,6 +127,13 @@ public class Job implements Runnable {
 	}
 	
 	private final static String SQL_UPDATE = "UPDATE jobs SET messages=?, output=?, output_type=?, endDate=? WHERE job_id=?";
+	public static final String ERROR_TAG = "<FONT COLOR='red'><B>ERROR:</FONT></B> ";
+	public static final String FAILED_TAG = "<FONT COLOR='red'><B>FAILED:</FONT></B> ";
+	public static final String WARNING_TAG = "<FONT COLOR='orange'><B>WARNING:</FONT></B> ";
+	public static final String SUCCESS_TAG = "<FONT COLOR='green'><B>SUCCESS:</FONT></B> ";
+	public static final String FOUND_TAG = "<FONT COLOR='blue'><B>FOUND:</FONT></B> ";
+	public static final String SKIP_TAG = "<FONT COLOR='purple'><B>SKIPPED:</FONT></B> ";
+	public static final String NOTICE_TAG = "<FONT COLOR='gray'><B>NOTICE:</FONT></B> ";
 	
 	protected void update() throws DataException {
 		if ( this.id != null ) {
