@@ -7,7 +7,8 @@ org.openscience.cdk.tools.MFAnalyser, java.util.List, java.util.ArrayList" %>
 <a class="twist">
 <input type="checkbox" name="msdata" onclick="selectDiv(this)" <%= request.getParameter("msdata") != null ? "checked" : "" %>> Mass Spec</a>
 <% if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request.getParameter("msdata") != null ) {
-	StringBuffer query = DereplicationServlet.getQuery(request);
+	
+	StringBuffer query = new StringBuffer();
 	String sign = request.getParameter("msMode");
 	String column = SQLCompound.TABLE + "." + SQLCompound.MONOISOTOPIC_MASS_COLUMN;
 	
@@ -56,6 +57,9 @@ org.openscience.cdk.tools.MFAnalyser, java.util.List, java.util.ArrayList" %>
 		}
 	}
 	query.append(")");
+	
+	DereplicationServlet.addQuery(request, query.toString());
+	
 } %><div class="<%= request.getParameter("msdata") != null ? "show" : "hide" %>Section" id="div_msdata">
 <p align="CENTER">
 <% String msmode = request.getParameter("msMode"); %>
