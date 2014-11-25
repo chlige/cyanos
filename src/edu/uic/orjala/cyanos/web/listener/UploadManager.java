@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.util.Streams;
 public class UploadManager {
 
 	private final Map<String, List<FileUpload>> uploadItems = new Hashtable<String, List<FileUpload>>();
+	private final Map<String, String[]> parameters = new Hashtable<String, String[]>();
 	
 	public class FileUpload {
 
@@ -104,6 +105,19 @@ public class UploadManager {
 				FileItemStream anItem = iter.next();
 				if ( ! anItem.isFormField() ) {
 					uploads.addItem(anItem);
+				} else {
+					String[] current = uploads.parameters.get(anItem.getFieldName());
+					String[] values;
+					if ( current != null ) {
+						values = new String[current.length + 1];
+						System.arraycopy(current, 0, values, 0, current.length);
+						values[values.length] = anItem.toString();
+						
+					} else {
+						values = new String[1];
+						values[0] = anItem.toString();
+					}
+					uploads.parameters.put(anItem.getFieldName(), values);
 				}
 			}
 		} catch (FileUploadException e) {
@@ -151,6 +165,18 @@ public class UploadManager {
 			return list.size();
 		}
 		return 0;
+	}
+	
+	public String[] getParameterValues(String parameter) {
+		return this.parameters.get(parameter);
+	}
+	
+	public String getParameter(String parameter) {
+		String[] values = this.getParameterValues(parameter);
+		if ( values != null && values.length > 1 ) {
+			return values[0];
+		}
+		return null;
 	}
 
 
