@@ -19,7 +19,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import edu.uic.orjala.cyanos.DataException;
-import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
@@ -199,8 +198,8 @@ public class UploadServlet extends ServletObject {
 		session.removeAttribute(UPLOAD_JOB);
 	}
 	
-	public static Job getUploadJob(HttpSession session) {
-		return (Job) session.getAttribute(UPLOAD_JOB);
+	public static UploadJob getUploadJob(HttpSession session) {
+		return (UploadJob) session.getAttribute(UPLOAD_JOB);
 	} 
 	
 	public static void startJob(HttpServletRequest request, UploadJob job) throws DataException, SQLException, ServletException, IOException, ParserConfigurationException, SAXException {
