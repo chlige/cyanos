@@ -3,6 +3,8 @@
   <display-name>Cyanos Database</display-name>
   <description>Cyanos Database servlets.</description>
   <listener>
+  	<listener-class>edu.uic.orjala.cyanos.web.listener.CyanosRequestListener</listener-class></listener>
+  <listener>
     <listener-class>edu.uic.orjala.cyanos.web.listener.AppConfigListener</listener-class>
   </listener>
   <listener>
