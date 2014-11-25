@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
@@ -22,6 +20,7 @@ import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
+import edu.uic.orjala.cyanos.web.listener.UploadManager;
 
 /**
  * @author George Chlipala
@@ -57,22 +56,22 @@ public class CompoundUpload extends Job {
 	 * Start paring the upload.
 	 * @throws DataException 
 	 */
-	public void startJob(HttpServletRequest req, InputStream sdfStream) throws DataException {
+	public void startJob(UploadManager manager, InputStream sdfStream) throws DataException {
 		if ( this.parseThread == null ) {
 			this.create();
-			this.updateTemplate(req);
-			this.safeUpload = req.getParameter(FORCE_UPLOAD) == null;
+			this.updateTemplate(manager);
+			this.safeUpload = manager.getParameter(FORCE_UPLOAD) == null;
 			this.sdfData = sdfStream;
 			this.parseThread = new Thread(this, THREAD_LABEL);
 			this.parseThread.start();
 		}
 	}
 	
-	void updateTemplate(HttpServletRequest req) {
+	void updateTemplate(UploadManager manager) {
 		String[] keys = getTemplateKeys();
 		for (int i = 0; i < keys.length; i++ ) {
-			if ( req.getParameter(keys[i]) != null ) {
-				template.put(keys[i], req.getParameter(keys[i]));
+			if ( manager.getParameter(keys[i]) != null ) {
+				template.put(keys[i], manager.getParameter(keys[i]));
 			}
 		}
 		
