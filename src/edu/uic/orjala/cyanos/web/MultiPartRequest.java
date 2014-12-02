@@ -32,6 +32,9 @@ import org.apache.commons.fileupload.util.Streams;
  *
  */
 public class MultiPartRequest extends HttpServletRequestWrapper {
+	
+	private static final String ATTR_PARAMETERS = "multipart-params";
+	private static final String ATTR_UPLOADS = "multipart-files";
 
 	public class FileUpload {
 
@@ -127,7 +130,11 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 	protected MultiPartRequest(HttpServletRequest request) throws ServletException, IOException {
 		super(request);
 		if ( ServletFileUpload.isMultipartContent(request)) {
-			this.parseMultipartReq(request);
+			if ( request.getAttribute(ATTR_PARAMETERS) != null && request.getAttribute(ATTR_UPLOADS) != null ) {
+				this.formValues = (Map<String, String[]>) request.getAttribute(ATTR_PARAMETERS);
+				this.uploadItems = (Map<String, List<FileUpload>>) request.getAttribute(ATTR_UPLOADS);
+			} else
+				this.parseMultipartReq(request);
 		} else {
 			this.formValues = request.getParameterMap();
 		}
@@ -162,6 +169,8 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 					}
 				}
 			}
+			this.setAttribute(ATTR_PARAMETERS, this.formValues);
+			this.setAttribute(ATTR_UPLOADS, this.uploadItems);
 		} catch (FileUploadException e) {
 			throw new ServletException("COULD NOT PARSE UPLOAD", e);
 		}

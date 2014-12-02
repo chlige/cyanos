@@ -74,10 +74,11 @@ import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.AppConfig;
+import edu.uic.orjala.cyanos.web.MultiPartRequest;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.forms.DataForm;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
-import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 
 public class DataFileServlet extends ServletObject {
@@ -161,7 +162,7 @@ public class DataFileServlet extends ServletObject {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-//		req = MultiPartRequest.parseRequest(req);
+		req = MultiPartRequest.parseRequest(req);
 		super.doPost(req, res);
 		this.handleRequest(req, res);
 	}
@@ -258,7 +259,6 @@ public class DataFileServlet extends ServletObject {
 	}
 
 	private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-
 		String module = req.getPathInfo();	
 		if ( module != null && module.startsWith("/manager") ) {
 			this.handleManagerReq(req, res);

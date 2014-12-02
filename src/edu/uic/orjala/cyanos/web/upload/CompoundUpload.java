@@ -3,11 +3,15 @@
  */
 package edu.uic.orjala.cyanos.web.upload;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -19,8 +23,8 @@ import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.Job;
+import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
-import edu.uic.orjala.cyanos.web.listener.UploadManager;
 
 /**
  * @author George Chlipala
@@ -55,19 +59,22 @@ public class CompoundUpload extends Job {
 	/**
 	 * Start paring the upload.
 	 * @throws DataException 
+	 * @throws IOException 
+	 * @throws ServletException 
 	 */
-	public void startJob(UploadManager manager, InputStream sdfStream) throws DataException {
+	public void startJob(HttpServletRequest req, InputStream sdfStream) throws DataException, ServletException, IOException {
+		req = MultiPartRequest.parseRequest(req);
 		if ( this.parseThread == null ) {
 			this.create();
-			this.updateTemplate(manager);
-			this.safeUpload = manager.getParameter(FORCE_UPLOAD) == null;
+			this.updateTemplate(req);
+			this.safeUpload = req.getParameter(FORCE_UPLOAD) == null;
 			this.sdfData = sdfStream;
 			this.parseThread = new Thread(this, THREAD_LABEL);
 			this.parseThread.start();
 		}
 	}
 	
-	void updateTemplate(UploadManager manager) {
+	void updateTemplate(HttpServletRequest manager) {
 		String[] keys = getTemplateKeys();
 		for (int i = 0; i < keys.length; i++ ) {
 			if ( manager.getParameter(keys[i]) != null ) {

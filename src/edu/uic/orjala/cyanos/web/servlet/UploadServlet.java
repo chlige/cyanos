@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;
@@ -27,8 +28,6 @@ import edu.uic.orjala.cyanos.web.UploadModule;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
-import edu.uic.orjala.cyanos.web.listener.UploadManager;
-import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 
@@ -178,9 +177,9 @@ public class UploadServlet extends ServletObject {
 		boolean hasWorkSheet = ( thisSession.getAttribute(SPREADSHEET) != null );
 		
 		if ( ! hasWorkSheet ) {
-			UploadManager manager = CyanosRequestListener.getUploadManager(request);
-			if ( manager != null ) {
-				hasWorkSheet = (manager.getFileCount(PARAM_FILE) > 0 );	
+			request = MultiPartRequest.parseRequest(request);
+			if ( request instanceof MultiPartRequest ) {
+				hasWorkSheet = ((MultiPartRequest)request).getUploadCount(PARAM_FILE) > 0;	
 			}
 		}
 		

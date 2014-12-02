@@ -4,12 +4,12 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.upload.CompoundUpload,
 	edu.uic.orjala.cyanos.web.listener.CyanosRequestListener,
-	edu.uic.orjala.cyanos.web.listener.UploadManager,
-	edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload,
 	edu.uic.orjala.cyanos.web.Job,
 	edu.uic.orjala.cyanos.User,
 	edu.uic.orjala.cyanos.Role,
-	edu.uic.orjala.cyanos.web.Sheet" %>
+	edu.uic.orjala.cyanos.web.Sheet,
+	edu.uic.orjala.cyanos.web.MultiPartRequest,
+	edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="cyanos"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -121,14 +121,15 @@ function displayResults(jobID) {
 <cyanos:menu helpModule="collection"/>
 <h1>Compound Data Upload</h1>
 <div class="content">
-<% 	UploadManager manager = CyanosRequestListener.getUploadManager(request);
-	if ( manager != null && manager.getParameter(UploadServlet.PARSE_ACTION) != null ) {
+<% 	
+	HttpServletRequest mpReq = MultiPartRequest.parseRequest(request);
+	if ( mpReq instanceof MultiPartRequest && mpReq.getParameter(UploadServlet.PARSE_ACTION) != null ) {
 	if ( session.getAttribute("upload-job") != null ) { %>
 <p style="text-align: center; color: red; font-weight:bold">ERROR: Cannot start upload job.  Current upload job running.</p>		
 <%	} else {
 		CompoundUpload job = new CompoundUpload(UploadServlet.newSQLData(request));
-		FileUpload upload = manager.getFile("sdfile", 0);
-		job.startJob(manager, upload.getStream());
+		FileUpload upload = ((MultiPartRequest)mpReq).getUpload("sdfile", 0);
+		job.startJob(request, upload.getStream());
 		UploadServlet.addJob(session, job); 
 %><div id="job-<%= job.getID()  %>">
 <div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div>

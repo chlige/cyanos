@@ -43,6 +43,7 @@ import edu.uic.orjala.cyanos.web.CyanosWrapper;
 import edu.uic.orjala.cyanos.web.GuestUser;
 import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.JobManager;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.ServletWrapper;
 import edu.uic.orjala.cyanos.web.SheetWriter;
 import edu.uic.orjala.cyanos.web.WebModule;
@@ -55,7 +56,6 @@ import edu.uic.orjala.cyanos.web.html.TableRow;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
-import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
  * Abstract class for all servlets in application (common methods and attributes)

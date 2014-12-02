@@ -57,8 +57,8 @@ import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
+import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
-import edu.uic.orjala.cyanos.web.listener.UploadManager.FileUpload;
 
 /**
  * @author George Chlipala
