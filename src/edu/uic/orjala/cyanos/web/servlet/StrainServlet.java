@@ -643,7 +643,7 @@ public class StrainServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 		try {
 			String searchParam = "%".concat(req.getParameter(LS_PARAM_COLLECTION)).concat("%");
-			Collection collections = SQLCollection.collectionsLike(this.getSQLData(req), new String[]{ SQLCollection.ID_COLUMN }, 
+			Collection collections = SQLCollection.collectionsLike(getSQLData(req), new String[]{ SQLCollection.ID_COLUMN }, 
 					new String[]{ searchParam }, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
 			if ( collections.first() ) {
 				collections.beforeFirst();
