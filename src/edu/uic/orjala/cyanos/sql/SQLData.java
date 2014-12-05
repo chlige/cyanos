@@ -146,7 +146,7 @@ public class SQLData {
 
 	private boolean hasTrash = true;
 	private String trashCatalog = "trash";
-	private boolean closeOnCommit = true;
+	private boolean commitOnClose = true;
 	
 	public static final int ID_TYPE_SERIAL = 1;
 	public static final int ID_TYPE_UUID = 2;
@@ -469,7 +469,7 @@ public class SQLData {
 	}
 
 	public void close() throws DataException {
-		this.close(this.closeOnCommit);
+		this.close(this.commitOnClose);
 	}
 
 	public void close(boolean commit) throws DataException {
@@ -489,6 +489,7 @@ public class SQLData {
 	public void closeDBC() throws DataException {
 		try {
 			if ( this.conn.getDBC() != null & ( ! this.conn.getDBC().isClosed() ) )
+				System.err.format("CLOSING CONNECTION: %d\n", this.conn.dbc.hashCode());
 				this.conn.close();
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -500,7 +501,7 @@ public class SQLData {
 	@Override
 	protected void finalize() throws Throwable {
 		this.close();
-		this.closeDBC();
+//		this.closeDBC();
 		super.finalize();
 	}
 
@@ -1057,7 +1058,7 @@ public class SQLData {
 		SQLData newData = new SQLData(this.config, this.conn, this.user);
 		newData.hasTrash = this.hasTrash;
 		newData.trashCatalog = this.trashCatalog;
-		newData.closeOnCommit = (this.conn.savepoints.size() < 1);
+		newData.commitOnClose = (this.conn.savepoints.size() < 1);
 		newData.accessRole = null;
 		newData.currentProjectID = null;
 		return newData;

@@ -11,8 +11,6 @@ import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
@@ -67,8 +65,9 @@ public class CyanosRequestListener implements ServletRequestListener {
 	 */
 	@Override
 	public void requestInitialized(ServletRequestEvent event) {
-		ServletRequest object = event.getServletRequest();
+//		ServletRequest object = event.getServletRequest();
 //		if ( object instanceof HttpServletRequest ) {
+//
 //		}
 	}
 	
@@ -104,6 +103,7 @@ public class CyanosRequestListener implements ServletRequestListener {
 	
 	public static SQLData newSQLData(HttpServletRequest req) throws SQLException, ConfigException, DataException {
 		Connection conn = AppConfigListener.getDBConnection();
+		System.err.format("Created connection: %d\n", conn.hashCode());
 		return new SQLData(AppConfigListener.getConfig(), conn, getUser(req), AppConfigListener.getIDType());			
 	}
 	
