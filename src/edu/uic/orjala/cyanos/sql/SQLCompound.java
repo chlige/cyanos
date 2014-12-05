@@ -629,8 +629,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 					sth.setDouble(6, atom.zcoord);
 					sth.setInt(7, atom.charge);
 					sth.setInt(8, atom.getHCount(atomList));
-					System.err.format("Atom: %d (%s) %d H\n", atom.index, 
-							atom.symbol, atom.getHCount(atomList));
+//					System.err.format("Atom: %d (%s) %d H\n", atom.index,  atom.symbol, atom.getHCount(atomList));
 					sth.addBatch();
 				}
 			}
