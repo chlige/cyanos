@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.job.DereplicationQuery;
@@ -37,7 +38,7 @@ public class DereplicationServlet extends ServletObject {
 		if ( value != null && value.length() > 0 ) {
 			job.addTable(table, onclause);
 			String alias = table.concat("_having");
-			job.addColumn(table, having.concat(" AS ").concat(alias));
+			job.addColumn(having.concat(" AS ").concat(alias));
 			if ( where != null )
 				job.addQuery(where);
 			if ( value.endsWith("+") ) {
@@ -96,12 +97,12 @@ public class DereplicationServlet extends ServletObject {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		super.doGet(req, res);
 		
-		if ( req.getParameter("jobid")  != null ) {
+		if ( req.getParameter("jobid") != null ) {
 			try {
 				Job queryJob = getJobManager(req.getSession()).getJob(req.getParameter("jobid"), getSQLData(req));
 				if ( queryJob instanceof DereplicationQuery ) {
-					req.setAttribute(CompoundServlet.COMPOUND_RESULTS, ((DereplicationQuery)queryJob).getCompounds());
-					forwardRequest(req, res, "/compound/compound-list.jsp");
+					req.setAttribute("derep-job", queryJob);
+					forwardRequest(req, res, "/dereplication/compound-list.jsp");
 				}
 			} catch (DataException e) {
 				throw new ServletException(e);
@@ -111,6 +112,4 @@ public class DereplicationServlet extends ServletObject {
 
 		}
 	}
-
-	
 }
