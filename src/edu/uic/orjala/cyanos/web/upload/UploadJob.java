@@ -191,6 +191,7 @@ public abstract class UploadJob extends Job {
 			}
 			this.update();
 			this.myData.close();
+			this.myData.closeDBC();
 		} catch (DataException e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
