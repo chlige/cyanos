@@ -5,7 +5,9 @@ package edu.uic.orjala.cyanos.web.upload;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.sql.Savepoint;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.Molecule;
+import org.openscience.cdk.io.MDLWriter;
 import org.openscience.cdk.io.iterator.IteratingMDLReader;
+import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.tools.HydrogenAdder;
+import org.openscience.cdk.tools.MFAnalyser;
+import org.openscience.cdk.tools.ValencyChecker;
 
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
@@ -87,21 +94,11 @@ public class CompoundUpload extends Job {
 	protected void finishJob() {
 		try {
 			this.endDate = new Date();
-			if ( this.working ) { 
-				this.myData.commit(); 
-				this.messages.append("<P ALIGN='CENTER'><B>SEARCH COMPLETE</B>.</P>"); 
-			} else { 
-				this.myData.rollback(); 
-				this.messages.append("<P ALIGN='CENTER'><B>SEARCH HALTED:</B> Job incomplete!</P>"); 
-			}
-
 			this.update();
 			this.myData.close();
+			this.myData.closeDBC();
 
 		} catch (DataException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		} catch (SQLException e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		} finally {
@@ -147,11 +144,19 @@ public class CompoundUpload extends Job {
 			boolean useProjectProp = (projectProp != null && projectProp.length() > 0 );
 
 			int row = 1;
+			Savepoint savepoint = null;
 			
+			
+			SmilesGenerator smileGen = new SmilesGenerator();
+			smileGen.setUseAromaticityFlag(true);
+
+			HydrogenAdder hAdder = new HydrogenAdder(new ValencyChecker());
+		
 			while ( reader.hasNext() && this.working ) {
 				try {
 
 					Molecule molecule = (Molecule)reader.next();
+					savepoint = this.myData.setSavepoint();
 					
 					String compoundID = null;
 					
@@ -167,6 +172,7 @@ public class CompoundUpload extends Job {
 
 						try {
 							Compound compound = SQLCompound.load(myData, compoundID);
+							compound.setManualRefresh();
 
 							boolean update = true;
 							String myProject = staticProject;
@@ -187,6 +193,35 @@ public class CompoundUpload extends Job {
 
 							if ( compound.first() && update ) {
 								compound.setManualRefresh();
+								
+								compound.setSmilesString(smileGen.createSMILES(molecule));									
+								
+						// For CDK v1.0.4
+							    hAdder.addExplicitHydrogensToSatisfyValency(molecule);
+							    MFAnalyser formulaMaker = new MFAnalyser(molecule);
+
+						//CDK v.1.2.3
+						/*		
+						  		IMolecularFormula aFormula = MolecularFormulaManipulator.getMolecularFormula(aMolecule);
+							    aCompound.setManualRefresh();
+								aCompound.setName(this.getFormValue("name"));
+						 */
+						// for CDK v1.0.4		
+							    compound.setFormula(formulaMaker.getMolecularFormula());
+					    // TODO should set the proper sig figs.
+							    compound.setAverageMass(new BigDecimal(formulaMaker.getNaturalMass()));
+							    compound.setMonoisotopicMass(new BigDecimal(formulaMaker.getMass()));
+						// CDK v1.2.3
+						/*	    aCompound.setFormula(MolecularFormulaManipulator.getHillString(aFormula));
+							    aCompound.setAverageMass(MolecularFormulaManipulator.getNaturalExactMass(aFormula));
+							    aCompound.setMonoisotopicMass(MolecularFormulaManipulator.getMajorIsotopeMass(aFormula));
+						 */
+								
+								StringWriter mdlData = new StringWriter();
+								MDLWriter mdlWrite = new MDLWriter(mdlData);
+								mdlWrite.writeMolecule(molecule);
+								compound.setMDLData(mdlData.toString());
+																
 								if (setName) {
 									String name = (String)molecule.getProperty(nameProp);
 									if ( name != null ) {
@@ -206,6 +241,8 @@ public class CompoundUpload extends Job {
 								}
 								compound.refresh();
 								compound.setAutoRefresh();
+								this.myData.commit();
+								this.myData.releaseSavepoint(savepoint);
 								currResults.addItem(SUCCESS_TAG + "Information updated.");
 							} else {
 								currResults.addItem(FAILED_TAG + "Information update failed.");
@@ -220,6 +257,8 @@ public class CompoundUpload extends Job {
 					}
 					row++;
 				} catch (Exception e) {
+					if ( savepoint != null ) this.myData.rollback(savepoint);
+					else this.myData.rollback();
 					this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 					e.printStackTrace();
 				}
