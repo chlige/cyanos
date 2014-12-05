@@ -12,6 +12,8 @@
 <head>
 <cyanos:header title="Cyanos - Compound Dereplication"/>
 <script type="text/javascript">
+var count = 0;
+
 function jobStatus(jobID) {
 	var xmlHttp = null;
 	
@@ -38,7 +40,7 @@ function jobStatus(jobID) {
 					progText.innerHTML = "<font color='red'>ERROR!</font>";
 				}						
 			} else if ( response === "STOP" ) {
-				endProgress(progressLen, resultButton);
+				displayResults(jobID);
 				if ( progText != null ) {
 					progText.innerHTML = "Stopped";
 				}				
@@ -70,7 +72,7 @@ function displayResults(jobID) {
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
  			var jobDIV = document.getElementById('job-' + jobID);
-			jobDiv.innerHTML = xmlHttp.responseText;
+			jobDIV.innerHTML = xmlHttp.responseText;
 		} 
   	}	
 }
