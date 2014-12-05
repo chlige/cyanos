@@ -5,7 +5,7 @@
 	edu.uic.orjala.cyanos.web.JobManager,
 	edu.uic.orjala.cyanos.web.Job,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
-	java.util.Collection, java.util.Date" %>   
+	java.util.Collection, java.util.Date, java.io.BufferedReader, java.io.StringReader" %>   
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -113,8 +113,31 @@ if ( request.getParameter("jobid") != null ) {
 	if ( job != null ) {
 %><h1>Job <%= job.getID() %>: <i><%= job.getType() %></i></h1>
 <p align="center">Started: <%= UploadServlet.DATETIME_FORMAT.format(job.getStartDate()) %><br>
-Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) { %><%= UploadServlet.DATETIME_FORMAT.format(endDate) %><% } %><br>
-<% if ( job.getOutput() != null ) { %>Show output<% } %></p>
+Ended: <% Date endDate = job.getEndDate(); if ( endDate != null ) { %><%= UploadServlet.DATETIME_FORMAT.format(endDate) %><% } %><br></p>
+<% if ( job.getOutput() != null ) { %><div class="collapseSection" style="background:white;"><a name='job_output' class='twist' onClick='loadDiv("output")'>
+<img align="absmiddle" id="twist_output" src="<%= request.getContextPath() %>/images/twist-closed.png" /> Output</a>
+<div class="hideSection" id="div_output">
+<% if ( "table".equals(job.getOutputType()) ) { %>
+<table border=1 align="center">
+<% BufferedReader reader = new BufferedReader(new StringReader(job.getOutput())); 
+String line = reader.readLine();
+while ( line != null ) {
+	int offset = 0;
+	char sep = ',';
+	int lineLen = line.length();
+%><tr><% while ( offset > -1 ) { 
+	if ( line.startsWith("\"", offset) ) {
+		offset++;
+		sep = '"';
+	}
+	int end = line.indexOf(sep, offset);
+%><td><%= ( end >= offset ? line.substring(offset, end) : line.substring(offset) ) %></td>
+<% 	if ( sep == '"' && end == (lineLen - 1) ) { offset = -1; } else if ( end == -1 ) { offset = -1; } else { offset = end + 1; }
+	sep = ',';
+} %></tr><% line = reader.readLine(); } %></table>
+<% } else { %><code><%= job.getOutput() %></code>
+<% }  %></div></div>
+<% } %>
 <div class="collapseSection" style="background:white;"><a name='job_messages' class='twist' onClick='loadDiv("messages")'>
 <img align="absmiddle" id="twist_messages" src="<%= request.getContextPath() %>/images/twist-closed.png" /> Messages</a>
 <div class="hideSection" id="div_messages"><%= job.getMessages() %></div></div>
