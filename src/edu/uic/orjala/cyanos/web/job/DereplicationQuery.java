@@ -3,7 +3,6 @@
  */
 package edu.uic.orjala.cyanos.web.job;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +50,34 @@ public class DereplicationQuery extends Job {
 			} else {
 				this.compoundList = SQLCompound.compoundQuery(this.myData, this.buildQuery());
 			}
+			
+			StringBuffer out = new StringBuffer("compound_id,name,formula,inchi_key,notes\n");
+			try {
+				compoundList.beforeFirst();
+				
+				while ( compoundList.next() ) {
+					out.append(compoundList.getID());
+					out.append(",");
+					out.append(compoundList.getName());
+					out.append(",");
+					out.append(compoundList.getFormula());
+					out.append(",");
+					out.append(compoundList.getInChiKey());
+					out.append(",\"");
+					String notes = compoundList.getNotes();
+					notes.replaceAll("\n", " ");
+					notes.replaceAll("\"", "''");
+					out.append(notes);
+					out.append("\"\n");
+				}
+				compoundList.beforeFirst();
+			} catch (DataException e) {
+				this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+				e.printStackTrace();			
+			} finally {
+				this.output = out.toString();
+			}
+
 		} catch (Exception e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();
@@ -71,49 +98,19 @@ public class DereplicationQuery extends Job {
 			this.parseThread.start();
 		}
 	}
-	
+
 	protected void finishJob() {
 		try {
 			this.endDate = new Date();
 			if ( this.working ) { 
-				this.myData.commit(); 
 				this.messages.append("<P ALIGN='CENTER'><B>SEARCH COMPLETE</B>.</P>"); 
 			} else { 
-				this.myData.rollback(); 
 				this.messages.append("<P ALIGN='CENTER'><B>SEARCH HALTED:</B> Job incomplete!</P>"); 
 			}
-
-			StringBuffer out = new StringBuffer("compound_id,name,formula,notes\n");
-			try {
-				compoundList.beforeFirst();
-				
-				while ( compoundList.next() ) {
-					out.append(compoundList.getID());
-					out.append(",");
-					out.append(compoundList.getName());
-					out.append(",");
-					out.append(compoundList.getFormula());
-					out.append(",\"");
-					String notes = compoundList.getNotes();
-					notes.replaceAll("\n", " ");
-					notes.replaceAll("\"", "''");
-					out.append(notes);
-					out.append("\"\n");
-				}
-				compoundList.beforeFirst();
-			} catch (DataException e) {
-				this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-				e.printStackTrace();			
-			} finally {
-				this.output = out.toString();
-				this.update();
-				this.myData.close();
-			}
-			
+			this.update();
+			this.myData.close();
+			this.myData.closeDBC();
 		} catch (DataException e) {
-			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-			e.printStackTrace();			
-		} catch (SQLException e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();			
 		} finally {
@@ -182,6 +179,10 @@ public class DereplicationQuery extends Job {
 	
 	public void addColumn(String table, String column) {
 		columns.add(table.concat(".").concat(column));
+	}
+
+	public void addColumn(String column) {
+		columns.add(column);
 	}
 
 }
