@@ -93,7 +93,7 @@ if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request
 			StringBuffer query = new StringBuffer("arom_sub.atom1_H = 0");
 			String[] atoms = {"2", "3", "4", "5", "6"};
 			for ( String pos : atoms ) {
-				query.append(String.format(" AND arom_sub.arom%s_H = %d", pos, (aromSubs.contains(pos) ? 0 : 1)));
+				query.append(String.format(" AND arom_sub.atom%s_H = %d", pos, (aromSubs.contains(pos) ? 0 : 1)));
 			}
 			DereplicationServlet.addQuery(request, query.toString());
 		}
