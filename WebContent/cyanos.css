@@ -44,7 +44,7 @@ h1 { text-align: center; }
 .sideModule a:hover { FONT-WEIGHT: bold; BACKGROUND-COLOR: #FFFF30; color: #9F9F9F; text-decoration: none; }
 .sideModule p { margin-left: 10px; }
 
-.calendar { background-color: #FFFFFF; padding: 5px 10px; width: 250px; min-height: 175px; z-index:99; position:absolute; display:none; }
+.calendar { background-color: #fcf7e2; padding: 5px 10px; width: 250px; min-height: 175px; z-index:99; position:absolute; display:none; }
 
 .livesearch { background-color: #FFFFFF; padding: 5px 10px; max-height: 200px; overflow:auto; position:absolute; z-index:99; display: none;}
 .livesearch a { color: #202020; text-decoration: none; }
@@ -92,10 +92,10 @@ table.dashboard { border-collapse: collapse; margin-left:auto; margin-right:auto
 col.datashort { width: 25%; }
 col.datalong { width: 50%; }
 
-table.upload tr td, table.upload tr th { border: 1px solid #999; padding-left: 10px; padding-right: 10px; }
-table.uploadForm tr td { border-bottom: 2px solid #bbb;}
+table.upload > tbody > tr > td, table.upload > tbody > tr > th { border: 1px solid #999; padding-left: 10px; padding-right: 10px; }
+table.uploadForm > tbody > tr > td { border-bottom: 2px solid #bbb;}
 table.uploadForm { margin-left: auto; margin-right: auto; border-top: 2px solid #bbb; }
-table.uploadForm tr td:first-child {  border-right: 1px solid #ddd; font-weight: bold;}
+table.uploadForm > tbody > tr > td:first-child {  border-right: 1px solid #ddd; font-weight: bold;}
 
 table.files { border: 0px; width:100%; border-collapse: collapse; margin-left:auto; margin-right:auto; }
 tr.listing td { border: 1px solid black; background-color: white; }
@@ -154,8 +154,8 @@ td { FONT-WEIGHT: normal; FONT-SIZE: 12px; COLOR: #000000;
 	padding: 4px; }
 td.week { border-right: 1px solid #808080; border-left: 1px solid #808080; }
 td.day { BACKGROUND-COLOR: #BBEEFF;}
-td.today { BACKGROUND-COLOR: #BBBBFF; }
-td.selDay { BACKGROUND-COLOR: #EEFFCC; font-weight: bold; }
+td.today { background-color: #BBBBFF; }
+td.selDay { background-color: #ffff80; font-weight: bold; border: 1px solid #777 !important; }
 td.selDay a { font-weight: bold; }
 td.updated { BACKGROUND-COLOR: #FFFF90 }
 td.section { border-bottom: 2px solid #808080 }
@@ -168,6 +168,16 @@ td.subheader { border-bottom: 1px solid #808080; background-color: #E8E8E8; }
 td.removed { color:#707070; text-decoration: line-through; }
 tr.voided td { color:#707070; }
 tr.voided font.voidNote { color:#FF0000; font-weight:bold;}
+
+input.dateField {
+	background-image: url('images/calendar.png');
+	background-repeat:no-repeat;
+	background-position: right 2px center;
+	height: 23px;
+	border: solid 1px #aaa;
+	padding-left: 2px;
+	padding-right: 25px;
+}
 
 .tabset { position: relative; padding-left: 10px;
 	padding-top: 7px; 

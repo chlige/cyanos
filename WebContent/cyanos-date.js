@@ -1,23 +1,61 @@
-function showDate(divTag, dateFieldID) {
-	var div = window.document.getElementById(divTag);
-	if ( div.style.display == "block") {
-		div.style.border = "0px";
-		div.style.display = "none";
+function showDate(divTag, dateFieldID, showTime) {
+	var cals = document.getElementsByClassName("calendar");
+	for ( var i = 0; i < cals.length; i++ ) {
+		if ( cals[i].id == divTag ) {
+			if ( cals[i].style.display == "block") {
+				cals[i].style.border = "0px";
+				cals[i].style.display = "none";
+			} else {
+				var dateString = window.document.getElementById(dateFieldID).value;
+				var timestamp = Date.parse(dateString);
+				var selDate;
+				if ( isNaN(timestamp) == false ) {
+					selDate = new Date(timestamp);
+				} else {
+					selDate = new Date();
+				}
+				buildCalendar(dateFieldID, divTag, selDate.getMonth(), selDate.getFullYear(), showTime);
+				cals[i].style.border = "1px solid #A5ACB2";
+				cals[i].style.display = "block";
+			}
+		} else if ( cals[i].style.display == "block") {
+			cals[i].style.border = "0px";
+			cals[i].style.display = "none";
+		}
+	}	
+}
+
+function setDateDiv(fieldTag, fieldValue, divTag, close) {
+	if ( close ) {
+		window.document.getElementById(fieldTag).value = fieldValue; 
+		closeDateDiv(divTag);
 	} else {
-		resetDateDiv(dateFieldID, divTag);
-		div.style.border = "1px solid #A5ACB2";
-		div.style.display = "block";
+		document.getElementById('temp_'.concat(fieldTag)).value = fieldValue; 
+		var elem = document.getElementsByClassName("selDay");
+		var today = new Date();
+		var todayString = today.toISOString().substring(0,10);
+		if ( elem.length > 0 ) {
+			if ( elem[0].id == todayString ) {
+				elem[0].className = "today";
+			} else {
+				elem[0].className = "day";
+			}
+		}
+		document.getElementById(fieldValue).className = "selDay";
 	}
 }
 
-function setDateDiv(fieldTag, fieldValue, divTag) {
+function closeDateDiv(divTag) {
 	var div = window.document.getElementById(divTag);
-	window.document.getElementById(fieldTag).value= fieldValue; 
 	div.style.border = "0px";
 	div.style.display = "none";
 }
 
-function resetDateDiv(fieldTag, divTag) {
+function resetDateDiv(action, showTime) {
+	var div = getParent(action, "div.calendar")
+	var divTag = div.id;
+	var fieldTag = divTag.substring(4);
+
 	var dateString = window.document.getElementById(fieldTag).value;
 	var timestamp = Date.parse(dateString);
 	var selDate;
@@ -26,16 +64,18 @@ function resetDateDiv(fieldTag, divTag) {
 	} else {
 		selDate = new Date();
 	}
-	buildCalendar(fieldTag, divTag, selDate.getMonth(), selDate.getFullYear());
+	buildCalendar(fieldTag, divTag, selDate.getMonth(), selDate.getFullYear(), showTime);
 }
 
-function buildCalendar(fieldTag, divTag, month, year) {
+function buildCalendar(fieldTag, divTag, month, year, showTime) {
 	var div = window.document.getElementById(divTag);
 	var dateString = window.document.getElementById(fieldTag).value;
 	var timestamp = Date.parse(dateString);
+	dateString = dateString.substring(0,10);
 	var selDateString;
+	var selDate = new Date();
 	if ( isNaN(timestamp) == false ) {
-		var selDate = new Date(timestamp);
+		selDate = new Date(timestamp);
 		selDateString = selDate.toISOString().substring(0,10);
 	}
 	var today = new Date();
@@ -70,10 +110,11 @@ function buildCalendar(fieldTag, divTag, month, year) {
 		var anchor = document.createElement("a");
 		anchor.innerHTML = calDate.getDate();
 		var dateString = calDate.toISOString().substring(0,10);
-		anchor.onclick = function(thisDate) { return function () { setDateDiv(fieldTag, thisDate, divTag); }; }(dateString);
+		cell.id = dateString;
+		anchor.onclick = function(thisDate) { return function () { setDateDiv(fieldTag, thisDate, divTag, ! showTime); }; }(dateString);
 		cell.appendChild(anchor);
 		if ( dateString == selDateString ) {
-			cell.className = "selDate";
+			cell.className = "selDay";
 		} else if ( dateString == todayString ) {
 			cell.className = "today";
 		} else {
@@ -99,30 +140,84 @@ function buildCalendar(fieldTag, divTag, month, year) {
 		table.deleteRow(-1);
 	}
 		
-	var inputs = div.getElementsByTagName("input");
-	for ( i in inputs ) {
-		if ( inputs[i].name == "year" ) {
-			inputs[i].value = year;
-		}
+	div.querySelector("#year").value = year;
+	div.querySelector("#month").value = month;
+	if ( showTime ) {
+		div.querySelector("#hour").value = ( selDate.getHours() + 11 ) % 12 + 1;
+		div.querySelector("#minute").value = selDate.getMinutes();
+		div.querySelector("#meridian").selectedIndex = ( selDate.getHours() > 11 ? 1 : 0 );
 	}
+}
 
-	inputs = div.getElementsByTagName("select");
-	for ( i in inputs ) {
-		if ( inputs[i].name == "month" ) {
-			inputs[i].selectedIndex = month;
+function updateDateTime(action) {
+	var div = getParent(action, "div.calendar")
+	var divTag = div.id;
+	var fieldTag = divTag.substring(4);
+
+	var hour = div.querySelector("#hour").value;
+	if ( hour < 10 ) hour = "0".concat(hour);
+	var minute = div.querySelector("#minute").value;
+	if ( minute < 10 ) minute = "0".concat(minute);
+	
+	var meridian = div.querySelector("#meridian").value;
+	
+	var newValue = document.getElementById('temp_'.concat(fieldTag)).value.concat(" ").concat(hour).concat(":").concat(minute).concat(" ").concat(meridian);
+	setDateDiv(fieldTag, newValue, divTag, true);
+}
+
+function updateDateDiv(action, showTime) {
+	var div = getParent(action, "div.calendar");
+	var divTag = div.id;
+	var fieldTag = divTag.substring(4);
+	buildCalendar(fieldTag, divTag, div.querySelector("#month").value, div.querySelector("#year").value, showTime);	
+}
+
+function getParent(elem, selector) {
+	var byClass = selector.indexOf(".");
+	var byID = selector.indexOf("#");
+	var tagName = "";
+	var className = "";
+	var id = "";
+	if ( byClass < 0 && byID < 0 ) {
+		tagName = selector.toUpperCase();
+	} else {
+		if ( byClass > byID ) {
+			var sels = selector.split(".", 2);	
+			if ( sels.length > 1 ) {
+				tagName = sels[0].toUpperCase();
+			}
+			className = sels[sels.length - 1];
+		} else {
+			var sels = selector.split("#", 2);	
+			if ( sels.length > 1 ) {
+				tagName = sels[0].toUpperCase();
+			}
+			id = sels[sels.length - 1];			
 		}
 	}
 	
-
+	for ( ; elem && elem != document; elem = elem.parentNode ) {
+		var valid = 0;
+		if ( tagName.length > 0 ) {
+			valid += (elem.tagName === tagName ? 1 : -1);
+		}
+		if ( className.length > 0 ) {
+			valid += (className === elem.className ? 1 : -1);
+		} 
+		if ( id.length > 0 ) {
+			valid += (id === elem.id ? 1 : -1);
+		}
+		if ( valid > 0 )
+			return elem;
+	}
+	
 }
 
-function gotoToday(fieldTag, divTag) {
+function gotoToday(button, showTime) {
+	var div = getParent(button, "div.calendar");
 	var today = new Date();
-	buildCalendar(fieldTag, divTag, today.getMonth(), today.getFullYear());
-}
-
-function updateDateDiv(action, fieldTag, divTag) {
-	var myForm = action.form;
-	
-	buildCalendar(fieldTag, divTag, myForm.elements["month"].value, myForm.elements["year"].value);	
+	var divTag = div.id;
+	var fieldTag = divTag.substring(4);
+	buildCalendar(fieldTag, divTag, today.getMonth(), today.getFullYear(), showTime);
+	setDateDiv(fieldTag, today.toISOString().substring(0,10), divTag, ! showTime );
 }
