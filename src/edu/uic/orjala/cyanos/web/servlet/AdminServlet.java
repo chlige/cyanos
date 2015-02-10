@@ -5,6 +5,7 @@ package edu.uic.orjala.cyanos.web.servlet;
 
 import java.io.PrintWriter;
 import java.security.KeyPair;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -252,6 +253,12 @@ public class AdminServlet extends ServletObject {
 				}
 			}
 		}
+	}
+	
+	public static News getAllNews(HttpServletRequest request) throws DataException, SQLException {
+		if ( getUser(request).isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.WRITE) ) 
+			return News.allNews(getSQLData(request));
+		return null;
 	}
 	
 	private void updateConfigQueues(CyanosWrapper aWrap, AppConfig myConfig) {
