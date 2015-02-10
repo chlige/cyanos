@@ -103,7 +103,6 @@ public class CyanosRequestListener implements ServletRequestListener {
 	
 	public static SQLData newSQLData(HttpServletRequest req) throws SQLException, ConfigException, DataException {
 		Connection conn = AppConfigListener.getDBConnection();
-		System.err.format("Created connection: %d\n", conn.hashCode());
 		return new SQLData(AppConfigListener.getConfig(), conn, getUser(req), AppConfigListener.getIDType());			
 	}
 	

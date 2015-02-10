@@ -489,7 +489,7 @@ public class SQLData {
 	public void closeDBC() throws DataException {
 		try {
 			if ( this.conn.getDBC() != null & ( ! this.conn.getDBC().isClosed() ) )
-				System.err.format("CLOSING CONNECTION: %d\n", this.conn.dbc.hashCode());
+//				System.err.format("CLOSING CONNECTION: %d\n", this.conn.dbc.hashCode());
 				this.conn.close();
 		} catch (SQLException e) {
 			throw new DataException(e);
