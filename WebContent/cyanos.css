@@ -35,11 +35,11 @@ h1 { text-align: center; }
 .selectSection { clear: both; display: block; width: 90%; margin-left: 5%; 
 	border-top: 1px solid gray; border-bottom: 1px solid gray; margin-bottom: 10px;  
 	background-color: #FFF9CD; }
-.sideModule { border: 4px groove gray; display:block; width: 100%; background-color: #9F9F9F; }
+.sideModule { border: 1px solid #999; border-radius: 5px; display:block; width: 100%; background-color: #ccc; }
 .pageModule { border: 4px groove gray; display:block; width: 350px; margin-left: auto; margin-right: auto; }
 .searchNav  { display: block; background-color: #FFFCE6; border: 1px solid black;; padding: 5px; margin-bottom: 10px; width: 80%; margin-left: auto; margin-right:auto;}
 
-.sideModule a { FONT-WEIGHT: bold; COLOR: #FFFF30; }
+.sideModule a { FONT-WEIGHT: bold; COLOR: #ffff00; }
 .sideModule a:visited { FONT-WEIGHT: bold; COLOR: #FFFF30; }
 .sideModule a:hover { FONT-WEIGHT: bold; BACKGROUND-COLOR: #FFFF30; color: #9F9F9F; text-decoration: none; }
 .sideModule p { margin-left: 10px; }
@@ -344,38 +344,115 @@ a.footer {
 	*/
 }
 
-#loginBox {
-	display: block;
-	position: fixed;
-	z-index: 999;
-	width: 100%;
-	height: 200px;
-	top: 100px;
+@media only screen and (min-device-width: 720px) {
+	#loginBox {
+		display: block;
+		position: fixed;
+		z-index: 999;
+		width: 100%;
+		height: 200px;
+		top: 100px;
+	}
+
+	#loginBoxForm {
+		display: block;
+		position: relative;
+		width: 350px;
+		height: 200px;
+		background-color: white;
+		padding: 10px;
+		border: 2px solid black;
+		opacity: 1.0;
+		margin: auto;
+	}
+
+	#loginCover {
+		width: 100%;
+		background-color: #333333;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		visibility: hidden;
+		opacity: 0.75;
+		z-index: 998;
+		height: 100%;
+	}
+
+	label {
+		display:inline-block;
+		width: 70px;
+		margin-bottom: 10px;
+	}
 }
 
-#loginBoxForm {
-	display: block;
-	position: relative;
-	width: 350px;
-	height: 200px;
-	background-color: white;
-	padding: 10px;
-	border: 2px solid black;
-	opacity: 1.0;
-	margin: auto;
-}
 
-#loginCover {
-	width: 100%;
-	background-color: #333333;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	visibility: hidden;
-	opacity: 0.75;
-	filter: alpha(opacity = 75);
-	z-index: 998;
-	height: 100%;
+
+@media only screen and (max-device-width: 680px) {
+	body {
+		-webkit-text-size-adjust: 100%;
+		font-size: 100%;
+	} 
+
+	#loginBox {
+		display: block;
+		width: 100%;
+		margin: 10px;
+	}
+
+	#loginBox hr {
+		display:none;
+	}
+
+	#loginBox input[type=text], #loginBox input[type=password] {
+  		-webkit-appearance: none; -moz-appearance: none;
+		display: block;
+		margin: 0;
+		width: 90%; height: 40px;
+		line-height: 40px; font-size: 17px;
+		border: 1px solid #bbb;
+	}
+
+	#loginBox button {
+		-webkit-appearance: none; -moz-appearance: none;
+		display: block;
+		margin: 1.5em 0;
+		font-size: 1em; line-height: 2.5em;
+		color: #333;
+		font-weight: bold;
+		height: 2.5em; width: 100%;
+		background: #fdfdfd; 
+		background: -moz-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0% ,#fdfdfd), color-stop(100%,#bebebe)); 
+		background: -webkit-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
+		background: -o-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
+		background: -ms-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
+		background: linear-gradient(to bottom, #fdfdfd 0%,#bebebe 100%);
+		border: 1px solid #bbb;
+ 		-webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px;
+}
+	label:after { content: " "; }
+
+	#loginBoxForm {
+		display: block;
+		position: relative;
+		width: 350px;
+		height: 200px;
+		padding: 10px;
+		opacity: 1.0;
+		margin: auto;
+	}
+
+	#loginCover {
+		display:none;
+		width: 100%;
+		background-color: #333333;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		visibility: hidden;
+		opacity: 0.75;
+		height: 100%;
+	}
 }
 
 #sideNav ol li {
