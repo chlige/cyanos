@@ -28,8 +28,8 @@ import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.web.AppConfig;
 import edu.uic.orjala.cyanos.web.AppConfigSQL;
 import edu.uic.orjala.cyanos.web.AppConfigXML;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.News;
 

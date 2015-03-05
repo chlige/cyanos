@@ -3,10 +3,7 @@
  */
 package edu.uic.orjala.cyanos.web;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -36,71 +33,6 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 	private static final String ATTR_PARAMETERS = "multipart-params";
 	private static final String ATTR_UPLOADS = "multipart-files";
 
-	public class FileUpload {
-
-		private final InputStream inStream;
-		private final String name;
-		private final String contentType;
-
-		/**
-		 * @throws IOException 
-		 * 
-		 */
-		protected FileUpload(FileItemStream fileItem) throws IOException {
-			this.name = fileItem.getName();
-
-			InputStream fileIn = fileItem.openStream();
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			int c;
-			while ((c= fileIn.read()) != -1) {
-				out.write((char) c);
-			}
-			this.inStream = new ByteArrayInputStream(out.toByteArray());
-			this.contentType = fileItem.getContentType();
-		}
-
-		/**
-		 * Return the name of the uploaded file.
-		 * 
-		 * @return
-		 */
-		public String getName() {
-			return this.name;
-		}
-
-		/**
-		 * Return an InputStream of the uploaded data.
-		 * 
-		 * @return
-		 * @throws IOException
-		 */
-		public InputStream getStream() throws IOException {
-			inStream.reset();
-			return inStream;
-		}
-
-		/**
-		 * Return the reported content type of the uploaded file
-		 * 
-		 * @return
-		 */
-		public String getContentType() {
-			return contentType;
-		}
-
-		/**
-		 * Return the uploaded data as a String.
-		 * 
-		 * @return
-		 * @throws IOException
-		 */
-		@Deprecated
-		public String getString() throws IOException {
-			inStream.reset();
-			return Streams.asString(inStream);
-		}
-
-	}
 	private Map<String, String[]> formValues = null;
 	private Map<String, List<FileUpload>> uploadItems = null;
 
@@ -120,6 +52,13 @@ public class MultiPartRequest extends HttpServletRequestWrapper {
 			return new MultiPartRequest(request);
 		else
 			return request;
+	}
+	
+	public static MultiPartRequest genRequest(HttpServletRequest request) throws ServletException, IOException {
+		if ( request instanceof MultiPartRequest ) 
+			return (MultiPartRequest) request;
+		else 
+			return new MultiPartRequest(request);		
 	}
 
 	/**

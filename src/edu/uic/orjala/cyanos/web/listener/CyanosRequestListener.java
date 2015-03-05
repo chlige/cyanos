@@ -16,9 +16,9 @@ import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLUser;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.GuestUser;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 
 /**
  * Application Lifecycle Listener implementation class CyanosRequestListener

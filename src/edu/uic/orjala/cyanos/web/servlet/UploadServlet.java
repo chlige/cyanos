@@ -19,8 +19,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.Sheet;
 import edu.uic.orjala.cyanos.web.SpreadSheet;
 import edu.uic.orjala.cyanos.web.UploadForm;

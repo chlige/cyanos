@@ -55,9 +55,9 @@ import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.InchiGenerator;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 /**
@@ -744,7 +744,7 @@ public class CompoundServlet extends ServletObject {
 		String reqFormat = req.getParameter(FIELD_FILE_FORMAT);
 		
 		if ( req instanceof MultiPartRequest ) {
-			edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload file = ((MultiPartRequest)req).getUpload(MDL_FILE);
+			edu.uic.orjala.cyanos.web.FileUpload file = ((MultiPartRequest)req).getUpload(MDL_FILE);
 			molecule = getMolecule(file.getStream(), file.getContentType(), reqFormat);
 			mdlData = file.getString();
 		}
