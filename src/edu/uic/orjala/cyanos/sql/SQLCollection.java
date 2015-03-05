@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import edu.uic.orjala.cyanos.Collection;
 import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.ExternalFile;
 import edu.uic.orjala.cyanos.Harvest;
 import edu.uic.orjala.cyanos.Isolation;
 import edu.uic.orjala.cyanos.Notebook;
@@ -806,7 +807,52 @@ public class SQLCollection extends SQLObject implements Collection {
 	@Override
 	public String getRemoteHostID() throws DataException {
 		return this.myData.getString(REMOTE_HOST_COLUMN);
+	}	
+
+	public void unlinkDataFile(ExternalFile aFile) throws DataException {
+		this.unsetDataFile(DATA_FILE_CLASS, this.myID, aFile);
+	}
+
+	public String getDataFileClass() {
+		return DATA_FILE_CLASS;
 	}
 	
+	public ExternalFile getDataFiles() throws DataException {
+		return this.getDataFiles(DATA_FILE_CLASS, this.myID);
+	}
+
+	public void linkDataFile(ExternalFile aFile, String dataType) throws DataException {
+		this.setDataFile(DATA_FILE_CLASS, this.myID, dataType, aFile);
+	}
+
+	public ExternalFile getDataFilesForType(String dataType) throws DataException {
+		return this.getDataFilesForType(DATA_FILE_CLASS, this.myID, dataType);
+	}
+
+	@Override
+	public String addPhoto(String name, String description, String mimeType) throws DataException {
+		String path = String.format("/collection/%s/%s", this.myID, name);
+		this.linkDataFile(path, Strain.PHOTO_DATA_TYPE, description, mimeType);
+		return path;
+	}
+
+	public ExternalFile getPhotos() throws DataException {
+		return this.getDataFilesForType(Strain.PHOTO_DATA_TYPE);
+	}
+
+	@Override
+	public void linkDataFile(String path, String dataType, String description, String mimeType) throws DataException {
+		this.setDataFile(DATA_FILE_CLASS, this.myID, dataType, path, description, mimeType);
+	}
+
+	@Override
+	public void updateDataFile(String path, String dataType, String description, String mimeType) throws DataException {
+		this.setDataFile(DATA_FILE_CLASS, this.myID, dataType, path, description, mimeType);
+	}
+
+	@Override
+	public void unlinkDataFile(String path) throws DataException {
+		this.unsetDataFile(DATA_FILE_CLASS, this.myID, path);
+	}
 
 }

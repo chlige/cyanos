@@ -8,7 +8,13 @@ import java.util.Date;
  * @author George Chlipala
  *
  */
-public interface Collection extends BasicObject, NotebookObject, RemoteObject {
+public interface Collection extends BasicObject, NotebookObject, RemoteObject, DataFileObject {
+
+	final static String PHOTO_DATA_TYPE = "photo";
+	
+	final static String[] DATA_TYPES = { PHOTO_DATA_TYPE };
+	final static String DATA_FILE_CLASS = "collection";
+
 
 	/**
 	 * Returns the ID of the current Collection
@@ -293,5 +299,8 @@ public interface Collection extends BasicObject, NotebookObject, RemoteObject {
 	 * @throws DataException
 	 */
 	Strain getStrains() throws DataException;
+	
+	ExternalFile getPhotos() throws DataException;
 
+	String addPhoto(String name, String description, String mimeType) throws DataException;
 }

@@ -1,13 +1,20 @@
 package edu.uic.orjala.cyanos.web.servlet;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -16,12 +23,17 @@ import edu.uic.orjala.cyanos.Collection;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Isolation;
 import edu.uic.orjala.cyanos.Role;
+import edu.uic.orjala.cyanos.Strain;
 import edu.uic.orjala.cyanos.sql.SQLCollection;
 import edu.uic.orjala.cyanos.sql.SQLIsolation;
+import edu.uic.orjala.cyanos.web.AppConfig;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.SheetWriter;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 public class CollectionServlet extends ServletObject {
 	
+	public static final String FILE_QUEUE = "file-queue";
 	private static float LAT_RANGE = 180.0f / 256.0f;
 	private static float LONG_RANGE = 360.0f / 256.0f;
 
@@ -87,6 +99,7 @@ public class CollectionServlet extends ServletObject {
 	public static final String STRAIN_LIST_DIV_ID = "strains";
 	public static final String HARVEST_DIV_ID = "harvests";
 	public static final String INFO_FORM_DIV_ID = "infoForm";
+	public static final String PHOTO_DIV_ID = "photos";
 
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.servlet.ServletObject#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -106,6 +119,23 @@ public class CollectionServlet extends ServletObject {
 		this.handleRequest(req, res);
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		super.doPut(req, resp);
+		HttpSession session = req.getSession();
+		Object files = session.getAttribute(FILE_QUEUE);
+		if ( files == null ) {
+			files = new ArrayList<FileUpload>();
+			session.setAttribute(FILE_QUEUE, files);
+		}
+		
+		if ( files instanceof List ) {
+			((List)files).add(FileUpload.fromPut(req));
+		}
+	}
 
 	private void handleRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException,IOException {
 
@@ -133,6 +163,34 @@ public class CollectionServlet extends ServletObject {
 
 		try {
 			
+/*
+			if ( req.getParameter("addCollection") != null ) {
+				String colID = req.getParameter("colID");
+				String projectID = req.getParameter("project");
+				Collection collection = null;
+				if (projectID != null && projectID.length() > 0) {
+					collection = SQLCollection.createInProject(getSQLData(req), colID, projectID);
+				} else if (colID != null) {
+					collection = SQLCollection.create(getSQLData(req), colID);
+				}
+				
+				collection.setCollector(req.getParameter("collector"));
+				collection.setLocationName(req.getParameter("loc_name"));
+				collection.setDate(req.getParameter("colDate"));
+				collection.setLatitude(req.getParameter("pos_lat"));
+				collection.setLongitude(req.getParameter("pos_long"));
+				collection.setNotes(req.getParameter("notes"));
+				
+				Part part = req.getPart("photo");
+				if ( part != null && part.getSize() > 0 ) {
+					System.err.print("PART:");
+				}
+		
+				req.setAttribute(ATTR_COLLECTION, collection);	
+				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
+				this.forwardRequest(req, res, "/collection.jsp");
+			}
+*/			
 			String form = req.getParameter("form");
 			if ( form != null ) {
 				if ( form.equals("add") ) {
@@ -142,11 +200,11 @@ public class CollectionServlet extends ServletObject {
 			} 
 
 			if ( req.getParameter("col") != null ) {
-				req.setAttribute(ATTR_COLLECTION, SQLCollection.load(this.getSQLData(req), req.getParameter("col")));	
+				req.setAttribute(ATTR_COLLECTION, SQLCollection.load(getSQLData(req), req.getParameter("col")));	
 				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
 			} else if ( req.getParameter("id") != null ) {
-				req.setAttribute(ATTR_ISOLATION, SQLIsolation.load(this.getSQLData(req), req.getParameter("id")));
-				req.setAttribute(ATTR_TYPES, SQLIsolation.types(this.getSQLData(req)));
+				req.setAttribute(ATTR_ISOLATION, SQLIsolation.load(getSQLData(req), req.getParameter("id")));
+				req.setAttribute(ATTR_TYPES, SQLIsolation.types(getSQLData(req)));
 				this.forwardRequest(req, res, "/isolation.jsp");
 				return;
 			} else if ( req.getParameter("query") != null ) {
@@ -416,7 +474,20 @@ public class CollectionServlet extends ServletObject {
 						req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
 						req.setAttribute("canMap", new Boolean(this.getAppConfig().canMap()));
 						this.forwardRequest(req, res, "/collection/collection-form.jsp");
-					}
+					} else if ( divID.equals(PHOTO_DIV_ID) ) {
+						req.setAttribute(ATTR_COLLECTION, aCol);
+						if ( req.getParameter(DataFileServlet.ACTION_SHOW_BROWSER) != null ) {
+							AppConfig myConf = this.getAppConfig();
+							String path = myConf.getFilePath(Strain.DATA_FILE_CLASS, Strain.PHOTO_DATA_TYPE);
+							req.setAttribute(DataFileServlet.ATTR_ROOT_DIR, path);
+							if ( req.getParameter("path") != null ) {
+								req.setAttribute(DataFileServlet.ATTR_CURRENT_DIR, new File(path, req.getParameter("path")));					
+							} else {
+								req.setAttribute(DataFileServlet.ATTR_CURRENT_DIR, new File(path));						
+							}
+						}
+						this.forwardRequest(req, res, "/collection/photos.jsp");
+}
 				} else {
 					out.print("ACCESS DENIED");
 				}
@@ -948,4 +1019,24 @@ public class CollectionServlet extends ServletObject {
 		return output.toString();
 	}
 
+	public static void addPhotos(Collection collection, List<FileUpload> files) throws DataException, IOException {
+		if ( files != null ) {
+			String fileRoot = AppConfigListener.getConfig().getFilePath(Collection.DATA_FILE_CLASS, Collection.PHOTO_DATA_TYPE);
+			for ( FileUpload file : files ) {
+				String path = collection.addPhoto(file.getName(), "", file.getContentType());
+				File realFile = new File(fileRoot, path);
+				File directory = new File(realFile.getParentFile().getAbsolutePath());
+				directory.mkdirs();
+				FileOutputStream out = new FileOutputStream(realFile);
+				InputStream in = file.getStream();
+				byte[] buffer = new byte[4096];
+				int n;
+				while ((n = in.read(buffer)) > 0 ) {
+					out.write(buffer,0,n);
+				}
+				out.close();
+			}
+		}
+	}
+	
 }
