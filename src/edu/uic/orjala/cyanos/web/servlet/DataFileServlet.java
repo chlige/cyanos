@@ -74,8 +74,8 @@ import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.sql.SQLSeparation;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.AppConfig;
+import edu.uic.orjala.cyanos.web.FileUpload;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
-import edu.uic.orjala.cyanos.web.MultiPartRequest.FileUpload;
 import edu.uic.orjala.cyanos.web.forms.DataForm;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
@@ -83,6 +83,7 @@ import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 public class DataFileServlet extends ServletObject {
 	
+	private static final int BUFFER_SIZE = 1024 * 1024; // 1 MB
 	public static final String ACTION_UPDATE_FILE = "updateFile";
 	public static final String ACTION_GET_FILES = "getfiles";
 	public static final String ACTION_GET_DIRS = "getdirs";
@@ -600,28 +601,20 @@ public class DataFileServlet extends ServletObject {
 						InputStream fileIn = aFile.getInputStream();
 						Long thisSize = new Long(aFile.getFileObject().length());
 						res.setContentLength(thisSize.intValue());
-						int d = fileIn.read();
-						while ( d != -1 ) {
-							out.write(d);
-							d = fileIn.read();
-						}
-						while ( d != -1 ) {
-							out.write(d);
-							d = fileIn.read();
+						byte[] buffer = new byte[BUFFER_SIZE];
+						int count;
+						while ( (count = fileIn.read(buffer)) > 0  ) {
+							out.write(buffer, 0, count);
 						}
 					}
 				} else {
 					InputStream fileIn = aFile.getInputStream();
 					Long thisSize = new Long(aFile.getFileObject().length());
 					res.setContentLength(thisSize.intValue());
-					int d = fileIn.read();
-					while ( d != -1 ) {
-						out.write(d);
-						d = fileIn.read();
-					}
-					while ( d != -1 ) {
-						out.write(d);
-						d = fileIn.read();
+					byte[] buffer = new byte[BUFFER_SIZE];
+					int count;
+					while ( (count = fileIn.read(buffer)) > 0  ) {
+						out.write(buffer, 0, count);
 					}
 				}
 				out.flush();
