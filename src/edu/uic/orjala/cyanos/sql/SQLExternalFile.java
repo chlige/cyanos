@@ -13,7 +13,6 @@ import net.sf.jmimemagic.MagicException;
 import net.sf.jmimemagic.MagicMatch;
 import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
-
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.DataFileObject;
 import edu.uic.orjala.cyanos.ExternalFile;
@@ -32,7 +31,6 @@ public class SQLExternalFile extends SQLObject implements ExternalFile {
 	private static final String DATA_TYPE_COLUMN = "type";	
 	
 	protected static final String SQL_LOAD = "SELECT data.* FROM data WHERE file=?";
-
 
 	public static ExternalFile load(SQLData data, String root, String path) throws DataException {
 		SQLExternalFile aFile = new SQLExternalFile(data, root);
