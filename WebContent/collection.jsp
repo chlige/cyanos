@@ -84,6 +84,11 @@ function setupMap(canvas) {
 <DIV CLASS="unloaded" ID="div_<%= CollectionServlet.HARVEST_DIV_ID %>"></DIV>
 </DIV>
 
+<DIV CLASS="collapseSection"><A NAME='<%= CollectionServlet.PHOTO_DIV_ID %>' CLASS='twist' onClick='loadDiv("<%= CollectionServlet.PHOTO_DIV_ID %>")' CLASS='divTitle'>
+<IMG ALIGN="ABSMIDDLE" ID="twist_<%= CollectionServlet.PHOTO_DIV_ID %>" SRC="/cyanos/images/twist-closed.png" /> Photos</A>
+<DIV CLASS="unloaded" ID="div_<%= CollectionServlet.PHOTO_DIV_ID %>"></DIV>
+</DIV>
+
 <% } else { %>
 <p align="CENTER"><font size="+3" >Collection Search</font>
 <hr width='85%'/></p>
