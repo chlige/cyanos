@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:web="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+	version="3.0">
   <display-name>Cyanos Database</display-name>
   <description>Cyanos Database servlets.</description>
   <listener>
@@ -25,6 +29,10 @@
       <param-value>false</param-value>
     </init-param>
     <load-on-startup>3</load-on-startup>
+    <multipart-config>
+      <max-file-size>3145728</max-file-size>
+      <max-request-size>5242880</max-request-size>
+    </multipart-config>
   </servlet>
   <servlet>
     <servlet-name>help</servlet-name>
@@ -266,6 +274,10 @@
   <servlet-mapping>
     <servlet-name>collection</servlet-name>
     <url-pattern>/collection.csv</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>collection</servlet-name>
+    <url-pattern>/collection/upload/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>admin</servlet-name>
