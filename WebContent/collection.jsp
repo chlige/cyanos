@@ -69,25 +69,13 @@ function setupMap(canvas) {
 <jsp:include page="/collection/collection-form.jsp" />
 </div>
 
-<DIV CLASS="collapseSection"><A NAME='<%= CollectionServlet.ISOLATION_DIV_ID %>' CLASS='twist' onClick='loadDiv("<%= CollectionServlet.ISOLATION_DIV_ID %>")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_<%= CollectionServlet.ISOLATION_DIV_ID %>" SRC="/cyanos/images/twist-closed.png" /> Isolations</A>
-<DIV CLASS="unloaded" ID="div_<%= CollectionServlet.ISOLATION_DIV_ID %>"></DIV>
-</DIV>
+<cyanos:div divID="<%= CollectionServlet.ISOLATION_DIV_ID %>" title="Isolations"/>
 
-<DIV CLASS="collapseSection"><A NAME='<%= CollectionServlet.STRAIN_LIST_DIV_ID %>' CLASS='twist' onClick='loadDiv("<%= CollectionServlet.STRAIN_LIST_DIV_ID %>")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_<%= CollectionServlet.STRAIN_LIST_DIV_ID %>" SRC="/cyanos/images/twist-closed.png" /> Strains</A>
-<DIV CLASS="unloaded" ID="div_<%= CollectionServlet.STRAIN_LIST_DIV_ID %>"></DIV>
-</DIV>
+<cyanos:div divID="<%= CollectionServlet.STRAIN_LIST_DIV_ID %>" title="Strains"/>
 
-<DIV CLASS="collapseSection"><A NAME='<%= CollectionServlet.HARVEST_DIV_ID %>' CLASS='twist' onClick='loadDiv("<%= CollectionServlet.HARVEST_DIV_ID %>")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_<%= CollectionServlet.HARVEST_DIV_ID %>" SRC="/cyanos/images/twist-closed.png" /> Harvests</A>
-<DIV CLASS="unloaded" ID="div_<%= CollectionServlet.HARVEST_DIV_ID %>"></DIV>
-</DIV>
+<cyanos:div divID="<%= CollectionServlet.HARVEST_DIV_ID %>" title="Harvests"/>
 
-<DIV CLASS="collapseSection"><A NAME='<%= CollectionServlet.PHOTO_DIV_ID %>' CLASS='twist' onClick='loadDiv("<%= CollectionServlet.PHOTO_DIV_ID %>")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_<%= CollectionServlet.PHOTO_DIV_ID %>" SRC="/cyanos/images/twist-closed.png" /> Photos</A>
-<DIV CLASS="unloaded" ID="div_<%= CollectionServlet.PHOTO_DIV_ID %>"></DIV>
-</DIV>
+<cyanos:div divID="<%= CollectionServlet.PHOTO_DIV_ID %>" title="Photos"/>
 
 <% } else { %>
 <p align="CENTER"><font size="+3" >Collection Search</font>

@@ -221,3 +221,15 @@ function gotoToday(button, showTime) {
 	buildCalendar(fieldTag, divTag, today.getMonth(), today.getFullYear(), showTime);
 	setDateDiv(fieldTag, today.toISOString().substring(0,10), divTag, ! showTime );
 }
+
+function checkCalendar(newInput, oldInput, div, showTime) {
+	var type = ( showTime ? "datetime-local" : "date");
+	newInput.setAttribute("type", type);
+	var typeValid = ( newInput.type === type);
+	if ( typeValid ) {
+		oldInput.parentNode.removeChild(oldInput);
+		div.parentNode.removeChild(div);
+	} else {
+		newInput.parentNode.removeChild(newInput);
+	}	
+}

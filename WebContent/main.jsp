@@ -45,7 +45,7 @@
 
 <div class='content'>
 <div class="left25">
-<div style="height:100px;">
+<!-- <div style="height:100px;"> -->
 <div class="sideModule">
 <% if ( request.getRemoteUser() != null )  { 
 	User aUser = MainServlet.getUser(request);  %>
@@ -56,11 +56,12 @@
 <p><b>Welcome, Guest User</b></p>
 <p><a href="login.jsp">Login</a></p>
 <% } %>
-</div>
+<!-- </div> -->
 </div>
 </div>
 
 <div class="right75">
+<div class="desktop">
 <h1 style="text-align:center">Cyanos Database v1.6</h1>
 <hr width="85%">
 <% 	News news = (News) request.getAttribute(MainServlet.ATTR_NEWS); 
@@ -109,8 +110,9 @@ Click on an object class to manage the data</p>
 <area shape="rect" title="Manage Strain Data" coords="0,113,70,191" href="strain">
 <area shape="rect" title="Manage Isolation Data" coords="0,34,71,84" href="isolation.jsp">
 </map>
-
 </p>
+</div>
+</div>
 </div>
 </body>
 </html>

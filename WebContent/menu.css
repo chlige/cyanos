@@ -14,6 +14,19 @@ nav ul  {
 
 .show-menu {
 	display: none;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	text-decoration: none;
+	color: #ffff30;
+	background: #009070;
+	text-align: center;
+	padding: 10px 0;
+	display: none;
+	font-size: 14pt;
+	width: 100%;
+}
+
+.mobile-menu {
+	display:none;
 }
 
 nav input[type=checkbox] {
@@ -26,11 +39,7 @@ nav input[type=checkbox] {
 	display: none;
 }
 
-nav input[type=checkbox]:checked ~ .menu {
-	display: block;
-}
-
-@media screen and (min-width: 481px) {
+@media screen and (min-width: 680px) {
 	ul.menu {
 		width:100%;
 		margin-top: 0px;
@@ -131,7 +140,7 @@ nav input[type=checkbox]:checked ~ .menu {
 		display: block;
 	}
 	
- 	.helpmenu, .helpmenu ul {
+ 	.helpmenu {
 		background-color: #FF4E4E;
 	}
 		
@@ -149,72 +158,43 @@ nav input[type=checkbox]:checked ~ .menu {
 	}
 }
 
-@media screen and (max-width: 320px) {
+nav input[type=checkbox]:checked ~ #mobile-menu {
+	display: block;
+}
+
+@media screen and (max-width: 680px) {
 		
-	.menubar {
+	.show-menu {
 		display: block;
-		margin-left: 10px;
-		margin-bottom: 10px;
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 10px;
-		height: 45px;
-		width: 100%;
-		background-color: #009070;
-	}
-	
+	}	
+		
 	.menu {
 		display: none;
-		width: 125px;
-		padding-left: 7px;
-		padding-top: 5px;
-		height: 25px;
-		background-color: #009070;
-		border-top: 1px solid black;
-		border-bottom: 1px solid black;
-		-moz-user-select: none;
-		-khtml-user-select: none;
-		user-select: none;
 	}
 
 	.helpmenu {
-		display: none;
-		width: 125px;
-		padding-left: 7px;
-		padding-top: 5px;
-		height: 25px;
-		margin-right: 2px;
 		background-color: #FF4E4E;
-		border: 2px outset red;
-		-moz-user-select: none;
-		-khtml-user-select: none;
-		user-select: none;
 	}
 	
-	.menu a,.menu a:visited {
-		FONT-SIZE: 16px;
-		FONT-WEIGHT: bold;
-		COLOR: #E8E850;
+	.mobile-menu a, .mobile-menu a:visited {
+		font-size: 14pt;
+		color: #fff;
 	}
 	
-	.menu a:hover {
-		FONT-SIZE: 16px;
-		FONT-WEIGHT: bold;
-		COLOR: #FFFF30;
+	.mobile-menu a:hover {
+		font-size: 14pt;
+		color: #fff;
 		text-decoration: none;
 	}
 	
 	.helpmenu a,.helpmenu a:visited {
-		FONT-SIZE: 16px;
-		FONT-WEIGHT: bold;
-		COLOR: #101010;
+		font-size: 14pt;
+		color: #fff;
 	}
 	
 	.helpmenu a:hover {
-		FONT-SIZE: 16px;
-		FONT-WEIGHT: bold;
-		COLOR: #FFFFFF;
+		font-size: 14pt;
+		color: #fff;
 		text-decoration: none;
 	}
 	
@@ -263,6 +243,29 @@ nav input[type=checkbox]:checked ~ .menu {
 	.helpmenu:hover {
 		cursor: pointer;
 	}
+	
+	
+	ul.mobile-menu {
+		position: static;
+		display: none; 
+		background: #00c0a0;
+		margin: 0px;
+		padding: 0;
+		list-style: none;
+	}
+	
+	/*Create vertical spacing*/
+	ul.mobile-menu li {
+		margin-bottom: 1px;
+		border-top: 1px solid white;
+		text-align: center;
+		padding: 10px 0;
+	}
+	
+	/*Make all menu links full width*/
+	ul.mobile-menu li, ul.mobile-menu li a {
+		width: 100%;
+	}	
 }
 
 @media print {
@@ -279,30 +282,6 @@ nav input[type=checkbox]:checked ~ .menu {
 		display: none;
 	}
 }
-
-
-@media screen and (max-width: 760px) {
-	
-	.show-menu {
-		display:block;
-	}
-	
-	ul.menu {
-		position: static;
-		display: none;
-	}
-	
-	nav ul li { 
-		display: none;
-	}
-	
-	li.home {
-		display:block;
-	}
-}
-
-
-/*   NEW CSS */
 
 
 

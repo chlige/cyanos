@@ -1,8 +1,10 @@
+@CHARSET "UTF-8";
+
 @import url("menu.css");
+@import url("mobile.css");
 
 body {
-	background-color: #ffffff;
-	font-weight: normal; font-size: 12px; color: #000000; 
+	font-weight: normal; font-size: 11pt; color: #000000; 
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Verdana, Arial, "Lucida Grande", sans-serif;
 	margin: 0px;
 }
@@ -20,10 +22,6 @@ h1 { text-align: center; }
 	margin-bottom: 10px; } 
 .role { display: block; background-color: #E0FFFF; 
 	border: 1px solid gray; width: 85%; margin-left: 10%; margin-bottom: 10px }
-.left70 { width: 67%; float: left; display: inline; margin-bottom: 0;}
-.right30 { width: 27%; float: right; display: inline; margin-bottom: 0; }
-.left25 { width: 25%; float: left; display: inline; margin-bottom: 0;}
-.right75 { width: 73%; float: right; display: inline; margin-bottom: 0; }
 .messages { display:block; background-color: #DDDDDD; width: 80%; 
 	border: 2px solid black; margin-left: 10%; margin-bottom: 10px; margin-top: 10px; padding-left: 10px; }
 .error { display:block; background-color: #FEDDDD; width: 80%; 
@@ -54,11 +52,11 @@ font.headline { font-weight: bold; font-size: 130%; }
 
 p.moduleTitle { -moz-user-select: none; -khtml-user-select: none; 
 	user-select: none; margin-left: 10px; }
-p.moduleTitle a { font-size: 16px; font-weight:bold; color: black; text-decoration: none; }
-p.moduleTitle a:hover { font-size: 16px; font-weight:bold; color: black; text-decoration: none; background-color: #9F9F9F;}
-p.moduleTitle a:visited { font-size: 16px; font-weight:bold; color: black; text-decoration: none; }
-p.moduleText { margin-left: 10px; font-size: 14px; }
-p.moduleText a, p.moduleText a:hover, p.moduleText a:visited { font-size: 14px; }
+p.moduleTitle a { font-size: 14pt; font-weight:bold; color: black; text-decoration: none; }
+p.moduleTitle a:hover { font-size: 14pt; font-weight:bold; color: black; text-decoration: none; background-color: #9F9F9F;}
+p.moduleTitle a:visited { font-size: 14pt; font-weight:bold; color: black; text-decoration: none; }
+p.moduleText { margin-left: 10px; font-size: 12pt; }
+p.moduleText a, p.moduleText a:hover, p.moduleText a:visited { font-size: 12pt; }
 
 p.menu {
 	FONT-SIZE: 16px; TEXT-ALIGN: center; FONT-WEIGHT: bold;
@@ -248,8 +246,7 @@ ul.topmenu li > ul li a:hover { background-color: #00CCCC; color: #202020; }
 li.day { list-style: none; BACKGROUND-COLOR: #000000; COLOR: #FFFFFF }
 li.event { list-style: disc; margin-left: 20px; padding-left: 0 }
 
-a { color: #009000; text-decoration: none
-}
+a { color: #009000; text-decoration: none }
 
 a.closeBox, a.closeBox:visited {
 	border: 1px solid black;  background-color:red;  padding-left:1px; padding-right:1px;
@@ -279,10 +276,10 @@ a.sort  { font-weight: bold; color: #000000; }
 a.sort:hover { font-weight: bold; color: #202020; text-decoration:underline; }
 
 a:hover {
-	FONT-SIZE: 12px; COLOR: #905000; TEXT-DECORATION: underline;
+	COLOR: #905000; TEXT-DECORATION: underline;
 }
 a:visited {
-	FONT-SIZE: 12px; FONT-WEIGHT: normal; COLOR: #009000; TEXT-DECORATION: none
+	FONT-WEIGHT: normal; COLOR: #009000; TEXT-DECORATION: none
 }
 
 a.menu {
@@ -344,7 +341,35 @@ a.footer {
 	*/
 }
 
-@media only screen and (min-device-width: 720px) {
+@media only screen and (min-width: 720px) {
+	.left70 {
+		width: 67%;
+		float: left;
+		display: inline;
+		margin-bottom: 0;
+	}
+	.right30 {
+		width: 27%;
+		float: right;
+		display: inline;
+		margin-bottom: 0;
+	}
+	.left25 {
+		width: 25%;
+		float: left;
+		display: inline;
+		margin-bottom: 0;
+	}
+	.right75 {
+		width: 73%;
+		float: right;
+		display: inline;
+		margin-bottom: 0;
+	}
+	.mobile {
+		display:none;
+	}
+	
 	#loginBox {
 		display: block;
 		position: fixed;
@@ -380,80 +405,15 @@ a.footer {
 
 	label {
 		display:inline-block;
-		width: 70px;
 		margin-bottom: 10px;
+		width: 125px;
+		vertical-align:top;
+		margin-bottom: 20px;
 	}
 }
 
 
 
-@media only screen and (max-device-width: 680px) {
-	body {
-		-webkit-text-size-adjust: 100%;
-		font-size: 100%;
-	} 
-
-	#loginBox {
-		display: block;
-		width: 100%;
-		margin: 10px;
-	}
-
-	#loginBox hr {
-		display:none;
-	}
-
-	#loginBox input[type=text], #loginBox input[type=password] {
-  		-webkit-appearance: none; -moz-appearance: none;
-		display: block;
-		margin: 0;
-		width: 90%; height: 40px;
-		line-height: 40px; font-size: 17px;
-		border: 1px solid #bbb;
-	}
-
-	#loginBox button {
-		-webkit-appearance: none; -moz-appearance: none;
-		display: block;
-		margin: 1.5em 0;
-		font-size: 1em; line-height: 2.5em;
-		color: #333;
-		font-weight: bold;
-		height: 2.5em; width: 100%;
-		background: #fdfdfd; 
-		background: -moz-linear-gradient(top, #fdfdfd 0%, #bebebe 100%);
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0% ,#fdfdfd), color-stop(100%,#bebebe)); 
-		background: -webkit-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
-		background: -o-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
-		background: -ms-linear-gradient(top, #fdfdfd 0%,#bebebe 100%); 
-		background: linear-gradient(to bottom, #fdfdfd 0%,#bebebe 100%);
-		border: 1px solid #bbb;
- 		-webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px;
-}
-	label:after { content: " "; }
-
-	#loginBoxForm {
-		display: block;
-		position: relative;
-		width: 350px;
-		height: 200px;
-		padding: 10px;
-		opacity: 1.0;
-		margin: auto;
-	}
-
-	#loginCover {
-		display:none;
-		width: 100%;
-		background-color: #333333;
-		position: absolute;
-		left: 0px;
-		top: 0px;
-		visibility: hidden;
-		opacity: 0.75;
-		height: 100%;
-	}
-}
 
 #sideNav ol li {
 	padding-bottom: 25px;

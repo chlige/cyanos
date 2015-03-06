@@ -4,10 +4,19 @@
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet" %>
 <%@ attribute name="helpModule" required="false" %>
 <% String contextPath = request.getContextPath(); %><nav>
-<label for="show-menu" class="show-menu">Cyanos</label>
+<label for="show-menu" class="show-menu">CYANOS</label>
 <input type="checkbox" id="show-menu" role="button">
+<ul id="mobile-menu" class="mobile-menu">
+<li><a href='<%= contextPath %>/main'>Main Page</a></li>
+<li><a href="<%= contextPath %>/collection/add-collection.jsp">Add Collection Data</a></li>
+<li><a href="<%= contextPath %>/strain">Strain List</a></li>
+<c:if test="${helpModule} != null">
+<li class='helpmenu'><a href='<%= contextPath %>/help?toc&module=${helpModule}'>Quick Help</a></li>
+</c:if>
+<li class='helpmenu'><a href='<%= contextPath %>/help?search'>Search Help</a></li>
+</ul>
 <ul class="menu">
-<li><a onClick='toggleMenu("cyanosMenu")'>Cyanos</a>
+<li><a>Cyanos</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/main'>Main Page</a></li>
 <% if ( request.isUserInRole("project") ) { %>

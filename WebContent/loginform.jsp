@@ -23,21 +23,18 @@
 </div>
 <div id="loginBox">
 <div id="loginBoxForm">
-<div id="loginForm"  style="visibility: visible">
 <font size='+2'>CYANOS Login</font><hr>
 <form action='j_security_check' method='post' target='_top'>
 <label for="j_username">Username:</label>
-<input type='text' name='j_username'><br/>
+<input type='text' name='j_username'  autocorrect="off" autocapitalize="none"><br/>
 <label for="j_password">Password:</label>
 <input type='password' name='j_password' size='8'><br/>
-  <button type='submit'>Login</button><button type='reset'>Clear form</button>
+<button type='submit'>Login</button>
 </form></div>
 <div id="loginNote" style="visibility: hidden">
 <h2>Login session expired</h2>
 <hr>
 <p align="center">Your session has expired.</p>
 <p align="center"><a href="">Login again.</a></p>
-
-</div>
 </div></div>
 </body></html>
