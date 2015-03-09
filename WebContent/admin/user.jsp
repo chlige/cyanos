@@ -47,24 +47,25 @@ if ( thisUser.isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.WRITE) ) {
 <tr><td><i>GLOBAL</i></td>
 <% int[] perms = {Role.READ, Role.WRITE, Role.CREATE, Role.DELETE};
  	Map<String,Role> roleMap = user.globalRoleMap();
-	for (String role : User.ROLES ) {  Role currentRole = roleMap.get(role);
-	String inputName = "globalrole_".concat(role);
-	if ( update ) {
-		String[] newPerms = request.getParameterValues(inputName);
-		if ( newPerms.length > 0 ) {
-			int newBits = 0;
-			for ( String bit: newPerms ) {
-				newBits = newBits + Integer.parseInt(bit);
+	for ( String role : User.ROLES ) {  
+		Role currentRole = roleMap.get(role);
+		String inputName = "globalrole_".concat(role);
+		if ( update ) {
+			String[] newPerms = request.getParameterValues(inputName);
+			if ( newPerms != null && newPerms.length > 0 ) {
+				int newBits = 0;
+				for ( String bit: newPerms ) {
+					newBits = newBits + Integer.parseInt(bit);
+				}
+				if ( currentRole == null || currentRole.permissions() != newBits ) {
+					user.grantGlobalPermission(role, newBits);
+					currentRole = roleMap.get(role);
+				}
+			} else if ( currentRole != null ) {
+				currentRole = null;
+				user.removeGlobalRole(role);
 			}
-			if ( currentRole == null || currentRole.permissions() != newBits ) {
-				user.grantGlobalPermission(role, newBits);
-				currentRole = roleMap.get(role);
-			}
-		} else if ( currentRole != null ) {
-			currentRole = null;
-			user.removeGlobalRole(role);
 		}
-	} 
 %><td style="border-left: solid 1px black; border-right: solid 1px black;"><%
  for ( int perm : perms ) { %>
 <input type="checkbox" name="<%= inputName %>" value="<%= String.format("%d", perm) %>" <%= (currentRole != null && currentRole.hasPermission(perm) ? "checked" : "" ) %>><%= Role.charForBit(perm) %>

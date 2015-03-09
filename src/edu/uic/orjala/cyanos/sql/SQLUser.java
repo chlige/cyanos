@@ -23,10 +23,12 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.BasicUser;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Role;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 /**
  * @author George Chlipala
@@ -264,6 +266,5 @@ public class SQLUser extends BasicUser {
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
-	}
-	
+	}	
 }

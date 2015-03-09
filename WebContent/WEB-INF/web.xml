@@ -177,7 +177,7 @@
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>admin</servlet-name>
-    <url-pattern>/self/*</url-pattern>
+    <url-pattern>/self/password</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>admin</servlet-name>

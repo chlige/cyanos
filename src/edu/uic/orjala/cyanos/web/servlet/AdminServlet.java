@@ -307,6 +307,11 @@ public class AdminServlet extends ServletObject {
 
 	}
 	
+	public static void addUser(HttpServletRequest request, String userID, String email) throws DataException, SQLException {
+		MutableUser aUser = SQLMutableUser.createUser(getSQLData(request), userID);
+		
+	}
+	
 	
 	private void updateConfigFilePaths(CyanosWrapper aWrap, AppConfig myConfig) {
 		updateConfigFilePaths(aWrap.getRequest(), myConfig);
@@ -585,4 +590,5 @@ public class AdminServlet extends ServletObject {
 		return output.toString();
 	}
 	*/
+	
 }

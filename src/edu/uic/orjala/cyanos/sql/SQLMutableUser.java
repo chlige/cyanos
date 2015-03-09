@@ -4,6 +4,7 @@
 package edu.uic.orjala.cyanos.sql;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,11 +21,13 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.MutableUser;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 /**
  * @author George Chlipala
@@ -397,5 +400,35 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		}
 		
 	}
+	
+	private final static String SQL_SET_PASSWORD = "UPDATE users SET password=SHA1(?) WHERE username=?";
+	private final static String SQL_SET_EMAIL = "UPDATE users SET email=? WHERE username=?";
+	
+	public static boolean updatePassword(HttpServletRequest req, String password) throws SQLException {
+		if ( req.getRemoteUser() != null ) {
+			Connection dbc = AppConfigListener.getDBConnection();
+			PreparedStatement psth = dbc.prepareStatement(SQL_SET_PASSWORD, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			psth.setString(1, password);
+			psth.setString(2, req.getRemoteUser());
+			boolean update = psth.executeUpdate() == 1;
+			psth.close();
+			dbc.close();
+			return update;
+		} 
+		return false;
+	}
+	
+	public static void updateEmail(HttpServletRequest req, String email) throws SQLException {
+		if ( req.getRemoteUser() != null ) {
+			Connection dbc = AppConfigListener.getDBConnection();
+			PreparedStatement psth = dbc.prepareStatement(SQL_SET_EMAIL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			psth.setString(1, email);
+			psth.setString(2, req.getRemoteUser());
+			psth.executeUpdate();
+			psth.close();
+			dbc.close();
+		} 
+	}
+
 
 }

@@ -3,6 +3,8 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.util.List;
+
 
 
 /**
@@ -103,5 +105,11 @@ public interface User {
 	 * @return true if the user has permission in any project.
 	 */
 	boolean couldPerform(String role, int permission);
+	
+	public List<Role> globalRoles();
+	
+	public List<Role> rolesForProject(String projectID);
+	
+	
 
 }

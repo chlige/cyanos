@@ -3,8 +3,12 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import edu.uic.orjala.cyanos.sql.SQLUser;
 
 /**
  * This abstract class contains the methods to check permissions of a user.
@@ -66,7 +70,20 @@ public abstract class BasicUser implements User {
 			}
 		}
 		return false;
-		
 	}
+	
+	public List<Role> globalRoles() {
+		return this.rolesForProject(SQLUser.GLOBAL_PROJECT);
+	}
+
+	public List<Role> rolesForProject(String projectID) {
+		List<Role> roleList = new ArrayList<Role>();
+		if ( this.projectRoles.containsKey(projectID) ) {
+			roleList.addAll(this.projectRoles.get(projectID).values());
+		}
+		return roleList;
+	}
+
+
 	
 }
