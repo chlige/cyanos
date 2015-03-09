@@ -175,9 +175,8 @@ public class Amount {
 					break;
 				}
 			}
-			
-			BigDecimal formatValue = value.movePointLeft(autoScale.power);
-			return formatValue.toPlainString().concat(" ").concat(unit.print(autoScale));			
+
+			return this.toString(autoScale);
 		}
 	}
 
@@ -195,6 +194,11 @@ public class Amount {
 	
 	public String toString(BigDecimal concentration) {
 		return this.convert(concentration).toString();
+	}
+	
+	public String toString(AmountScale scale) {
+		BigDecimal formatValue = value.movePointLeft(scale.power);
+		return formatValue.toPlainString().concat(" ").concat(unit.print(scale));			
 	}
 	
 	public BigDecimal getValue() {
