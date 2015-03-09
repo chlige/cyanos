@@ -380,7 +380,7 @@ public class CompoundServlet extends ServletObject {
 					output.append("\n\n$$$$\n");
 				}
 			}
-			res.setHeader("Content-Disposition", "inline; filename=\"compounds.sdf\"");
+			res.setHeader("Content-Disposition", "attachement; filename=\"compounds.sdf\"");
 			res.setContentType("chemical/x-mdl-sdfile");
 			out.print(output.toString());
 		} catch ( DataException ex ) {

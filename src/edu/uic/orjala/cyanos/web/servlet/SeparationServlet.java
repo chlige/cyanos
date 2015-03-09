@@ -69,6 +69,8 @@ public class SeparationServlet extends ServletObject {
 
 
 			if ( req.getServletPath().endsWith("/export") ) {
+				res.setHeader("Content-Disposition", "attachement; filename=\"export.csv\"");
+				res.setContentType("text/csv");
 				if ( req.getParameter("id") != null )
 					this.exportSeparation(req, res);
 				else 
@@ -239,7 +241,6 @@ public class SeparationServlet extends ServletObject {
 
 	private void exportSeparation(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
-		res.setContentType("text/plain");
 		try {
 			Separation thisSep = new SQLSeparation(getSQLData(req), req.getParameter("id"));
 			if ( thisSep.first() ) {
