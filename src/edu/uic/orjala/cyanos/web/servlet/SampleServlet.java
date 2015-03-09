@@ -26,8 +26,6 @@ import edu.uic.orjala.cyanos.sql.SQLSampleCollection;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
 import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.SheetWriter;
-import edu.uic.orjala.cyanos.web.forms.SampleForm;
-
 /**
  * @author George Chlipala
  *
@@ -103,7 +101,7 @@ public class SampleServlet extends ServletObject {
 			//		SampleForm aForm = new SampleForm(aWrap);
 			if ( aSample == null ) {
 				req.setAttribute(ATTR_LIBRARIES, SQLSampleCollection.libraries(getSQLData(req)));
-				if ( req.getParameter(SampleForm.ACTION_INTERLACE_COLS) != null ) { 
+				if ( req.getParameter(ACTION_INTERLACE_COLS) != null ) { 
 					this.exportInterlace(req, res);
 					return;
 				} 
