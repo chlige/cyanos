@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import edu.uic.orjala.cyanos.Amount;
+import edu.uic.orjala.cyanos.Amount.AmountUnit;
 import edu.uic.orjala.cyanos.Assay;
 import edu.uic.orjala.cyanos.BasicObject;
 import edu.uic.orjala.cyanos.DataException;
@@ -194,79 +196,100 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		this.myData.setString(ACCT_NOTES_COLUMN, newValue.toString());
 	}
 	
-	public BigDecimal getAmount() throws DataException {
-		return this.myData.getDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN);
+	@Override
+	public Amount getAmount() throws DataException {
+		BigDecimal value = this.myData.getDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN);
+		BigDecimal conc = this.mySample.getConcentration();
+		if ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 ) {
+			value = value.divide(conc).movePointRight(3);
+			return new Amount(value, AmountUnit.VOLUME);			
+		} else {
+			return new Amount(value, AmountUnit.MASS);			
+		}
+	}
+	
+	@Override
+	public Amount getAmountMass() throws DataException {
+		BigDecimal value = this.myData.getDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN);
+		return new Amount(value, AmountUnit.MASS);			
 	}
 	
 	/**
 	 * Set the transaction amount to value given (in grams)
 	 * 
-	 * @param value value to transact (in grams)
+	 * @param amount to transact.
 	 * @throws DataException
 	 */
-	protected void setAmount(BigDecimal value) throws DataException {
-		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_VALUE_COLUMN, value);
-	}
-
-	public void withdrawAmount(String aValue) throws DataException {
-		BigDecimal newValue = this.getAmount(aValue, null);
-		this.setAmount(newValue.negate());
-	}
-	
-	public void withdrawAmount(String amount, String unit) throws DataException {
-		BigDecimal newValue = this.getAmount(amount, unit);
-		this.setAmount(newValue.negate());
-	}
-	
-	public void depositAmount(String aValue) throws DataException {
-		BigDecimal newValue = this.getAmount(aValue, null);
-		this.setAmount(newValue);
-	}
-	
-	public void depositAmount(String amount, String unit) throws DataException {
-		BigDecimal newValue = this.getAmount(amount, unit);
-		this.setAmount(newValue);
-	}
-
-	protected BigDecimal getAmount(String aValue, String unit) throws DataException {
-		String baseUnit = this.mySample.getBaseUnit();
-		boolean liquid = isLiquid(aValue);
-		liquid = ( liquid ? liquid : isLiquid(unit) );
-		if ( baseUnit.endsWith("g") && liquid ) {
+	private void setAmount(Amount amount) throws DataException {
+		boolean liquid = ( amount.getBaseUnit() == AmountUnit.VOLUME );
+		
+		BigDecimal conc = this.mySample.getConcentration();
+		boolean liquidSample = ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 );
+		
+		if ( (! liquidSample) && liquid ) {
 			throw new DataException("Cannot transact liquid amounts from solid samples.");
 		}	
 		
-		BigDecimal newValue = parseAmount(aValue, (unit != null ? unit : baseUnit));
-		if ( liquid || ( unit == null && (! aValue.endsWith("g"))) ) {
-			
-			BigDecimal conc = this.mySample.getConcentration();
-			if ( conc != null && conc.doubleValue() != 0.0 ) {
-				newValue = newValue.multiply(conc);
-			}
+		BigDecimal value = amount.getValue();
+		if ( liquid && liquidSample ) {
+		//  amount (L) * 10^3 mL/L * conc g/mL 
+			value = value.movePointRight(3).multiply(conc);
 		}
-		return newValue;
+		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_VALUE_COLUMN, value);
+	}
+
+	@Override
+	public void withdrawAmount(String aValue) throws DataException {
+		Amount amount = new Amount(aValue);
+		this.setAmount(amount.negate());
 	}
 	
-	protected static boolean isLiquid(String value) {
-		return ( value != null && ( value.endsWith("L") || value.endsWith("l") ));
+	@Override
+	public void withdrawAmount(String amount, String unit) throws DataException {
+		Amount newValue = new Amount(amount, unit);
+		this.setAmount(newValue.negate());
 	}
 	
-	protected static boolean isSolid(String value) {
-		return ( value != null && value.endsWith("g"));
+	@Override
+	public void depositAmount(String aValue) throws DataException {
+		this.setAmount(new Amount(aValue));
 	}
 	
+	@Override
+	public void depositAmount(String amount, String unit) throws DataException {
+		this.setAmount(new Amount(amount, unit));
+	}
+
+	@Override
 	public SampleAccount transferAmount(Sample source, String amount, String unit) throws DataException {
-		BigDecimal newValue = parseAmount(amount, unit);
-		this.setAmount(newValue);
+		Amount transfer = new Amount(amount, unit);
+		BigDecimal value = transfer.getValue();
+
+		boolean liquid = ( transfer.getBaseUnit() == AmountUnit.VOLUME );
+		
+		BigDecimal conc = this.mySample.getConcentration();
+		boolean liquidSample = ( conc != null && conc.compareTo(BigDecimal.ZERO) != 0 );
+		
+		if ( (! liquidSample) && liquid ) {
+			throw new DataException("Cannot transact liquid amounts from solid samples.");
+		}	
+		
+		if ( liquid && liquidSample ) {
+		//  amount (L) * 10^3 mL/L * conc g/mL 
+			value = value.movePointRight(3).multiply(conc);
+		}
+		
+		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_VALUE_COLUMN, value);
 		this.setTransactionReference(source);
 		
 		SQLSampleAccount srcAcct = (SQLSampleAccount) source.getAccount();
 		srcAcct.addTransaction();
-		srcAcct.setAmount(this.getAmount());
+		srcAcct.setAmount(new Amount(value.negate(), AmountUnit.MASS));
 		srcAcct.setTransactionReference(this.mySample);
 		return srcAcct;
 	}
 	
+	@Override
 	public BasicObject getReference() throws DataException {
 		if ( this.myData != null && this.myData.getRow() > 0 ) {
 			String refTable = this.myData.getString(ACCT_REF_TABLE_COLUMN);
@@ -290,6 +313,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		return null;
 	}
 	
+	@Override
 	public void setTransactionReference(Sample aRef) throws DataException {
 		if ( this.myData != null ) {
 			this.myData.setString(ACCT_REF_TABLE_COLUMN, SAMPLE_REF);
@@ -297,6 +321,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 
+	@Override
 	public void setTransactionReference(Separation aRef) throws DataException {
 		if ( this.myData != null ) {
 			this.myData.setString(ACCT_REF_TABLE_COLUMN, SEP_REF);
@@ -304,6 +329,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		} 
 	}
 	
+	@Override
 	public void setTransactionReference(Harvest aRef) throws DataException {
 		if ( this.myData != null ) {
 			this.myData.setString(ACCT_REF_TABLE_COLUMN, HARVEST_REF);
@@ -311,6 +337,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 	
+	@Override
 	public void setTransactionReference(Assay aRef) throws DataException {
 		if ( this.myData != null ) {
 			this.myData.setString(ACCT_REF_TABLE_COLUMN, ASSAY_REF);
@@ -318,6 +345,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 	
+	@Override
 	public Class<?> getTransactionReferenceClass() throws DataException {
 		if ( this.myData != null && this.myData.getRow() > 0 ) {
 			String refTable = this.myData.getString(ACCT_REF_TABLE_COLUMN);
@@ -337,18 +365,22 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		
 	}
 	
+	@Override
 	public String getTransactionReferenceID() throws DataException {
 		return this.myData.getString(ACCT_REF_ID_COLUMN);
 	}
 	
+	@Override
 	public void updateTransaction() throws DataException {
 		this.myData.refresh();
 	}
 	
+	@Override
 	public BigDecimal accountBalance() throws DataException {
 		return SQLSampleAccount.balance(this.myData, this.myID);
 	}
 
+	@Override
 	public String getSampleID() {
 		return this.myID;
 	}
@@ -370,6 +402,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 	}
 	*/
 	
+	@Override
 	public Notebook getNotebook() throws DataException {
 		String notebookID = this.myData.getString(NOTEBOOK_COLUMN);
 		if ( notebookID != null ) {
@@ -379,14 +412,17 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		return null;
 	}
 
+	@Override
 	public String getNotebookID() throws DataException {
 		return this.myData.getString(NOTEBOOK_COLUMN);
 	}
 
+	@Override
 	public int getNotebookPage() throws DataException {
 		return this.myData.getInt(NOTEBOOK_PAGE_COLUMN);
 	}
 
+	@Override
 	public void setNotebook(Notebook aNotebook) throws DataException {
 		if ( aNotebook != null ) 
 			this.myData.setString(NOTEBOOK_COLUMN, aNotebook.getID());
@@ -394,6 +430,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 			this.myData.setNull(NOTEBOOK_COLUMN);
 	}
 
+	@Override
 	public void setNotebook(Notebook aNotebook, int aPage) throws DataException {
 		if ( aNotebook != null ) {
 			this.myData.setString(NOTEBOOK_COLUMN, aNotebook.getID());
@@ -404,10 +441,12 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 
+	@Override
 	public void setNotebookID(String anID) throws DataException {
 		this.myData.setStringNullBlank(NOTEBOOK_COLUMN, anID);
 	}
 
+	@Override
 	public void setNotebookID(String anID, int aPage) throws DataException {
 		if ( anID.length() > 0 ) {
 			this.myData.setString(NOTEBOOK_COLUMN, anID);
@@ -418,26 +457,32 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 
+	@Override
 	public void setNotebookPage(int aPage) throws DataException {
 		this.myData.setInt(NOTEBOOK_PAGE_COLUMN, aPage);
 	}
 	
+	@Override
 	public boolean isValid() throws DataException {
 		return this.myData.isNull(ACCT_VOID_COLUMN);
 	}
 	
+	@Override
 	public boolean isVoid() throws DataException {
 		return (! this.myData.isNull(ACCT_VOID_COLUMN));
 	}
 	
+	@Override
 	public Date getVoidDate() throws DataException {
 		return this.myData.getDate(ACCT_VOID_COLUMN);
 	}
 	
+	@Override
 	public String getVoidUserID() throws DataException {
 		return this.myData.getString(ACCT_VOID_ADMIN_COLUMN);
 	}
 	
+	@Override
 	public void voidTransaction() throws DataException {
 		if ( this.isAllowedException(Role.DELETE) ) {
 			Date now = new Date();
@@ -446,6 +491,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 	
+	@Override
 	public void clearReference() throws DataException {
 		this.myData.setNull(ACCT_REF_ID_COLUMN);
 		this.myData.setNull(ACCT_REF_TABLE_COLUMN);

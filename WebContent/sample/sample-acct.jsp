@@ -5,6 +5,8 @@
 	edu.uic.orjala.cyanos.Assay,
 	edu.uic.orjala.cyanos.sql.SQLSample,
 	edu.uic.orjala.cyanos.SampleAccount,
+	edu.uic.orjala.cyanos.Amount,
+	edu.uic.orjala.cyanos.Amount.AmountUnit,
 	edu.uic.orjala.cyanos.web.servlet.SampleServlet,
 	java.text.SimpleDateFormat,
 	java.math.BigDecimal" %>
@@ -46,19 +48,21 @@
 <% if ( isVoid ) { 
 	out.print("-");	
 } else {	
-	BigDecimal amount = txnAccount.getAmount().divide(conc);
-	if ( amount.signum() < 0 ) {
+	Amount amount = txnAccount.getAmount();
+	if ( amount.getValue().signum() < 0 ) {
 		out.print("<font color='red'>(");
-		out.print(SQLSample.formatAmount(amount.negate(), unit));
+		out.print(amount.negate().toString());
 		out.print(")</font>");
 	} else {
-		out.print(SQLSample.formatAmount(amount, unit));	
+		out.print(amount.toString());	
 	}
-	balance = balance.add(amount);
-}%></td>
-<td><b><%= SQLSample.formatAmount(balance, unit) %></b></td></tr>
+	balance = balance.add(txnAccount.getAmountMass().getValue());
+}
+Amount balAmt = new Amount(balance, AmountUnit.MASS);
+%></td>
+<td><b><%= balAmt.toString(conc) %></b></td></tr>
 <% } %>
 <tr><th colspan="4" align="right" class="footer">Final Balance:</th><th class="footer">
-<%= SQLSample.formatAmount(mySample.accountBalance().divide(conc), unit) %></th></tr>
+<%= mySample.accountBalance().toString() %></th></tr>
 </table>
 <% } else { out.println("<p align=\"center\"><b><i>NONE</i></b></p>"); } %>

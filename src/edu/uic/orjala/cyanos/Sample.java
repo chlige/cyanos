@@ -80,7 +80,7 @@ public interface Sample extends DataFileObject, CompoundObject {
 	
 	void setProject(Project aProject) throws DataException;
 	
-	BigDecimal accountBalance() throws DataException;
+	Amount accountBalance() throws DataException;
 	
 	boolean isFraction() throws DataException;
 	

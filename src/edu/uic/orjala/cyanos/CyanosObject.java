@@ -24,7 +24,7 @@ public abstract class CyanosObject {
 	protected final static Pattern SEC_PATTERN = Pattern.compile("([\\d\\.]+)\\s*[sS].*");
 	protected final static Pattern CLOCK_PATTERN = Pattern.compile("([\\d\\.]+):([\\d\\.]+)\\s*");
 	
-	protected final static Pattern UNIT_PATTERN = Pattern.compile("([\\d\\.]+)\\s*([a-zA-Z/]+)$");
+	protected final static Pattern UNIT_PATTERN = Pattern.compile("([\\d\\.]+)\\s*([a-zA-Z/]+)\\s*$");
 	
 	protected final static BigDecimal KILO_VALUE = new BigDecimal("1000");
 	protected final static BigDecimal MILLI_VALUE = new BigDecimal("0.001");
@@ -84,6 +84,7 @@ public abstract class CyanosObject {
 		return export;
 	}
 
+	@Deprecated
 	public static BigDecimal parseAmount(String amount) {
 		Matcher match = UNIT_PATTERN.matcher(amount);
 		if ( match.matches() )
@@ -91,6 +92,7 @@ public abstract class CyanosObject {
 		return null;
 	}
 	
+	@Deprecated
 	public static BigDecimal parseAmount(String amount, String scale) {
 		Matcher match = UNIT_PATTERN.matcher(amount);
 		if ( match.matches() ) {
@@ -125,6 +127,7 @@ public abstract class CyanosObject {
 		return null;
 	}
 
+	@Deprecated
 	public static String formatAmount(String format, float amount, String scale) {
 		if ( scale != null ) {
 			if ( scale.length() > 1 ) {
@@ -141,6 +144,7 @@ public abstract class CyanosObject {
 		}
 	}
 	
+	@Deprecated
 	public static String formatAmount(BigDecimal amount, String unit) { 
 		if ( amount == null ) return "";
 		if ( unit != null ) {
@@ -173,10 +177,12 @@ public abstract class CyanosObject {
 		
 	}
 	
+	@Deprecated
 	public static String autoFormatAmount(BigDecimal amount, int type) {
 		return autoFormatAmount(amount, type, KILO_PREFIX, MILLI_PREFIX, MICRO_PREFIX);
 	}
 
+	@Deprecated
 	public static String autoFormatAmount(BigDecimal amount, int type, String kilo, String milli, String micro) {
 		if ( amount == null ) return "";
 		int power = amount.precision() - amount.scale();

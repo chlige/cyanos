@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import edu.uic.orjala.cyanos.AccessException;
+import edu.uic.orjala.cyanos.Amount;
 import edu.uic.orjala.cyanos.Assay;
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
@@ -20,6 +21,7 @@ import edu.uic.orjala.cyanos.SampleAccount;
 import edu.uic.orjala.cyanos.SampleCollection;
 import edu.uic.orjala.cyanos.Separation;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.Amount.AmountUnit;
 
 public class SQLSample extends SQLObject implements Sample {
 
@@ -468,8 +470,15 @@ public class SQLSample extends SQLObject implements Sample {
 			this.myData.setNull(PROJECT_COLUMN);
 	}
 	
-	public BigDecimal accountBalance() throws DataException {
-		return SQLSampleAccount.balance(this.myData, this.myID);
+	public Amount accountBalance() throws DataException {
+		BigDecimal value = SQLSampleAccount.balance(this.myData, this.myID);
+		BigDecimal conc = this.getConcentration();
+		if ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 ) {
+			value = value.divide(conc).movePointRight(3);
+			return new Amount(value, AmountUnit.VOLUME);			
+		} else {
+			return new Amount(value, AmountUnit.MASS);			
+		}
 	}
 
 	public boolean isFraction() throws DataException {

@@ -105,7 +105,9 @@ public interface SampleAccount extends BasicObject, NotebookObject {
 	 * @return Transaction amount as a BigDecimal.
 	 * @throws DataException
 	 */
-	BigDecimal getAmount() throws DataException;
+	Amount getAmount() throws DataException;
+	
+	Amount getAmountMass() throws DataException;
 
 	/**
 	 * Withdraw the specified amount from the account.  

@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.uic.orjala.cyanos.AccessException;
+import edu.uic.orjala.cyanos.Amount;
 import edu.uic.orjala.cyanos.ConfigException;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Role;
@@ -936,6 +937,25 @@ public class SQLData {
 					this.myData.updateNull(valueColumn);
 					this.myData.updateNull(scaleColumn);
 				} else {
+					BigInteger unscaledValue = value.unscaledValue();
+					this.myData.updateLong(valueColumn, unscaledValue.longValue());
+					this.myData.updateInt(scaleColumn, -1 * value.scale());
+				}		
+				if ( this.autoRefresh ) this.refresh();
+			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}		
+	}
+	
+	public void setAmount(String valueColumn, String scaleColumn, Amount amount) throws DataException {
+		try {
+			if ( this.myData != null && this.myData.getRow() > 0 && this.isAllowed(Role.WRITE) )  {
+				if ( amount == null ) {
+					this.myData.updateNull(valueColumn);
+					this.myData.updateNull(scaleColumn);
+				} else {
+					BigDecimal value = amount.getValue();
 					BigInteger unscaledValue = value.unscaledValue();
 					this.myData.updateLong(valueColumn, unscaledValue.longValue());
 					this.myData.updateInt(scaleColumn, -1 * value.scale());
