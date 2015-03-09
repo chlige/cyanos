@@ -83,6 +83,10 @@ public class SampleLibraryUpload extends UploadJob {
 			boolean wksConc = (loadConcCol > 0);
 
 			int destLibCol = Integer.parseInt(template.get(DEST_COLLECTION));
+			String staticCol = template.get(STATIC_COLLECTION);
+			
+			boolean useCollectionCol = ( destLibCol > 0 );
+			
 			int destLocCol = Integer.parseInt(template.get(DEST_LOCATION));
 			int destLabelCol = Integer.parseInt(template.get(DEST_LABEL));
 			int destNotesCol = Integer.parseInt(template.get(DEST_NOTES));
@@ -117,7 +121,8 @@ public class SampleLibraryUpload extends UploadJob {
 							if ( wksConc ) { conc = BaseForm.parseAmount(this.worksheet.getStringValue(loadConcCol));
 							} else { conc = staticConc; }
 							dest.setConcentration(conc);
-							dest.setCollectionID(this.worksheet.getStringValue(destLibCol));
+							if ( useCollectionCol ) { dest.setCollectionID(this.worksheet.getStringValue(destLibCol)); }
+							else { dest.setCollectionID(staticCol); }
 							if (destLocCol > -1) { dest.setLocation(this.worksheet.getStringValue(destLocCol)); }
 							if (destLabelCol > -1) { dest.setName(this.worksheet.getStringValue(destLabelCol)); }
 							dest.setNotes(bulkLoadNote);
