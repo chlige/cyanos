@@ -23,6 +23,7 @@
 <% String tag = sepObj.getTag(); if ( tag != null && tag.length() > 0 ) { %>( <c:out value="<%= tag %>"/>)<% } %>
 </font>
 <hr width="90%">
+<p align="center"><a href="<%= contextPath %>/separation/export?id=<%= sepObj.getID() %>">Export Separation</a></p>
 <jsp:include page="/separation/separation-form.jsp" />
 <div CLASS="collapseSection"><A NAME='sep_source' CLASS='twist' onClick='loadDiv("sep_source")' CLASS='divTitle'>
 <img align="ABSMIDDLE" ID="twist_sep_source" SRC="<%= contextPath %>/images/twist-open.png" /> Source Materials</A>
@@ -82,15 +83,9 @@
 <% } %>
 </div></div>
 
-<DIV CLASS="collapseSection"><A NAME='dataFiles' CLASS='twist' onClick='loadDiv("dataFiles")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_dataFiles" SRC="/cyanos/images/twist-closed.png" /> Data Files</A>
-<DIV CLASS="unloaded" ID="div_dataFiles"></DIV>
-</DIV>
+<cyanos:div divID="dataFiles" title="Data Files"/>
 
-<DIV CLASS="collapseSection"><A NAME='compounds' CLASS='twist' onClick='loadDiv("compounds")' CLASS='divTitle'>
-<IMG ALIGN="ABSMIDDLE" ID="twist_compounds" SRC="/cyanos/images/twist-closed.png" /> Compounds</A>
-<DIV CLASS="unloaded" ID="div_compounds"></DIV>
-</DIV>
+<cyanos:div divID="compounds" title="Compounds"/>
 
 <% } else { %>
 <p align="CENTER"><font size="+3" >Separation Search</font>
