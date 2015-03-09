@@ -266,42 +266,52 @@ public class SQLHarvest extends SQLObject implements Harvest {
 	 * @throws DataException 
 	 * @see Strain
 	 */
+	@Override
 	public Strain getStrain() throws DataException {
 		return SQLStrain.load(this.myData, this.myData.getString(CULTURE_ID_COLUMN));
 	}
 	
+	@Override
 	public Date getDate() throws DataException {
 		return this.myData.getDate(DATE_COLUMN);
 	}
 	
+	@Override
 	public String getColor() throws DataException  {
 		return this.myData.getString(COLOR_COLUMN);
 	}
 	
+	@Override
 	public String getType() throws DataException  {
 		return this.myData.getString(TYPE_COLUMN);
 	}
 	
+	@Override
 	public BigDecimal getCellMass() throws DataException  {
 		return this.myData.getDecimal(CELL_MASS_VALUE_COLUMN, CELL_MASS_SCALE_COLUMN);
 	}
 	
+	@Override
 	public BigDecimal getMediaVolume() throws DataException  {
 		return this.myData.getDecimal(MEDIA_VOLUME_VALUE_COLUMN, MEDIA_VOLUME_SCALE_COLUMN);
 	}
 	
+	@Override
 	public Date getPrepDate() throws DataException {
 		return this.myData.getDate(PREP_DATE_COLUMN);
 	}
 	
+	@Override
 	public String getPrepDateString() throws DataException {
 		return this.myData.getString(PREP_DATE_COLUMN);
 	}
 	
+	@Override
 	public String getProjectID() throws DataException {
 		return this.myData.getString(PROJECT_COLUMN);
 	}
 	
+	@Override
 	public Project getProject() throws DataException {
 		String projID = this.getProjectID();
 		if ( projID != null ) {
@@ -312,10 +322,12 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 	
+	@Override
 	public void setProjectID(String newValue) throws DataException {
 		this.myData.setStringNullBlank(PROJECT_COLUMN, newValue);
 	}
 	
+	@Override
 	public void setProject(Project aProject) throws DataException {
 		if ( aProject != null )
 			this.setProjectID(aProject.getID());
@@ -329,6 +341,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 	 * @param aStrain Strain Object
 	 * @throws DataException 
 	 */
+	@Override
 	public void setStrain(Strain aStrain) throws DataException {
 		this.setStrainID(aStrain.getID());
 	}
@@ -339,58 +352,72 @@ public class SQLHarvest extends SQLObject implements Harvest {
 	 * @param anID String
 	 * @throws DataException 
 	 */
+	@Override
 	public void setStrainID(String anID) throws DataException {
 		this.myData.setString(CULTURE_ID_COLUMN, anID);
 	}
 
+	@Override
 	public void setPrepDate(String newDate) throws DataException {
 		this.myData.setString(PREP_DATE_COLUMN, newDate);
 	}
 	
+	@Override
 	public void setPrepDate(Date newDate) throws DataException {
 		this.myData.setDate(PREP_DATE_COLUMN, newDate);
 	}
 	
+	@Override
 	public String getNotes() throws DataException  {
 		return this.myData.getString(NOTES_COLUMN);
 	}
 	
+	@Override
 	public void setDate(Date newDate) throws DataException {
 		this.myData.setDate(DATE_COLUMN, newDate);
 	}
 	
+	@Override
 	public void setDate(String newDate) throws DataException {
 		this.myData.setString(DATE_COLUMN, newDate);
 	}
 	
+	@Override
 	public void setColor(String newColor) throws DataException  {
 		this.myData.setString(COLOR_COLUMN, newColor);
 	}
 	
+	@Override
 	public void setType(String newType) throws DataException  {
 		this.myData.setString(TYPE_COLUMN, newType);
 	}
 	
+	@Override
 	public void setCellMass(BigDecimal newCellmass) throws DataException  {
 		this.myData.setDecimal(CELL_MASS_VALUE_COLUMN, CELL_MASS_SCALE_COLUMN, newCellmass);
 	}
 	
+	@Override
 	public void setCellMass(String newCellMass) throws DataException {
 		this.setCellMass(parseAmount(newCellMass));
 	}
 	
+	@Override
 	public void setMediaVolume(BigDecimal newVol) throws DataException  {
 		this.myData.setDecimal(MEDIA_VOLUME_VALUE_COLUMN, MEDIA_VOLUME_SCALE_COLUMN, newVol);
 	}
 	
+	@Override
 	public void setMediaVolume(String newVol) throws DataException  {
 		this.setMediaVolume(parseAmount(newVol));
 	}
 	
+	@Override
 	public void setNotes(String newNotes) throws DataException  {
 		this.myData.setString(NOTES_COLUMN, newNotes);
 	}
 	
+	@Override
 	public void addNotes(String newNotes) throws DataException  {
 		StringBuffer curNotes = new StringBuffer(this.myData.getString(NOTES_COLUMN));
 		curNotes.append(" ");
@@ -398,6 +425,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		this.myData.setString(NOTES_COLUMN, curNotes.toString());
 	}
 
+	@Override
 	public Inoc getInoculations() throws DataException {
 		if ( this.myData.isNull(COLLECTION_ID_COLUMN) ) {
 			SQLInoc anInoc = new SQLInoc(this.myData);
@@ -414,14 +442,17 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 
+	@Override
 	public boolean isFieldHarvest() throws DataException {
 		return (! this.myData.isNull(COLLECTION_ID_COLUMN));
 	}
 	
+	@Override
 	public String getCollectionID() throws DataException {
 		return this.myData.getString(COLLECTION_ID_COLUMN);
 	}
 	
+	@Override
 	public Collection getCollection() throws DataException {
 		String colID = this.getCollectionID();
 		if ( colID != null ) {
@@ -431,18 +462,22 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 	
+	@Override
 	public void setCollectionID(String newValue) throws DataException {
 		this.myData.setString(COLLECTION_ID_COLUMN, newValue);
 	}
 	
+	@Override
 	public void setCollection(Collection aCol) throws DataException {
 		this.setCollectionID(aCol.getID());
 	}
 	
+	@Override
 	public void unlinkCollection() throws DataException {
 		this.myData.setNull(COLLECTION_ID_COLUMN);
 	}
 	
+	@Override
 	public Material getExtract() throws DataException {
 		if ( this.myID != null ) {
 			SQLMaterial aSample = new SQLMaterial(this.myData);
@@ -459,6 +494,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 	
+	@Override
 	public Material createExtract() throws DataException {
 		if ( this.myID != null ) {
 			SQLMaterial aSample = SQLMaterial.createInProject(this.myData, this.getStrainID(), this.getProjectID());
@@ -476,6 +512,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 //		this.myData.setString(NAME_COLUMN, aName);
 //	}
 	
+	@Override
 	public Notebook getNotebook() throws DataException {
 		String notebookID = this.myData.getString(NOTEBOOK_COLUMN);
 		if ( notebookID != null ) {
@@ -485,14 +522,17 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 
+	@Override
 	public String getNotebookID() throws DataException {
 		return this.myData.getString(NOTEBOOK_COLUMN);
 	}
 
+	@Override
 	public int getNotebookPage() throws DataException {
 		return this.myData.getInt(NOTEBOOK_PAGE_COLUMN);
 	}
 
+	@Override
 	public void setNotebook(Notebook aNotebook) throws DataException {
 		if ( aNotebook != null ) 
 			this.myData.setString(NOTEBOOK_COLUMN, aNotebook.getID());
@@ -500,6 +540,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 			this.myData.setNull(NOTEBOOK_COLUMN);
 	}
 
+	@Override
 	public void setNotebook(Notebook aNotebook, int aPage) throws DataException {
 		if ( aNotebook != null ) {
 			this.myData.setString(NOTEBOOK_COLUMN, aNotebook.getID());
@@ -510,10 +551,12 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		}
 	}
 
+	@Override
 	public void setNotebookID(String anID) throws DataException {
 		this.myData.setStringNullBlank(NOTEBOOK_COLUMN, anID);
 	}
 
+	@Override
 	public void setNotebookID(String anID, int aPage) throws DataException {
 		if ( anID.length() > 0 ) {
 			this.myData.setString(NOTEBOOK_COLUMN, anID);
@@ -524,6 +567,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		}
 	}
 
+	@Override
 	public void setNotebookPage(int aPage) throws DataException {
 		this.myData.setInt(NOTEBOOK_PAGE_COLUMN, aPage);
 	}
