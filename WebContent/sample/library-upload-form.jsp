@@ -10,8 +10,8 @@
 	java.util.List, java.util.ListIterator" %>
 <table class="uploadForm">
 <tr><td>Source Material ID:</td><td><cyanos:sheet-columns fieldName="<%= SampleLibraryUpload.SOURCE_ID %>"/></td></tr>
+<tr><td>Date:</td><td><cyanos:sheet-columns fieldName="<%= SampleLibraryUpload.LOAD_DATE %>"/></td></tr>
 <tr><th colspan="2" align="center">Destination Information</th></tr>
-<tr><td>Date:</td><td><cyanos:sheet-columns fieldName="<%= SampleLibraryUpload.DEST_LOCATION %>"/></td></tr>
 <tr><td>Collection:</td><td>
 <cyanos:sheet-columns fieldName="<%= SampleLibraryUpload.DEST_COLLECTION %>">
 <option value="-1">Use collection &rarr;</option></cyanos:sheet-columns>
