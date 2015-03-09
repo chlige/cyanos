@@ -16,6 +16,8 @@ public class FileUpload {
 	private final String name;
 	private final String contentType;
 
+	private final static int BUFFER_SIZE = 1024 * 1024;
+	
 	public static FileUpload fromPut(HttpServletRequest req) throws IOException {
 		String path = req.getPathInfo();
 		if ( path != null ) {
@@ -30,9 +32,9 @@ public class FileUpload {
 		this.contentType = contentType;
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		byte[] buffer = new byte[4096];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		int c;
-		while ((c= stream.read(buffer)) != -1) {
+		while ((c = stream.read(buffer)) != -1) {
 			out.write(buffer, 0, c);
 		}
 		this.inStream = new ByteArrayInputStream(out.toByteArray());
