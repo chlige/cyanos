@@ -56,11 +56,11 @@
 	} else {
 		out.print(amount.toString());	
 	}
-	balance = balance.add(txnAccount.getAmountMass().getValue());
+	balance = balance.add(amount.getValue());
 }
-Amount balAmt = new Amount(balance, AmountUnit.MASS);
+Amount balAmt = new Amount(balance, (mySample.isNeat() ? AmountUnit.MASS : AmountUnit.VOLUME ) );
 %></td>
-<td><b><%= balAmt.toString(conc) %></b></td></tr>
+<td><b><%= balAmt.toString() %></b></td></tr>
 <% } %>
 <tr><th colspan="4" align="right" class="footer">Final Balance:</th><th class="footer">
 <%= mySample.accountBalance().toString() %></th></tr>

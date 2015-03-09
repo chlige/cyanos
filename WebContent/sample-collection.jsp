@@ -52,7 +52,7 @@ while ( sampleList.next() ) {
 <td><a href="<%= contextPath %>/strain?id=<%= myStrain.getID() %>"><%= myStrain.getID() %> <i><%= myStrain.getName() %></i></a></td>
 <td><%= dateFormat.format(sampleList.getDate()) %></td><%
 if ( isBox ) { %><td><%= sampleList.getLocation() %></td><% } 
-%><td><%= SQLSampleCollection.autoFormatAmount(sampleList.accountBalance(), SQLSampleCollection.MASS_TYPE) %></td></tr><%
+%><td><%= sampleList.accountBalance().toString() %></td></tr><%
 	} catch (DataException e) {
 		out.print("<tr><th colspan=5>ERROR: ");
 		out.print(e.getMessage());

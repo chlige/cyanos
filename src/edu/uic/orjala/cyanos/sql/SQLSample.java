@@ -471,14 +471,7 @@ public class SQLSample extends SQLObject implements Sample {
 	}
 	
 	public Amount accountBalance() throws DataException {
-		BigDecimal value = SQLSampleAccount.balance(this.myData, this.myID);
-		BigDecimal conc = this.getConcentration();
-		if ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 ) {
-			value = value.divide(conc).movePointRight(3);
-			return new Amount(value, AmountUnit.VOLUME);			
-		} else {
-			return new Amount(value, AmountUnit.MASS);			
-		}
+		return SQLSampleAccount.balance(this);
 	}
 
 	public boolean isFraction() throws DataException {

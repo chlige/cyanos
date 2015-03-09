@@ -23,7 +23,7 @@
 <td class='<%= cellClass %>'><a href="<%= contextPath %>/sample?col=<%= queryResults.getCollectionID() %>"><%= queryResults.getCollectionID() %></a></td>
 <% } %>
 <td class='<%= cellClass %>'><%= queryResults.getLocation() %></td>
-<td class='<%= cellClass %>'><%= CyanosObject.formatAmount(queryResults.accountBalance(), queryResults.getBaseUnit()) %></td>
+<td class='<%= cellClass %>'><%= queryResults.accountBalance().toString() %></td>
 <td class='<%= cellClass %>'><%= BaseForm.shortenString(queryResults.getNotes(), 30) %></td>
 </tr>
 <% } %>

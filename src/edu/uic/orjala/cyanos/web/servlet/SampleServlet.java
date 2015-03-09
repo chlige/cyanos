@@ -24,7 +24,6 @@ import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLSample;
 import edu.uic.orjala.cyanos.sql.SQLSampleCollection;
 import edu.uic.orjala.cyanos.sql.SQLStrain;
-import edu.uic.orjala.cyanos.web.BaseForm;
 import edu.uic.orjala.cyanos.web.SheetWriter;
 /**
  * @author George Chlipala
@@ -284,7 +283,7 @@ public class SampleServlet extends ServletObject {
 					SampleAccount txnAcct = mySamples.getAccount();
 					if ( txnAcct.last() ) {
 						sheetOut.print(txnAcct.getDateString());
-						sheetOut.print(BaseForm.formatAmount(mySamples.accountBalance(), mySamples.getBaseUnit()));
+						sheetOut.print(mySamples.accountBalance().toString());
 					} else {
 						sheetOut.print(""); sheetOut.print("");
 					}

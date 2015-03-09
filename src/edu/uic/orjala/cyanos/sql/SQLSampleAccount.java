@@ -200,8 +200,8 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 	public Amount getAmount() throws DataException {
 		BigDecimal value = this.myData.getDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN);
 		BigDecimal conc = this.mySample.getConcentration();
-		if ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 ) {
-			value = value.divide(conc).movePointRight(3);
+		if ( conc != null && conc.compareTo(BigDecimal.ZERO) != 0 ) {
+			value = value.divide(conc).movePointLeft(3);
 			return new Amount(value, AmountUnit.VOLUME);			
 		} else {
 			return new Amount(value, AmountUnit.MASS);			
@@ -224,7 +224,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		boolean liquid = ( amount.getBaseUnit() == AmountUnit.VOLUME );
 		
 		BigDecimal conc = this.mySample.getConcentration();
-		boolean liquidSample = ( conc != null && conc.compareTo(BigDecimal.ZERO) == 0 );
+		boolean liquidSample = ( conc != null && conc.compareTo(BigDecimal.ZERO) != 0 );
 		
 		if ( (! liquidSample) && liquid ) {
 			throw new DataException("Cannot transact liquid amounts from solid samples.");
@@ -235,7 +235,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		//  amount (L) * 10^3 mL/L * conc g/mL 
 			value = value.movePointRight(3).multiply(conc);
 		}
-		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_VALUE_COLUMN, value);
+		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN, value);
 	}
 
 	@Override
@@ -279,7 +279,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 			value = value.movePointRight(3).multiply(conc);
 		}
 		
-		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_VALUE_COLUMN, value);
+		this.myData.setDecimal(ACCT_AMOUNT_VALUE_COLUMN, ACCT_AMOUNT_SCALE_COLUMN, value);
 		this.setTransactionReference(source);
 		
 		SQLSampleAccount srcAcct = (SQLSampleAccount) source.getAccount();
@@ -505,6 +505,7 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 	 * @return Balance of the sample account.
 	 * @throws DataException
 	 */
+	@Deprecated
 	public static BigDecimal balance(SQLData data, String sampleID) throws DataException {
 		try {
 			PreparedStatement aBal = data.prepareStatement(SQL_GET_BALANCE);
@@ -526,8 +527,15 @@ public class SQLSampleAccount extends SQLObject implements SampleAccount {
 		}
 	}
 
-	public static BigDecimal balance(SQLSample sample) throws DataException {
-		return balance(sample.myData, sample.getID());
+	public static Amount balance(SQLSample sample) throws DataException {
+		BigDecimal value = balance(sample.myData, sample.getID());
+		BigDecimal conc = sample.getConcentration();
+		if ( conc != null && conc.compareTo(BigDecimal.ZERO) != 0 ) {
+			value = value.divide(conc).movePointLeft(3);
+			return new Amount(value, AmountUnit.VOLUME);			
+		} else {
+			return new Amount(value, AmountUnit.MASS);			
+		}
 	}
 
 }
