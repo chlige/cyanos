@@ -19,7 +19,7 @@
 <tr><td>Collection ID:</td><td><input type="text" name="<%= SampleServlet.PARAM_COLLECTION_ID %>"></td></tr>
 <tr><td>Library:</td><td><% List<String> libraries = (List<String>) request.getAttribute(SampleServlet.ATTR_LIBRARIES); %>
 <select name="<%= SampleServlet.PARAM_LIBRARY %>">
-<option>NEW LIBRARY &rarr;</option>
+<option value="">NEW LIBRARY &rarr;</option>
 <% for ( String lib : libraries ) { %><option><%= lib %></option><% } %>
 </select><input name="new_library"></td></tr>
 <tr><td>Label:</td><td><input type='text' name='label'></td></tr>
