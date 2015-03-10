@@ -16,8 +16,6 @@ nav ul  {
 	display: none;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	text-decoration: none;
-	color: #ffff30;
-	background: #009070;
 	text-align: center;
 	padding: 10px 0;
 	display: none;
@@ -32,7 +30,6 @@ nav ul  {
 nav input[type=checkbox] {
 	font-size: 14pt;
 	font-weight: bold;
-	color: #FFFF30;
 	text-align: center;
 	padding: 4px;
 	text-decoration: none;
@@ -50,12 +47,7 @@ nav input[type=checkbox] {
 		border-right: 1px solid #ccc;
 	}
 	
-	li.home {
-		background-color: #00C0A0;
-	}
-	
 	nav ul {
-		background: #009070;
 		padding: 0 20px;
 		list-style: none;
 		position: relative;
@@ -77,19 +69,16 @@ nav input[type=checkbox] {
 		width: 130px;
 		font-size: 14pt;
 		font-weight: bold;
-		color: #FFFF30;
 		text-align: center;
 		padding: 4px;
 		text-decoration: none;
 	}
 	
 	nav ul a:hover, nav ul a:active {
-		background-color: #00C0A0;
 		display: block;
 		width: 130px;
 		font-size: 14pt;
 		font-weight: bold;
-		color: #FFFF30;
 		text-align: center;
 		padding: 4px;
 		text-decoration: none;
@@ -106,7 +95,6 @@ nav input[type=checkbox] {
 		border-bottom: 1px solid black;
 		border-left: 1px solid black;
 		border-right: 1px solid black;
-		background-color: #808080;
 	}
 	
 	ul.submenu a, ul.submenu a:active, ul.submenu a:hover, ul.submenu a:visited {
@@ -117,143 +105,34 @@ nav input[type=checkbox] {
 		font-size: 12pt;
 		font-weight: normal;
 	}
-	
-	ul.submenu > hr {
-		border-style: solid;
-		border-color: black;
-	}
-	
-	.submenu a:hover, .submenu a:active {
-		background-color: #aaa;
-	}
-	
-	li.break {
-		border-top: 1px solid black;
-	}
-	
-	nav ul ul li {
-		float: none;
-		position: relative;
-	}
-	
-	nav ul li:hover > ul {
-		display: block;
-	}
-	
- 	.helpmenu {
-		background-color: #FF4E4E;
-	}
-		
-	.helpmenu a,.helpmenu a:visited {
-		color: #101010;
-	}
-	
-	.helpmenu a:hover {
-		color: #FFFFFF;
-		background-color: #C00000;
-	}
-
-	nav a:hover {
-		cursor: pointer;
-	}
+	ul.submenu > hr { border-style: solid; border-color: black; }
+	li.break { border-top: 1px solid black; }
+	nav ul ul li { float: none; position: relative; }
+	nav ul li:hover > ul { display: block; }
+	nav a:hover { cursor: pointer; }
 }
 
 nav input[type=checkbox]:checked ~ #mobile-menu {
 	display: block;
 }
 
-@media screen and (max-width: 680px) {
-		
-	.show-menu {
-		display: block;
-	}	
-		
-	.menu {
-		display: none;
-	}
-
-	.helpmenu {
-		background-color: #FF4E4E;
-	}
-	
-	.mobile-menu a, .mobile-menu a:visited {
-		font-size: 14pt;
-		color: #fff;
-	}
-	
-	.mobile-menu a:hover {
-		font-size: 14pt;
-		color: #fff;
-		text-decoration: none;
-	}
-	
-	.helpmenu a,.helpmenu a:visited {
-		font-size: 14pt;
-		color: #fff;
-	}
-	
-	.helpmenu a:hover {
-		font-size: 14pt;
-		color: #fff;
-		text-decoration: none;
-	}
-	
-	.submenu {
-		display: none;
-	}
-	
-	.menuShow {
-		display: block;
-		position: absolute;
-		/* jade color - background: #00A86B; */
-		background-color: #EEEEEE;
-		min-width: 95px;
-		padding-left: 5px;
-		padding-right: 5px;
-		border-right: 2px inset black;
-		border-left: 2px inset black;
-		border-bottom: 2px inset black;
-		border-top: 2px groove black;
-		z-index: 10;
-	}
-	
-	.menuShow a:visited,.menuShow a:link {
-		font-size: 12px;
-		font-weight: normal;
-		margin-bottom: 2px;
-		color: #009070;
-	}
-	
-	.menuShow a:hover {
-		background-color: #00D000;
-		color: #FFFF30;
-		font-size: 12px;
-		font-weight: normal;
-		margin-bottom: 2px;
-	}
-	
-	.menuShow p {
-		line-height: 1.5em;
-	}
-	
-	.menu:hover {
-		cursor: pointer;
-	}
-	
-	.helpmenu:hover {
-		cursor: pointer;
-	}
-	
-	
+@media screen and (max-width: 680px) {	
+	.show-menu { display: block; }	
+	.menu { display: none; }
+	.mobile-menu a, .mobile-menu a:visited { font-size: 14pt; }
+	.mobile-menu a:hover { font-size: 14pt; text-decoration: none; }
+	.helpmenu a,.helpmenu a:visited { font-size: 14pt; }
+	.helpmenu a:hover { font-size: 14pt; text-decoration: none; }
+	.submenu { display: none; }
+	.menu:hover { cursor: pointer; }
+	.helpmenu:hover { cursor: pointer; }
 	ul.mobile-menu {
 		position: static;
 		display: none; 
-		background: #00c0a0;
 		margin: 0px;
 		padding: 0;
 		list-style: none;
 	}
-	
 	/*Create vertical spacing*/
 	ul.mobile-menu li {
 		margin-bottom: 1px;
@@ -261,26 +140,13 @@ nav input[type=checkbox]:checked ~ #mobile-menu {
 		text-align: center;
 		padding: 10px 0;
 	}
-	
 	/*Make all menu links full width*/
-	ul.mobile-menu li, ul.mobile-menu li a {
-		width: 100%;
-	}	
+	ul.mobile-menu li, ul.mobile-menu li a { width: 100%; }	
 }
 
 @media print {
-	
-	.printheader {
-		display: block;
-	}
-	
-	.menubar {
-		display: none;
-	}
-	
-	.menu {
-		display: none;
-	}
+	.printheader { display: block; }
+	nav { display: none; }
 }
 
 

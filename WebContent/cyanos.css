@@ -2,9 +2,10 @@
 
 @import url("menu.css");
 @import url("mobile.css");
+@import url("colors.css");
 
 body {
-	font-weight: normal; font-size: 11pt; color: #000000; 
+	font-weight: normal; font-size: 11pt; 
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Verdana, Arial, "Lucida Grande", sans-serif;
 	margin: 0px;
 }

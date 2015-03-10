@@ -23,10 +23,9 @@ nav ul { background: #009070; }
 	.mobile-menu a, .mobile-menu a:visited, .mobile-menu a:hover { color: #fff; }
 	.helpmenu a, .helpmenu a:visited, .helpmenu a:hover { color: #fff; }
 	/* jade color - background: #00A86B; */
-	ul.mobile-menu { background: #8080ff; }
+	ul.mobile-menu { background: #00c0a0; }
 	ul.mobile-menu li { border-top-color: white; }
 }
-
 
 .showEdit { background-color: #F5F5F5; border: 3px ridge #505050; }
 .user { background-color: #FFFACD; border: 1px solid black; } 
