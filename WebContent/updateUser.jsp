@@ -9,13 +9,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<jsp:include page="/includes/header-template.jsp"/>
-<title>User Administration</title>
+<cyanos:header title="Update User"/>
 </head>
 <body>
 <cyanos:menu/>
-<h1>User Administration</h1>
-<hr>
+<h1>Update Profile</h1>
+<hr width="80%">
 <% 	User user = AdminServlet.getUser(request); 
 	Project projectList = SQLProject.projects(AdminServlet.getSQLData(request), SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT); %>
 <form method="post">
@@ -27,13 +26,18 @@
 	if ( update && (! user.getUserEmail().equals(request.getParameter("email"))) ) {
 		SQLMutableUser.updateEmail(request, request.getParameter("email"));
 		out.print(" style=\"updated\"");
+		user.reload();
 	} %>><td>Email address:</td><td><input type="text" name="email" value="<%= user.getUserEmail() %>"></td></tr>
 </table>
+<p align="center"><button type="submit" name="updateUser">Update Information</button></p>
+</form>	
+<form method="post">
 <h2 style="text-align:center">Change Password</h2>
-<%
-	if ( request.getParameter("pwd1") != null ) {
-		String pwd1 = request.getParameter("pwd1");
-		if ( pwd1.equals(request.getParameter("pwd2")) ) {
+<% String pwd1 = request.getParameter("pwd1");
+	if ( request.getParameter("changePWD") != null & pwd1 != null && pwd1.length() > 0 ) {
+		if ( ! user.checkPassword(request.getParameter("currentpwd")) ) {
+%><p align='center' style='color: red'>Invalid password</p><%			
+		} else if ( pwd1.equals(request.getParameter("pwd2")) ) {
 			SQLMutableUser.updatePassword(request, pwd1);
 %><p align='center' style='color: green'>Password changed</p><%			
 		} else {
@@ -42,9 +46,12 @@
 	}
 %>
 <table class="species">
+<tr><td>Current password:</td><td><input type="password" name="currentpwd"></td></tr>
 <tr><td>New password:</td><td><input type="password" name="pwd1"></td></tr>
 <tr><td>Confirm new password:</td><td><input type="password" name="pwd2"></td></tr>
 </table>
+<p align="center"><button type="submit" name="changePWD">Change Password</button></p>
+</form>	
 <h2 style="text-align:center">Roles</h2>
 <table class="dashboard">
 <tr><td>GLOBAL</td><td><% for (  Role role: user.globalRoles() ) { %>
@@ -57,7 +64,5 @@ while ( projectList.next() ) {
 <%= role.roleName() %>(<%= role.permissionString() %>) <% } %></td></tr>
 <% } %>
 </table>
-<p align="center"><button type="submit" name="updateUser">Update Information</button></p>
-</form>	
 </body>
 </html>

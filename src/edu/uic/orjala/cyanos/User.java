@@ -3,6 +3,9 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 
@@ -109,6 +112,10 @@ public interface User {
 	public List<Role> globalRoles();
 	
 	public List<Role> rolesForProject(String projectID);
+
+	public abstract boolean checkPassword(String password) throws DataException;
+
+	public abstract void reload() throws DataException;
 	
 	
 

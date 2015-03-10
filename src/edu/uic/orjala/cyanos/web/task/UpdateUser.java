@@ -51,4 +51,10 @@ public class UpdateUser extends BasicUser {
 		return null;
 	}
 
+	@Override
+	public void reload() throws DataException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

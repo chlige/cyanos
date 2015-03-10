@@ -119,5 +119,11 @@ public class GuestUser extends BasicUser {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void reload() throws DataException {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

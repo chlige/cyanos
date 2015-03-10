@@ -379,6 +379,7 @@
       <url-pattern>/doc/*</url-pattern>
       <url-pattern>/file/manager/*</url-pattern>
       <url-pattern>/jobs.jsp</url-pattern>
+      <url-pattern>/updateUser.jsp</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>

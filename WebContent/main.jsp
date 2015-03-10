@@ -50,7 +50,7 @@
 <% if ( request.getRemoteUser() != null )  { 
 	User aUser = MainServlet.getUser(request);  %>
 <p><b>Welcome, <%= aUser.getUserName() %></b></p>
-<p><a href="self/password">Update Password</a><br>
+<p><a href="updateUser.jsp">Change password</a><br>
 <a href="logout.jsp">Logout</a></p>
 <% } else { %>
 <p><b>Welcome, Guest User</b></p>

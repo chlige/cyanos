@@ -20,6 +20,8 @@ public abstract class BasicUser implements User {
 
 	protected String myID = null;
 	protected final Map<String, Map<String, Role>> projectRoles = new HashMap<String, Map<String, Role>>();
+	protected String email = null;
+	protected String fullname = null;
 	
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.User#getUserID()
@@ -84,6 +86,25 @@ public abstract class BasicUser implements User {
 		return roleList;
 	}
 
-
+	public boolean checkPassword(String password) throws DataException {
+		return false;
+	}
 	
+	/* (non-Javadoc)
+	 * @see edu.uic.orjala.cyanos.User#getUserEmail()
+	 */
+	@Override
+	public String getUserEmail() throws DataException {
+		return this.email;
+	}
+
+	/* (non-Javadoc)
+	 * @see edu.uic.orjala.cyanos.User#getUserName()
+	 */
+	@Override
+	public String getUserName() throws DataException {
+		return this.fullname;
+	}
+
+
 }

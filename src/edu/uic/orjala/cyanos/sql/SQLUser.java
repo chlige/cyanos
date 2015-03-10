@@ -8,13 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -23,12 +19,10 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.BasicUser;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Role;
-import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 
 /**
  * @author George Chlipala
@@ -37,18 +31,10 @@ import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
 public class SQLUser extends BasicUser {
 	
 	private Connection dbc = null;
-	private ResultSet myData = null;
-	private Set<Statement> statments = null;
-	
+
 	private final static String SQL_GET_ROLES = "SELECT username,project_id,role,perm FROM roles WHERE username=?";
-	private final static String USER_SQL = "SELECT * FROM users WHERE username=?";
-	
-	private final static String USER_EMAIL = "email";
-	private final static String USER_NAME = "fullname";
-	
-	private final static String ROLE_NAME = "role";
-	private final static String ROLE_PROJECT = "project_id";
-	private static final String ROLE_PERM = "perm";
+	private final static String USER_SQL = "SELECT username,fullname,email FROM users WHERE username=?";	
+	private final static String SQL_VALIDATE_PASSWORD = "SELECT username FROM users WHERE username=? AND password=SHA(?)";
 
 	public SQLUser(Connection aDBC, String userID) throws DataException {
 		this.dbc = aDBC;
@@ -70,19 +56,20 @@ public class SQLUser extends BasicUser {
 		}
 	}
 
-	
-	private PreparedStatement prepareStatement(String sqlString) throws SQLException {
-		return this.prepareStatement(sqlString, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-	}
-	
-	private PreparedStatement prepareStatement(String sqlString, int setType, int setConcurrency) throws SQLException {
-		if ( this.dbc != null ) {
-			if ( this.statments == null ) this.statments = new HashSet<Statement>();
-			PreparedStatement aPsth = this.dbc.prepareStatement(sqlString, setType, setConcurrency);
-			this.statments.add(aPsth);
-			return aPsth;
+	@Override
+	public boolean checkPassword(String password) throws DataException {
+		try {
+			PreparedStatement sth = this.dbc.prepareStatement(SQL_VALIDATE_PASSWORD);
+			sth.setString(1, this.myID);
+			sth.setString(2, password);
+			ResultSet results = sth.executeQuery();
+			boolean check = results.first();
+			results.close();
+			sth.close();
+			return check;
+		} catch (SQLException e) {
+			throw new DataException(e);
 		}
-		return null;
 	}
 	
 	protected void finalize() throws Throwable {
@@ -93,29 +80,32 @@ public class SQLUser extends BasicUser {
 		}
 	}
 	
-	private void closeData(ResultSet aData) throws SQLException {
-		if ( aData != null ) {
-			Statement aSth = aData.getStatement();
-			this.statments.remove(aSth);
-			aData.close();
-			aSth.close();
-		}
-	}	
-	
 	private void loadData() throws DataException, SQLException {
-			this.closeData(this.myData);
-			PreparedStatement aPsth = this.prepareStatement(USER_SQL);
+			this.reload();
+			this.loadRoles();
+	}
+	
+	@Override
+	public void reload() throws DataException {
+		try {
+			PreparedStatement aPsth = this.dbc.prepareStatement(USER_SQL);
 			aPsth.setString(1, this.myID);
-			this.statments.add(aPsth);
-			this.myData = aPsth.executeQuery();
-			if ( this.myData.first() ) 
-				this.loadRoles();
-			else
-				throw new DataException(String.format("User %s not found.", this.myID));
+			ResultSet results = aPsth.executeQuery();
+			boolean exists = results.first();
+			if ( exists ) {
+				this.fullname = results.getString(2);
+				this.email = results.getString(3);
+			}
+			results.close();
+			aPsth.close();
+			if ( ! exists ) throw new DataException(String.format("User %s not found.", this.myID));
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
 	}
 		
 	private void loadRoles() throws SQLException {
-		PreparedStatement aPsth = this.prepareStatement(SQL_GET_ROLES);
+		PreparedStatement aPsth = this.dbc.prepareStatement(SQL_GET_ROLES);
 		aPsth.setString(1, this.myID);
 		ResultSet roleData = aPsth.executeQuery();
 
@@ -124,9 +114,9 @@ public class SQLUser extends BasicUser {
 		this.projectRoles.clear();
 		
 		while ( roleData.next() ) {
-			String projectID = roleData.getString(ROLE_PROJECT);
-			String roleName = roleData.getString(ROLE_NAME);
-			Role role = new Role(roleName, roleData.getInt(ROLE_PERM));
+			String projectID = roleData.getString(2);
+			String roleName = roleData.getString(3);
+			Role role = new Role(roleName, roleData.getInt(4));
 			if ( ! this.projectRoles.containsKey(projectID) ) 
 				this.projectRoles.put(projectID, new HashMap<String,Role>());
 			Map<String,Role> thisProj = this.projectRoles.get(projectID);
@@ -136,58 +126,12 @@ public class SQLUser extends BasicUser {
 		aPsth.close();
 	}
 	
-	private String getString(ResultSet aData, String colName) throws DataException {
-		try {
-			if ( aData != null ) return aData.getString(colName);
-		} catch (SQLException e) {
-			throw new DataException(e);
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.User#getUserEmail()
-	 */
-	public String getUserEmail() throws DataException {
-		return this.getString(this.myData, USER_EMAIL);
-	}
-
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.User#getUserName()
-	 */
-	public String getUserName() throws DataException {
-		return this.getString(this.myData, USER_NAME);
-	}
-
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.User#getUserPreferences()
 	 */
 	public String getUserPreferences() throws DataException {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	private void setString(ResultSet aData, String colName, String newValue) throws DataException {
-		try { 
-			if ( aData != null ) {
-				aData.updateString(colName, newValue);
-				aData.refreshRow();
-			}
-		} catch (SQLException e) {
-			throw new DataException(e);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see edu.uic.orjala.cyanos.User#setUserEmail(java.lang.String)
-	 */
-	public void setUserEmail(String anEmail) throws DataException {
-		this.setString(this.myData, USER_EMAIL, anEmail);
-
-	}
-
-	public void setUserName(String aName) throws DataException {
-		this.setString(this.myData, USER_NAME, aName);
 	}
 
 	public static void resetPassword(SQLUser user, Session mailSession) throws DataException, AddressException, MessagingException {
@@ -213,7 +157,7 @@ public class SQLUser extends BasicUser {
 			aMsg.setRecipient(Message.RecipientType.TO, anEmail);
 			aMsg.setSubject("Database Password Reset");
 
-			psth = user.prepareStatement("UPDATE users SET password=SHA1(?) WHERE username=?");
+			psth = user.dbc.prepareStatement("UPDATE users SET password=SHA1(?) WHERE username=?");
 			Random random = new Random();
 			int len = random.nextInt(4) + 6;
 			char[] pwd = new char[len];
@@ -241,24 +185,7 @@ public class SQLUser extends BasicUser {
 		
 	}
 
-
-	public void close() throws DataException {
-		try {
-		if ( this.myData != null ) this.myData.close();
-		if ( this.statments != null ) {
-			Iterator<Statement> anIter = this.statments.iterator();
-			while ( anIter.hasNext() ) {
-				anIter.next().close();
-			}
-			this.statments.clear();
-		}
-		} catch (SQLException e) {
-			throw new DataException(e);
-		}
-	}
-	
 	public void closeAll() throws DataException {
-		this.close();
 		try {
 			if ( this.dbc != null && (! this.dbc.isClosed()) )
 //				System.out.format("SQLUser: DB Connection CLOSE: %d\n", dbc.hashCode());

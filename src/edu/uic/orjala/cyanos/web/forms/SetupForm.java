@@ -98,6 +98,12 @@ public class SetupForm extends BaseForm {
 			// NOTHING TO DO.
 		}
 
+		@Override
+		public void reload() throws DataException {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 
 	/**
