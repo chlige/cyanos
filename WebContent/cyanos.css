@@ -17,7 +17,7 @@ h1 { text-align: center; }
 .hideSection { display: none; }
 .unloaded { display: none; }
 .showSection { display: block; margin-bottom: 10px; }
-.showEdit { display: block; background-color: #F5F5F5; border: 3px ridge #505050; padding: 5px; margin-bottom: 10px; width: 80%; margin-left: auto; margin-right:auto;}
+.showEdit { display: block; border: 3px ridge #505050; padding: 5px; margin-bottom: 10px; width: 80%; margin-left: auto; margin-right:auto;}
 .user { display: block; background-color: #FFFACD; 
 	border: 1px solid black; width: 80%; margin-left:10%; 
 	margin-bottom: 10px; } 
@@ -102,45 +102,13 @@ tr.listing td { border: 1px solid black; background-color: white; }
 caption.month { font-size: 24px }
 
 tr.header { border-bottom: 2px solid #808080 }
-tr.banded:nth-child(odd) { background-color: #c0ffdd;}
-tr.banded:nth-child(even) { background-color: #ffffff;}
 
 /*
 .collapseSection tr:nth-child(odd) { background-color: #FFFEFA; }
 .collapseSection tr:nth-child(even) { background-color: #c0ffdd;}
 */
 
-tr.even { BACKGROUND-COLOR: #C0FFDD;}
-.collapseSection tr.odd { background-color: #FFFEFA; }
-tr.odd { background-color: #FFFFFF; }
-tr.dead { BACKGROUND-COLOR: #909090;}
-
-tr.warn:nth-child(even) { BACKGROUND-COLOR: #FFEE70;}
-tr.warn:nth-child(odd) { BACKGROUND-COLOR: #FFEEC0;}
-tr.danger:nth-child(even) { BACKGROUND-COLOR: #FF7070;}
-tr.danger:nth-child(odd) { BACKGROUND-COLOR: #FFC0C0;}
-
-tr.dead:nth-child(even) { BACKGROUND-COLOR: #F8F8F8;}
-tr.dead:nth-child(odd) { BACKGROUND-COLOR: #DDDDDD;}
-tr.dead td { color: #707070; }
-
-tr.active:nth-child(even) { BACKGROUND-COLOR: #FF7070; }
-tr.active:nth-child(odd) { BACKGROUND-COLOR: #FFC0C0; }
-
-tr.warneven { BACKGROUND-COLOR: #FFEE70;}
-tr.warnodd { BACKGROUND-COLOR: #FFEEC0;}
-
-tr.dangereven { BACKGROUND-COLOR: #FF7070;}
-tr.dangerodd { BACKGROUND-COLOR: #FFC0C0;}
-
-tr.active_even { BACKGROUND-COLOR: #FF7070; }
-tr.active_odd { BACKGROUND-COLOR: #FFC0C0; }
-
-tr.subhead { TEXT-ALIGN: center; BACKGROUND-COLOR: #B0B0B0;}
-tr.border { BACKGROUND-COLOR: #808080 }
-/* tr.active { border: 2px solid #50FF50} */
-tr.updated { BACKGROUND-COLOR: #FFFF90 }
-
+tr.subhead { TEXT-ALIGN: center; }
 
 th { FONT-WEIGHT: bold; font-style: oblique; font-size: 12px; 
 	COLOR: #000000; }
@@ -404,7 +372,7 @@ a.footer {
 		height: 100%;
 	}
 
-	label {
+	form label {
 		display:inline-block;
 		margin-bottom: 10px;
 		width: 125px;
