@@ -27,9 +27,9 @@
 function setupMap(canvas) { 
 	var map = setupOLMap(canvas);
  	var layer;
-<% if ( myConfig.getMapParameter(AppConfig.MAP_OSM_LAYER) != null ) { %> addOSMLayers(map);
-<% } if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { %>	addNASALayers(map);
-<% } 
+<% if ( myConfig.getMapParameter(AppConfig.MAP_OSM_LAYER) != null ) { %> addOSMLayers(map);<% } 
+if ( myConfig.getMapParameter("mapQuest") != null ) { %> addMapQuestLayers(map);<% } 
+if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { %>	addNASALayers(map);<% } 
 	Set<String> keys = new TreeSet<String>(layers.keySet());
 	Iterator<String> keyIter = keys.iterator();
 	while ( keyIter.hasNext() ) {

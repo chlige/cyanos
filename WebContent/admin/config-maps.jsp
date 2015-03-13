@@ -15,11 +15,13 @@ By default, CYANOS will enable the OpenStree maps terrain layer.</p>
  		
 	boolean enableOSM = ("1".equals(appConfig.getMapParameter(AppConfig.MAP_OSM_LAYER)));
 	boolean enableNASA = ("1".equals(appConfig.getMapParameter(AppConfig.MAP_NASA_LAYER)));
+	boolean enableMQ = ("1".equals(appConfig.getMapParameter("mapQuest")));
 	String googleMapKey = appConfig.getGoogleMapKey();
 	
 	if ( ! appConfig.configExists() )
 		enableOSM = true;
 %><p><input type="checkbox" name="enableOSM" value="1" <%= ( enableOSM ? "checked" : "") %>> Enable OpenStreet Terrain map.</p>
+<p><input type="checkbox" name="enableMQ" value="1" <%= ( enableMQ ? "checked" : "") %>> Enable MapQuest layers.</p>
 <p><input type="checkbox" name="enableNASA" value="1" <%= ( enableNASA ? "checked" : "") %>> Enable NASA BlueMarble map.</p>
 <p>Google Maps API Key: <input type="text" name="" value="<%= ( googleMapKey != null ? googleMapKey : "") %>" size="100"><br>
 You can acquire a Map API key at <a href='http://code.google.com/apis/maps/signup.html'>http://code.google.com/apis/maps/signup.html</a></p>

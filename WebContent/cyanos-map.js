@@ -142,11 +142,31 @@ function addOSMLayers(map) {
 //	var layer = new OpenLayers.Layer.OSM('Open Street Maps'); 
 //	map.addLayer(layer);
 //	layer.setIsBaseLayer(true); 
+	map.addLayers([new OpenLayers.Layer.OSM("OpenStreet Map"),
+	               new OpenLayers.Layer.OSM('Open Cycle Terrain', 
+	            		   [ "http://a.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png", 
+	            		     "http://b.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png", 
+	            		     "http://c.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png" ], 
+	            		   {projection: "EPSG:900913"})]);
+//	layer.setIsBaseLayer(true); 		
+}
 
-	map.addLayers([new OpenLayers.Layer.OSM("OpenStreet Map"), new OpenLayers.Layer.OSM('Open Cycle Terrain', 
-			[ "http://a.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png", 
-				"http://b.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png", 
-				"http://c.tile3.opencyclemap.org/landscape/${z}/${x}/${y}.png" ], {projection: "EPSG:900913"})]);
+function addMapQuestLayers(map) {
+//	var layer = new OpenLayers.Layer.OSM('Open Street Maps'); 
+//	map.addLayer(layer);
+//	layer.setIsBaseLayer(true); 
+
+	var mqOSM = ["http://otile1.mqcdn.com/tiles/1.0.0/map/${z}/${x}/${y}.jpg",
+                    "http://otile2.mqcdn.com/tiles/1.0.0/map/${z}/${x}/${y}.jpg",
+                    "http://otile3.mqcdn.com/tiles/1.0.0/map/${z}/${x}/${y}.jpg",
+                    "http://otile4.mqcdn.com/tiles/1.0.0/map/${z}/${x}/${y}.jpg"];
+    var mqAerial = ["http://otile1.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://otile2.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://otile3.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://otile4.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg"];
+	
+	map.addLayers([new OpenLayers.Layer.OSM('MapQuest Standard',mqOSM),
+	            	new OpenLayers.Layer.OSM('MapQuest Satellite',mqAerial)]);
 //	layer.setIsBaseLayer(true); 		
 }
 
