@@ -13,7 +13,7 @@
 			collections.beforeFirst();
 			boolean oddRow = true;
 %> 
-<table width="75%" align="center" class="dashboard"><tbody>
+<table style="width: 75%; margin-left:auto; margin-right:auto;" class="dashboard banded"><tbody>
 <tr><th class="header">ID</th>
 <th class="header">Date</th>
 <th class="header">Location</th>
@@ -23,7 +23,7 @@
 </tr>	
 <% while ( collections.next() )  { 	
 %>
-<tr class='normal' align='center'>
+<tr class='banded' align='center'>
 <td><a href="<%= contextPath %>/collection?col=<%= collections.getID() %>"><%= collections.getID() %></a></td>
 <td><%= dateFormat.format(collections.getDate()) %></td>
 <td><%= collections.getLocationName() %></td>
