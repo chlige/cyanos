@@ -53,6 +53,7 @@ public class AdminServlet extends ServletObject {
 	public static final String PARAM_CONFIG_NEW_MAP_URL = "mapURL";
 	public static final String PARAM_CONFIG_MAP_GOOGLE_KEY = "googleMapKey";
 	public static final String PARAM_CONFIG_MAP_ENABLE_NASA = "enableNASA";
+	public static final String PARAM_CONFIG_MAP_ENABLE_MAPQUEST = "enableMQ";
 	public static final String PARAM_CONFIG_MAP_ENABLE_OSM = "enableOSM";
 	/**
 	 * 
@@ -508,6 +509,13 @@ public class AdminServlet extends ServletObject {
 			myConfig.removeMapParameter(AppConfig.MAP_NASA_LAYER);
 		}
 
+		if ( req.getParameter(PARAM_CONFIG_MAP_ENABLE_MAPQUEST) != null ) {
+			myConfig.setMapParameter("mapQuest", "1");
+		} else {
+			myConfig.removeMapParameter("mapQuest");
+		}
+
+		
 		String googleMapKey = req.getParameter(PARAM_CONFIG_MAP_GOOGLE_KEY);
 		if ( googleMapKey != null && googleMapKey.length() > 0 ) {
 			myConfig.setGoogleMapKey(googleMapKey);

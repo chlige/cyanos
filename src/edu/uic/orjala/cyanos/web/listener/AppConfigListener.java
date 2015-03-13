@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.mail.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -127,5 +128,11 @@ public class AppConfigListener implements ServletContextListener {
 	public static boolean isUpgradeInstall() {
 		return ( AppConfig.APP_VERSION > config.getVersion() );
 	}
+
+	public static Session getMailSession() throws NamingException {		
+		Context initCtx = new InitialContext();
+		return (Session) initCtx.lookup("java:comp/env/mail/Session");
+	}
+
 
 }

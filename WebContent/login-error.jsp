@@ -26,7 +26,7 @@
 <input type='password' name='j_password' size='8'><br/>
 <button type='submit'>Login</button>
 </form>
-<p><a href='<%= response.encodeURL("reset") %>'>Reset password</a></p></div>
+<p><a href='<%= response.encodeURL("reset.jsp") %>'>Reset password</a></p></div>
 <div id="loginNote" style="visibility: hidden">
 <h2>Login error</h2>
 <hr>

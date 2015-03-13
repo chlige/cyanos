@@ -21,6 +21,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.DataException;
@@ -399,6 +400,99 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 			throw new DataException(e);
 		}
 		
+	}
+
+	private final static String SQL_CHECK_EMAIL = "SELECT fullname FROM users WHERE username=? AND email=?";
+	
+	public static void resetPassword(String urlBase, String userID, String email) throws SQLException, NamingException, MessagingException, DataException {
+		PreparedStatement psth = null;
+		Connection dbc = AppConfigListener.getDBConnection();
+		Session mailSession = AppConfigListener.getMailSession();
+		
+		psth = dbc.prepareStatement(SQL_CHECK_EMAIL);
+		psth.setString(1, userID);
+		psth.setString(2, email);
+
+		ResultSet results = psth.executeQuery();
+		if ( ! results.first() ) {
+			throw new DataException("Email does not match user account specified.");
+		}
+		String fullname = results.getString(1);
+		results.close();
+		psth.close();
+		
+		Message aMsg = new MimeMessage(mailSession);
+		InternetAddress anEmail = new InternetAddress(email);
+
+		try {
+			anEmail.setPersonal(fullname);
+		} catch (UnsupportedEncodingException e) {
+			// NO BIG DEAL.
+		}
+		aMsg.setRecipient(Message.RecipientType.TO, anEmail);
+		aMsg.setSubject("CYANOS Password Reset");
+
+		psth = dbc.prepareStatement("UPDATE users SET password=MD5(?) WHERE username=?");
+		Random random = new Random();
+		int len = random.nextInt(4) + 6;
+		char[] pwd = new char[len];
+		for ( int i = 0; i < pwd.length; i++ ) {
+			switch ( random.nextInt(3) ) {
+			case 0: pwd[i] = (char)('a' + random.nextInt(27)); break;
+			case 1: pwd[i] = (char)('A' + random.nextInt(27)); break;
+			case 2: pwd[i] = (char)('0' + random.nextInt(10)); break;
+			}
+		}
+		String randPwd = new String(pwd);
+		psth.setString(1, randPwd);
+		psth.setString(2, userID);
+		if ( psth.executeUpdate() > 0 ) {
+			StringBuffer content = new StringBuffer(fullname);
+			content.append(" -\n\nA password reset has been requested for your user account.\n\tAccess the reset password page and use the following link to change your password.\n");
+			content.append(urlBase);
+			content.append("?username=");
+			content.append(userID);
+			content.append("&token=");
+			content.append(randPwd);
+			content.append("\n\n.  Do not reply to this message.");
+			aMsg.setContent(content.toString(), "text/plain");
+			Transport.send(aMsg);
+		} else {
+			psth.close();
+			dbc.close();
+			throw new DataException("Could not reset password.");
+		}
+		psth.close();
+		dbc.close();
+	}
+
+	private final static String SQL_CHECK_TOKEN = "SELECT username FROM users WHERE username=? AND password=MD5(?)";
+
+	public static void finishReset(String userID, String token, String password) throws SQLException, DataException {
+		PreparedStatement psth = null;
+		Connection dbc = AppConfigListener.getDBConnection();
+		
+		psth = dbc.prepareStatement(SQL_CHECK_TOKEN);
+		psth.setString(1, userID);
+		psth.setString(2, token);
+
+		ResultSet results = psth.executeQuery();
+		if ( ! results.first() ) {
+			throw new DataException("Update token does not match user account specified.");
+		}
+		results.close();
+		psth.close();
+		
+		psth = dbc.prepareStatement("UPDATE users SET password=SHA1(?) WHERE username=?");
+		psth.setString(1, password);
+		psth.setString(2, userID);
+		if ( psth.executeUpdate() == 0 ) {
+			psth.close();
+			dbc.close();
+			throw new DataException("Could not set password.");
+		}
+		psth.close();
+		dbc.close();
 	}
 	
 	private final static String SQL_SET_PASSWORD = "UPDATE users SET password=SHA1(?) WHERE username=?";
