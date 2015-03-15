@@ -3,15 +3,21 @@
  */
 package edu.uic.orjala.cyanos.web.job;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 
 import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.web.Job;
+import edu.uic.orjala.cyanos.xml.XMLCompound;
 
 /**
  * @author George Chlipala
@@ -20,6 +26,8 @@ import edu.uic.orjala.cyanos.web.Job;
 public class DereplicationQuery extends Job {
 
 
+	public static final String OUTPUT_TYPE = "compound-xml";
+	public static final String JOB_TYPE = "Dereplication Query";
 	private static final String THREAD_LABEL = "dereplication";
 	private Compound compoundList;
 	
@@ -28,10 +36,14 @@ public class DereplicationQuery extends Job {
 	private final StringBuffer queryBuffer = new StringBuffer();
 	private final StringBuffer havingBuffer = new StringBuffer();
 	
+	public static Collection<Job> previousQueries(SQLData data) throws DataException {
+		return Job.oldJobs(data, JOB_TYPE);
+	}
+	
 	public DereplicationQuery(SQLData data) {
 		super(data);
-		super.type = "Dereplication Query";
-		this.outputType = "table";
+		super.type = JOB_TYPE;
+		this.outputType = OUTPUT_TYPE;
 	}
 
 	/* (non-Javadoc)
@@ -50,34 +62,30 @@ public class DereplicationQuery extends Job {
 			} else {
 				this.compoundList = SQLCompound.compoundQuery(this.myData, this.buildQuery());
 			}
-			
-			StringBuffer out = new StringBuffer("compound_id,name,formula,inchi_key,notes\n");
-			try {
-				compoundList.beforeFirst();
-				
-				while ( compoundList.next() ) {
-					out.append(compoundList.getID());
-					out.append(",");
-					out.append(compoundList.getName());
-					out.append(",");
-					out.append(compoundList.getFormula());
-					out.append(",");
-					out.append(compoundList.getInChiKey());
-					out.append(",\"");
-					String notes = compoundList.getNotes();
-					notes.replaceAll("\n", " ");
-					notes.replaceAll("\"", "''");
-					out.append(notes);
-					out.append("\"\n");
-				}
-				compoundList.beforeFirst();
-			} catch (DataException e) {
-				this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
-				e.printStackTrace();			
-			} finally {
-				this.output = out.toString();
-			}
 
+			if ( compoundList != null && compoundList.first() ) {
+				StringWriter out = new StringWriter();
+				try {
+					XMLOutputFactory xof = XMLOutputFactory.newInstance();
+					XMLStreamWriter xtw = xof.createXMLStreamWriter(out);
+
+					xtw.writeStartDocument("UTF-8", "1.0");
+					xtw.writeStartElement("dereplication-list");				
+					XMLCompound.generateXML(compoundList, xtw);
+					xtw.writeEndElement();
+					xtw.writeEndDocument();
+					this.progress = 1.0f;
+				} catch (DataException e) {
+					this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
+					e.printStackTrace();			
+				} finally {
+					this.output = out.toString();
+				} 
+			} else {
+				this.outputType = "text";
+				this.output = "No results";
+				this.progress = 1.0f;
+			}
 		} catch (Exception e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();

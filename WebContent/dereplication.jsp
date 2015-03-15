@@ -6,7 +6,11 @@
 	edu.uic.orjala.cyanos.web.servlet.DereplicationServlet,
 	edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
 	edu.uic.orjala.cyanos.web.job.RebuildCompoundGraphJob,
-	edu.uic.orjala.cyanos.web.job.DereplicationQuery" %>
+	edu.uic.orjala.cyanos.web.job.DereplicationQuery,
+	edu.uic.orjala.cyanos.web.Job,
+	edu.uic.orjala.cyanos.xml.XMLCompound,
+	java.io.StringReader,
+	java.util.Collection" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -14,68 +18,78 @@
 <script type="text/javascript">
 var count = 0;
 
-function jobStatus(jobID) {
-	var xmlHttp = null;
-	
-	if (window.XMLHttpRequest) {  
-		xmlHttp=new XMLHttpRequest();
-	} else if (window.ActiveXObject) {
-		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-  	}
-  	
-	if (xmlHttp != null) {
- 		xmlHttp.open("GET", "upload/status?jobid=" + jobID, false);
- 		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
- 			var jobDIV = document.getElementById('job-' + jobID);
- 			var subAreas = jobDIV.getElementsByTagName("div")
- 			var progText = jobDIV.getElementsByClassName("progressText")[0];
-			var response = xmlHttp.responseText;
-			if ( response === "DONE" ) {
-				jobDiv.innerHTML = "<p align='center'>Loading results...</p>";
-				window.setTimeout(displayResults, 50, jobID);
-			} else if ( response === "ERROR" ) { 
-				endProgress(progressLen, resultButton);
-				if ( progText != null ) {
-					progText.innerHTML = "<font color='red'>ERROR!</font>";
-				}						
-			} else if ( response === "STOP" ) {
-				displayResults(jobID);
-				if ( progText != null ) {
-					progText.innerHTML = "Stopped";
-				}				
-			} else {
-				var length = Number(response);
-				var elem = jobDIV.getElementsByClassName('progressBar')[0];
-				elem.style.opacity = (0.3 *  Math.sin((count / 180) * Math.PI)) + 0.7 ;
-				elem.style.width = "100%";
-				progText.innerHTML = "Running...";
-				if ( count == 360 ) { count = 0; }
-				count += 15;
-				window.setTimeout(jobStatus, 50, jobID);
-			}
-		} 
-  	}
-}
+	function jobStatus(jobID) {
+		var xmlHttp = null;
 
-function displayResults(jobID) {
-	var xmlHttp = null;
-	
-	if (window.XMLHttpRequest) {  
-		xmlHttp=new XMLHttpRequest();
-	} else if (window.ActiveXObject) {
-		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-  	}
-  	
-	if (xmlHttp != null) {
- 		xmlHttp.open("GET", "dereplication?jobid=" + jobID, false);
- 		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
- 			var jobDIV = document.getElementById('job-' + jobID);
-			jobDIV.innerHTML = xmlHttp.responseText;
-		} 
-  	}	
-}
+		if (window.XMLHttpRequest) {
+			xmlHttp = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		if (xmlHttp != null) {
+			xmlHttp.open("GET", "upload/status?jobid=" + jobID, true);
+			xmlHttp.onreadystatechange = function() {
+				if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+					var jobDIV = document.getElementById('job-' + jobID);
+					var subAreas = jobDIV.getElementsByTagName("div")
+					var progText = jobDIV.getElementsByClassName("progressText")[0];
+					var response = xmlHttp.responseText;
+					if (response === "DONE") {
+						jobDIV.innerHTML = "<p align='center'>Loading results...</p>";
+						displayResults(jobID);
+					} else if (response === "ERROR") {
+						endProgress(progressLen, resultButton);
+						if (progText != null) {
+							progText.innerHTML = "<font color='red'>ERROR!</font>";
+						}
+					} else if (response === "STOP") {
+						displayResults(jobID);
+						if (progText != null) {
+							progText.innerHTML = "Stopped";
+						}
+					} else {
+						var length = Number(response);
+						var elem = jobDIV.getElementsByClassName('progressBar')[0];
+						elem.style.opacity = (0.3 * Math.sin((count / 180) * Math.PI)) + 0.7;
+						elem.style.width = "100%";
+						progText.innerHTML = "Running...";
+						if (count == 360) {
+							count = 0;
+						}
+						count += 15;
+						window.setTimeout(jobStatus, 50, jobID);
+					}
+				}
+			};
+
+			xmlHttp.send(null);
+
+		}
+	}
+
+
+	function displayResults(jobID) {
+		var xmlHttp = null;
+
+		if (window.XMLHttpRequest) {
+			xmlHttp = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		if (xmlHttp != null) {
+
+			xmlHttp.open("GET", "dereplication?jobid=" + jobID, true);
+			xmlHttp.onreadystatechange = function() {
+				if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+					var jobDIV = document.getElementById('job-' + jobID);
+					jobDIV.innerHTML = xmlHttp.responseText;
+				}
+			};
+			xmlHttp.send(null);
+		}
+	}
 </script>
 <style type="text/css">
 .job { margin-left:auto; margin-right:auto; margin-bottom: 10px; width: 600px; border: 2px solid gray; background-color: #eee; padding: 10px; display: block; }
@@ -125,7 +139,23 @@ function displayResults(jobID) {
 		job.startJob(); 
 		DereplicationServlet.addJob(session, job);
 %><p align="center"><i>Rebuilding chemical structure index</i><br><a href="<%= request.getContextPath() %>/jobs.jsp">View status</a></p>
-<% } else { 
+<% } else if (request.getParameter("listPrevJobs") != null ) {
+		Collection<Job> jobList = DereplicationQuery.previousQueries(DereplicationServlet.getSQLData(request));
+%><h2 style="text-align:center">Previous Dereplication Queries</h2><ul>
+<% for (Job job : jobList ) { %>
+<li><a href="?jobid=<%= job.getID() %>">Job #<%= job.getID() %></a> - <%= DereplicationServlet.DATETIME_FORMAT.format(job.getStartDate()) %></li>
+<% } %></ul>
+<% } else if (request.getParameter("jobid") != null ) {
+   		Job queryJob = Job.loadJob(DereplicationServlet.getSQLData(request), request.getParameter("jobid"));
+%><h2 style="text-align:center">Previous Dereplication Query</h2>
+<p align="center">Job #<%= queryJob.getID() %> - <%= DereplicationServlet.DATETIME_FORMAT.format(queryJob.getStartDate()) %></p> <%
+   		if ( queryJob.getOutputType().equals("compound-xml") ) { 
+   			request.setAttribute(CompoundServlet.COMPOUND_RESULTS, XMLCompound.load(new StringReader(queryJob.getOutput())));
+%><jsp:include page="/compound/compound-list.jsp" /><% 
+   		} else {
+ %><p style="font-weight:bold; text-align:center;"><%= queryJob.getOutput() %></p><%  			
+   		}
+  } else {
 	boolean performSearch = request.getParameter(DereplicationServlet.SEARCH_ACTION) != null;
 %><div class="searchNav"><a class='twist' onClick='loadDiv("search")'>
 <form method="post">
@@ -148,6 +178,6 @@ function displayResults(jobID) {
 <div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div>
 <script>jobStatus("<%= search.getID() %>");</script>
 </div>
-<% } } %>
+<% } else { %><p align="center"><a href="?listPrevJobs">List previous dereplication jobs</a></p><% } } %>
 </body>
 </html>

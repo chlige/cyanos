@@ -5,6 +5,8 @@
 	edu.uic.orjala.cyanos.web.JobManager,
 	edu.uic.orjala.cyanos.web.Job,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
+	edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
+	edu.uic.orjala.cyanos.xml.XMLCompound,
 	java.util.Collection, java.util.Date, java.io.BufferedReader, java.io.StringReader" %>   
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -135,7 +137,14 @@ while ( line != null ) {
 <% 	if ( sep == '"' && end == (lineLen - 1) ) { offset = -1; } else if ( end == -1 ) { offset = -1; } else { offset = end + 1; }
 	sep = ',';
 } %></tr><% line = reader.readLine(); } %></table>
-<% } else { %><code><%= job.getOutput() %></code>
+<% } else if ( job.getOutputType().equals("compound-xml") ) { 
+	try {
+	request.setAttribute(CompoundServlet.COMPOUND_RESULTS, XMLCompound.load(new StringReader(job.getOutput())));
+%><jsp:include page="/compound/compound-list.jsp" />
+<% } catch (Exception e) {
+%>Error loading output: <%= e.getLocalizedMessage() %><%	
+}
+	} else { %><code><%= job.getOutput() %></code>
 <% }  %></div></div>
 <% } %>
 <div class="collapseSection" style="background:white;"><a name='job_messages' class='twist' onClick='loadDiv("messages")'>

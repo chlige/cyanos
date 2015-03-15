@@ -98,6 +98,26 @@ public class Job implements Runnable {
 		return jobList;
 	}
 	
+	private final static String SQL_OLD_JOBS_TYPE = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate,output_type FROM jobs WHERE owner=? AND job_type=? AND endDate IS NOT NULL";
+
+	public static List<Job> oldJobs(SQLData data, String type) throws DataException {
+		List<Job> jobList = new ArrayList<Job>();
+		try {
+			PreparedStatement sth = data.prepareStatement(SQL_OLD_JOBS_TYPE);
+			sth.setString(1, data.getUser().getUserID() );
+			sth.setString(2, type);
+			ResultSet results = sth.executeQuery();
+			while ( results.next() ) {
+				jobList.add(new Job(data, results));
+			}
+			results.close();
+			sth.close();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return jobList;
+	}
+	
 	
 	private final static String SQL_INSERT_JOB = "INSERT INTO jobs(job_type,owner) VALUES(?,?)";
 	
