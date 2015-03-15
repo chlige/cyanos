@@ -15,25 +15,23 @@
 			compounds.beforeFirst();
 			boolean oddRow = true;
 %> 
-<table width="75%" align="center" class="dashboard"><tbody>
+<table style="min-width:600px; margin-left:auto; margin-right:auto;" class="dashboard banded"><tbody>
 <tr><th class="header">Name</th><th class="header">Formula</th><th class="header">Notes</th><th class="header">Links</th>
 <% if ( source != null )  { %>
 <th class="header">Retention Time</th>
 <% } %>
 </tr>	
 <% while ( compounds.next() )  { 
-	String rowFormat = ( oddRow ? "odd" : "even" ); oddRow = ! oddRow; 		
 	String name = compounds.getName();
 	if ( name == null || name.length() < 1) name = compounds.getID();
 	String inchiString = compounds.getInChiKey();
-	%>
-<tr class='<%= rowFormat %>' align='center'>
+	%><tr class="banded" align="center">
 <td><a href="<%= contextPath %>/compound?id=<%= compounds.getID() %>"><%= name %></a></td>
 <td><%= compounds.getHTMLFormula() %></td>
 <td><%= BaseForm.shortenString(compounds.getNotes(), 20) %></td>
 <td>
 <% if ( inchiString != null )  { %>
-<a class="chemspider" href="http://www.chemspider.com/Search.aspx?q=<%= inchiString %>" target="_blank"><img src="<%= contextPath %>/images/icons/cs-icon.png" valign="middle"> Search ChemSpider</a>
+<a class="chemspider" href="http://www.chemspider.com/Search.aspx?q=<%= inchiString %>" target="_blank"><img src="<%= contextPath %>/images/icons/cs-icon.png" alt="Search ChemSpider"></a>
 <% } %>
 </td>
 <% if ( source != null )  {  
