@@ -951,7 +951,7 @@ CREATE VIEW `compound_bond_links` AS
  select `bond`.`compound_id` AS `compound_id`,`bond`.`bond_id` AS `bond_id`,`bond`.`bond_order` AS `bond_order`,`bond`.`stereo` AS `stereo`,`cab1`.`atom_number` AS `atom1_number`,`cab2`.`atom_number` AS `atom2_number` 
  from ((`compound_bonds` `bond` 
  join `compound_bond_atoms` `cab1` on(((`bond`.`compound_id` = `cab1`.`compound_id`) and (`bond`.`bond_id` = `cab1`.`bond_id`)))) 
- join `compound_bond_atoms` `cab2` on(((`bond`.`compound_id` = `cab2`.`compound_id`) and (`bond`.`bond_id` = `cab2`.`bond_id`) and (`cab1`.`atom_number` <> `cab2`.`atom_number`))))
+ join `compound_bond_atoms` `cab2` on(((`bond`.`compound_id` = `cab2`.`compound_id`) and (`bond`.`bond_id` = `cab2`.`bond_id`) and (`cab1`.`atom_number` <> `cab2`.`atom_number`))));
 
 DROP VIEW IF EXISTS `compound_aromatic_h`;
 
