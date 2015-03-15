@@ -14,57 +14,57 @@ if ( aroms != null ) {
 
 if ( request.getParameter(DereplicationServlet.SEARCH_ACTION) != null && request.getParameter("nmrdata") != null ) {
 
-	DereplicationServlet.parseGraph(request, "ch2_methyl", "compound_diatomic as ch2me", 
+	DereplicationServlet.parseGraph(request, "ch2_methyl", "compound_diatomic AS ch2me", 
 			"ch2me.compound_id = compound.compound_id", 
 			"ch2me.atom1_h = 3 AND ch2me.atom1_element = 'C' AND ch2me.atom2_h=2 AND ch2me.atom2_element = 'C'", 
 			"COUNT(DISTINCT ch2me.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "ch_methyl", "compound_diatomic as chme", 
+	DereplicationServlet.parseGraph(request, "ch_methyl", "compound_diatomic AS chme", 
 			"chme.compound_id = compound.compound_id", 
 			"chme.atom1_h = 3 AND chme.atom1_element = 'C' AND chme.atom2_h=1 AND chme.atom2_element = 'C'", 
 			"COUNT(DISTINCT chme.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "c_methyl", "compound_diatomic as cme", 
+	DereplicationServlet.parseGraph(request, "c_methyl", "compound_diatomic AS cme", 
 			"cme.compound_id = compound.compound_id", 
 			"cme.atom1_h = 3 AND cme.atom1_element = 'C' AND cme.atom2_h=0 AND cme.atom2_element = 'C'", 
 			"COUNT(DISTINCT cme.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "ome", "compound_diatomic as ome", 
+	DereplicationServlet.parseGraph(request, "ome", "compound_diatomic AS ome", 
 			"ome.compound_id = compound.compound_id", 
 			"ome.atom1_h = 3 AND ome.atom1_element = 'C' AND ome.atom2_element = 'O'", 
 			"COUNT(DISTINCT ome.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "nme", "compound_diatomic as nme", 
+	DereplicationServlet.parseGraph(request, "nme", "compound_diatomic AS nme", 
 			"nme.compound_id = compound.compound_id", 
 			"nme.atom1_h = 3 AND nme.atom1_element = 'C' AND nme.atom2_element = 'N'", 
 			"COUNT(DISTINCT nme.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "exo_me", "compound_diatomic as exoch2", 
+	DereplicationServlet.parseGraph(request, "exo_me", "compound_diatomic AS exoch2", 
 			"exoch2.compound_id = compound.compound_id", 
 			"exoch2.atom1_h = 2 AND exoch2.atom1_element = 'C' AND exoch2.atom2_element = 'C' AND exoch2.bond_order = 2 AND exoch2.atom2_h = 0", 
 			"COUNT(DISTINCT exoch2.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "ene_disub", "compound_diatomic as ene_disub", 
+	DereplicationServlet.parseGraph(request, "ene_disub", "compound_diatomic AS ene_disub", 
 			"ene_disub.compound_id = compound.compound_id", 
 			"ene_disub.atom1_h = 1 AND ene_disub.atom1_element = 'C' AND ene_disub.atom2_element = 'C' AND ene_disub.bond_order = 2 AND ene_disub.atom2_h = 1", 
 			"COUNT(DISTINCT ene_disub.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "exo_vinyl", "compound_diatomic as vinyl", 
+	DereplicationServlet.parseGraph(request, "exo_vinyl", "compound_diatomic AS vinyl", 
 			"vinyl.compound_id = compound.compound_id", 
 			"vinyl.atom1_h = 2 AND vinyl.atom1_element = 'C' AND vinyl.atom2_element = 'C' AND vinyl.bond_order = 2 AND vinyl.atom2_h = 1", 
 			"COUNT(DISTINCT vinyl.atom1_number)");
 
-	DereplicationServlet.parseGraph(request, "aldehyde", "compound_diatomic as al", 
+	DereplicationServlet.parseGraph(request, "aldehyde", "compound_diatomic AS al", 
 			"al.compound_id = compound.compound_id", 
 			"al.atom1_h = 1 AND al.atom1_element = 'C' AND al.atom2_element = 'O' AND al.bond_order = 2", 
 			"COUNT(DISTINCT al.atom1_number)");
 	
-	DereplicationServlet.parseGraph(request, "amide", "compound_triatomic as amide", 
+	DereplicationServlet.parseGraph(request, "amide", "compound_triatomic AS amide", 
 			"amide.compound_id = compound.compound_id", 
 			"amide.atom1_h = 3 AND amide.atom1_element = 'C' AND amide.atom2_element = 'N' and amide.atom3_element = 'O' AND bond2_order = 2",
 			"COUNT(DISTINCT amide.atom1_number)");
 
-	DereplicationServlet.parseGraph(request, "acetyl", "compound_triatomic as oac", 
+	DereplicationServlet.parseGraph(request, "acetyl", "compound_triatomic AS oac", 
 			"oac.compound_id = compound.compound_id", 
 			"oac.atom1_h = 3 AND oac.atom1_element = 'C' AND oac.atom2_element = 'C' and oac.atom3_element = 'O' AND bond2_order = 2",
 			"COUNT(DISTINCT oac.atom1_number)");
