@@ -1,4 +1,4 @@
-<%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject, edu.uic.orjala.cyanos.sql.SQLMutableUser, edu.uic.orjala.cyanos.AccessException"%>
+<%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject, edu.uic.orjala.cyanos.sql.SQLMutableUser, edu.uic.orjala.cyanos.DataException"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html><head><title>Login Page</title>
@@ -17,7 +17,7 @@ if ( request.getParameter("resetPWD") != null ) {
 		SQLMutableUser.resetPassword(request.getParameter("urlbase"), request.getParameter("username"), request.getParameter("email"));
 		displayForm = false;
 %><p align='center'>Password reset information sent via email to <%= request.getParameter("email")%>.</p><%
-	} catch (AccessException e) {
+	} catch (DataException e) {
 %><p align='center'><font color='red'>ERROR:</font> <%= e.getLocalizedMessage() %></p><% 
 	}
 } else if ( request.getParameter("username") != null && request.getParameter("token") != null ) { 
@@ -29,7 +29,7 @@ if ( request.getParameter("resetPWD") != null ) {
 				SQLMutableUser.finishReset(request.getParameter("username"), request.getParameter("token"), pwd1);
 				displayForm = false;
 %><p align='center' style='color: green'>Password changed</p><%		
-			} catch (AccessException e) {
+			} catch (DataException e) {
 %><p align='center'><font color='red'>ERROR:</font> <%= e.getLocalizedMessage() %></p><% 				
 			}
 		} else {
