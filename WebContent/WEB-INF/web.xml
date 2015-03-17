@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
-	version="3.0">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name>Cyanos Database</display-name>
   <description>Cyanos Database servlets.</description>
   <listener>
-  	<listener-class>edu.uic.orjala.cyanos.web.listener.CyanosRequestListener</listener-class></listener>
+    <listener-class>edu.uic.orjala.cyanos.web.listener.CyanosRequestListener</listener-class>
+  </listener>
   <listener>
     <listener-class>edu.uic.orjala.cyanos.web.listener.AppConfigListener</listener-class>
   </listener>
@@ -430,7 +427,7 @@
       <url-pattern>/compound/*</url-pattern>
       <url-pattern>/dereplication/*</url-pattern>
       <url-pattern>/dereplication.jsp</url-pattern>
-      </web-resource-collection>
+    </web-resource-collection>
     <auth-constraint>
       <role-name>sample</role-name>
     </auth-constraint>
