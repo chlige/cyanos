@@ -440,6 +440,21 @@ public abstract class SQLObject extends CyanosObject implements BasicObject {
 		return someFiles;
 	}
 
+	protected ExternalFile getDataFile(String table, String id, String path) throws DataException {
+		SQLExternalFile someFiles = new SQLExternalFile(this.myData, null);
+		if ( this.isAllowedException(Role.READ) ) {
+			try {
+				PreparedStatement aPsth = this.myData.prepareStatement(FIND_DATA_SQL);
+				aPsth.setString(1, id);
+				aPsth.setString(2, table);
+				aPsth.setString(3, path);
+				someFiles.loadUsingPreparedStatement(aPsth);
+			} catch (SQLException e) {
+				throw new DataException(e);
+			}
+		}
+		return someFiles;
+	}
 	
 	protected void setDataFile(String table, String id, String dataType, ExternalFile aFile) throws DataException {
 		this.setDataFile(table, id, dataType, aFile.getFilePath(), aFile.getDescription(), null);

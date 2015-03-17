@@ -826,4 +826,14 @@ public class SQLAssay extends SQLBoxObject implements Assay {
 		return this.myData.getInt(SIG_FIGS_COLUMN);
 	}
 
+	@Override
+	public boolean hasDataFile(String path) throws DataException {
+		ExternalFile file = this.getDataFile(DATA_FILE_TABLE, this.myID, path);
+		return ( file != null && file.first());
+	}
+	
+	@Override
+	public ExternalFile getDataFile(String path) throws DataException {
+		return this.getDataFile(DATA_FILE_CLASS, this.myID, path);
+	}
 }

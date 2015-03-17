@@ -801,4 +801,14 @@ public class SQLStrain extends SQLObject implements Strain, DataFileObject {
 		this.unsetDataFile(DATA_FILE_CLASS, this.myID, path);
 	}
 
+	@Override
+	public boolean hasDataFile(String path) throws DataException {
+		ExternalFile file = this.getDataFile(DATA_FILE_CLASS, this.myID, path);
+		return ( file != null && file.first());
+	}
+	
+	@Override
+	public ExternalFile getDataFile(String path) throws DataException {
+		return this.getDataFile(DATA_FILE_CLASS, this.myID, path);
+	}
 }

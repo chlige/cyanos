@@ -26,4 +26,8 @@ public interface DataFileObject extends BasicObject {
 	void unlinkDataFile(ExternalFile aFile) throws DataException;
 
 	void unlinkDataFile(String path) throws DataException;
+	
+	boolean hasDataFile(String path) throws DataException;
+
+	ExternalFile getDataFile(String path) throws DataException;
 }
