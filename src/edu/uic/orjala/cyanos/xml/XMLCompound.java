@@ -6,7 +6,6 @@ package edu.uic.orjala.cyanos.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.sql.Savepoint;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.ListIterator;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -909,6 +907,18 @@ public class XMLCompound extends DefaultHandler implements Compound  {
 	public void endDocument() throws SAXException {
 		this.currentCompound = null;
 		this.compoundIter = this.compoudList.listIterator();
+	}
+
+	@Override
+	public boolean hasDataFile(String path) throws DataException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public ExternalFile getDataFile(String path) throws DataException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	
