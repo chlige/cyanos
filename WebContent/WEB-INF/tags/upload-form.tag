@@ -9,6 +9,7 @@
 <%@ attribute name="jspform" required="true" %>
 <%@ attribute name="templateType" required="false" %>
 <%
+	String contextPath = request.getContextPath();
 	if ( request.getParameter("clearUpload") != null) {
 		UploadServlet.clearSession(session);
 	} else if (request.getParameter("clearResults") != null) {
@@ -24,7 +25,7 @@
 --%>
 <%	if (request.getParameter(UploadServlet.SHOW_RESULTS) != null) {
 			if (job.resultSheet() != null) {
-				out.println("<p align='center'><a href='upload/results'>Export Results</a></p>");
+				out.println(String.format("<p align='center'><a href='%s/upload/results'>Export Results</a></p>", contextPath));
 			}
 %><form method="post">
 <p align="center"><button type="submit" name="clearUpload">Clear Uploaded Data</button>
