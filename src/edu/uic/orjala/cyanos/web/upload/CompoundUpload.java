@@ -262,7 +262,8 @@ public class CompoundUpload extends Job {
 					this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 					e.printStackTrace();
 				}
-			}		
+			}
+			this.progress = 1.0f;
 		} catch (Exception e) {
 			this.messages.append("<P ALIGN='CENTER'><B><FONT COLOR='red'>ERROR:</FONT>" + e.getMessage() + "</B></P>");
 			e.printStackTrace();

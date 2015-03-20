@@ -26,7 +26,7 @@ function jobStatus(jobID) {
   	}
   	
 	if (xmlHttp != null) {
- 		xmlHttp.open("GET", "upload/status?jobid=" + jobID, false);
+ 		xmlHttp.open("GET", "<%= request.getContextPath() %>/status?jobid=" + jobID, false);
  		xmlHttp.send(null);
  		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
  			var jobDIV = document.getElementById('job-' + jobID);
@@ -131,8 +131,11 @@ function displayResults(jobID) {
 		FileUpload upload = ((MultiPartRequest)mpReq).getUpload("sdfile", 0);
 		job.startJob(request, upload.getStream());
 		UploadServlet.addJob(session, job); 
-%><div id="job-<%= job.getID()  %>">
-<div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div>
+%>
+<div id="job-<%= job.getID() %>" align="center">
+<div class="progress" style="width: 200px"><div class="progressText"></div><div id="progressBar"></div></div>
+<form method="get" action="<%= request.getContextPath() %>/jobs.jsp">
+<button id="resultButton" name="jobid" value="<%= job.getID() %>" disabled>Show Results</button></form>
 <script>jobStatus("<%= job.getID() %>");</script>
 </div>
 <% } } else { 

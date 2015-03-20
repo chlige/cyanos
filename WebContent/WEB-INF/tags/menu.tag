@@ -82,6 +82,7 @@
 <li><a href="<%= contextPath %>/sample/move-upload.jsp">Move Samples (upload)</a></li>
 <li class="break"><a href='<%= contextPath %>/compound'>Search Compounds</a></li>
 <li><a href='<%= contextPath %>/compound?form=add'>Add Compound</a></li>
+<li><a href='<%= contextPath %>/compound/upload.jsp'>Upload Compounds</a></li>
 <li><a href='<%= contextPath %>/dereplication.jsp'>Dereplication</a></li>
 </ul></li>
 <% } 
