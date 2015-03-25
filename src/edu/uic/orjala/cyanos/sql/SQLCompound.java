@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +152,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	public final static String MONOISOTOPIC_MASS_COLUMN = "isotopic_wt";
 	public final static String NOTES_COLUMN = "notes";
 	public final static String PROJECT_COLUMN = "project_id";
+	public final static String DATE_COLUMN = "date_created";
 	
 	public final static String MDL_COLUMN = "mdl_data";
 	public final static String SMILES_COLUMN = "smiles";
@@ -171,7 +173,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	private final static String[] ALL_COLUMNS = { ID_COLUMN, NAME_COLUMN, 
 		FORMULA_COLUMN, AVERAGE_MASS_COLUMN, MONOISOTOPIC_MASS_COLUMN,
 		SMILES_COLUMN, INCHI_STRING_COLUMN, INCHI_KEY_COLUMN, MDL_COLUMN,
-		NOTES_COLUMN, PROJECT_COLUMN, REMOTE_HOST_COLUMN
+		NOTES_COLUMN, PROJECT_COLUMN, REMOTE_HOST_COLUMN, DATE_COLUMN,
 	//	REMOVED_DATE_COLUMN, REMOVED_USER_COLUMN, 
 	//	NOTEBOOK_COLUMN, NOTEBOOK_PAGE_COLUMN
 		};	
@@ -1192,5 +1194,10 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	@Override
 	public ExternalFile getDataFile(String path) throws DataException {
 		return this.getDataFile(DATA_FILE_CLASS, this.myID, path);
+	}
+
+	@Override
+	public Date getDate() throws DataException {
+		return this.myData.getTimestamp(DATE_COLUMN);
 	}
 }
