@@ -79,6 +79,9 @@
             mail.smtp.host="localhost"
             mail.smtp.from="CYANOS DATABASE &lt;do-not-reply@cyanos&gt;"/>
 
+<!--  Set value of filePath to absolute path on file system to store files linked in CYANOS database -->            
+<Environment name="filePath" override="false" type="java.lang.String" value="/tmp/"/>
+
 <!-- DO NOT MODIFY OR DELETE THE FOLLOWING RESOURCE DEFINITION -->
 <Realm className="org.apache.catalina.realm.DataSourceRealm" 
     	dataSourceName="jdbc/CyanosDB"
