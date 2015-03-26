@@ -41,8 +41,13 @@ if ( status != null && status.equals(Strain.FIELD_HARVEST_STATUS) ) { %>
 </jsp:include>
 <% } else { %>
 <jsp:include page="/includes/loadableDiv.jsp">
+<jsp:param value="<%= StrainServlet.STOCK_DIV_ID %>" name="loadingDivID"/>
+<jsp:param value="Stock Cultures" name="loadingDivTitle"/>
+</jsp:include>
+
+<jsp:include page="/includes/loadableDiv.jsp">
 <jsp:param value="<%= StrainServlet.INOC_DIV_ID %>" name="loadingDivID"/>
-<jsp:param value="Inoculations" name="loadingDivTitle"/>
+<jsp:param value="Large Scale Cultures" name="loadingDivTitle"/>
 </jsp:include>
 
 <jsp:include page="/includes/loadableDiv.jsp">
