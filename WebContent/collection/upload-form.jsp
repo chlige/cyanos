@@ -10,7 +10,7 @@
 	edu.uic.orjala.cyanos.Project,
 	java.util.Map, java.util.List" %>
 <p align="center">
-<input type="checkbox" name="forceUpload" value="true" <%= ( request.getParameter(CollectionUpload.FORCE_UPLOAD) != null ? "checked" : "" ) %>> Force upload.<br> i.e. Overwrite existing collection information.
+<input type="checkbox" name="forceUpload" value="true" <%= ( request.getParameter(CollectionUpload.FORCE_UPLOAD) != null ? "checked" : "" ) %>> Force upload. (i.e. Overwrite existing collection information.)
 </p>
 <table class="uploadForm">
 <tr><td>Collection ID:</td><td><%= UploadServlet.genColumnSelect(request, CollectionUpload.COLLECTION_ID, null) %></td></tr>
