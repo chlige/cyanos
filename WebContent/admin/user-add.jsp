@@ -18,14 +18,63 @@
 <cyanos:menu/>
 <h1>User Administration</h1>
 <hr width="80%">
+<div class="content">
 <% User thisUser = AdminServlet.getUser(request);
+Project projectList = SQLProject.projects(AdminServlet.getSQLData(request), SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT);
+
 if ( thisUser.isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.CREATE) ) {
 
 	if ( request.getParameter("addUser") != null ) {
-
+		MutableUser user = SQLMutableUser.createUser(AdminServlet.getSQLData(request), request.getParameter("userid"));
+		user.setUserEmail(request.getParameter("email"));
+		user.setUserName(request.getParameter("fullname"));
+%><p>Creating user: <%= user.getUserID() %><br><%
+		int[] perms = {Role.READ, Role.WRITE, Role.CREATE, Role.DELETE};
+		for ( String role: User.ROLES ) {
+			String inputName = "globalrole_".concat(role);
+			String[] newPerms = request.getParameterValues(inputName);
+			if ( newPerms != null && newPerms.length > 0 ) {
+				int newBits = 0;
+				for ( String bit: newPerms ) {
+					newBits = newBits + Integer.parseInt(bit);
+				}
+				user.grantGlobalPermission(role, newBits);
+			}
+			inputName = "nullrole_".concat(role);
+			newPerms = request.getParameterValues(inputName);
+			if ( newPerms != null && newPerms.length > 0 ) {
+				int newBits = 0;
+				for ( String bit: newPerms ) {
+					newBits = newBits + Integer.parseInt(bit);
+				}
+				user.grantPermissionForProject(User.NULL_PROJECT, role, newBits);
+			}
+			projectList.beforeFirst();
+			while ( projectList.next() ) {
+				inputName = "projectrole_".concat(role).concat("_").concat(projectList.getID());
+				newPerms = request.getParameterValues(inputName);
+				if ( newPerms != null && newPerms.length > 0 ) {
+					int newBits = 0;
+					for ( String bit: newPerms ) {
+						newBits = newBits + Integer.parseInt(bit);
+					}
+					user.grantPermissionForProject(projectList.getID(), role, newBits);
+				}
+			}
+		}
+%>Roles:<br>
+GLOBAL: <% for (  Role role: user.globalRoles() ) { %>
+<%= role.roleName() %>(<%= role.permissionString() %>) <% } %><br>
+NULL: <% for ( Role role: user.rolesForProject(User.NULL_PROJECT) ) { %>
+<%= role.roleName() %>(<%= role.permissionString() %>) <% } %><br>
+<% projectList.beforeFirst();
+while ( projectList.next() ) { 
+%><%= projectList.getID() %>: <% for ( Role role: user.rolesForProject(projectList.getID()) ) { %>
+<%= role.roleName() %>(<%= role.permissionString() %>) <% } %><br>
+<% } 
+		SQLMutableUser.newPassword(request, user.getUserID(), user.getUserEmail());
+%><p>An email has been sent to the user (<%= user.getUserEmail()  %>) notifying of the account creation and informing them of how to create their password</p><%
 	} else {
-	
-	Project projectList = SQLProject.projects(AdminServlet.getSQLData(request), SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT);
 %><form method="post">
 <table class="species">
 <tr><td>User ID:</td><td><input type="text" name="userid"></td></tr>
@@ -66,5 +115,6 @@ for ( int perm : perms ) { %>
 <% } } else { %>
 <h2>ACCESS DENIED</h2>
 <% } %>
+</div>
 </body>
 </html>

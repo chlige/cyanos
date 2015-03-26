@@ -50,7 +50,7 @@
 <% if ( request.getRemoteUser() != null )  { 
 	User aUser = MainServlet.getUser(request);  %>
 <p><b>Welcome, <%= aUser.getUserName() %></b></p>
-<p><a href="updateUser.jsp">Change password</a><br>
+<p><a href="updateUser.jsp">Update user account</a><br>
 <a href="logout.jsp">Logout</a></p>
 <% } else { %>
 <p><b>Welcome, Guest User</b></p>
@@ -111,6 +111,11 @@ Click on an object class to manage the data</p>
 <area shape="rect" title="Manage Isolation Data" coords="0,34,71,84" href="isolation.jsp">
 </map>
 </p>
+<p><b>Original publication</b><br>
+George E. Chlipala, Aleksej Krunic, Shunyan Mo, Megan Sturdy, and Jimmy Orjala. (2011) "CYANOS: A Data Management System for Natural Product Drug Discovery Efforts Using Cultured Microorganisms". 
+<i>J. Chem. Inf. Model.</i> 51(1): 171-180. 
+<a href="http://pubs.acs.org/doi/abs/10.1021/ci100280a">ACS Link</a> | 
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/21162567">Pubmed</a></p>
 </div>
 </div>
 </div>

@@ -76,7 +76,7 @@ if ( thisUser.isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.WRITE) ) {
 	String inputName = "nullrole_".concat(role);
 	if ( update ) {
 		String[] newPerms = request.getParameterValues(inputName);
-		if ( newPerms.length > 0 ) {
+		if (  newPerms != null && newPerms.length > 0 ) {
 			int newBits = 0;
 			for ( String bit: newPerms ) {
 				newBits = newBits + Integer.parseInt(bit);

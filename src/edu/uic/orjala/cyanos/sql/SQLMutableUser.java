@@ -29,6 +29,7 @@ import edu.uic.orjala.cyanos.MutableUser;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.web.listener.AppConfigListener;
+import edu.uic.orjala.cyanos.web.servlet.AdminServlet;
 
 /**
  * @author George Chlipala
@@ -404,7 +405,109 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 
 	private final static String SQL_CHECK_EMAIL = "SELECT fullname FROM users WHERE username=? AND email=?";
 	
-	public static void resetPassword(String urlBase, String userID, String email) throws SQLException, NamingException, MessagingException, DataException {
+	private static void resetPassword(HttpServletRequest request, String userID, String email, String message) throws SQLException, DataException, MessagingException, NamingException {
+		String scheme = request.getScheme();
+		StringBuffer url = new StringBuffer(scheme);
+		url.append("://");
+		url.append(request.getServerName());
+		int port = request.getServerPort();
+		if ( (scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)  ) {
+			url.append(":");
+			url.append(port);
+		}
+		url.append(request.getContextPath());
+		url.append("/reset.jsp");
+		
+		PreparedStatement psth = null;
+		Connection dbc = AppConfigListener.getDBConnection();
+		Session mailSession = AppConfigListener.getMailSession();
+		
+		User user = null;
+		
+		if ( request.getRemoteUser() != null ) {
+			user = AdminServlet.getUser(request);
+		}
+		
+		
+		
+		psth = dbc.prepareStatement(SQL_CHECK_EMAIL);
+		psth.setString(1, userID);
+		psth.setString(2, email);
+
+		ResultSet results = psth.executeQuery();
+		if ( ! results.first() ) {
+			throw new DataException("Email does not match user account specified.");
+		}
+		String fullname = results.getString(1);
+		results.close();
+		psth.close();
+		
+		Message aMsg = new MimeMessage(mailSession);
+		InternetAddress anEmail = new InternetAddress(email);
+
+		try {
+			anEmail.setPersonal(fullname);
+		} catch (UnsupportedEncodingException e) {
+			// NO BIG DEAL.
+		}
+		
+		if ( user != null ) {
+			try {
+				InternetAddress from = new InternetAddress(user.getUserEmail(), user.getUserName());
+				aMsg.setFrom(from);
+			} catch (UnsupportedEncodingException e) {
+				// NO BIG DEAL.
+			}
+		}
+		
+		aMsg.setRecipient(Message.RecipientType.TO, anEmail);
+		aMsg.setSubject("CYANOS Password Reset");
+
+		psth = dbc.prepareStatement("UPDATE users SET password=MD5(?) WHERE username=?");
+		Random random = new Random();
+		int len = random.nextInt(4) + 6;
+		char[] pwd = new char[len];
+		for ( int i = 0; i < pwd.length; i++ ) {
+			switch ( random.nextInt(3) ) {
+			case 0: pwd[i] = (char)('a' + random.nextInt(27)); break;
+			case 1: pwd[i] = (char)('A' + random.nextInt(27)); break;
+			case 2: pwd[i] = (char)('0' + random.nextInt(10)); break;
+			}
+		}
+		String randPwd = new String(pwd);
+		psth.setString(1, randPwd);
+		psth.setString(2, userID);
+		if ( psth.executeUpdate() > 0 ) {
+			StringBuffer content = new StringBuffer(fullname);
+			content.append(" -\n\n");
+			content.append(message);
+			content.append("\nAccess the reset password page and use the following link to change your password.\n");
+			content.append(url.toString());
+			content.append("?username=");
+			content.append(userID);
+			content.append("&token=");
+			content.append(randPwd);
+			content.append("\n\n.  Do not reply to this message.");
+			aMsg.setContent(content.toString(), "text/plain");
+			Transport.send(aMsg);
+		} else {
+			psth.close();
+			dbc.close();
+			throw new DataException("Could not reset password.");
+		}
+		psth.close();
+		dbc.close();
+	}
+	
+	public static void newPassword(HttpServletRequest request, String userID, String email) throws SQLException, NamingException, MessagingException, DataException {
+		resetPassword(request, userID, email, "An account has been created for you to access the CYANOS database. You will need to set a password for you account.");
+	}
+	
+	public static void resetPassword(HttpServletRequest request, String userID, String email) throws SQLException, NamingException, MessagingException, DataException {
+		resetPassword(request, userID, email, "A password reset has been requested for your user account.");
+	}
+
+	private static void resetPassword(String urlBase, String userID, String email, String message) throws SQLException, NamingException, MessagingException, DataException {
 		PreparedStatement psth = null;
 		Connection dbc = AppConfigListener.getDBConnection();
 		Session mailSession = AppConfigListener.getMailSession();
@@ -448,7 +551,9 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		psth.setString(2, userID);
 		if ( psth.executeUpdate() > 0 ) {
 			StringBuffer content = new StringBuffer(fullname);
-			content.append(" -\n\nA password reset has been requested for your user account.\n\tAccess the reset password page and use the following link to change your password.\n");
+			content.append(" -\n\n");
+			content.append(message);
+			content.append("\nAccess the reset password page and use the following link to change your password.\n");
 			content.append(urlBase);
 			content.append("?username=");
 			content.append(userID);
@@ -466,6 +571,7 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		dbc.close();
 	}
 
+	
 	private final static String SQL_CHECK_TOKEN = "SELECT username FROM users WHERE username=? AND password=MD5(?)";
 
 	public static void finishReset(String userID, String token, String password) throws SQLException, DataException {

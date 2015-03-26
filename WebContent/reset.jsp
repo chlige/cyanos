@@ -14,7 +14,7 @@
 <% boolean displayForm = true;
 if ( request.getParameter("resetPWD") != null ) { 
 	try {
-		SQLMutableUser.resetPassword(request.getParameter("urlbase"), request.getParameter("username"), request.getParameter("email"));
+		SQLMutableUser.resetPassword(request, request.getParameter("username"), request.getParameter("email"));
 		displayForm = false;
 %><p align='center'>Password reset information sent via email to <%= request.getParameter("email")%>.</p><%
 	} catch (DataException e) {
@@ -28,7 +28,8 @@ if ( request.getParameter("resetPWD") != null ) {
 			try {
 				SQLMutableUser.finishReset(request.getParameter("username"), request.getParameter("token"), pwd1);
 				displayForm = false;
-%><p align='center' style='color: green'>Password changed</p><%		
+%><p align='center' style='color: green'>Password changed</p>
+<p align='center'><a href="<%= request.getContextPath() %>/login.jsp">Click here</a> to login</p><%		
 			} catch (DataException e) {
 %><p align='center'><font color='red'>ERROR:</font> <%= e.getLocalizedMessage() %></p><% 				
 			}
@@ -39,9 +40,10 @@ if ( request.getParameter("resetPWD") != null ) {
 	
 	if ( displayForm ) { 
 %><form method='post'>
-<input type="hidden" name="username" value="<%= request.getParameter("username") %>">
+<label for="username">Username: <%= request.getParameter("username") %></label>
+<input type="hidden" name="username" value="<%= request.getParameter("username") %>"><br/>
 <label for="token">Update Token:</label>
-<input type="text" name="token" value="<%= request.getParameter("token") %>">
+<input type="text" name="token" value="<%= request.getParameter("token") %>"><br/>
 <label for="pwd1">New Password:</label>
 <input type='password' name='pwd1'><br/>
 <label for="pwd2">Confirm Password:</label>
@@ -52,14 +54,6 @@ if ( request.getParameter("resetPWD") != null ) {
 }
 if ( displayForm ) { %>
 <form method='post' target='_top'>
-<script>
-	var url = location.protocol + '//' + location.host + location.pathname;
-	var elem = document.createElement("input");
-	elem.setAttribute("type","hidden");
-	elem.setAttribute("name", "urlbase");
-	elem.setAttribute("value", url);
-	document.write(elem.outerHTML);
-</script>
 <label for="username">Username:</label>
 <input type='text' name='username' autocorrect="off" autocapitalize="none"><br/>
 <label for="email">Email Address:</label>

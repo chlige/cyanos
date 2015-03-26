@@ -13,7 +13,7 @@
 </head>
 <body>
 <cyanos:menu/>
-<h1>Update Profile</h1>
+<h1>Update User Account</h1>
 <hr width="80%">
 <% 	User user = AdminServlet.getUser(request); 
 	Project projectList = SQLProject.projects(AdminServlet.getSQLData(request), SQLProject.ID_COLUMN, SQLProject.ASCENDING_SORT); %>
