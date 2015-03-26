@@ -32,6 +32,22 @@
 <td>Optional<br>(Ignored for source materials)</td><td>Optional<br>(Ignored for source materials)</td></tr>
 </table>
 <p align="center"><b>NOTE:</b> A spreadsheet can contain multiple separations.  Separate each with a row where the fraction number is "NEW".</p>
+<h3 style="text-align:center">Example Worksheet</h3>
+<p style="margin-left:10%; margin-right:10%">The following example shows a worksheet that details two separations, one from material #1340 and one from material #893</p>
+<table align="center" class="upload">
+<tr style="text-align:center"><th>Material ID</th><th>Fraction Number</th><th>Amount</th><th>Label</th><th>Notes</th></tr>
+<tr><td>1340</td><td>S</td><td>250.3 mg</td><td></td><td></td></tr>
+<tr><td></td><td>1</td><td>12.5 mg</td><td>Test01 FR1</td><td></td></tr>
+<tr><td></td><td>2</td><td>34.3 mg</td><td>Test01 FR2</td><td></td></tr>
+<tr><td></td><td>3</td><td>48.0 mg</td><td>Test01 FR3</td><td></td></tr>
+<tr><td></td><td>4</td><td>14.8 mg</td><td>Test01 FR4</td><td></td></tr>
+<tr><td></td><td>NEW</td><td></td><td></td><td></td></tr>
+<tr><td>893</td><td>S</td><td>374.9 mg</td><td></td><td></td></tr>
+<tr><td></td><td>1</td><td>64.5 mg</td><td>Test02 FR1</td><td></td></tr>
+<tr><td></td><td>2</td><td>38.8 mg</td><td>Test02 FR2</td><td></td></tr>
+<tr><td></td><td>3</td><td>84.7 mg</td><td>Test02 FR3</td><td></td></tr>
+<tr><td></td><td>4</td><td>9.0 mg</td><td>Test02 FR4</td><td></td></tr>
+</table>
 </cyanos:upload-form>
 </div>
 </body>
