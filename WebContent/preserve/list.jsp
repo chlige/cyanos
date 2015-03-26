@@ -5,7 +5,6 @@
 <%	Object attr = request.getAttribute("cryoList");
 if ( attr != null && attr instanceof Cryo ) {
 	Cryo queryResults = (Cryo) attr;
-	queryResults.beforeFirst();
 	SimpleDateFormat dateFormat = CryoServlet.DATE_FORMAT;
 %><table  class="dashboard">
 <tr><th class="header">Strain (Preservation #)</th><th class="header" width='200'>Date</th><th class="header" width='100'>Location</th><th class="header" width='100'>Remove Date</th><th class="header" width="100">Notes</th></tr>
