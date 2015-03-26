@@ -62,15 +62,7 @@ public interface Strain extends DataFileObject, RemoteObject {
 	 * @throws DataException
 	 */
 	String getName() throws DataException;
-	
-	/**
-	 * Get the date the strain was added.
-	 * 
-	 * @return add date as a {@link java.util.Date}
-	 * @throws DataException
-	 */
-	Date getDate() throws DataException;
-	
+		
 	/**
 	 * Get the date the strain was added.
 	 * 

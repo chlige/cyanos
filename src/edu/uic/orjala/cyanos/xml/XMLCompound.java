@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.ListIterator;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -917,6 +918,12 @@ public class XMLCompound extends DefaultHandler implements Compound  {
 
 	@Override
 	public ExternalFile getDataFile(String path) throws DataException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Date getDate() throws DataException {
 		// TODO Auto-generated method stub
 		return null;
 	}

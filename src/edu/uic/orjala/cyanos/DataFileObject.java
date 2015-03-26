@@ -3,6 +3,8 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.util.Date;
+
 /**
  * @author George Chlipala
  *
@@ -10,6 +12,14 @@ package edu.uic.orjala.cyanos;
 public interface DataFileObject extends BasicObject {
 
 	String getID();
+	
+	/**
+	 * Get the date the object was added.
+	 * 
+	 * @return add date as a {@link java.util.Date}
+	 * @throws DataException
+	 */
+	Date getDate() throws DataException;
 	
 	String getDataFileClass();
 	

@@ -30,26 +30,37 @@ public class AppConfigListener implements ServletContextListener {
 	private static AppConfigSQL config = null;
 	private static DataSource dbh = null;
 	private static int idtype = SQLData.ID_TYPE_SERIAL;
+	private static String filePath = null;
+	private static String instanceName = null;
 	
 	/**
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
-    public void contextInitialized(ServletContextEvent arg0) {
-        ServletContext context = arg0.getServletContext();
+    public void contextInitialized(ServletContextEvent ev) {
+        ServletContext context = ev.getServletContext();
 		if ( context.getAttribute(ServletObject.APP_CONFIG_ATTR) == null ) {
 			try {
 				Context initCtx = new InitialContext();
+				Context envCtx = (Context) initCtx.lookup("java:comp/env");
+				
+				if ( filePath == null )
+					filePath = (String) envCtx.lookup("filePath");
+				
+				if ( instanceName == null ) 
+					instanceName = (String) envCtx.lookup("name");
+				
 				if ( dbh == null ) {
 					dbh  = (DataSource) initCtx.lookup("java:comp/env/jdbc/" + AppConfig.CYANOS_DB_NAME);
 					idtype = AppConfigSQL.getSchemaIDType(dbh);
 				}
 
 				if ( config == null ) {
-					context.log("Initializing CYANOS configuration.");
+					context.log(String.format("Initializing CYANOS configuration for %s.", instanceName));
 					config = new AppConfigSQL();
 				}
 								
 				context.setAttribute(ServletObject.APP_CONFIG_ATTR, config);
+				
 //				context.setAttribute(UploadServlet.CUSTOM_UPLOAD_MODULES, uploadModules);
 //				List<String> addOns = config.classesForUploadModule();
 //				this.addModules(addOns, context);
@@ -84,8 +95,8 @@ public class AppConfigListener implements ServletContextListener {
 	/**
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
-    public void contextDestroyed(ServletContextEvent arg0) {
-        ServletContext context = arg0.getServletContext();    
+    public void contextDestroyed(ServletContextEvent ev) {
+        ServletContext context = ev.getServletContext();    
         if ( config != null && config.isUnsaved() ) {
         	try {
 				config.writeConfig();
@@ -113,6 +124,10 @@ public class AppConfigListener implements ServletContextListener {
 	
 	public static int getIDType() {
 		return idtype;
+	}
+	
+	public static String getFilePath() {
+		return filePath;
 	}
 	
 	public static Connection getDBConnection() throws SQLException {
