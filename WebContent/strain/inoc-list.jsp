@@ -13,7 +13,7 @@
 <p align="center"><button name="form" value="add">Add Inoculation(s)</button></p>
 <%		if ( queryResults != null && queryResults.first() ) { 
 	queryResults.beforeFirst(); SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter");  %>
-<p align="center"><input type="checkbox" name="allInocs" <%= request.getParameter("allInocs") != null ? "checked" : ""%> onClick="updateForm(this,'<%= StrainServlet.INOC_DIV_ID %>')"> Show dead & harvested inoculations.</p>
+<p align="center"><input type="checkbox" name="allInocs" <%= request.getParameter("allInocs") != null ? "checked" : ""%> onClick="updateForm(this,'<%= request.getParameter("div") %>')"> Show dead & harvested inoculations.</p>
 <table  class="dashboard">
 <tr><th class="header" width='100'>Inoculation</th><th class="header" width='200'>Date</th><th class="header" width='100'>Media</th><th class="header" width='100'>Volume</th><th class="header" width="100">Notes</th><th class="header" width="50">Fate</th></tr>
 <% while ( queryResults.next() ) { if ( ! queryResults.isAllowed(Role.READ) ) continue; %>

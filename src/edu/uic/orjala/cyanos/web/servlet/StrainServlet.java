@@ -30,6 +30,7 @@ import edu.uic.orjala.cyanos.sql.SQLAssay;
 import edu.uic.orjala.cyanos.sql.SQLAssayData;
 import edu.uic.orjala.cyanos.sql.SQLCollection;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
+import edu.uic.orjala.cyanos.sql.SQLCryo;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLHarvest;
 import edu.uic.orjala.cyanos.sql.SQLInoc;
@@ -53,6 +54,8 @@ public class StrainServlet extends ServletObject {
 
 	public static final String INOC_DIV_TITLE = "Inoculations";
 	public static final String INOC_DIV_ID = "strainInocs";
+	
+	public static final String STOCK_DIV_ID = "strainsStocks";
 
 	public static final String CRYO_DIV_TITLE = "Cryopreservations";
 	public static final String CRYO_DIV_ID = "cryoInfo";
@@ -353,7 +356,7 @@ public class StrainServlet extends ServletObject {
 				if ( this.getUser(req).isAllowed(User.CULTURE_ROLE, User.NULL_PROJECT, Role.CREATE) ) {
 					if ( req.getParameter("updateStrain") != null ) {
 						try {
-							Strain strainObj = SQLStrain.create(this.getSQLData(req), req.getParameter("newID"));
+							Strain strainObj = SQLStrain.create(getSQLData(req), req.getParameter("newID"));
 							strainObj.setName(req.getParameter("sci_name"));
 							strainObj.setDate(req.getParameter("addDate"));
 							req.setAttribute(STRAIN_OBJECT, strainObj);	
@@ -371,11 +374,11 @@ public class StrainServlet extends ServletObject {
 			}
 
 			if ( req.getParameter("id") != null ) {
-				req.setAttribute(STRAIN_OBJECT, SQLStrain.load(this.getSQLData(req), req.getParameter("id")));	
+				req.setAttribute(STRAIN_OBJECT, SQLStrain.load(getSQLData(req), req.getParameter("id")));	
 			} else if ( req.getParameter(FIELD_QUERY) != null ) {
 				req.setAttribute(SEARCHRESULTS_ATTR, getStrains(req));
 			} else if ( req.getParameter("photoList") != null ) {
-				req.setAttribute(STRAIN_OBJECT, SQLStrain.loadWithPhotos(this.getSQLData(req)));
+				req.setAttribute(STRAIN_OBJECT, SQLStrain.loadWithPhotos(getSQLData(req)));
 				this.forwardRequest(req, res, "/strain-photos.jsp");
 				return;
 			}
@@ -405,7 +408,7 @@ public class StrainServlet extends ServletObject {
 				this.livesearchIsolation(req, res);
 			}
 		} else if ( req.getParameter("id") != null ) {
-			Strain thisStrain = SQLStrain.load(this.getSQLData(req), req.getParameter("id"));
+			Strain thisStrain = SQLStrain.load(getSQLData(req), req.getParameter("id"));
 			if ( thisStrain.first() ) {
 				if ( divTag.equals(INFO_FORM_DIV_ID) ) {
 					req.setAttribute(STRAIN_OBJECT, thisStrain);
@@ -413,28 +416,33 @@ public class StrainServlet extends ServletObject {
 				} else if ( divTag.equals(ASSAY_DIV_ID) ) {
 					AssayData data;
 					if ( req.getParameter("target") != null && req.getParameter("target").length() > 0 )
-						data = SQLAssayData.dataForStrainID(this.getSQLData(req), thisStrain.getID(), req.getParameter("target"));
+						data = SQLAssayData.dataForStrainID(getSQLData(req), thisStrain.getID(), req.getParameter("target"));
 					else
-						data = SQLAssayData.dataForStrain(this.getSQLData(req), thisStrain);
+						data = SQLAssayData.dataForStrain(getSQLData(req), thisStrain);
 					req.setAttribute(AssayServlet.SEARCHRESULTS_ATTR, data);
-					req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(this.getSQLData(req)));
+					req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(getSQLData(req)));
 					this.forwardRequest(req, res, "/assay/assay-data-list.jsp");
 				} else if ( divTag.equals(HARVEST_DIV_ID) ) {
-					req.setAttribute(HarvestServlet.SEARCHRESULTS_ATTR, SQLHarvest.harvestsForStrain(this.getSQLData(req), thisStrain));					
+					req.setAttribute(HarvestServlet.SEARCHRESULTS_ATTR, SQLHarvest.harvestsForStrain(getSQLData(req), thisStrain));					
 					this.forwardRequest(req, res, "/harvest/harvest-list.jsp");
 				} else if ( divTag.equals(SEPARATION_DIV_ID) ) {
-					req.setAttribute(SeparationServlet.SEARCHRESULTS_ATTR, SQLSeparation.findForStrain(this.getSQLData(req), thisStrain.getID()));
+					req.setAttribute(SeparationServlet.SEARCHRESULTS_ATTR, SQLSeparation.findForStrain(getSQLData(req), thisStrain.getID()));
 					this.forwardRequest(req, res, "/separation/separation-list.jsp");
 				} else if ( divTag.equals(EXTRACT_LIST_DIV_ID) ) {			
-					req.setAttribute(MaterialServlet.SEARCHRESULTS_ATTR, SQLMaterial.extractsForStrain(this.getSQLData(req), thisStrain.getID()));
+					req.setAttribute(MaterialServlet.SEARCHRESULTS_ATTR, SQLMaterial.extractsForStrain(getSQLData(req), thisStrain.getID()));
 					this.forwardRequest(req, res, "/material/extract-list.jsp");
 				} else if ( divTag.equals(INOC_DIV_ID) ) {
-					req.setAttribute(InocServlet.SEARCHRESULTS_ATTR, ( req.getParameter("allInocs") != null ? thisStrain.getInoculations() :  SQLInoc.viableInocsForStrain(this.getSQLData(req), thisStrain.getID()) ));
+					req.setAttribute(InocServlet.SEARCHRESULTS_ATTR, ( req.getParameter("allInocs") != null ? thisStrain.getInoculations() :  SQLInoc.openInocsForStrain(getSQLData(req), thisStrain.getID()) ));
+					this.forwardRequest(req, res, "/strain/inoc-list.jsp");
+				} else if ( divTag.equals(STOCK_DIV_ID) ) {
+					req.setAttribute(InocServlet.SEARCHRESULTS_ATTR, ( req.getParameter("allInocs") != null ? SQLInoc.allStocksForStrain(getSQLData(req), thisStrain.getID()) :  SQLInoc.currentStocksForStrain(getSQLData(req), thisStrain.getID()) ));
 					this.forwardRequest(req, res, "/strain/inoc-list.jsp");
 				} else if ( divTag.equals(COL_DIV_ID) ) {
 					req.setAttribute(CollectionServlet.SEARCHRESULTS_ATTR, thisStrain.getFieldCollections());
 					this.forwardRequest(req, res, "/collection/collection-list.jsp");
 				} else if ( divTag.equals(CRYO_DIV_ID) ) {
+					req.setAttribute("cryoList", SQLCryo.loadForStrain(getSQLData(req), thisStrain.getID()));
+					this.forwardRequest(req, res, "/strain/preseve-list.jsp");
 					//						CryoForm aForm = new CryoForm(aWrap);
 					//						out.println(aForm.cryoList(thisStrain));
 				} else if ( divTag.equals(PHOTO_DIV_ID) ) {
@@ -453,7 +461,7 @@ public class StrainServlet extends ServletObject {
 				} else if ( divTag.equals(PHOTO_FORM)) {
 					//						out.println(strainForm.photoForm(thisStrain, 3));
 				} else if ( divTag.equals(COMPOUND_DIV_ID) ) {
-					req.setAttribute(CompoundServlet.COMPOUND_RESULTS, SQLCompound.compoundsForStrain(this.getSQLData(req), thisStrain));
+					req.setAttribute(CompoundServlet.COMPOUND_RESULTS, SQLCompound.compoundsForStrain(getSQLData(req), thisStrain));
 					this.forwardRequest(req, res, "/compund/compound-list.jsp");
 				} else if ( divTag.equals(DIV_VALID_GENUS) ) {
 					this.validateGenus(req, res);
@@ -493,9 +501,9 @@ public class StrainServlet extends ServletObject {
 		String[] queries = {queryString, queryString};
 
 		if ( sortString.equals(Taxon.LEVEL_ORDER) ) 
-			return SQLStrain.strainsLikeByTaxa(this.getSQLData(req), columns, queries, sortString, sortDir);
+			return SQLStrain.strainsLikeByTaxa(getSQLData(req), columns, queries, sortString, sortDir);
 		else 
-			return SQLStrain.strainsLike(this.getSQLData(req), columns, queries, sortString, sortDir);
+			return SQLStrain.strainsLike(getSQLData(req), columns, queries, sortString, sortDir);
 	}
 
 	public String getHelpModule() {
@@ -557,14 +565,14 @@ public class StrainServlet extends ServletObject {
 
 		String[] likeColumns = { SQLStrain.ID_COLUMN };
 		String[] likeValues = { lval };
-		Strain strains = SQLStrain.strainsLike(this.getSQLData(req), likeColumns, likeValues, SQLStrain.ID_COLUMN, SQLStrain.ASCENDING_SORT);
+		Strain strains = SQLStrain.strainsLike(getSQLData(req), likeColumns, likeValues, SQLStrain.ID_COLUMN, SQLStrain.ASCENDING_SORT);
 		strains.beforeFirst();
 		while ( strains.next() ) {
 			hasOutput = true;
 			out.println(String.format("<A onClick='setLS(\"%s\",\"%s\",\"%s\")'>%s</A><BR>", searchTag, strains.getID(), divID, strains.getID()));			
 		}
 
-		PreparedStatement psth = this.getSQLData(req).prepareStatement("(SELECT DISTINCT name AS label FROM species WHERE name LIKE ? OR name LIKE ?) " +
+		PreparedStatement psth = getSQLData(req).prepareStatement("(SELECT DISTINCT name AS label FROM species WHERE name LIKE ? OR name LIKE ?) " +
 				"UNION DISTINCT (SELECT DISTINCT genus AS label FROM species WHERE genus LIKE ? OR genus LIKE ?) ORDER BY label ASC");
 		psth.setString(1, lval);
 		psth.setString(2, lvalSpace);
@@ -580,7 +588,7 @@ public class StrainServlet extends ServletObject {
 		}		
 
 		/*
-		Taxon taxa = SQLTaxon.taxaLike(this.getSQLData(req), lval, Taxon.LEVEL_GENUS);
+		Taxon taxa = SQLTaxon.taxaLike(getSQLData(req), lval, Taxon.LEVEL_GENUS);
 		taxa.beforeFirst();
 		while ( taxa.next() ) {
 			hasOutput = true;
@@ -616,7 +624,7 @@ public class StrainServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 		try {
 			String searchParam = req.getParameter(PARAM_GENUS).concat("%");
-			Taxon taxa = SQLTaxon.taxaLike(this.getSQLData(req), searchParam, Taxon.LEVEL_GENUS);
+			Taxon taxa = SQLTaxon.taxaLike(getSQLData(req), searchParam, Taxon.LEVEL_GENUS);
 			if ( taxa.first() ) {
 				taxa.beforeFirst();
 				while ( taxa.next() ) {
@@ -670,7 +678,7 @@ public class StrainServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 		try {
 			String searchParam = "%".concat(req.getParameter(LS_PARAM_ISOLATION)).concat("%");
-			Isolation isolations = SQLIsolation.isolationsLike(this.getSQLData(req), 
+			Isolation isolations = SQLIsolation.isolationsLike(getSQLData(req), 
 					new String[]{SQLIsolation.ID_COLUMN}, new String[]{searchParam}, 
 					SQLIsolation.ID_COLUMN, SQLIsolation.ASCENDING_SORT);
 			if ( isolations.first() ) {
@@ -700,10 +708,10 @@ public class StrainServlet extends ServletObject {
 	private void validateGenus(HttpServletRequest req, HttpServletResponse res) throws DataException, IOException, SQLException {
 		PrintWriter out = res.getWriter();
 
-		if ( SQLTaxon.load(this.getSQLData(req), req.getParameter("genus")).first() ) {
+		if ( SQLTaxon.load(getSQLData(req), req.getParameter("genus")).first() ) {
 			out.println("<b>Valid name</b>");
 		}
-		Taxon possibles = SQLTaxon.soundsLike(this.getSQLData(req), req.getParameter("genus"));
+		Taxon possibles = SQLTaxon.soundsLike(getSQLData(req), req.getParameter("genus"));
 		possibles.beforeFirst();
 		out.print("<ul style=\"list-style-type: none;\">");
 		while ( possibles.next() ) {

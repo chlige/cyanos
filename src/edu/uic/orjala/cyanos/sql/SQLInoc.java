@@ -70,6 +70,8 @@ public class SQLInoc extends SQLObject implements Inoc {
 	private static final String SQL_LOAD_TEMPLATE = "SELECT inoculation.* FROM inoculation WHERE %s ORDER BY %s %s";
 	private static final String SQL_OPEN_FOR_STRAIN = "SELECT inoculation.* FROM inoculation WHERE culture_id=? AND fate IS NULL ORDER BY date";
 	private static final String SQL_VIABLE_FOR_STRAIN = "SELECT inoculation.* FROM inoculation WHERE culture_id=? AND removed IS NULL ORDER BY date";
+	private static final String SQL_CURRENT_STOCK_FOR_STRAIN = "SELECT inoculation.* FROM inoculation WHERE culture_id=? AND fate='stock' AND removed IS NULL ORDER BY date";
+	private static final String SQL_ALL_STOCK_FOR_STRAIN = "SELECT inoculation.* FROM inoculation WHERE culture_id=? AND fate='stock' ORDER BY date";
 	private static final String SQL_LOAD_FOR_STRAIN = "SELECT inoculation.* FROM inoculation WHERE culture_id=? ORDER BY date";
 	
 	public static List<String> fates(SQLData data) throws DataException, SQLException {
@@ -114,6 +116,34 @@ public class SQLInoc extends SQLObject implements Inoc {
 		SQLInoc anInoc = new SQLInoc(data);
 		try {
 			PreparedStatement aPsth = anInoc.myData.prepareStatement(SQL_VIABLE_FOR_STRAIN);
+			aPsth.setString(1, strainID);
+			anInoc.myData.loadUsingPreparedStatement(aPsth);
+			if ( anInoc.first() ) 
+				return anInoc;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return null;
+	}
+	
+	public static Inoc currentStocksForStrain(SQLData data, String strainID) throws DataException {
+		SQLInoc anInoc = new SQLInoc(data);
+		try {
+			PreparedStatement aPsth = anInoc.myData.prepareStatement(SQL_CURRENT_STOCK_FOR_STRAIN);
+			aPsth.setString(1, strainID);
+			anInoc.myData.loadUsingPreparedStatement(aPsth);
+			if ( anInoc.first() ) 
+				return anInoc;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return null;
+	}
+	
+	public static Inoc allStocksForStrain(SQLData data, String strainID) throws DataException {
+		SQLInoc anInoc = new SQLInoc(data);
+		try {
+			PreparedStatement aPsth = anInoc.myData.prepareStatement(SQL_ALL_STOCK_FOR_STRAIN);
 			aPsth.setString(1, strainID);
 			anInoc.myData.loadUsingPreparedStatement(aPsth);
 			if ( anInoc.first() ) 
