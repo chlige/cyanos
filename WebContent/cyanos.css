@@ -352,7 +352,7 @@ a.footer {
 		display: block;
 		position: relative;
 		width: 350px;
-		height: 200px;
+		min-height: 200px;
 		background-color: white;
 		padding: 10px;
 		border: 2px solid black;
