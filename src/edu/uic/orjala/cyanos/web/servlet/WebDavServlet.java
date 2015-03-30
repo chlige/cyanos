@@ -21,9 +21,11 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +43,7 @@ import net.sf.jmimemagic.MagicMatch;
 import net.sf.jmimemagic.MagicMatchNotFoundException;
 import net.sf.jmimemagic.MagicParseException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,7 +57,9 @@ import edu.uic.orjala.cyanos.ExternalFile;
 import edu.uic.orjala.cyanos.Material;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.Separation;
+import edu.uic.orjala.cyanos.User;
 import edu.uic.orjala.cyanos.sql.SQLAssay;
+import edu.uic.orjala.cyanos.sql.SQLCollection;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
 import edu.uic.orjala.cyanos.sql.SQLMaterial;
@@ -68,11 +73,10 @@ import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
  */
 @WebServlet(description = "WebDAV Servlet", urlPatterns = { "/webdav", "/webdav/", "/webdav/*" })
 public class WebDavServlet extends HttpServlet {
-	private static final String XMLNS_DAV = "DAV:";
-
 
 	private static final long serialVersionUID = 1L;
 	
+	private static final String XMLNS_DAV = "DAV:";
 
 	private static final String METHOD_HEAD = "HEAD";
 	private static final String METHOD_PROPFIND = "PROPFIND";
@@ -82,6 +86,8 @@ public class WebDavServlet extends HttpServlet {
 	private static final String METHOD_LOCK = "LOCK";
 	private static final String METHOD_UNLOCK = "UNLOCK";
 
+	public static final String ATTR_DAV_OBJECT = "davObject";
+	
 	enum LockScope {
 		EXCLUSIVE("exclusive"), SHARED("shared");
 		
@@ -97,7 +103,7 @@ public class WebDavServlet extends HttpServlet {
 	}
 	
 	enum DavDepth {
-		BASE("0", 0), SUB("1", 1), INFINITY("infinity", 2);
+		BASE("0", 0), SUB("1", 1), INFINITY("infinity", 1);
 	
 		private String name;
 		private int depth = 0;
@@ -361,6 +367,7 @@ public class WebDavServlet extends HttpServlet {
 
 		void writeProperties(String urlPrefix, DataFileObject object, int depth) throws XMLStreamException, DataException, IOException, MagicParseException, MagicMatchNotFoundException, MagicException {
 			if ( object != null ) {
+				object.beforeFirst();
 				while ( object.next() ) {
 					String path = String.format("%s/%s/", object.getDataFileClass(), object.getID());
 					String urlPath = urlPrefix.concat(path);
@@ -394,13 +401,15 @@ public class WebDavServlet extends HttpServlet {
 		
 		void writeProperties(String urlPrefix, ExternalFile file, DataFileObject parent, int depth) throws XMLStreamException, DataException, IOException, MagicParseException, MagicMatchNotFoundException, MagicException {
 			if ( file != null ) {
+				file.beforeFirst();
 				while ( file.next() ) {
 					String path = String.format("%s/%s/%s", parent.getDataFileClass(), parent.getID(), file.getFilePath());
 					String urlPath = urlPrefix.concat(path);
 					HashMap<String, DavProperty> props = new HashMap<String,DavProperty>();
 					File fileObj = file.getFileObject();
 					BasicFileAttributes fileAttr = Files.readAttributes(fileObj.toPath(), BasicFileAttributes.class);
-					props.put(DAVPROP_CREATIONDATE, new DavProperty(creationDateFormat.format(fileAttr.creationTime())));
+					Date ctime = new Date(fileAttr.creationTime().toMillis());
+					props.put(DAVPROP_CREATIONDATE, new DavProperty(creationDateFormat.format(ctime)));
 					props.put(DAVPROP_DISPLAYNAME, new DavProperty(fileObj.getName()));										
 					props.put(DAVPROP_RESOURCETYPE, new DavProperty());
 					props.put(DAVPROP_SUPPORTEDLOCK, new DavSupportedLocks());
@@ -448,7 +457,7 @@ public class WebDavServlet extends HttpServlet {
 		void write(String property, XMLStreamWriter xtw) throws XMLStreamException {
 			if ( value != null ) {
 				xtw.writeStartElement(this.xmlns, property);
-				xtw.writeEmptyElement(value);
+				xtw.writeEmptyElement(this.xmlns, value);
 				xtw.writeEndElement();
 			} else {
 				xtw.writeEmptyElement(this.xmlns, property);
@@ -485,7 +494,7 @@ public class WebDavServlet extends HttpServlet {
     /**
      * Simple date format for the creation date ISO representation (partial).
      */
-    protected static final SimpleDateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    protected static final SimpleDateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 	static final Properties mimeProps = new Properties();
 	private DavLockMap lockMap;
 	private final HashMap<String,DavProperty> rootProperties = new HashMap<String,DavProperty>(4);
@@ -532,9 +541,10 @@ public class WebDavServlet extends HttpServlet {
 	private static final String DAVLOCK_TOKEN = "locktoken";
 	private static final String DAVLOCK_ROOT = "lockroot";
 	
-	private static String DAVPROP_RESOURCETYPE = "resourcetype";
-	private static String DAVPROP_SUPPORTEDLOCK = "supportedlock";
+	private static final String DAVPROP_RESOURCETYPE = "resourcetype";
+	private static final String DAVPROP_SUPPORTEDLOCK = "supportedlock";
 
+	private String realm = "cyanos";
 	
 	/*
 	 *          <D:supportedlock> 
@@ -575,6 +585,14 @@ public class WebDavServlet extends HttpServlet {
 		rootProperties.put(DAVPROP_DISPLAYNAME, new DavProperty("CYANOS Database"));
 		rootProperties.put(DAVPROP_RESOURCETYPE, new DavElementProperty("collection"));
 		rootProperties.put(DAVPROP_SUPPORTEDLOCK, new DavSupportedLocks());
+		
+		realm = context.getContextPath();
+		if ( realm.startsWith("/") ) {
+			realm = realm.substring(1);
+		}
+		if ( realm.endsWith("/") ) {
+			realm = realm.substring(0, realm.length() - 1);
+		}
 	}
 
 	/**
@@ -582,6 +600,25 @@ public class WebDavServlet extends HttpServlet {
 	 */
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String method = req.getMethod();
+        
+        if ( req.getRemoteUser() == null ) {
+        	String auth = req.getHeader("Authorization");
+        	if ( auth != null && auth.startsWith("Basic")) {
+        		auth = new String(Base64.decodeBase64(auth.substring(6)),"US-ASCII");
+        		String[] authinfo = auth.split(":", 2);
+        		try { 
+        			req.login(authinfo[0], authinfo[1]);
+        		} catch (ServletException e) {
+            		resp.setHeader("WWW-Authenticate", String.format("Basic realm=\"%s\"", this.realm));
+            		resp.setStatus(401);
+            		return;
+        		}
+        	} else {
+ //       		resp.setHeader("WWW-Authenticate", String.format("Basic realm=\"%s\"", this.realm));
+ //      		resp.setStatus(401);
+ //       		return;
+        	}
+        }
         
 		try {
 			if (! validPath(req) ) { 
@@ -813,42 +850,48 @@ public class WebDavServlet extends HttpServlet {
 		int type = FIND_ALL_PROP;
         String[] path = getPathComponents(req);		
 		
-        InputStream in = req.getInputStream();
+        ServletInputStream in = req.getInputStream();
 
         Node propNode = null;
         DocumentBuilder documentBuilder = getDocumentBuilder();		
         try {
-        	Document document = documentBuilder.parse(in);
-        	Element root = document.getDocumentElement();
-        	NodeList nodes = root.getChildNodes();
-        	for ( int i = 0; i < nodes.getLength(); i++ ) {
-        		Node aNode = nodes.item(i);
-        		if ( aNode.getNodeType() == Node.ELEMENT_NODE ) {
-        			String nodeName = aNode.getNodeName();
-        			if ( nodeName.endsWith("prop") ) {
-        				type = FIND_BY_PROPERTY;
-        				propNode = aNode;
-        			} else if ( nodeName.endsWith("propname") ) {
-        				type = FIND_PROPERTY_NAMES;
-        			} else if ( nodeName.endsWith("allprop") ) {
-        				type = FIND_ALL_PROP;
+        	if ( in.available() > 0 ) {
+        		Document document = documentBuilder.parse(in);
+        		Element root = document.getDocumentElement();
+        		NodeList nodes = root.getChildNodes();
+        		for ( int i = 0; i < nodes.getLength(); i++ ) {
+        			Node aNode = nodes.item(i);
+        			if ( aNode.getNodeType() == Node.ELEMENT_NODE ) {
+        				String nodeName = aNode.getNodeName();
+        				if ( nodeName.endsWith("prop") ) {
+        					type = FIND_BY_PROPERTY;
+        					propNode = aNode;
+        				} else if ( nodeName.endsWith("propname") ) {
+        					type = FIND_PROPERTY_NAMES;
+        				} else if ( nodeName.endsWith("allprop") ) {
+        					type = FIND_ALL_PROP;
+        				}
         			}
         		}
+        	} else {
+        		type = FIND_ALL_PROP;
         	}
 
         	XMLOutputFactory xof = XMLOutputFactory.newInstance();
+        	xof.setProperty("javax.xml.stream.isRepairingNamespaces", true);
         	XMLStreamWriter xtw = xof.createXMLStreamWriter(resp.getOutputStream());
         	xtw.writeStartDocument();
         	xtw.writeStartElement("D", "multistatus", XMLNS_DAV);
 
-        	URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), req.getContextPath().concat(req.getServletPath()).concat("/") );
+//        	URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), req.getContextPath().concat(req.getServletPath()).concat("/") );
+           	String url = req.getContextPath().concat(req.getServletPath()).concat("/");
 
-        	PropertyWriter propOuts = new PropertyWriter(url.toString(), xtw, data);
+        	PropertyWriter propOuts = new PropertyWriter(url, xtw, data);
 
         	if ( type == FIND_BY_PROPERTY || type == FIND_ALL_PROP ) {
         		propOuts.setReturnValues(true);
         		if ( propNode != null ) {
-        			nodes = propNode.getChildNodes();
+        			NodeList nodes = propNode.getChildNodes();
         			for ( int i = 0; i < nodes.getLength(); i++ ) {
         				Node aNode = nodes.item(i);
         				if ( aNode.getNodeType() == Node.ELEMENT_NODE ) {
@@ -872,7 +915,7 @@ public class WebDavServlet extends HttpServlet {
         		propOuts.writeProperties(getObject(req), depth);
         	} else if ( pathLen == 3 ) {
         		DataFileObject object = getObject(req);
-        		propOuts.writeProperties(object.getDataFile(path[2]), object, depth);
+        		propOuts.writeProperties(object.getDataFile("/"+ path[2]), object, depth);
         	}				
         	xtw.writeEndElement();				
         	xtw.writeEndDocument();
@@ -896,29 +939,33 @@ public class WebDavServlet extends HttpServlet {
     		pathLen--;
 
     	try {
-    		if ( pathLen == 0 ) {
-    			// List classes
-    		} else if ( pathLen == 1 ) {
-    			// List object in class;
-    		} else if ( pathLen == 2 ) {
-    			// List Datafiles in class;
-    			DataFileObject object = getObject(request);
-    			if ( object.isAllowed(Role.READ) ) {
-    				
-    			} else { 
-    				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-    				return;
-    			}
-
-    		} else if ( pathLen == 3 ) {
+    		if ( pathLen == 3 ) {
     			DataFileObject object = getObject(request);
     			if ( object.isAllowed(Role.READ) )
-    				this.writeFile(object.getDataFile(path[2]), response);
+    				this.writeFile(object.getDataFile("/"+ path[2]), response);
     			else { 
     				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     				return;
     			}
-    		}				
+    		} else {
+    			switch(pathLen) {
+    			case 0: request.setAttribute(ATTR_DAV_OBJECT, VALID_CLASSES); break;
+    			case 1: 
+    				if ( ! isAllowed(request, path[0], Role.READ) ) {    					
+    					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    					return;
+    				}
+    				request.setAttribute(ATTR_DAV_OBJECT, getAll(getSQLData(request), path[0])); break;
+    			case 2:	DataFileObject object = getObject(request);
+    				if ( ! object.isAllowed(Role.READ) ) {
+    					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    					return;
+    				}
+    				request.setAttribute(ATTR_DAV_OBJECT, object.getDataFiles()); break;
+    			}
+    			RequestDispatcher disp = getServletContext().getRequestDispatcher("/includes/file-list.jsp");
+    			disp.forward(request, response);					
+    		}
     	} catch (DataException | SQLException e) {
     		throw new ServletException(e);
     	}
@@ -928,14 +975,16 @@ public class WebDavServlet extends HttpServlet {
 	private static final int BUFFER_SIZE = 1024 * 1024; // 1 MB
 
 	private void writeFile(ExternalFile file, HttpServletResponse resp) throws IOException, DataException {
-		OutputStream out = resp.getOutputStream();
-		InputStream fileIn = file.getInputStream();
-		Long thisSize = new Long(file.getFileObject().length());
-		resp.setContentLength(thisSize.intValue());
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int count;
-		while ( (count = fileIn.read(buffer)) > 0  ) {
-			out.write(buffer, 0, count);
+		if ( file.first() ) {
+			OutputStream out = resp.getOutputStream();
+			InputStream fileIn = file.getInputStream();
+			Long thisSize = new Long(file.getFileObject().length());
+			resp.setContentLength(thisSize.intValue());
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int count;
+			while ( (count = fileIn.read(buffer)) > 0  ) {
+				out.write(buffer, 0, count);
+			}
 		}
 	}
 	
@@ -1062,7 +1111,7 @@ public class WebDavServlet extends HttpServlet {
 				if ( valid ) {
 					req.setAttribute(ATTR_OBJECT, object);
 					if ( path.length > 2 && path[2].length() > 0 ) {
-						valid = object.hasDataFile(path[2]);
+						valid = object.hasDataFile("/" + path[2]);
 					}			
 				}
 			}
@@ -1077,10 +1126,10 @@ public class WebDavServlet extends HttpServlet {
 			return (DataFileObject) object;
 		}
 		if ( validPath(req) ) {
-			object = req.getAttribute(ATTR_OBJECT);
-			if ( object instanceof DataFileObject ) {
-				return (DataFileObject) object;
-			}
+	        String[] path = getPathComponents(req);		
+			DataFileObject myObj = getObject(req, path[0], path[1]);
+			req.setAttribute(ATTR_OBJECT, myObj);
+			return myObj;
 		}
 		return null;
 	}
@@ -1100,8 +1149,29 @@ public class WebDavServlet extends HttpServlet {
 			return SQLAssay.load(data, objID);
 		} else if ( objClass.equals(Material.DATA_FILE_CLASS) ) {
 			return SQLMaterial.load(data, objID);
+		} else if ( objClass.equals(Collection.DATA_FILE_CLASS) ) {
+			return SQLCollection.load(data, objID);
 		}
 		return null;
+	}
+
+	private static boolean isAllowed(HttpServletRequest req, String objClass, int action) throws DataException, SQLException {
+		SQLData data = getSQLData(req);
+		User user = data.getUser();
+		if ( objClass.equals("sample") ) {
+			return user.couldPerform(User.SAMPLE_ROLE, action);
+		} else if (objClass.equals("strain") ) {
+			return user.couldPerform(User.CULTURE_ROLE, action);
+		} else if (objClass.equals("separation") ) {
+			return user.couldPerform(User.SAMPLE_ROLE, action);
+		} else if (objClass.equals("compound") ) {
+			return user.couldPerform(User.SAMPLE_ROLE, action);
+		} else if ( objClass.equals("assay") ) {
+			return user.couldPerform(User.BIOASSAY_ROLE, action);
+		} else if ( objClass.equals(Material.DATA_FILE_CLASS) ) {
+			return user.couldPerform(User.SAMPLE_ROLE, action);
+		}
+		return true;
 	}
 
 	private static DataFileObject getAll(SQLData data, String objClass) throws DataException, SQLException {		
@@ -1116,7 +1186,9 @@ public class WebDavServlet extends HttpServlet {
 		} else if ( objClass.equals("assay") ) {
 			return SQLAssay.assays(data);
 		} else if ( objClass.equals(Material.DATA_FILE_CLASS) ) {
-			return SQLMaterial.find(data, "%");
+			return SQLMaterial.find(data, "");
+		} else if ( objClass.equals(Collection.DATA_FILE_CLASS ) ) {
+			return SQLCollection.collections(data);
 		}
 		return null;
 	}
@@ -1134,5 +1206,24 @@ public class WebDavServlet extends HttpServlet {
 	
 	public static SQLData getSQLData(HttpServletRequest req) throws SQLException, DataException {
 		return CyanosRequestListener.getSQLData(req);
+	}
+	
+	private static final long GIGA = 1024 * 1024 * 1024;
+	private static final long MEGA = 1024 * 1024;
+	private static final long KILO = 1024;
+	
+	public static String humanSize(long size) {
+		if ( size >= GIGA ) {
+			double newSize = size / GIGA;
+			return String.format("%.1f GB", newSize);
+		} else if ( size >= MEGA ) {
+			double newSize = size / MEGA;
+			return String.format("%.1f MB", newSize);
+		} else if ( size >= KILO ) {
+			double newSize = size / KILO;
+			return String.format("%.1f kB", newSize);
+		} else {
+			return String.format("%d B", size);
+		}
 	}
 }
