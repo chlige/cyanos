@@ -4,7 +4,7 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee" 
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name>Cyanos Database</display-name>
-  <description>Cyanos Database servlets.</description>
+  <description>Cyanos Database servlets</description>
   <listener>
     <listener-class>edu.uic.orjala.cyanos.web.listener.CyanosRequestListener</listener-class>
   </listener>
@@ -343,6 +343,16 @@
     <error-code>500</error-code>
     <location>/error.jsp</location>
   </error-page>
+  <env-entry>
+  	<env-entry-name>name</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>Cyanos</env-entry-value>
+  </env-entry>
+  <env-entry>
+  	<env-entry-name>filePath</env-entry-name>
+  	<env-entry-type>java.lang.String</env-entry-type>
+  	<env-entry-value>/tmp</env-entry-value>
+  </env-entry>
   <resource-ref>
     <res-ref-name>jdbc/CyanosDB</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
