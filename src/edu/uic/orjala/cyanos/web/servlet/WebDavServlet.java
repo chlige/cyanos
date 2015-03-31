@@ -1,11 +1,11 @@
 package edu.uic.orjala.cyanos.web.servlet;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.SQLException;
@@ -77,6 +77,7 @@ public class WebDavServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static final String XMLNS_DAV = "DAV:";
+	private static final String XMLNS_CYANOS = "urn:cyanos-schema";
 
 	private static final String METHOD_HEAD = "HEAD";
 	private static final String METHOD_PROPFIND = "PROPFIND";
@@ -298,7 +299,6 @@ public class WebDavServlet extends HttpServlet {
 			this.out.writeStartElement(XMLNS_DAV, "propstat");
 			this.out.writeStartElement(XMLNS_DAV, "prop");
 
-
 			if ( propList.size() > 0 ) {
 				for ( String prop : propList ) {
 					if ( props.containsKey(prop) ) {
@@ -375,7 +375,7 @@ public class WebDavServlet extends HttpServlet {
 					props.put(DAVPROP_CREATIONDATE, new DavProperty(creationDateFormat.format(object.getDate())));
 					if ( object instanceof Material ) {
 						Material material = (Material) object;
-						props.put(DAVPROP_DISPLAYNAME, new DavProperty(String.format("%s (%s)", material.getLabel(), material.getID())));					
+						props.put(DAVPROP_DISPLAYNAME, new DavProperty(String.format("%s (%s)", material.getLabel(), material.getID())));			
 					} else if ( object instanceof Separation ) {
 						Separation sep = (Separation) object;
 						props.put(DAVPROP_DISPLAYNAME, new DavProperty(String.format("%s (%s)", sep.getTag(), sep.getID())));										
@@ -417,6 +417,8 @@ public class WebDavServlet extends HttpServlet {
 					MagicMatch aMatch = Magic.getMagicMatch(fileObj, true);
 					props.put(DAVPROP_GETCONTENTTYPE, new DavProperty(aMatch.getMimeType()));
 					props.put(DAVPROP_GETLASTMOD, new DavProperty(creationDateFormat.format(new Date(fileObj.lastModified()))));
+//					props.put("dataType", new DavProperty(XMLNS_CYANOS, file.getDataType()));
+//					props.put("description", new DavProperty(XMLNS_CYANOS, file.getDescription()));
 					this.writeProperties(urlPath, props);				
 				}
 			}
@@ -821,19 +823,78 @@ public class WebDavServlet extends HttpServlet {
 		return false;
 	}
 
-	private void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
-	private void doProppatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+	protected void doProppatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		SQLData data;
 		
+		try {
+			data = getSQLData(req);
+		} catch (DataException | SQLException e) {
+			throw new ServletException(e);
+		}
+
+        String[] path = getPathComponents(req);		
+        ServletInputStream in = req.getInputStream();
+        DocumentBuilder documentBuilder = getDocumentBuilder();		
+
+        try {
+
+        	
+        	
+        	if ( in.available() > 0 ) {
+        		Document document = documentBuilder.parse(in);
+        		Element root = document.getDocumentElement();
+        		NodeList nodes = root.getChildNodes();
+        		for ( int i = 0; i < nodes.getLength(); i++ ) {
+        			Node aNode = nodes.item(i);
+        			if ( aNode.getNodeType() == Node.ELEMENT_NODE ) {
+        				String nodeName = aNode.getNodeName();
+        				if ( nodeName.endsWith("set") ) {
+
+        				} else if ( nodeName.endsWith("remove") ) {
+
+        				}
+        			}
+        		}
+        	}
+
+        	XMLOutputFactory xof = XMLOutputFactory.newInstance();
+        	xof.setProperty("javax.xml.stream.isRepairingNamespaces", true);
+        	XMLStreamWriter xtw = xof.createXMLStreamWriter(resp.getOutputStream());
+        	xtw.writeStartDocument();
+        	xtw.writeStartElement("D", "multistatus", XMLNS_DAV);
+
+           	String url = req.getContextPath().concat(req.getServletPath()).concat("/");
+
+        	int pathLen = path.length;
+        	if ( path[pathLen - 1].length() == 0 ) 
+        		pathLen--;
+
+        	if ( pathLen == 0 ) {
+
+        	} else if ( pathLen == 1 ) {
+
+        	} else if ( pathLen == 2 ) {
+
+        	} else if ( pathLen == 3 ) {
+
+        	}				
+        	xtw.writeEndElement();				
+        	xtw.writeEndDocument();
+        	resp.setStatus(SC_MULTISTATUS);
+        } catch (SAXException | XMLStreamException e) {
+        	throw new ServletException(e);
+        }
+
 	}
 		
 	// http://www.webdav.org/specs/rfc4918.html#METHOD_PROPFIND
@@ -999,8 +1060,55 @@ public class WebDavServlet extends HttpServlet {
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+		if ( isLocked(request) ) {
+			response.sendError(SC_LOCKED, "Locked");
+		}
 		
+		String[] path = getPathComponents(request);		
+
+		int pathLen = path.length;
+		if ( path[pathLen - 1].length() == 0 ) 
+			pathLen--;
+
+		try { 
+			if ( pathLen == 3 ) {
+				DataFileObject object = getObject(request);
+				if ( object.isAllowed(Role.WRITE) ) {
+					String filePath = "/" + path[2];
+					ExternalFile file = object.getDataFile(filePath);
+					if ( ! file.first() ) {
+						object.linkDataFile(filePath, "", "", request.getContentType());
+						file = object.getDataFile(filePath);
+					}
+					File outputFile = file.getFileObject();
+					boolean ready = outputFile.exists();
+					if ( ready ) {
+						response.setStatus(HttpServletResponse.SC_OK);
+					} else {
+						ready = outputFile.createNewFile();
+						if ( ready )
+							response.setStatus(HttpServletResponse.SC_CREATED);
+					}
+					if ( ready ) {
+						BufferedInputStream fileData = new BufferedInputStream(request.getInputStream());
+						FileOutputStream fileOut = new FileOutputStream(outputFile);
+						byte[] buffer = new byte[BUFFER_SIZE];
+						int count;
+						while ( (count = fileData.read(buffer)) > 0  ) {
+							fileOut.write(buffer, 0, count);
+						}
+						fileOut.close();
+						fileData.close();
+					}
+				
+				} else { 
+					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
+			}
+		} catch (DataException | SQLException e) {
+			throw new ServletException(e);
+		}
 	}
 
 	/**
