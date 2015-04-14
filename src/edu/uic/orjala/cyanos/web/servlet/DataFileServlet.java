@@ -168,7 +168,7 @@ public class DataFileServlet extends ServletObject {
 		this.handleRequest(req, res);
 	}
 
-	public void doPut ( HttpServletRequest req, HttpServletResponse res ) throws ServletException, IOException {
+	protected void doPut ( HttpServletRequest req, HttpServletResponse res ) throws ServletException, IOException {
 		if ( AppConfigListener.isUpgradeInstall() ) {
 			return;
 		}
@@ -192,12 +192,19 @@ public class DataFileServlet extends ServletObject {
 						BufferedInputStream fileData = new BufferedInputStream(req.getInputStream());
 						FileOutputStream fileOut = new FileOutputStream(outputFile);
 						int d = fileData.read();
-		//				int count = 1;
+						byte[] buffer = new byte[BUFFER_SIZE];
+						int count;
+						while ( (count = fileData.read(buffer)) > 0  ) {
+							fileOut.write(buffer, 0, count);
+						}
+/*						
+//						int count = 1;
 						while ( d != -1 ) {
 							fileOut.write(d);
 							d = fileData.read();
-		//					count++;
+//							count++;
 						}
+*/
 						fileOut.close();
 						fileData.close();
 						res.setStatus(HttpServletResponse.SC_CREATED);
@@ -317,6 +324,19 @@ public class DataFileServlet extends ServletObject {
 		*/
 	}
 
+	private static void writeFile(ExternalFile file, HttpServletResponse resp) throws IOException, DataException {
+		OutputStream out = resp.getOutputStream();
+		InputStream fileIn = file.getInputStream();
+		Long thisSize = new Long(file.getFileObject().length());
+		resp.setContentLength(thisSize.intValue());
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int count;
+		while ( (count = fileIn.read(buffer)) > 0  ) {
+			out.write(buffer, 0, count);
+		}
+	}
+
+	
 	private void handleManagerReq(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		String module = req.getPathInfo();	
 		String[] details = module.split("/", 5);
@@ -498,7 +518,7 @@ public class DataFileServlet extends ServletObject {
 	}
 	
 	private DataFileObject getObject(HttpServletRequest req) throws DataException, SQLException {
-		SQLData data = this.getSQLData(req);
+		SQLData data = getSQLData(req);
 		String objClass = req.getParameter(PARAM_OBJECT_CLASS);
 		String objID = req.getParameter(PARAM_OBJECT_ID);
 		
@@ -534,7 +554,7 @@ public class DataFileServlet extends ServletObject {
 				return;
 			}
 			
-			ExternalFile aFile = SQLExternalFile.load(this.getSQLData(req), path, details[4]);
+			ExternalFile aFile = SQLExternalFile.load(getSQLData(req), path, details[4]);
 			String contentType = null;
 			
 			if ( aFile.first() ) {
@@ -597,28 +617,14 @@ public class DataFileServlet extends ServletObject {
 						byteOut.flush();
 						res.setContentLength(byteOut.size());
 						out.write(byteOut.toByteArray());
+						out.flush();
+						out.close();
 					} else {
-						InputStream fileIn = aFile.getInputStream();
-						Long thisSize = new Long(aFile.getFileObject().length());
-						res.setContentLength(thisSize.intValue());
-						byte[] buffer = new byte[BUFFER_SIZE];
-						int count;
-						while ( (count = fileIn.read(buffer)) > 0  ) {
-							out.write(buffer, 0, count);
-						}
+						writeFile(aFile, res);
 					}
 				} else {
-					InputStream fileIn = aFile.getInputStream();
-					Long thisSize = new Long(aFile.getFileObject().length());
-					res.setContentLength(thisSize.intValue());
-					byte[] buffer = new byte[BUFFER_SIZE];
-					int count;
-					while ( (count = fileIn.read(buffer)) > 0  ) {
-						out.write(buffer, 0, count);
-					}
+					writeFile(aFile, res);
 				}
-				out.flush();
-				out.close();
 				res.flushBuffer();
 			} else {
 				res.setContentType("text/plain");
@@ -637,27 +643,7 @@ public class DataFileServlet extends ServletObject {
 			ex.printStackTrace();
 			out.println("IO Error:");
 			out.println(ex.getMessage());
-		} catch (MagicParseException ex) {
-			res.setContentType("text/plain");
-			res.resetBuffer();
-			ex.printStackTrace();
-			out.println(ex.getMessage());
-		} catch (MagicMatchNotFoundException ex) {
-			res.setContentType("text/plain");
-			res.resetBuffer();
-			ex.printStackTrace();
-			out.println(ex.getMessage());
-		} catch (MagicException ex) {
-			res.setContentType("text/plain");
-			res.resetBuffer();
-			ex.printStackTrace();
-			out.println(ex.getMessage());
-		} catch (DataException e) {
-			res.setContentType("text/plain");
-			res.resetBuffer();
-			e.printStackTrace();
-			out.println(e.getMessage());
-		} catch (SQLException e) {
+		} catch (MagicParseException | MagicMatchNotFoundException | MagicException | DataException | SQLException e) {
 			res.setContentType("text/plain");
 			res.resetBuffer();
 			e.printStackTrace();
