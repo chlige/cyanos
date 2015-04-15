@@ -121,6 +121,7 @@ public abstract class AppConfig {
 	protected final Map<String, String> moduleJars;
 	protected final Map<String, String> mapserverLayers;
 	protected final Map<String, String> mapParams;
+	protected final Map<String, String> authClients = new HashMap<String, String>();
 
 	public abstract void loadConfig() throws ConfigException;
 
@@ -158,6 +159,7 @@ public abstract class AppConfig {
 		cloneMapList(config.modules, this.modules);
 		cloneMap(config.mapserverLayers, this.mapserverLayers);
 		cloneMap(config.mapParams, this.mapParams);
+		cloneMap(config.authClients, this.authClients);
 	}
 	
 	private void cloneSuperMap(Map<String, Map<String, String>> source, Map<String, Map<String, String>> destination) {
@@ -370,8 +372,21 @@ public abstract class AppConfig {
 			return null;
 		}			
 	}
+	
+	public void addOAuthClient(String clientID, String secret) {
+		this.authClients.put(clientID, secret);
+		this.updated = true;
+	}
 
-
+	public boolean validateOAuthClient(String clientID, String secret) {
+		String realSecret = this.authClients.get(clientID);
+		return ( realSecret != null && realSecret.equals(secret) );
+	}
+	
+	public boolean existsOAuthClient(String clientID) {
+		return this.authClients.containsKey(clientID);
+	}
+	
 	public void setDataType(String aClass, String type, String description) {
 		this.getDataTypeMap(aClass).put(type, description);
 		this.updated = true;

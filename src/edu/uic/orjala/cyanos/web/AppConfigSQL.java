@@ -32,6 +32,7 @@ import edu.uic.orjala.cyanos.sql.SQLData;
  *   <TR><TD><B><I>queue</I></B></TD><TD>Queue Type</TD><TD>Source</TD><TD>Name (if static)</TD></TD><TD>Sources: Static, JDBC, Single</TD></TR>
  *   <TR><TD><B><I>module</I></B></TD><TD>Module Type</TD><TD></TD><TD>Java Class</TD><td>Modules for dereplication & upload</TD></TR>
  *   <TR><TD><B><I>urlTemplate</I></B></TD><TD>Object Class</TD><TD>Label</TD><TD>URL</TD></TD></TR>
+ *   <tr><td><b><i>oauth</i></b></td><td>"client"</td><td>client ID</td><td>client secret</td></tr>
  *   </TABLE>
  * 
  * 
@@ -48,7 +49,10 @@ public class AppConfigSQL extends AppConfig {
 		private static final String CONFIG_ELEMENT = "config";
 		private static final String MAP_ELEMENT = "map";
 		private static final String DATA_TYPE_ELEMENT = "dataType";
-
+		private static final String OAUTH_ELEMENT = "oauth";
+		
+		private static final String OAUTH_CLIENT_PARAM = "client";
+		
 		private static final String VALUE_COLUMN = "value";
 		private static final String PARAM_COLUMN = "param";
 		private static final String KEY_COLUMN = "param_key";
@@ -114,6 +118,7 @@ public class AppConfigSQL extends AppConfig {
 				this.urlTemplateMap.clear();
 				this.modules.clear();
 				this.mapParams.clear();
+				this.authClients.clear();
 
 				loadConfig(this);							
 				this.updated = false;
@@ -166,6 +171,7 @@ public class AppConfigSQL extends AppConfig {
 			parseMapParams(config);
 			parseURLTemplates(config);
 			parseModules(config);
+			parseOAuth(config);
 		}
 		
 		private static void parseFileElements(AppConfig config) throws ConfigException {
@@ -342,6 +348,28 @@ public class AppConfigSQL extends AppConfig {
 
 		}
 
+		private static void parseOAuth(AppConfig config) throws ConfigException {
+			try {
+				Connection aConn = config.getDataSourceObject().getConnection();
+				try {
+					PreparedStatement mySth = aConn.prepareStatement(GET_CONFIG_PARAM);
+					mySth.setString(1, OAUTH_ELEMENT);
+					mySth.setString(2, OAUTH_CLIENT_PARAM);
+					ResultSet myResult = mySth.executeQuery();
+					while ( myResult.next() ) {
+						config.authClients.put(myResult.getString(3), myResult.getString(4));
+					}
+					aConn.close();
+				} catch (SQLException e) {
+					aConn.close();
+					throw new ConfigException(e);
+				}
+			} catch (SQLException e) {
+				throw new ConfigException(e);
+			}
+
+		}
+
 		private String getValue(String element, String key) throws ConfigException {
 			String retVal = null;
 			try {
@@ -505,6 +533,7 @@ public class AppConfigSQL extends AppConfig {
 				this.genKeyValueElement(mapserverLayers, MAP_ELEMENT, OL_MAPSERVER_PARAM);
 				this.genKeyValueElement(mapParams, MAP_ELEMENT, MAP_PARAMS);
 				this.genKeyValuesElement(modules, MODULE_ELEMENT, MODULE_CLASS_PARAM);
+				this.genKeyValueElement(authClients, OAUTH_ELEMENT, OAUTH_CLIENT_PARAM);
 				this.genModuleJarElement(moduleJars);
 				this.genQueueElement();
 				this.setVersion();
