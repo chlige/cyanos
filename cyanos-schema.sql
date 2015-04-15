@@ -747,6 +747,22 @@ COMMENT = 'Cyanos Users';
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
+-- Table `users_oauth`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `users_oauth` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `users_oauth` (
+  `username` VARCHAR(15) NOT NULL DEFAULT '' ,
+  `client_id` VARCHAR(256) NOT NULL DEFAULT ''
+  PRIMARY KEY (`username`,`client_id`) )
+ENGINE = MyISAM
+DEFAULT CHARACTER SET = utf8
+COMMENT = 'Cyanos Users OAuth details';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
 -- Table `config`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `config` ;
