@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -79,7 +80,11 @@ public class OAuthServlet extends HttpServlet {
 		 this.processRequest(request, response);
 	}
 	
-	private void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	public static void setupManager(HttpServletRequest request) throws MalformedURLException {
+		manager.setOPEndpointUrl(getOPURL(request));
+	}
+	
+	private void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		ParameterList params = new ParameterList(req.getParameterMap());
 		Message response;
 		String responseText = null;
@@ -93,29 +98,21 @@ public class OAuthServlet extends HttpServlet {
 			responseText = response.keyValueFormEncoding();
 		} else if ("checkid_setup".equals(mode) || "checkid_immediate".equals(mode)) {
 			// interact with the user and obtain data needed to continue
-			String userID = getUserURL(req); 
-			Boolean authenticatedAndApproved = Boolean.TRUE;
-
-			// --- process an authentication request ---
-			response = manager.authResponse(params,	userID, userID,
-					authenticatedAndApproved.booleanValue());
-
-			if (response instanceof DirectError)
-				responseText = response.keyValueFormEncoding();
-			else {
-				// caller will need to decide which of the following to use:
-
-				// option1: GET HTTP-redirect to the return_to URL
-				responseText = response.getDestinationUrl(true);
-
-				// option2: HTML FORM Redirection
-				//RequestDispatcher dispatcher =
-				//        getServletContext().getRequestDispatcher("formredirection.jsp");
-				//httpReq.setAttribute("prameterMap", response.getParameterMap());
-				//httpReq.setAttribute("destinationUrl", response.getDestinationUrl(false));
-				//dispatcher.forward(request, response);
-				//return null;
+			String authConfirm = req.getParameter("auth_confirm");
+			if ( authConfirm != null ) {
+				String userID = getUserURL(req); 
+				// --- process an authentication request ---
+				response = manager.authResponse(params,	userID, userID, authConfirm.equalsIgnoreCase("true"));
+				
+				if (response instanceof DirectError)
+					responseText = response.keyValueFormEncoding();
+				else
+					responseText = response.getDestinationUrl(true);				
+			} else {
+				RequestDispatcher disp = getServletContext().getRequestDispatcher("/oauth.jsp");
+				disp.forward(req, resp);					
 			}
+			
 		} else if ("check_authentication".equals(mode)) {
 				// --- processing a verification request ---
 				response = manager.verify(params);
