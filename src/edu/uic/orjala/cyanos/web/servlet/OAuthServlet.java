@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
 import org.apache.oltu.oauth2.as.request.OAuthRequest;
@@ -26,16 +28,26 @@ import org.apache.oltu.oauth2.as.response.OAuthASResponse.OAuthAuthorizationResp
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.OAuthResponse;
+import org.openid4java.association.AssociationException;
+import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.DirectError;
 import org.openid4java.message.Message;
+import org.openid4java.message.MessageException;
+import org.openid4java.message.MessageExtension;
 import org.openid4java.message.ParameterList;
+import org.openid4java.message.sreg.SRegMessage;
+import org.openid4java.message.sreg.SRegRequest;
+import org.openid4java.message.sreg.SRegResponse;
+import org.openid4java.server.ServerException;
 import org.openid4java.server.ServerManager;
+
+import edu.uic.orjala.cyanos.DataException;
+import edu.uic.orjala.cyanos.User;
 
 /**
  * Servlet implementation class OAuthServlet
  */
-@WebServlet(description = "OAuth Servlet to allow connection of external tools.", urlPatterns = { "/oauth", "/oauth/" })
-@RolesAllowed({"*"})
+@WebServlet(description = "OAuth Servlet to allow connection of external tools.", urlPatterns = { "/oauth", "/oauth/", "/oauth/user/*" })
 public class OAuthServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Map<String,String> oAuthTokens = new HashMap<String,String>();
@@ -49,14 +61,12 @@ public class OAuthServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		 String module = request.getPathInfo();		 
 		 response.setHeader(XRDS_HEADER, getXRDSURL(request));
-		 
-		 if ( module == null ) module = "";
-		 
+		 this.processRequest(request, response);
+
+		 /*
 		 try {
 //			 this.processAuthz(request, response);
-
 			 if ( module.startsWith("/authorize") )
 				 this.processAuthz(request, response);
 			 else if ( module.startsWith("/token") ) 
@@ -66,8 +76,8 @@ public class OAuthServlet extends HttpServlet {
 		} catch (OAuthSystemException e ) {
 
 		}
+		*/
 	}
-	
 	
 	public static BigInteger DEFAULT_DH_P = new BigInteger("DCF93A0B883972EC0E19989AC5A2CE310E1D37717E8D9571BB7623731866E61EF75A2E27898B057F9891C2E27A639C3F29B60814581CD3B2CA3986D2683705577D45C2E7E52DC81C7A171876E5CEA74B1448BFDFAF18828EFD2519F14E45E3826634AF1949E5B535CC829A483B8A76223E5D490A257F05BDFF16F2FB22C583AB", 16);
 	public static BigInteger DEFAULT_DH_G = new BigInteger("2");
@@ -91,24 +101,67 @@ public class OAuthServlet extends HttpServlet {
 		
 		manager.setOPEndpointUrl(getOPURL(req));
 
-		String mode = ( params.hasParameter("mode") ? params.getParameterValue("mode") : "");
-
+		String mode = ( params.hasParameter("openid.mode") ? params.getParameterValue("openid.mode") : "");
+		
+		HttpSession session = req.getSession();
+		if ( mode.length() < 1 ) {
+			Object parmObj = session.getAttribute("OAuthParams");
+			if ( parmObj instanceof ParameterList ) {
+				params = (ParameterList) parmObj;
+				session.removeAttribute("OAuthParams");
+				mode = ( params.hasParameter("openid.mode") ? params.getParameterValue("openid.mode") : "");
+			}
+		}
+			
 		if ( mode.equals("associate") ) {
 			response = manager.associationResponse(params);
 			responseText = response.keyValueFormEncoding();
 		} else if ("checkid_setup".equals(mode) || "checkid_immediate".equals(mode)) {
+			if ( req.getRemoteUser() == null ) {
+				session.setAttribute("OAuthParams", params);
+				req.authenticate(resp);
+				return;
+			}			
 			// interact with the user and obtain data needed to continue
 			String authConfirm = req.getParameter("auth_confirm");
 			if ( authConfirm != null ) {
 				String userID = getUserURL(req); 
 				// --- process an authentication request ---
-				response = manager.authResponse(params,	userID, userID, authConfirm.equalsIgnoreCase("true"));
+				response = manager.authResponse(params,	userID, userID, authConfirm.equalsIgnoreCase("true"), false);
+				Map<String,String> userData = new HashMap<String,String>();
+				try {
+					
+					Message reqMsg = Message.createMessage(params);
+					User aUser = MainServlet.getUser(req);
+
+					userData.put("fullname", aUser.getUserName());
+					userData.put("email", aUser.getUserEmail());
+
+					MessageExtension ext = reqMsg.getExtension(SRegMessage.OPENID_NS_SREG11);
+					
+					SRegResponse sregResp = SRegResponse.createSRegResponse((SRegRequest) ext, userData);
+					sregResp.setTypeUri(SRegMessage.OPENID_NS_SREG11);
+					response.addExtension(sregResp);		
+				} catch (DataException | MessageException | SQLException e) {
+					e.printStackTrace();
+				}		
+				
+				try {
+					manager.sign((AuthSuccess) response);
+				} catch (ServerException | AssociationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				if (response instanceof DirectError)
 					responseText = response.keyValueFormEncoding();
-				else
-					responseText = response.getDestinationUrl(true);				
+				else {
+					responseText = response.getDestinationUrl(true);	
+					resp.sendRedirect(responseText);
+					return;
+				}
 			} else {
+				req.setAttribute("OAuthParams", params);
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/oauth.jsp");
 				disp.forward(req, resp);					
 			}
@@ -197,7 +250,7 @@ public class OAuthServlet extends HttpServlet {
 	
 	public static String getUserURL(HttpServletRequest req) throws MalformedURLException {
 		URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), 
-				req.getContextPath().concat("/oauth/user/").concat(req.getRemoteUser()) );
+				req.getContextPath().concat("/oauth/user.jsp?user=").concat(req.getRemoteUser()) );
 		return url.toString();
 	}
 	
