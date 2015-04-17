@@ -3,10 +3,8 @@
  */
 package edu.uic.orjala.cyanos;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 
 
@@ -117,6 +115,8 @@ public interface User {
 
 	public abstract void reload() throws DataException;
 	
+	boolean trustsOAuthRealm(String realm);
 	
+	Set<String> oauthRealms();
 
 }

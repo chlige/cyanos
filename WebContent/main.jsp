@@ -7,7 +7,8 @@
 	edu.uic.orjala.cyanos.web.BaseForm,
 	edu.uic.orjala.cyanos.web.News,
 	edu.uic.orjala.cyanos.User,
-	java.text.SimpleDateFormat" %>
+	java.text.SimpleDateFormat,
+	java.util.Set" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -52,7 +53,14 @@
 <p><b>Welcome, <%= aUser.getUserName() %></b></p>
 <p><a href="updateUser.jsp">Update user account</a><br>
 <a href="logout.jsp">Logout</a></p>
-<% } else { %>
+<% Set<String> sites = aUser.oauthRealms(); 
+	if ( sites.size() > 0 ) { %>
+<p><b>External Sites</b> (OpenID connections)</br>
+<% for ( String site : sites ) { %>
+<a href="<%= site %>"><%= site %></a><br/>
+<% } %>
+</p>
+<% } } else { %>
 <p><b>Welcome, Guest User</b></p>
 <p><a href="login.jsp">Login</a></p>
 <% } %>

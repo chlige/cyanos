@@ -2,8 +2,7 @@
 <%@ page language="java" contentType="application/xrds+xml; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.net.URL" %>
-<% URL url = new URL(request.getScheme(), request.getServerName(), request.getServerPort(), 
-		request.getContextPath().concat("/oauth/") ); %>
+<% URL url = new URL(request.getScheme(), request.getServerName(), request.getContextPath().concat("/oauth/") ); %>
 <xrds:XRDS
     xmlns:xrds="xri://$xrds"
     xmlns="xri://$xrd*($v*2.0)">

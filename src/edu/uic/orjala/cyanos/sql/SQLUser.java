@@ -19,10 +19,13 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 
 import edu.uic.orjala.cyanos.BasicUser;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Role;
+import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 /**
  * @author George Chlipala
@@ -33,6 +36,7 @@ public class SQLUser extends BasicUser {
 	private Connection dbc = null;
 
 	private final static String SQL_GET_ROLES = "SELECT username,project_id,role,perm FROM roles WHERE username=?";
+	private final static String SQL_GET_OAUTH = "SELECT realm FROM users_oauth WHERE username=?";
 	private final static String USER_SQL = "SELECT username,fullname,email FROM users WHERE username=?";	
 	private final static String SQL_VALIDATE_PASSWORD = "SELECT username FROM users WHERE username=? AND password=SHA(?)";
 
@@ -83,6 +87,7 @@ public class SQLUser extends BasicUser {
 	private void loadData() throws DataException, SQLException {
 			this.reload();
 			this.loadRoles();
+			this.loadOAuth();
 	}
 	
 	@Override
@@ -124,6 +129,22 @@ public class SQLUser extends BasicUser {
 		}
 		roleData.close();
 		aPsth.close();
+	}
+	
+	private void loadOAuth() throws SQLException {
+		PreparedStatement sth = this.dbc.prepareStatement(SQL_GET_OAUTH);
+		sth.setString(1, this.myID);
+		ResultSet results = sth.executeQuery();
+
+		results.beforeFirst();
+
+		this.oauthRealms.clear();
+		
+		while ( results.next() ) {
+			this.oauthRealms.add(results.getString(1));
+		}
+		results.close();
+		sth.close();
 	}
 	
 	/* (non-Javadoc)
@@ -182,7 +203,24 @@ public class SQLUser extends BasicUser {
 		} catch (SQLException e) {
 			throw new DataException(e);
 		}
-		
+	}
+	
+	private static final String SQL_ADD_REALM = "INSERT INTO users_oauth(username,realm) VALUES(?,?)";
+	
+	public static void addOAuthRealm(HttpServletRequest req, String realm) throws DataException, SQLException {
+		String userID = req.getRemoteUser();
+		if ( userID != null ) {
+			SQLUser user = new SQLUser(CyanosRequestListener.getSQLData(req), userID);
+			if ( (! user.trustsOAuthRealm(realm)) ) {
+				PreparedStatement sth = user.dbc.prepareStatement(SQL_ADD_REALM);
+				sth.setString(1, user.myID);
+				sth.setString(2, realm);
+				if ( sth.executeUpdate() == 1 ) {
+					user.oauthRealms.add(realm);				
+				}
+				sth.close();
+			} 
+		}
 	}
 
 	public void closeAll() throws DataException {

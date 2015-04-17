@@ -10,9 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
@@ -43,6 +41,8 @@ import org.openid4java.server.ServerManager;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.User;
+import edu.uic.orjala.cyanos.sql.SQLUser;
+import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 /**
  * Servlet implementation class OAuthServlet
@@ -50,7 +50,7 @@ import edu.uic.orjala.cyanos.User;
 @WebServlet(description = "OAuth Servlet to allow connection of external tools.", urlPatterns = { "/oauth", "/oauth/", "/oauth/user/*" })
 public class OAuthServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static Map<String,String> oAuthTokens = new HashMap<String,String>();
+//	private static Map<String,String> oAuthTokens = new HashMap<String,String>();
 	
 	public static final String XRDS_HEADER = "X-XRDS-Location";
 	private static final String XRDS_PATH = "/oauth/idpXrds.jsp";
@@ -64,7 +64,7 @@ public class OAuthServlet extends HttpServlet {
 		 response.setHeader(XRDS_HEADER, getXRDSURL(request));
 		 this.processRequest(request, response);
 
-		 /*
+		 /*  TODO for OpenID Connect specification.
 		 try {
 //			 this.processAuthz(request, response);
 			 if ( module.startsWith("/authorize") )
@@ -117,55 +117,78 @@ public class OAuthServlet extends HttpServlet {
 			response = manager.associationResponse(params);
 			responseText = response.keyValueFormEncoding();
 		} else if ("checkid_setup".equals(mode) || "checkid_immediate".equals(mode)) {
-			if ( req.getRemoteUser() == null ) {
-				session.setAttribute("OAuthParams", params);
-				req.authenticate(resp);
-				return;
-			}			
-			// interact with the user and obtain data needed to continue
-			String authConfirm = req.getParameter("auth_confirm");
-			if ( authConfirm != null ) {
-				String userID = getUserURL(req); 
-				// --- process an authentication request ---
-				response = manager.authResponse(params,	userID, userID, authConfirm.equalsIgnoreCase("true"), false);
-				Map<String,String> userData = new HashMap<String,String>();
-				try {
-					
-					Message reqMsg = Message.createMessage(params);
-					User aUser = MainServlet.getUser(req);
 
-					userData.put("fullname", aUser.getUserName());
-					userData.put("email", aUser.getUserEmail());
+			try {
+				if ( req.getRemoteUser() == null ) {
+					String username = req.getParameter("j_username");
+					String password = req.getParameter("j_password");
+					if ( username != null && username.length() > 0 && password != null && password.length() > 0 ) {
+						req.login(username, password);
+					}
+				}
 
-					MessageExtension ext = reqMsg.getExtension(SRegMessage.OPENID_NS_SREG11);
-					
-					SRegResponse sregResp = SRegResponse.createSRegResponse((SRegRequest) ext, userData);
-					sregResp.setTypeUri(SRegMessage.OPENID_NS_SREG11);
-					response.addExtension(sregResp);		
-				} catch (DataException | MessageException | SQLException e) {
-					e.printStackTrace();
-				}		
+				User aUser = CyanosRequestListener.getUser(req, true);
+				String authConfirm = req.getParameter("auth_confirm");
+				String realm = params.getParameterValue("openid.realm");
 				
-				try {
-					manager.sign((AuthSuccess) response);
-				} catch (ServerException | AssociationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				boolean trusts = false;
+				boolean shouldAsk = true;
+				
+				if ( req.getRemoteUser() != null ) {
+					trusts = aUser.trustsOAuthRealm(realm);
+					if ( ! trusts && authConfirm != null ) {
+						trusts = authConfirm.equalsIgnoreCase("true");
+						if ( trusts )
+							SQLUser.addOAuthRealm(req, realm);
+					}
+					shouldAsk = ( ! trusts ) && authConfirm == null;
 				}
 				
-				if (response instanceof DirectError)
-					responseText = response.keyValueFormEncoding();
-				else {
-					responseText = response.getDestinationUrl(true);	
-					resp.sendRedirect(responseText);
+				if ( shouldAsk ) {
+					req.setAttribute("OAuthParams", params);
+					RequestDispatcher disp = getServletContext().getRequestDispatcher("/oauth.jsp");
+					disp.forward(req, resp);	
 					return;
+				} else {
+					// interact with the user and obtain data needed to continue
+					String userID = getUserURL(req); 
+					// --- process an authentication request ---
+					response = manager.authResponse(params,	userID, userID, trusts, false);
+
+					if ( trusts ) {
+						Map<String,String> userData = new HashMap<String,String>();
+
+						Message reqMsg = Message.createMessage(params);
+
+						userData.put("fullname", aUser.getUserName());
+						userData.put("email", aUser.getUserEmail());
+
+						MessageExtension ext = reqMsg.getExtension(SRegMessage.OPENID_NS_SREG11);
+
+						SRegResponse sregResp = SRegResponse.createSRegResponse((SRegRequest) ext, userData);
+						sregResp.setTypeUri(SRegMessage.OPENID_NS_SREG11);
+						response.addExtension(sregResp);	
+					}
+
+					if (response instanceof DirectError)
+						responseText = response.keyValueFormEncoding();
+					else {
+						if ( response instanceof AuthSuccess) {
+							try {
+								manager.sign((AuthSuccess) response);
+							} catch (ServerException | AssociationException e) {
+								throw new ServletException(e);
+							}
+						}
+						responseText = response.getDestinationUrl(true);	
+						resp.sendRedirect(responseText);
+						return;
+					}
 				}
-			} else {
-				req.setAttribute("OAuthParams", params);
-				RequestDispatcher disp = getServletContext().getRequestDispatcher("/oauth.jsp");
-				disp.forward(req, resp);					
-			}
-			
+			} catch (DataException | MessageException | SQLException e) {
+				e.printStackTrace();
+			}		
+
 		} else if ("check_authentication".equals(mode)) {
 				// --- processing a verification request ---
 				response = manager.verify(params);
@@ -249,20 +272,18 @@ public class OAuthServlet extends HttpServlet {
 	}
 	
 	public static String getUserURL(HttpServletRequest req) throws MalformedURLException {
-		URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), 
-				req.getContextPath().concat("/oauth/user.jsp?user=").concat(req.getRemoteUser()) );
+		String userID = ( req.getRemoteUser() != null ? req.getRemoteUser() : "guest");
+		URL url = new URL(req.getScheme(), req.getServerName(), req.getContextPath().concat("/oauth/user.jsp?user=").concat(userID) );
 		return url.toString();
 	}
 	
 	public static String getOPURL(HttpServletRequest req) throws MalformedURLException {
-		URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), 
-				req.getContextPath().concat("/oauth/") );
+		URL url = new URL(req.getScheme(), req.getServerName(), req.getContextPath().concat("/oauth/") );
 		return url.toString();
 	}
 	
 	public static String getXRDSURL(HttpServletRequest req) throws MalformedURLException {
-		URL url = new URL(req.getScheme(), req.getServerName(), req.getServerPort(), 
-				req.getContextPath().concat(XRDS_PATH) );
+		URL url = new URL(req.getScheme(), req.getServerName(), req.getContextPath().concat(XRDS_PATH) );
 		return url.toString();
 	}	
 }

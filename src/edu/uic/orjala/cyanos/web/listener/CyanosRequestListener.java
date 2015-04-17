@@ -107,12 +107,13 @@ public class CyanosRequestListener implements ServletRequestListener {
 	}
 	
 	public static User getUser(HttpServletRequest req) throws DataException, SQLException {
-		User user = (User) req.getAttribute(USER);
+		return getUser(req, false);
+	}
+	
+	public static User getUser(HttpServletRequest req, boolean reload) throws DataException, SQLException {
+		User user = ( reload ? null : (User) req.getAttribute(USER) );		
 		if ( user == null ) {
-			if ( req.getRemoteUser() == null )
-				user = getGuestUser();
-			else 
-				user = new SQLUser(AppConfigListener.getDBConnection(), req.getRemoteUser());
+			user = ( req.getRemoteUser() == null ? getGuestUser(): new SQLUser(AppConfigListener.getDBConnection(), req.getRemoteUser()) );
 			req.setAttribute(USER, user);
 		}
 		return user;

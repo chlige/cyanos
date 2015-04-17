@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.uic.orjala.cyanos.sql.SQLUser;
 
@@ -20,6 +22,7 @@ public abstract class BasicUser implements User {
 
 	protected String myID = null;
 	protected final Map<String, Map<String, Role>> projectRoles = new HashMap<String, Map<String, Role>>();
+	protected final Set<String> oauthRealms = new TreeSet<String>();
 	protected String email = null;
 	protected String fullname = null;
 	
@@ -106,5 +109,13 @@ public abstract class BasicUser implements User {
 		return this.fullname;
 	}
 
+	@Override
+	public boolean trustsOAuthRealm(String realm) {
+		return this.oauthRealms.contains(realm);
+	}
+	
+	public Set<String> oauthRealms() {
+		return this.oauthRealms;
+	}
 
 }
