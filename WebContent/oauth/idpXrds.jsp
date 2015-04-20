@@ -9,8 +9,7 @@
   <XRD>
     <Service priority="0">
       <Type>http://specs.openid.net/auth/2.0/server</Type>
-<% URL url = new URL(request.getScheme(), request.getServerName(), request.getServerPort(), 
-		request.getContextPath().concat("/oauth/") ); %>
+<% URL url = OAuthServlet.getURL(request, "/oauth/"); %>
       <URI><%= url.toString() %></URI>
     </Service>
   </XRD>

@@ -1,8 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.net.URL, edu.uic.orjala.cyanos.web.servlet.OAuthServlet" %>  
-<% URL url = new URL(request.getScheme(), request.getServerName(), request.getServerPort(), 
-		request.getContextPath().concat("/oauth/") ); 
+<% URL url = OAuthServlet.getURL(request, "/oauth/");
 String userXRDS = url.toString().concat("userXrds.jsp?user=").concat(request.getParameter("user"));
 response.setHeader(OAuthServlet.XRDS_HEADER, userXRDS);		
 %>
