@@ -11,7 +11,7 @@ SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateForma
 <table  class="dashboard">
 <tr><th class="header" width='125'>Assay</th><th class="header" width='125'>Date</th><th class="header" width="75">Size</th><th class="header" width='400'>Notes</th></tr>
 <% while ( queryResults.next() ) { %>
-<tr class='normal' align='center'>
+<tr class='banded' align='center'>
 <td><a href="<%= contextPath %>/assay?id=<%= queryResults.getID() %>"><%= queryResults.getID() %></a></td>
 <td><%= dateFormat.format(queryResults.getDate()) %></td>
 <td><%= String.format("%d wells", queryResults.getLength() * queryResults.getWidth()) %></td>

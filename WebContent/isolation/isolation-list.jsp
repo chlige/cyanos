@@ -21,7 +21,7 @@
 <th class="header">Notes</th>
 </tr>	
 <% while ( isolations.next() )  { %>
-<tr class='normal' align='center'>
+<tr class='banded' align='center'>
 <td><a href="<%= contextPath %>/collection?id=<%= isolations.getID() %>"><%= isolations.getID() %></a></td>
 <td><%= dateFormat.format(isolations.getDate()) %></td>
 <td><%= isolations.getType() %></td>

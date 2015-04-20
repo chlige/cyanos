@@ -14,7 +14,7 @@
 <th class="header" width='100'>Amount</th></tr>
 <% while ( queryResults.next() ) { 
 	if ( ! queryResults.isExtract() ) continue;%>
-<tr class='normal' align='center'><td><a href="<%= contextPath %>/material?id=<%= queryResults.getID() %>"><%= queryResults.getLabel() %></a></td>
+<tr class='banded' align='center'><td><a href="<%= contextPath %>/material?id=<%= queryResults.getID() %>"><%= queryResults.getLabel() %></a></td>
 <td><%= dateFormat.format(queryResults.getDate()) %></td>
 <td><%= queryResults.getExtractType() %></td>
 <td><%= queryResults.getExtractSolvent() %></td>

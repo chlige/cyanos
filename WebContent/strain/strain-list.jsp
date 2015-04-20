@@ -15,7 +15,6 @@
 	if ( sortField == null ) sortField = SQLStrain.ID_COLUMN;
 	if ( sortDir == null )  sortDir = SQLStrain.ASCENDING_SORT;
 	boolean sortAsc = ( sortDir.equals(SQLStrain.ASCENDING_SORT) );
-	boolean oddRow = true;
 	queryResults.beforeFirst();
 	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute(StrainServlet.SESS_ATTR_DATE_FORMAT);
 %>
@@ -32,8 +31,7 @@
 <% if ( sortField.equals(SQLStrain.DATE_COLUMN) ) { %><img src="<%=contextPath%>/images/<%=(sortAsc ? "sort-asc.png" : "sort-desc.png")%>"><% } %></th>
 <th class="header" width='200'>Notes</th></tr>
 <%	while ( queryResults.next() ) { 
-	String rowFormat = ( oddRow ? "odd" : "even" ); 
-	oddRow = ! oddRow; 
+	String rowFormat = "banded";
 	if ( ! queryResults.isActive() ) { rowFormat = "dead"; } %>
 <tr class=<%=rowFormat%> align='center'><td><a href="<%=contextPath%>/strain?id=<%=queryResults.getID()%>"><%=queryResults.getID()%></a></td>
 <td><%=queryResults.getName()%></td>
