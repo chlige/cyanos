@@ -204,6 +204,9 @@ public class SQLAssayData extends SQLObject implements AssayData {
 	 */
 	public String getActivityString() throws DataException {
 		BigDecimal value = this.getActivity();
+		if ( value == null ) {
+			return "-";
+		}
 		int sign = this.myData.getInt(VALUE_SIGN_COLUMN);
 		String valueString = ( value.compareTo(BigDecimal.ZERO) == 0 ? "0" : value.round(new MathContext(this.myData.getInt(ASSAY_SIG_FIG_COLUMN))).toPlainString());
 		switch (sign) {
