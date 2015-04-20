@@ -949,3 +949,9 @@ function uploadStatus(updatePath, resultButton) {
   	} 
 }
 
+function toggleRows(className, show) {
+        var elem = document.getElementsByClassName(className);
+        for ( var i = 0; i < elem.length; i++ ) {
+                elem[i].style.display = (show ? "table-row" : "none");
+        }
+}
