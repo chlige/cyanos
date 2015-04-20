@@ -28,8 +28,8 @@ public class CyanosSessionListener implements HttpSessionListener {
 	 */
 	@Override
 	public void sessionCreated(HttpSessionEvent event) {
-		HttpSession session = event.getSession();
-		session.setAttribute(JOB_MANAGER, new JobManager());
+//		HttpSession session = event.getSession();
+//		session.setAttribute(JOB_MANAGER, new JobManager());
 	}
 
 	/* (non-Javadoc)
