@@ -12,7 +12,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<cyanos:header title="Cyanos Database v1.6">
+<cyanos:header title="Cyanos Database v1.7">
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
@@ -70,7 +70,7 @@
 
 <div class="right75">
 <div class="desktop">
-<h1 style="text-align:center">Cyanos Database v1.6</h1>
+<h1 style="text-align:center">Cyanos Database v1.7</h1>
 <hr width="85%">
 <% 	News news = (News) request.getAttribute(MainServlet.ATTR_NEWS); 
 	SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter");
