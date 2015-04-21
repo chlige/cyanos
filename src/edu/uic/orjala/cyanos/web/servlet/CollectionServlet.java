@@ -1,7 +1,6 @@
 package edu.uic.orjala.cyanos.web.servlet;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +41,7 @@ public class CollectionServlet extends ServletObject {
 	 * @author George Chlipala
 	 *
 	 */
-	public class MapBounds {
+	public static class MapBounds {
 
 		protected float minLat = -90.0f;
 		protected float maxLat = 90.0f;
@@ -144,13 +143,13 @@ public class CollectionServlet extends ServletObject {
 				this.handleAJAX(req, res);
 				return;
 			} else if ( req.getRequestURI().endsWith(".kml") ) {
-				this.printKML(req, res);
+				printKML(req, res);
 				return;
 			} else if ( req.getRequestURI().endsWith(".csv") ) {
 				if ( req.getParameter(PARAM_COLLECTION_ID) != null )
-					this.exportIsolations(req, res);
+					exportIsolations(req, res);
 				else 
-					this.exportCollections(req, res);
+					exportCollections(req, res);
 				return;
 			}
 		} catch (DataException e) {
@@ -187,7 +186,7 @@ public class CollectionServlet extends ServletObject {
 				}
 		
 				req.setAttribute(ATTR_COLLECTION, collection);	
-				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
+				req.setAttribute(ATTR_MAP_BOUNDS, getMapBounds(req));
 				this.forwardRequest(req, res, "/collection.jsp");
 			}
 */			
@@ -201,15 +200,15 @@ public class CollectionServlet extends ServletObject {
 
 			if ( req.getParameter("col") != null ) {
 				req.setAttribute(ATTR_COLLECTION, SQLCollection.load(getSQLData(req), req.getParameter("col")));	
-				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
+				req.setAttribute(ATTR_MAP_BOUNDS, getMapBounds(req));
 			} else if ( req.getParameter("id") != null ) {
 				req.setAttribute(ATTR_ISOLATION, SQLIsolation.load(getSQLData(req), req.getParameter("id")));
 				req.setAttribute(ATTR_TYPES, SQLIsolation.types(getSQLData(req)));
 				this.forwardRequest(req, res, "/isolation.jsp");
 				return;
 			} else if ( req.getParameter("query") != null ) {
-				req.setAttribute(SEARCHRESULTS_ATTR, this.getCollectionList(req));
-				req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
+				req.setAttribute(SEARCHRESULTS_ATTR, getCollectionList(req));
+				req.setAttribute(ATTR_MAP_BOUNDS, getMapBounds(req));
 			}
 			this.forwardRequest(req, res, "/collection.jsp");
 			return;
@@ -418,7 +417,7 @@ public class CollectionServlet extends ServletObject {
 	}
 */
 	
-	private MapBounds getMapBounds(HttpServletRequest req) throws DataException, SQLException {
+	private static MapBounds getMapBounds(HttpServletRequest req) throws DataException, SQLException {
 		MapBounds bounds = new MapBounds();
 		
 		if ( req.getAttribute(ATTR_COLLECTION) != null ) {
@@ -440,7 +439,7 @@ public class CollectionServlet extends ServletObject {
 				else query = "%" + query + "%";
 				String[] columns = { req.getParameter("field") };
 				String[] values = { query };
-				float[] b = SQLCollection.boundsLike(this.getSQLData(req), columns, values, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
+				float[] b = SQLCollection.boundsLike(getSQLData(req), columns, values, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
 				bounds.minLong = b[0];
 				bounds.minLat = b[1];
 				bounds.maxLong = b[2];
@@ -456,7 +455,7 @@ public class CollectionServlet extends ServletObject {
 		PrintWriter out = res.getWriter();
 
 		if ( req.getParameter(PARAM_COLLECTION_ID) != null) {
-			Collection aCol = SQLCollection.load(this.getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
+			Collection aCol = SQLCollection.load(getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
 			if ( aCol.isLoaded() ) {
 				if ( aCol.isAllowed(Role.READ) ) {
 					if ( divID.equals(STRAIN_LIST_DIV_ID) ) {
@@ -471,7 +470,7 @@ public class CollectionServlet extends ServletObject {
 						this.forwardRequest(req, res, "/isolation/isolation-list.jsp");
 					} else if ( divID.equals(INFO_FORM_DIV_ID) ) {
 						req.setAttribute(ATTR_COLLECTION, aCol);
-						req.setAttribute(ATTR_MAP_BOUNDS, this.getMapBounds(req));
+						req.setAttribute(ATTR_MAP_BOUNDS, getMapBounds(req));
 						req.setAttribute("canMap", new Boolean(this.getAppConfig().canMap()));
 						this.forwardRequest(req, res, "/collection/collection-form.jsp");
 					} else if ( divID.equals(PHOTO_DIV_ID) ) {
@@ -493,7 +492,7 @@ public class CollectionServlet extends ServletObject {
 				}
 			}
 		} else if (req.getParameter("id") != null ) {
-			Isolation anIso = SQLIsolation.load(this.getSQLData(req), req.getParameter("id"));
+			Isolation anIso = SQLIsolation.load(getSQLData(req), req.getParameter("id"));
 			if ( anIso.isLoaded() ) {
 				if ( anIso.isAllowed(Role.READ) ) {
 					if ( divID.equals(STRAIN_LIST_DIV_ID) ) {
@@ -527,13 +526,13 @@ public class CollectionServlet extends ServletObject {
 	}
 	*/
 	
-	private void exportCollections(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	private static void exportCollections(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
 		
 		try {
 			
-			Collection thisCol = this.getCollectionList(req);
+			Collection thisCol = getCollectionList(req);
 
 			if ( thisCol != null && thisCol.first() ) {
 				SheetWriter sheetOut = new SheetWriter(out);
@@ -572,11 +571,11 @@ public class CollectionServlet extends ServletObject {
 		}
 	}
 
-	private void exportIsolations(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	private static void exportIsolations(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("text/plain");
 		try {
-			Isolation isos = SQLIsolation.isolationsForCollection(this.getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
+			Isolation isos = SQLIsolation.isolationsForCollection(getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
 			if ( isos != null && isos.first() ) {
 				SheetWriter sheetOut = new SheetWriter(out);
 				sheetOut.print("Isolation ID");
@@ -612,7 +611,7 @@ public class CollectionServlet extends ServletObject {
 		}
 	}
 	
-	public void printKML(HttpServletRequest req, HttpServletResponse res) throws XMLStreamException, IOException, DataException, SQLException {
+	public static void printKML(HttpServletRequest req, HttpServletResponse res) throws XMLStreamException, IOException, DataException, SQLException {
 		res.setContentType("application/vnd.google-earth.kml+xml");
 		XMLOutputFactory xof = XMLOutputFactory.newInstance();
 		XMLStreamWriter writer = xof.createXMLStreamWriter(res.getWriter());
@@ -633,7 +632,7 @@ public class CollectionServlet extends ServletObject {
 		writer.writeEndElement();
 		writer.writeEndElement();
 			
-		this.writeCollectionsKML(req, writer, "#collectionMark");
+		writeCollectionsKML(req, writer, "#collectionMark");
 
 		writer.writeEndElement();
 		writer.writeEndElement();
@@ -642,7 +641,7 @@ public class CollectionServlet extends ServletObject {
 		writer.close();
 	}
 
-	public Collection getCollectionList(HttpServletRequest req) throws DataException, SQLException {
+	public static Collection getCollectionList(HttpServletRequest req) throws DataException, SQLException {
 		Collection colList = null;
 		if ( req.getParameter(PARAM_COLLECTION_ID) != null ) {
 			Float maxLat = null , minLat = null, maxLong = null, minLong = null;
@@ -659,7 +658,7 @@ public class CollectionServlet extends ServletObject {
 				maxLong = Float.parseFloat(box[2]);
 				maxLat = Float.parseFloat(box[3]);
 			} else {
-				Collection center = SQLCollection.load(this.getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
+				Collection center = SQLCollection.load(getSQLData(req), req.getParameter(PARAM_COLLECTION_ID));
 				Float latFloat = center.getLatitudeFloat();
 				Float longFloat = center.getLongitudeFloat();
 				boolean hasLocation = ( (latFloat != null) && (longFloat != null) );
@@ -675,7 +674,7 @@ public class CollectionServlet extends ServletObject {
 				}
 			}
 			if ( maxLat != null )
-				colList = SQLCollection.collectionsLoacted(this.getSQLData(req), minLat, maxLat, minLong, maxLong);
+				colList = SQLCollection.collectionsLoacted(getSQLData(req), minLat, maxLat, minLong, maxLong);
 		} else {
 			String query = req.getParameter("query");
 			if ( query != null && ( ! query.equals("") ) ) {
@@ -683,16 +682,16 @@ public class CollectionServlet extends ServletObject {
 				else query = "%" + query + "%";
 				String[] columns = { req.getParameter("field") };
 				String[] values = { query };
-				colList = SQLCollection.collectionsLike(this.getSQLData(req), columns, values, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
+				colList = SQLCollection.collectionsLike(getSQLData(req), columns, values, SQLCollection.ID_COLUMN, SQLCollection.ASCENDING_SORT);
 			} else {
-				colList = SQLCollection.collections(this.getSQLData(req));
+				colList = SQLCollection.collections(getSQLData(req));
 			}
 		}
 		return colList;
 	}
 
-	private void writeCollectionsKML(HttpServletRequest req, XMLStreamWriter writer, String styleURL) throws DataException, XMLStreamException, SQLException {
-		Collection cols = this.getCollectionList(req);
+	private static void writeCollectionsKML(HttpServletRequest req, XMLStreamWriter writer, String styleURL) throws DataException, XMLStreamException, SQLException {
+		Collection cols = getCollectionList(req);
 		String selectedCol = req.getParameter(PARAM_COLLECTION_ID);
 		if ( cols != null && cols.first() ) {
 			String url = req.getRequestURL().toString();

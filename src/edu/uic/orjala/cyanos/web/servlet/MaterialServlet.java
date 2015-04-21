@@ -62,11 +62,11 @@ public class MaterialServlet extends ServletObject {
 			}
 
 			if ( req.getParameter("id") != null ) {
-				Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+				Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 				req.setAttribute(MATERIAL_ATTR, object);
 			} else if ( req.getParameter("query") != null ) {
 				//			aWrap.getRequest().setAttribute("material", object);
-				Material objects = SQLMaterial.find(this.getSQLData(req), req.getParameter("query"));
+				Material objects = SQLMaterial.find(getSQLData(req), req.getParameter("query"));
 				req.setAttribute(SEARCHRESULTS_ATTR, objects);
 			}
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/material.jsp");
@@ -81,14 +81,14 @@ public class MaterialServlet extends ServletObject {
 	private void handleDivContent(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException, DataException, SQLException {
 		String divID = req.getParameter("div");
 		if ( req.getParameter("livesearch") != null ) {
-			StrainServlet.printCultureIDs(this.getSQLData(req), req, res);
+			StrainServlet.printCultureIDs(getSQLData(req), req, res);
 		} else if ( divID.equals(SAMPLE_LIST_DIV_ID) ) {
-			Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+			Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 			req.setAttribute(SampleServlet.SEARCHRESULTS_ATTR, object.getSamples());
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/sample/sample-list.jsp");
 			disp.forward(req, res);				
 		} else if ( divID.equals(SEP_LIST_DIV_ID) ) {
-			Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+			Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 			try {
 				req.setAttribute(SeparationServlet.SEARCHRESULTS_ATTR, object.getSeparations());
 				RequestDispatcher disp = getServletContext().getRequestDispatcher("/separation/separation-list.jsp");
@@ -97,31 +97,31 @@ public class MaterialServlet extends ServletObject {
 				throw new ServletException(e);
 			}
 		} else if ( divID.equals(COMPOUND_DIV_ID) ) {
-			Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+			Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 			req.setAttribute(CompoundServlet.COMPOUND_PARENT, object);
 			if ( req.getParameter("showCmpdForm") != null ) 
-				req.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(this.getSQLData(req), SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT));
+				req.setAttribute(CompoundServlet.COMPOUND_LIST, SQLCompound.compounds(getSQLData(req), SQLCompound.ID_COLUMN, SQLCompound.ASCENDING_SORT));
 			else 
 				req.setAttribute(CompoundServlet.COMPOUND_RESULTS, object.getCompounds());
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/material/link-material-compound.jsp");
 			disp.forward(req, res);
 		} else if ( divID.equals(INFO_FORM_DIV_ID) ) {
-			Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+			Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 			req.setAttribute(MATERIAL_ATTR, object);				
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/material/material-form.jsp");
 			disp.forward(req, res);
 		} else if ( divID.equals(ASSAY_DIV_ID) ) {
 			AssayData data;
 			if ( req.getParameter("target") != null && req.getParameter("target").length() > 0 )
-				data = SQLAssayData.dataForMaterialID(this.getSQLData(req), req.getParameter("id"), req.getParameter("target"));
+				data = SQLAssayData.dataForMaterialID(getSQLData(req), req.getParameter("id"), req.getParameter("target"));
 			else
-				data = SQLAssayData.dataForMaterialID(this.getSQLData(req), req.getParameter("id"));
+				data = SQLAssayData.dataForMaterialID(getSQLData(req), req.getParameter("id"));
 			req.setAttribute(AssayServlet.SEARCHRESULTS_ATTR, data);
-			req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(this.getSQLData(req)));
+			req.setAttribute(AssayServlet.TARGET_LIST, SQLAssay.targets(getSQLData(req)));
 			RequestDispatcher disp = getServletContext().getRequestDispatcher("/assay/assay-data-list.jsp");
 			disp.forward(req, res);
 		} else if ( divID.equals(DATAFILE_DIV_ID) ) {
-			Material object = SQLMaterial.load(this.getSQLData(req), req.getParameter("id"));
+			Material object = SQLMaterial.load(getSQLData(req), req.getParameter("id"));
 			RequestDispatcher disp = DataFileServlet.dataFileDiv(req, getServletContext(), object, Material.DATA_FILE_CLASS);
 			disp.forward(req, res);			
 		}

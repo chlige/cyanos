@@ -477,7 +477,7 @@ public class StrainServlet extends ServletObject {
 		return;
 	}
 
-	private Strain getStrains(HttpServletRequest req) throws DataException, SQLException {
+	public static Strain getStrains(HttpServletRequest req) throws DataException, SQLException {
 		String queryString = req.getParameter(FIELD_QUERY);
 		if (queryString.matches("\\*") ) {
 			queryString.replaceAll("\\*", "%");
