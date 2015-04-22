@@ -3,7 +3,10 @@
 <%@ tag import="java.net.URLEncoder,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet" %>
 <%@ attribute name="helpModule" required="false" %>
-<% String contextPath = request.getContextPath(); %><nav>
+<% String contextPath = request.getContextPath(); %>
+<div style="width:100%; margin-bottom:20px">
+<nav>
+<div class="mobile">
 <label for="show-menu" class="show-menu">CYANOS</label>
 <input type="checkbox" id="show-menu" role="button">
 <ul id="mobile-menu" class="mobile-menu">
@@ -15,6 +18,8 @@
 </c:if>
 <li class='helpmenu'><a href='<%= contextPath %>/help?search'>Search Help</a></li>
 </ul>
+</div>
+<div class="desktop">
 <ul class="menu">
 <li><a>Cyanos</a>
 <ul class='submenu'>
@@ -105,14 +110,15 @@
 <li><a href='<%= contextPath %>/help?find'>Find a Topic</a></li>
 <li><a href='<%= contextPath %>/help?search'>Search</a></li>
 </ul></li>
-<li style="float:right; padding-top: 6px; margin-right:30px; border:0px;">
+<li style="float:right; border: 0px; padding-top:5px; padding-right:10px">
 <% if (UploadServlet.hasSpreadsheet(request) ) { %>
-<a href="<%= contextPath %>/spreadsheet.jsp" style="width:20px; display:inline"><img title="View loaded spreadsheet" src="<%= contextPath %>/images/icons/spreadsheet.png" height="20px"></a>
+<a href="<%= contextPath %>/spreadsheet.jsp" style="width:20px; display:inline" class="ignore"><img title="View loaded spreadsheet" src="<%= contextPath %>/images/icons/spreadsheet.png" height="20px"></a>
 <% }
 	if ( UploadServlet.hasActiveJobs(session) ) { 
-%><a href="<%= contextPath %>/jobs.jsp" style="width:20px; display:inline"><img title="A job is running" src="<%= contextPath %>/images/icons/job-running.png" height="20px"></a>
+%><a href="<%= contextPath %>/jobs.jsp" style="width:20px; display:inline" class="ignore"><img title="A job is running" src="<%= contextPath %>/images/icons/job-running.png" height="20px"></a>
 <% } %>
 </li>
 </ul>
+</div>
 </nav>
-<div style='height:20px'></div>
+</div>

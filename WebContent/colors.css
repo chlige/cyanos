@@ -11,6 +11,7 @@ nav ul { background: #009070; }
 	li.home { background-color: #00C0A0; }	
 	nav ul a, nav ul a:visited { color: #FFFF30; }
 	nav ul a:hover, nav ul a:active { background-color: #00C0A0; color: #FFFF30; }
+	nav ul a.ignore:hover, nav ul a.ignore:active { background-color: inherit; }
 	ul.submenu { border-bottom-color: black; background-color: #808080;	}
 	ul.submenu > hr { border-color: black; }
 	.submenu a:hover, .submenu a:active { background-color: #aaa; }
