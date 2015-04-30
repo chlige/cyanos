@@ -85,7 +85,12 @@ if ( taxon != null && taxon.first() ) { Taxon lineage = taxon.getLinage(); linea
 	String value = request.getParameter("culture_status");
 	if (value != null && (! value.equals(strainObj.getStatus()) ) ) {
 		strainObj.setStatus(value); %> class="updated"<% } } %>
-><td>Culture status:</td><td><%= strainObj.getStatus() %></td></tr>
+><td>Culture status:</td><td>
+<% if ( strainObj.isActive()) { %>
+<%= strainObj.getStatus() %>
+<% } else { %>
+<b style="color:red">REMOVED</b> - <%= dateFormat.format(strainObj.getRemovedDate()) %>
+<% } %></td></tr>
 <tr<% if ( update ) { 
 	String value = request.getParameter("project");
 	if (value != null && (! value.equals(strainObj.getProjectID()) ) ) {
