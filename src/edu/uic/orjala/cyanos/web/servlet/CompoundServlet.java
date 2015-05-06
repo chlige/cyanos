@@ -677,9 +677,7 @@ public class CompoundServlet extends ServletObject {
 				}
 				
 				if ( genInchi ) {
-					String inchiString = InchiGenerator.convertMOL(compound.getMDLData());
-					compound.setInChiString(inchiString);
-					compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
+					genInChi(compound);
 				} else {
 					setAttribute(req, FIELD_INCHI_STRING, compound, SQLCompound.INCHI_STRING_COLUMN, updateValues);
 					setAttribute(req, FIELD_INCHI_KEY, compound, SQLCompound.INCHI_KEY_COLUMN, updateValues);
@@ -696,6 +694,12 @@ public class CompoundServlet extends ServletObject {
 		}
 		
 		req.setAttribute(ATTR_UPDATE_MAP, updateValues);
+	}
+	
+	public static void genInChi(Compound compound) throws DataException, UnsupportedOperationException, SOAPException {
+		String inchiString = InchiGenerator.convertMOL(compound.getMDLData());
+		compound.setInChiString(inchiString);
+		compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
 	}
 	
 	private static void updateCompoundUpload(Compound compound, Molecule molecule, String mdlData) throws DataException, UnsupportedOperationException, SOAPException, ClassNotFoundException, IOException, CDKException {

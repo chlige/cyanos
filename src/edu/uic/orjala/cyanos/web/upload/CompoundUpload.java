@@ -29,6 +29,7 @@ import edu.uic.orjala.cyanos.Compound;
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.sql.SQLCompound;
 import edu.uic.orjala.cyanos.sql.SQLData;
+import edu.uic.orjala.cyanos.web.InchiGenerator;
 import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.MultiPartRequest;
 import edu.uic.orjala.cyanos.web.html.HtmlList;
@@ -220,7 +221,14 @@ public class CompoundUpload extends Job {
 								StringWriter mdlData = new StringWriter();
 								MDLWriter mdlWrite = new MDLWriter(mdlData);
 								mdlWrite.writeMolecule(molecule);
-								compound.setMDLData(mdlData.toString());
+								
+								String mdlString = mdlData.toString();
+								
+								compound.setMDLData(mdlString);
+								
+								String inchiString = InchiGenerator.convertMOL(mdlString);
+								compound.setInChiString(inchiString);
+								compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
 																
 								if (setName) {
 									String name = (String)molecule.getProperty(nameProp);
