@@ -48,7 +48,14 @@ public class CyanosSessionListener implements HttpSessionListener {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}		
+		}	
+		if ( session.getAttribute("dateFormatter") != null ) {
+			session.removeAttribute("dateFormatter");
+		}
+		
+		if ( session.getAttribute("url") != null ) {
+			session.removeAttribute("url");
+		}
 	}
 	
 	public static JobManager getJobManager(HttpSession session) {
