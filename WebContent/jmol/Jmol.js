@@ -909,7 +909,7 @@ function _jmolDomDocumentWrite(data) {
   Ptr[0] = 0
   while (Ptr[0] < data.length) {
     var child = _jmolGetDomElement(data, Ptr)
-    if (!child)break
+    if (!child)break;
     if (_jmol.XhtmlAppendChild)
       _jmol.XhtmlElement.appendChild(child)
     else
@@ -968,7 +968,7 @@ function _jmolGetDomElement(data, Ptr, closetag, lvel) {
   Ptr[0] = ++pt
   while (Ptr[0] < data.length) {
     var child = _jmolGetDomElement(data, Ptr, "/" + tagname, lvel+1)
-    if (!child)break
+    if (!child)break;
     e.appendChild(child)
   }
   return e
