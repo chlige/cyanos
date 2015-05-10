@@ -115,6 +115,18 @@ public class Amount {
 		this.unit = unit;
 	}
 	
+	public static Amount grams(BigDecimal value) {
+		return new Amount(value, AmountUnit.MASS);
+	}
+	
+	public static Amount liters(BigDecimal value) {
+		return new Amount(value, AmountUnit.VOLUME);
+	}
+	
+	public static Amount gramsPermL(BigDecimal value) {
+		return new Amount(value, AmountUnit.CONCENTRATION);
+	}
+	
 	private void parseAmount(String amount, String unit) {	
 		Matcher match = CyanosObject.UNIT_PATTERN.matcher(amount);
 		if ( match.matches() ) {
