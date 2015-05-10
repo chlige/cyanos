@@ -388,6 +388,7 @@
       <url-pattern>/jobs.jsp</url-pattern>
       <url-pattern>/updateUser.jsp</url-pattern>
       <url-pattern>/oauth.jsp</url-pattern>
+      <url-pattern>/report/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
