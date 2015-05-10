@@ -39,19 +39,17 @@ import edu.uic.orjala.cyanos.web.upload.UploadJob;
 public class UploadServlet extends ServletObject {
 	
 
-	public static final String PARAM_FILE = "xmlFile";
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String PARAM_HEADER = "header";
 	public static final String PARAM_SHOW_TYPE = "showType";
 	public static final String PARAM_MODULE = "module";
+	public static final String PARAM_FILE = "xmlFile";
 	
 	public static final String PARAM_ROW_BEHAVIOR = "behavior";
 	public static final String PARAM_ROWS = "rows";
 		
-
-
 	public final static String RESULTS = "upload results";
 	public final static String PARSE_ACTION = "parseAction";
 	public final static String CLEAR_SHEET_ACTION = "clearUpload";
