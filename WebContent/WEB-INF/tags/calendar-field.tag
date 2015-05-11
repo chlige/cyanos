@@ -4,14 +4,13 @@
 <%@ attribute name="fieldName" required="true" %>
 <%@ attribute name="dateValue" required="false" %>
 <%@ attribute name="showTime" required="false" type="java.lang.Boolean" %>
-<c:set var="showTime" value="${showTime == null ? false : showTime}"/>
-<% if ( jspContext.getAttribute("dateValue") == null ) {
-	String value = request.getParameter((String) jspContext.getAttribute("fieldName"));
-	if ( value == null ) {
-		SimpleDateFormat format = new SimpleDateFormat((Boolean)jspContext.getAttribute("showTime") ? "yyyy-MM-dd hh:mm a" : "yyyy-MM-dd"); 
-		value = format.format(new Date());	
-	}
-	jspContext.setAttribute("dateValue", value);	
+<% if ( showTime == null ) {
+	showTime = Boolean.FALSE;
+%><c:set var="showTime" value="${false}"/><% }
+if ( dateValue == null ) {
+		SimpleDateFormat format = new SimpleDateFormat(showTime ? "yyyy-MM-dd hh:mm a" : "yyyy-MM-dd"); 
+		dateValue = format.format(new Date());
+%><c:set var="dateValue" value="<%= dateValue %>"/><%
 } %>
 <input id="html5_${fieldName}" type="date" name="${fieldName}" value="${dateValue}" placeholder="YYYY-MM-DD">
 <input id="${fieldName}" type="text" class="dateField" name="${fieldName}" onload="checkDateType(this, false)" onClick="showDate('cal_' + this.name, this.name, ${showTime})"  style='padding-bottom: 0px' size="${showTime ? 15 : 10 }"  value="${dateValue}"/>
