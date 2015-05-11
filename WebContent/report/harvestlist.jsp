@@ -27,13 +27,19 @@ h2 { text-align:center; }
 <h1>Database Report</h1>
 <h2>Harvest awaiting extraction</h2>
 <hr>
+<div style="margin-left: auto; margin-right:auto; text-align:center; padding-bottom:10px">
+<form>Since: <cyanos:calendar-field fieldName="since" dateValue='<%= request.getParameter("since") %>'/><button type="submit">Run Report</button></form></div>
 <% if ( request.isUserInRole(User.CULTURE_ROLE) ) {
-	String sql = "SELECT culture_id, harvest_id, date, cell_mass_value * POW(10,cell_mass_scale), cell_mass_scale FROM harvest WHERE harvest_id NOT IN (SELECT DISTINCT harvest_id FROM extract_info) ORDER BY date ASC";
+	String sql = "SELECT culture_id, harvest_id, date, cell_mass_value * POW(10,cell_mass_scale), cell_mass_scale FROM harvest WHERE harvest_id NOT IN (SELECT DISTINCT harvest_id FROM extract_info) "  +
+			(request.getParameter("since") != null ? "date >= ? " : "")	+ "ORDER BY date ASC";
 	Connection conn = AppConfigListener.getDBConnection();
-	Statement sth = conn.createStatement();
-	ResultSet results = sth.executeQuery(sql);
+	PreparedStatement sth = conn.prepareStatement(sql);
+	if ( request.getParameter("since") != null )
+		sth.setString(1, request.getParameter("since"));
+		
+	ResultSet results = sth.executeQuery();
 	String path = request.getContextPath();
-	DateFormat dateFormat = MainServlet.DATE_FORMAT;
+	DateFormat dateFormat = MainServlet.DATE_FORMAT;	
 %>
 <table style="margin-left: auto; margin-right:auto;">
 <tr><th>Strain</th><th>Harvest Date</th><th>Cell Mass</th></tr>

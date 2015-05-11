@@ -28,6 +28,7 @@ h2 { text-align:center; }
 <ul>
 <li><a href="inoclist.jsp">Large scale inoculations awaiting harvest</a></li>
 <li><a href="harvestlist.jsp">Harvest awaiting extraction</a></li>
+<li><a href="extractList.jsp">Extracts made since</a></li>
 </ul>
 </body>
 </html>

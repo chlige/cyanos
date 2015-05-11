@@ -27,13 +27,19 @@ h2 { text-align:center; }
 <h1>Database Report</h1>
 <h2>Large scale inoculations awaiting harvest</h2>
 <hr>
+<div style="margin-left: auto; margin-right:auto; text-align:center; padding-bottom:10px;">
+<form>Since: <cyanos:calendar-field fieldName="since" dateValue='<%= request.getParameter("since") %>'/><button type="submit">Run Report</button></form></div>
 <% if ( request.isUserInRole(User.CULTURE_ROLE) ) {
-	String sql = "SELECT culture_id, date, media,COUNT(inoculation_id),volume_value * POW(10,volume_scale), MAX(volume_scale) FROM inoculation WHERE fate IS NULL AND harvest_id IS NULL GROUP BY culture_id,media,volume_value,volume_scale,date ORDER BY date ASC";
+	String sql = "SELECT culture_id, date, media,COUNT(inoculation_id),volume_value * POW(10,volume_scale), MAX(volume_scale) FROM inoculation WHERE fate IS NULL AND harvest_id IS NULL " + 
+			(request.getParameter("since") != null ? "AND date >= ? " : "") + "GROUP BY culture_id,media,volume_value,volume_scale,date ORDER BY date ASC";
 	Connection conn = AppConfigListener.getDBConnection();
-	Statement sth = conn.createStatement();
-	ResultSet results = sth.executeQuery(sql);
+	PreparedStatement sth = conn.prepareStatement(sql);
+	if ( request.getParameter("since") != null )
+		sth.setString(1, request.getParameter("since"));
+		
+	ResultSet results = sth.executeQuery();
 	String path = request.getContextPath();
-	DateFormat dateFormat = MainServlet.DATE_FORMAT;
+	DateFormat dateFormat = MainServlet.DATE_FORMAT;	
 %>
 <table style="margin-left: auto; margin-right:auto;">
 <tr><th>Strain</th><th>Inoc. Date</th><th>Volume</th><th>Media</th></tr>
