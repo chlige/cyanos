@@ -245,6 +245,7 @@ public class SQLAssayPlate extends SQLBoxObject implements AssayPlate {
 	 */
 	public String getActivityString() throws DataException {
 		BigDecimal value = this.getActivity();
+		if ( value == null ) return "-";
 		int sign = this.myData.getInt(VALUE_SIGN_COLUMN);
 		String valueString = ( value.compareTo(BigDecimal.ZERO) == 0 ? "0" : value.round(this.sfMC).toPlainString());
 		switch (sign) {
