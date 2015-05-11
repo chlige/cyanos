@@ -24,11 +24,13 @@ h2 { text-align:center; }
 </head>
 <body>
 <cyanos:menu helpModule="<%= MainServlet.HELP_MODULE %>"/>
+<div id="content">
 <h1>Database Reports</h1>
 <ul>
 <li><a href="inoclist.jsp">Large scale inoculations awaiting harvest</a></li>
 <li><a href="harvestlist.jsp">Harvest awaiting extraction</a></li>
 <li><a href="extractList.jsp">Extracts made since</a></li>
 </ul>
+</div>
 </body>
 </html>
