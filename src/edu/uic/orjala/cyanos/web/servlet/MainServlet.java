@@ -16,6 +16,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -332,6 +333,19 @@ public class MainServlet extends ServletObject {
 		}
 	}
 	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		try {
+			File install = new File(config.getServletContext().getRealPath(".install"));			
+			if ( ! install.exists() ) {
+				install.createNewFile();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private boolean validateSetup(Map<String,String> setupValues) {
 		boolean valid = setupValues.containsKey(SETUP_DB_VALID);
 		if ( valid && setupValues.containsKey(SETUP_HAS_ADMIN) ) 
