@@ -77,6 +77,7 @@ Minimum growth size: <input type="number" name="volume" value="1" min="1" max="2
 </table>
 <%	results.close();
 	sth.close();
+	conn.close();
 	} else {
 %><p align="center">Select date range</p><%
 	}		

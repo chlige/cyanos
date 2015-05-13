@@ -74,7 +74,8 @@ table { margin-left: auto; margin-right:auto; }
 	sth.close();
 	} else {
 %><p align="center">Select date range</p><%
-	}		
+	}	
+	conn.close();
 } else {
 %><p align="center">Access denied</p><%
 }
