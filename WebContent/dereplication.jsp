@@ -131,6 +131,7 @@ var count = 0;
 </head>
 <body>
 <cyanos:menu helpModule="derplication"/>
+<div id="content" style="margin-bottom:20px">
 <h1>Compound Dereplication</h1>
 <hr width="90%">
 <% String contextPath = request.getContextPath();
@@ -169,15 +170,17 @@ var count = 0;
 </div>
 <% if ( performSearch ) { 
 	DereplicationQuery search = DereplicationServlet.startDereplicationQuery(request);
-%><div style="margin-left:50px; margin-right:50px;"><div class="showSection" id="showSQL">
+%><p align="center"><a href="dereplication.jsp">New Dereplication Search</a></p>
+<div style="margin-left:50px; margin-right:50px;"><div class="showSection" id="showSQL">
 <p align="CENTER"><a onclick="showHide('hideSQL','showSQL')">Show SQL WHERE Statement</a></p></div>
 <div class="hideSection" id="hideSQL"><p align="CENTER" style="border: 1px solid gray">
 <code>SELECT DISTINCT compound.* FROM compound <%= search.buildQuery() %></code></p>
 <p align="CENTER"><a onclick="showHide('showSQL','hideSQL')">Hide SQL WHERE Statement</a></p></div></div>
-<div id="job-<%= search.getID()  %>">
+<div id="job-<%= search.getID()  %>" style="margin-bottom: 20px">
 <div class="progress" style="width: 200px"><div class="progressText"></div><div class="progressBar"></div></div>
 <script>jobStatus("<%= search.getID() %>");</script>
 </div>
 <% } else { %><p align="center"><a href="?listPrevJobs">List previous dereplication jobs</a></p><% } } %>
+</div>
 </body>
 </html>
