@@ -201,6 +201,7 @@ public class CompoundServlet extends ServletObject {
 
 				if ( req.getParameter("graphic") != null ) {
 					drawMolecule(aCompound, req, res);
+					return;
 				}
 				
 				if ( req.getParameter(UPDATE_ACTION) != null ) 

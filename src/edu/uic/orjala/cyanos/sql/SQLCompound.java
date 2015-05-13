@@ -81,6 +81,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 		int charge = 0;
 		int valence;
 		int Z;
+		boolean hypervalent = false;
 		
 		private final List<Bond> bonds = new ArrayList<Bond>(4);
 		
@@ -114,8 +115,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			// number e = 2(2l+1)
 			int electrons = Z;
 			int outer = 0;
-			for ( int row = 1; row <= 8; row++ ) {
-				int n = row;
+			for ( int n = 1; n <= 8; n++ ) {
 				int e = 2;
 				if ( n-2 >= 4 ) {
 					e = e + 14;
@@ -139,7 +139,9 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 			for ( Bond bond : bonds ) {
 				totalBonds = totalBonds + bond.bondOrder;
 			}
-			return (8 - valence) - Math.round(totalBonds) + charge;
+			int hCount =  (8 - valence) - Math.round(totalBonds) + charge;
+			this.hypervalent = hCount < 0;
+			return ( hypervalent && Z > 12 ? 0 : hCount);
 		}
 	}
 
