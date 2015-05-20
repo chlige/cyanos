@@ -28,8 +28,11 @@ h2 { text-align:center; }
 <h1>Database Reports</h1>
 <ul>
 <li><a href="inoclist.jsp">Large scale inoculations awaiting harvest</a></li>
-<li><a href="harvestlist.jsp">Harvest awaiting extraction</a></li>
+<li><a href="harvestlist.jsp">Harvests since</a></li>
 <li><a href="extractList.jsp">Extracts made since</a></li>
+<li><a href="strainStatus.jsp">Strain status including harvest, extract and separation</a></li>
+<li><a href="assayList.jsp">Assay summary by strain</a></li>
+<li><a href="activeList.jsp">Assay summary by target</a></li>
 </ul>
 </div>
 </body>
