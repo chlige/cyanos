@@ -23,12 +23,12 @@
 </div>
 <div id="loginBox">
 <div id="loginBoxForm">
-<font size='+2'>CYANOS Login</font><hr>
+<h1>CYANOS Login</h1><hr>
 <form action='j_security_check' method='post' target='_top'>
 <label for="j_username">Username:</label>
-<input type='text' name='j_username'  autocorrect="off" autocapitalize="none"><br/>
+<input type='text' name='j_username'  autocorrect="off" autocapitalize="none" size="20"><br/>
 <label for="j_password">Password:</label>
-<input type='password' name='j_password' size='8'><br/>
+<input type='password' name='j_password' size='20'><br/>
 <button type='submit'>Login</button>
 </form></div>
 <div id="loginNote" style="visibility: hidden">

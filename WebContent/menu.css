@@ -27,6 +27,10 @@ nav ul  {
 	display:none;
 }
 
+.tablet {
+	display:none;	
+}
+
 nav input[type=checkbox] {
 	font-size: 14pt;
 	font-weight: bold;
@@ -36,7 +40,7 @@ nav input[type=checkbox] {
 	display: none;
 }
 
-@media screen and (min-width: 680px) {
+@media screen and (min-device-width: 1025px) {
 	ul.menu {
 		width:100%;
 		margin-top: 0px;
@@ -113,11 +117,11 @@ nav input[type=checkbox] {
 	nav a:hover { cursor: pointer; }
 }
 
-nav input[type=checkbox]:checked ~ #mobile-menu {
-	display: block;
-}
-
-@media screen and (max-width: 680px) {	
+@media screen and (max-device-width: 680px) {	
+	nav input[type=checkbox]:checked ~ #mobile-menu {
+		display: block;
+	}
+	
 	.show-menu { display: block; }	
 	.menu { display: none; }
 	.mobile-menu a, .mobile-menu a:visited { font-size: 14pt; }
@@ -145,9 +149,87 @@ nav input[type=checkbox]:checked ~ #mobile-menu {
 	ul.mobile-menu li, ul.mobile-menu li a { width: 100%; }	
 }
 
+@media screen and (min-device-width: 681px) and (max-device-width: 1024px) {	
+	nav {
+		z-index: 500;
+	}
+	
+	ul.menu {
+		width:250px;
+		margin-top: 0px;
+		padding: 0px;
+		display: none;
+	}
+
+	ul.menu > li {
+		margin-bottom: 1px;
+		border-top: 1px solid white;
+		padding-top: 5px;
+	}
+	
+	nav input[type=checkbox]:checked ~ ul.menu {
+		display: block;
+	}
+
+	nav input[type=checkbox]:checked + label.showmenu {
+		width:225px;
+		border-bottom: 0px;
+		display: block; 
+		font-size:16pt; 
+		font-weight: bold; 
+	}
+	
+	nav ul.menu {
+		padding: 0px;
+		list-style: none;
+		position: fixed;
+	}
+	
+	ul.menu ul { display: none; }
+	
+	ul.menu > li > a {
+		padding-left: 10px;
+		padding-bottom: 5px;
+	}
+	
+	.show-menu { 
+		background-color: white;
+		font-size:16pt; 
+		font-weight: bold;
+		display:block;
+		text-align:left;
+		padding: 10px;
+		padding-left: 15px;
+		
+	}	
+	
+	.notablet { display: none; }
+	
+	nav ul li:hover > ul { display: block; }
+	
+	ul.submenu {
+		position: relative;
+		margin:0px;
+		margin-top: 5px;
+	}
+	
+	ul.submenu a, ul.submenu a:active, ul.submenu a:hover, ul.submenu a:visited {
+		text-align: left;
+		width: auto;
+		min-width: 125px;
+		padding: 5px;
+		font-size: 12pt;
+		font-weight: normal;
+	}
+	ul.submenu > hr { border-style: solid; border-color: black; }
+	li.break { border-top: 1px solid black; }
+	
+}
+
 @media print {
 	.printheader { display: block; }
 	nav { display: none; }
+	
 }
 
 

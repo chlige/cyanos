@@ -7,7 +7,7 @@
 <div style="width:100%; margin-bottom:20px">
 <nav>
 <div class="mobile">
-<label for="show-menu" class="show-menu">CYANOS</label>
+<label for="show-menu" id="show-menu-label" class="show-menu">CYANOS</label>
 <input type="checkbox" id="show-menu" role="button">
 <ul id="mobile-menu" class="mobile-menu">
 <li><a href='<%= contextPath %>/main'>Main Page</a></li>
@@ -20,7 +20,9 @@
 </ul>
 </div>
 <div class="desktop">
-<ul class="menu">
+<input type="checkbox" id="show-fullmenu" role="button">
+<label for="show-fullmenu" class="show-menu">&equiv;</label>
+<ul id="menu" class="menu">
 <li><a>Cyanos</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/main'>Main Page</a></li>
@@ -53,7 +55,7 @@
 
 <% if ( request.isUserInRole("culture") ) { %>
 <!-- COLLECTION/ISOLATION MENU -->
-<li class='menu' id='collectionMenu'><a onClick='toggleMenu("collectionMenu")'>Collections</a>
+<li class='menu' id='collectionMenu'><a>Collections</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/collection'>Search Collections</a></li>
 <li><a href='<%= contextPath %>/collection?form=add'>Add New Collection</a></li>
@@ -61,7 +63,7 @@
 <li><a href='<%= contextPath %>/isolation/upload.jsp'>Upload Isolation Data</a></li>
 </ul></li>
 
-<li><a onClick='toggleMenu("strainMenu")'>Cultures</a>
+<li><a>Cultures</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/strain'>Search Strains</a></li>
 <li><a href='<%= contextPath %>/taxabrowser'>Taxa Browser</a></li>
@@ -75,7 +77,7 @@
 <% } 
 	if ( request.isUserInRole("sample") ) { 
 %><!-- SAMPLE MENU -->
-<li class='menu' id='sampleMenu'><a onClick='toggleMenu("sampleMenu")'>Materials</a>
+<li class='menu' id='sampleMenu'><a>Materials</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/material'>Search Materials</a></li>
 <li><a href="<%= contextPath %>/material/upload.jsp">Upload Extract Data</a></li>
@@ -95,7 +97,7 @@
 <% } 
 	if ( request.isUserInRole("assay") ) { %>
 <!-- ASSAY MENU -->
-<li class='menu' id='assayMenu'><a onClick='toggleMenu("assayMenu")'>Assays</a>
+<li class='menu' id='assayMenu'><a>Assays</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/assay?action=add'>Add New</a></li>
 <li><a href='<%= contextPath %>/assay'>Browse Data</a></li>
@@ -104,7 +106,7 @@
 </ul></li>
 <% } %>
 <!-- HELP MENU -->
-<li class='helpmenu' id='helpMenu'><a onClick='toggleMenu("helpMenu")'>Help</a>
+<li class='helpmenu' id='helpMenu'><a>Help</a>
 <ul class='submenu'><li><%
 	if ( jspContext.getAttribute("helpModule") != null ) {
 %><a href='<%= contextPath %>/help?toc&module=${helpModule}'>Quick Help</a></li>
@@ -112,7 +114,7 @@
 <li><a href='<%= contextPath %>/help?find'>Find a Topic</a></li>
 <li><a href='<%= contextPath %>/help?search'>Search</a></li>
 </ul></li>
-<li style="float:right; border: 0px; padding-top:5px; padding-right:10px">
+<li style="float:right; border: 0px; padding-top:5px; padding-right:10px" class="notablet">
 <% if (UploadServlet.hasSpreadsheet(request) ) { %>
 <a href="<%= contextPath %>/spreadsheet.jsp" style="width:20px; display:inline" class="ignore"><img title="View loaded spreadsheet" src="<%= contextPath %>/images/icons/spreadsheet.png" height="20px"></a>
 <% }
