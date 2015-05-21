@@ -125,8 +125,8 @@ public class SampleLibraryUpload extends UploadJob {
 							else { dest.setCollectionID(staticCol); }
 							if (destLocCol > -1) { dest.setLocation(this.worksheet.getStringValue(destLocCol)); }
 							if (destLabelCol > -1) { dest.setName(this.worksheet.getStringValue(destLabelCol)); }
-							dest.setNotes(bulkLoadNote);
-							if (destNotesCol > -1)  { dest.addNotes(this.worksheet.getStringValue(destNotesCol)); }
+							if (destNotesCol > -1)  { dest.setNotes(bulkLoadNote + this.worksheet.getStringValue(destNotesCol)); }
+							else { dest.setNotes(bulkLoadNote); }
 							dest.setBaseUnit(loadUnit);
 							dest.refresh();
 							dest.setAutoRefresh();
