@@ -72,10 +72,10 @@ table { margin-left: auto; margin-right:auto; }
 </table>
 <%	results.close();
 	sth.close();
+	conn.close();
 	} else {
 %><p align="center">Select date range</p><%
 	}	
-	conn.close();
 } else {
 %><p align="center">Access denied</p><%
 }
