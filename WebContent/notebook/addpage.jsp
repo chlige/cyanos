@@ -19,7 +19,7 @@
 <head>
 <cyanos:header title="Cyanos Notebooks"/>
 <% if ( request.getParameter("id") != null && request.getParameter("add") == null ) {  %>
-<script type="text/javascript" src="<%= request.getContextPath() %>/tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="<%= request.getContextPath() %>/tinymce/tinymce.js"></script>
 <script type="text/javascript">
 tinymce.init({
         selector: "textarea#content",
@@ -27,7 +27,8 @@ tinymce.init({
         plugins: [
                 "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
                 "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-                "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern"
+                "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern",
+                "cyanos"
         ],
 
         toolbar1: "fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
