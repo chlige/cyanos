@@ -1,4 +1,4 @@
-@media only screen and (max-width: 680px) {
+@media only screen and (max-device-width: 680px) {
 	
 	.left25 { width: 90%; display: block; margin-left: auto; margin-right: auto; }
 	

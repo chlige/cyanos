@@ -5,7 +5,7 @@ nav input[type=checkbox] { color: #FFFF30; }
 .helpmenu { background-color: #ff4e4e; }
 nav ul { background: #009070; }
 
-@media screen and (min-width: 680px) {
+@media screen and (min-device-width: 680px) {
 	ul.menu { border-bottom-color: black; }
 	ul.menu > li { border-right-color: #ccc; }
 	li.home { background-color: #00C0A0; }	
@@ -132,7 +132,7 @@ a.submenu:hover { color:#727272; }
 
 #sideNav { background-color: #A9F8F3; border-color: black; }
 
-@media only screen and (min-width: 720px) {
+@media only screen and (min-device-width: 720px) {
 	#loginBoxForm { background-color: white; border-color: black; }
 	#loginCover { background-color: #333333;	}
 }
