@@ -48,7 +48,7 @@ summary, hgroup {
   height: 25px;
 }
 
-@media screen and (min-width: 40em) {
+@media screen and (min-device-width: 40em) {
   .nav-collapse li {
     width: 125px;
     *width: 120px; /* IE7 Hack */
@@ -68,7 +68,7 @@ summary, hgroup {
   outline: 0;
 }
 
-@media screen and (min-width: 40em) {
+@media screen and (min-device-width: 40em) {
   .nav-collapse a {
     margin: 0;
     padding: 1em;
@@ -85,7 +85,7 @@ summary, hgroup {
   padding-left: 2em;
 }
 
-@media screen and (min-width: 40em) {
+@media screen and (min-device-width: 40em) {
   .nav-collapse ul ul a {
     display: none;
   }
