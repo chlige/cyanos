@@ -40,16 +40,31 @@ nav input[type=checkbox] {
 	display: none;
 }
 
+ul.menu > li {
+		font-size: 14pt;
+		display: block;
+		padding: 0;
+}
+
+ul.menu a {
+		padding: 5px;
+		display: block;
+}
+
 @media screen and (min-device-width: 1025px) {
 	ul.menu {
 		width:100%;
 		margin-top: 0px;
 		border-bottom: 2px solid black;
 		padding: 0px;
+		cursor: pointer;
 	}
 	
 	ul.menu > li {
+		font-weight: bold;
 		border-right: 1px solid #ccc;
+		width: 130px;		
+		text-align: center;
 	}
 	
 	nav ul {
@@ -117,6 +132,8 @@ nav input[type=checkbox] {
 	nav a:hover { cursor: pointer; }
 }
 
+/* Mobile phones */
+
 @media screen and (max-device-width: 680px) {	
 	nav input[type=checkbox]:checked ~ #mobile-menu {
 		display: block;
@@ -149,6 +166,8 @@ nav input[type=checkbox] {
 	ul.mobile-menu li, ul.mobile-menu li a { width: 100%; }	
 }
 
+/* Tablets */
+
 @media screen and (min-device-width: 681px) and (max-device-width: 1024px) {	
 	nav {
 		z-index: 500;
@@ -162,23 +181,16 @@ nav input[type=checkbox] {
 	}
 
 	ul.menu > li {
-		margin-bottom: 1px;
 		border-top: 1px solid white;
-		padding-top: 5px;
 	}
 	
 	nav input[type=checkbox]:checked ~ ul.menu {
 		display: block;
+/*		animation-duration: 1s;
+		animation-name: menuin;
+*/	
 	}
 
-	nav input[type=checkbox]:checked + label.showmenu {
-		width:225px;
-		border-bottom: 0px;
-		display: block; 
-		font-size:16pt; 
-		font-weight: bold; 
-	}
-	
 	nav ul.menu {
 		padding: 0px;
 		list-style: none;
@@ -187,14 +199,9 @@ nav input[type=checkbox] {
 	
 	ul.menu ul { display: none; }
 	
-	ul.menu > li > a {
-		padding-left: 10px;
-		padding-bottom: 5px;
-	}
-	
 	.show-menu { 
 		background-color: white;
-		font-size:16pt; 
+		font-size:14pt; 
 		font-weight: bold;
 		display:block;
 		text-align:left;
@@ -205,12 +212,13 @@ nav input[type=checkbox] {
 	
 	.notablet { display: none; }
 	
-	nav ul li:hover > ul { display: block; }
+	ul.menu li:hover ul, ul.menu li:active ul { display: block; }
 	
 	ul.submenu {
 		position: relative;
-		margin:0px;
-		margin-top: 5px;
+		margin: 0px;
+		list-style: none;
+		padding-left: 10px;
 	}
 	
 	ul.submenu a, ul.submenu a:active, ul.submenu a:hover, ul.submenu a:visited {
@@ -223,15 +231,32 @@ nav input[type=checkbox] {
 	}
 	ul.submenu > hr { border-style: solid; border-color: black; }
 	li.break { border-top: 1px solid black; }
-	
 }
 
+@keyframes menuin {
+	from { display: none; width: 0px; }
+	to { display:block; width: 250px; }
+}
+
+@keyframes menuout {
+	from { display:block; width: 250px; }
+	to { width: 0px; display:none; }
+}
+
+@keyframes menudown {
+	from { display: none; height: 0px; }
+	to { display:block; }
+}
+
+@keyframes menuup {
+	from { display:block; height: inherit; }
+	to { height: 0px; display:none; }
+}
 @media print {
 	.printheader { display: block; }
 	nav { display: none; }
 	
 }
-
 
 
 

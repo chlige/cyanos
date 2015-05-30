@@ -48,14 +48,14 @@
 	if ( request.getQueryString() != null ) {
 		loginURL = loginURL.concat("?").concat(request.getQueryString());
 	}
-%><li><a href='<%= contextPath %>/login.jsp?url=<%= URLEncoder.encode(loginURL) %>'>Login</a></li>
+%><li><a href='<%= contextPath %>/login.jsp?url=<%= URLEncoder.encode(loginURL, "UTF-8") %>'>Login</a></li>
 <%	} 
 %>
 </ul></li>
 
 <% if ( request.isUserInRole("culture") ) { %>
 <!-- COLLECTION/ISOLATION MENU -->
-<li class='menu' id='collectionMenu'><a>Collections</a>
+<li><a>Collections</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/collection'>Search Collections</a></li>
 <li><a href='<%= contextPath %>/collection?form=add'>Add New Collection</a></li>
@@ -77,7 +77,7 @@
 <% } 
 	if ( request.isUserInRole("sample") ) { 
 %><!-- SAMPLE MENU -->
-<li class='menu' id='sampleMenu'><a>Materials</a>
+<li><a>Materials</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/material'>Search Materials</a></li>
 <li><a href="<%= contextPath %>/material/upload.jsp">Upload Extract Data</a></li>
@@ -97,7 +97,7 @@
 <% } 
 	if ( request.isUserInRole("assay") ) { %>
 <!-- ASSAY MENU -->
-<li class='menu' id='assayMenu'><a>Assays</a>
+<li><a>Assays</a>
 <ul class='submenu'>
 <li><a href='<%= contextPath %>/assay?action=add'>Add New</a></li>
 <li><a href='<%= contextPath %>/assay'>Browse Data</a></li>
