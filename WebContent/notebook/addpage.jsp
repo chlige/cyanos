@@ -23,17 +23,18 @@
 <script type="text/javascript">
 tinymce.init({
         selector: "textarea#content",
+        content_css: "<%= request.getContextPath() %>/cyanos.css",
+        body_class: "mceContentBody",
         height: 500,
         plugins: [
                 "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
                 "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-                "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern",
-                "cyanos"
+                "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern"
         ],
 
-        toolbar1: "fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect | cyanos",
+        toolbar1: "styleselect formatselect fontselect fontsizeselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify ",
         toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | insertdatetime preview | forecolor backcolor",
-        toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | ltr rtl | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft",
+        toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | ltr rtl | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft fullscreen",
 
         menubar: false,
         toolbar_items_size: 'small',
@@ -61,6 +62,12 @@ table.details td, table.details th { text-align:left; }
 table.results tr { border-top: 1px solid gray; border-bottom: 1px solid gray; }
 table.results td, table.results th { padding-left: 2px; padding-right: 2px; }
 table { margin-left: auto; margin-right:auto; }
+div#linkobj { width:25%; margin-right:0; display:block; float:right; }
+div#linkobj > label { border: 1px solid #888; background-color: #ddd; margin:5px; 
+	margin-top: 0px; height:20px; font-size:12pt; font-weight:bold; width:100%; display: block; padding-top: 5px; }
+div#linkobj > input[type=checkbox] { display: none; }
+div#linkobj > input[type=checkbox]:checked ~ iframe { display:block; animation-duration: 1s; animation-name: menudown; }
+div#linkobj > iframe { margin:0px 5px; border: 1px solid gray; height:500px; width:100%; display:none; transition: all 1s;}
 </style>
 </head>
 <body>
@@ -95,10 +102,17 @@ if ( request.getParameter("id") != null ) {
 	conn.close();
 } else { %>
 <form method="post">
-<div style="width:70%; margin-left:auto; margin-right:auto; ">
+<div style="width:80%; margin-left:auto; margin-right:auto; ">
 <p><label for="page">Page:</label><input type="number" name="page" value="<%= results.getInt(3) %>" min="1" step="1"><br>
 <label for="title">Title:</label><input type="text" name="title"></p>
+<div>
+<div id="linkobj">
+<label for="linkView">Link Objects</label><input type="checkbox" value="linkView" id="linkView">
+<iframe src="link.jsp"></iframe></div>
+<div style="width:75%; margin-left:0; display:block;">
 <textarea name="content" id="content"></textarea>
+</div>
+</div>
 <p align="center">
 <button type="submit" name="add">Add Notebook Page</button>
 </p>

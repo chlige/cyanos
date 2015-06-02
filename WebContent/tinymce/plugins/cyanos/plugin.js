@@ -7,11 +7,7 @@ tinymce.PluginManager.add('cyanos', function(editor, url) {
             // Open window
             editor.windowManager.open({
                 title: 'Cyanos objects',
-                url: 'link.jsp',
-                onsubmit: function(e) {
-                    // Insert content when the window form is submitted
-                    editor.insertContent('Title: ' + e.data.title);
-                }
+                url: 'link.jsp'
             });
         }
     });

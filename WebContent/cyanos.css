@@ -10,6 +10,10 @@ body {
 	margin: 0px;
 }
 
+body.mceContentBody {
+	padding: 10px;
+}
+
 img { max-width: 95%; }
 
 h1 { text-align: center; }
@@ -286,6 +290,22 @@ a.submenu:hover {
 
 a.footer {
 	FONT-SIZE: 16px; FONT-WEIGHT: bold;
+}
+
+a.notelink {
+	display: inline-block;
+	border: 1px solid #aaa;
+	border-radius: 5px;
+	padding: 3px;
+	background-color: #f0f0f0;
+	cursor: context-menu;
+	margin: 0px 5px;
+}
+
+a.notelink:hover {
+	background-color: #ff8;
+	text-decoration: none;
+	color: black;
 }
 
 #sideNav {

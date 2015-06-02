@@ -6,7 +6,20 @@
 	edu.uic.orjala.cyanos.web.listener.AppConfigListener,
 	edu.uic.orjala.cyanos.Strain,
 	edu.uic.orjala.cyanos.sql.SQLStrain,
+	edu.uic.orjala.cyanos.Inoc,
+	edu.uic.orjala.cyanos.sql.SQLInoc,
+	edu.uic.orjala.cyanos.Harvest,
+	edu.uic.orjala.cyanos.sql.SQLHarvest,
+	edu.uic.orjala.cyanos.Material,
+	edu.uic.orjala.cyanos.sql.SQLMaterial,
+	edu.uic.orjala.cyanos.Assay,
+	edu.uic.orjala.cyanos.sql.SQLAssay,
+	edu.uic.orjala.cyanos.Separation,
+	edu.uic.orjala.cyanos.sql.SQLSeparation,
+	edu.uic.orjala.cyanos.Assay,
+	edu.uic.orjala.cyanos.sql.SQLAssay,
 	edu.uic.orjala.cyanos.User,
+	java.math.BigDecimal,
 	java.text.DateFormat" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -15,11 +28,38 @@
 <style type="text/css">
 .content { margin: 10px; }
 input { background-color: white; border-radius: 0px; }
+li { border: 1px solid gray; padding: 2px; cursor: copy; margin: 2px 0px;  }
+li:hover { background-color: #ddd; }
+ul { list-style: none; padding: 0px; }
 </style>
+<script type="text/javascript" src="<%= request.getContextPath() %>/tinymce/tinymce.js"></script>
+<script type="text/javascript">
+function addStrainLink(id, name) {
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/strain?id=" + id + "' class='notelink' cyanos:type='strain' cyanos:id='" + id + "'>" + id + " - " + name + "</a>");
+}
+
+function addInocLink(id, strain, text) {
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/inoc?id=" + id + "' class='notelink' cyanos:type='inoc' cyanos:id='" + id + "'>" + strain + " Inoc: " + id + " " + text + "</a>");
+}
+
+function addHarvLink(id, strain, text) {
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/harvest?id=" + id + "' class='notelink' cyanos:type='harvest' cyanos:id='" + id + "'>" + strain + " Harvest: " + id + " " + text + "</a>");
+}
+
+function addMaterialLink(id, strain, text) {
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/material?id=" + id + "' class='notelink' cyanos:type='material' cyanos:id='" + id + "'>" + strain + " Material: " + id + " " + text + "</a>");
+}
+
+function addSepLink(id, text) {
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/separation?id=" + id + "' class='notelink' cyanos:type='separation' cyanos:id='" + id + "'> Separation: " + id + " " + text + "</a>");
+}
+</script>
 </head>
 <body>
 <div class="content">
-<% String queryType = request.getParameter("type"); 	String queryString = request.getParameter("query"); %>
+<% String queryType = request.getParameter("type"); String queryString = request.getParameter("query"); 
+	DateFormat dateFormat = MainServlet.DATE_FORMAT;
+%>
 <form><p>Record type: 
 <select name="type">
 <option value="strain" <%= "strain".equals(queryType) ? "selected" : "" %>>Strain</option>
@@ -30,24 +70,60 @@ input { background-color: white; border-radius: 0px; }
 <option value="assay"<%= "assay".equals(queryType) ? "selected" : "" %>>Assay</option>
 <option value="compound"<%= "compound".equals(queryType) ? "selected" : "" %>>Compound</option>
 </select>
-</p>
-<p>Query: <input type="text" name="query" size="15" value='<%= queryString != null ? queryString : "" %>'> <button type="submit">Search</button></p>
+<br>
+Query: <input type="text" name="query" size="15" value='<%= queryString != null ? queryString : "" %>'><br><button type="submit">Search</button></p>
 </form>
 <ul>
 <% if ( queryType != null ) { 
-	if (queryString.matches("\\*") ) {
-		queryString.replaceAll("\\*", "%");
-	} else {
-		queryString = "%" + queryString + "%";
-	}
 	
 	if ( queryType.equals("strain") ) {
+		if (queryString.matches("\\*") ) {
+			queryString.replaceAll("\\*", "%");
+		} else {
+			queryString = "%" + queryString + "%";
+		}
 		String[] columns = {SQLStrain.NAME_COLUMN, SQLStrain.ID_COLUMN};
 		String[] queries = {queryString, queryString};
 		Strain strainList = SQLStrain.strainsLike(MainServlet.getSQLData(request), columns, queries, SQLStrain.SORT_ID, SQLStrain.ASCENDING_SORT);	
 		strainList.beforeFirst();
 		while ( strainList.next() ) {
-%><li><%= strainList.getID() %></li><%			
+%><li onclick="addStrainLink('<%= strainList.getID() %>', '<%= strainList.getName() %>')"><%= strainList.getID() %> - <%= strainList.getName() %></li><%			
+		}
+	} else if ( queryType.equals("inoc") ) {
+		Inoc inocList = SQLInoc.inocsForStrain(MainServlet.getSQLData(request), queryString);
+		inocList.beforeFirst();
+		while ( inocList.next() ) {
+			String date = dateFormat.format(inocList.getDate());
+%><li onclick="addInocLink('<%= inocList.getID() %>', '<%= inocList.getStrainID() %>', '<%= date %> Volume: <%= inocList.getVolumeString() %> Media: <%= inocList.getMedia() %>')">#<%= inocList.getID() %> <%= date %> Volume: <%= inocList.getVolumeString() %> Media: <%= inocList.getMedia() %></li><%						
+		}
+	} else if ( queryType.equals("harvest") ) {
+		Harvest harvList = SQLHarvest.harvestsForStrain(MainServlet.getSQLData(request), queryString);	
+		harvList.beforeFirst();
+		while ( harvList.next() ) {
+			String date = dateFormat.format(harvList.getDate());
+%><li onclick="addHarvLink('<%= harvList.getID() %>', '<%= harvList.getStrainID() %>', '<%= date %>')">#<%= harvList.getID() %> <%= date %></li><%
+		}
+	} else if ( queryType.equals("material") ) {
+		Material objList = SQLMaterial.findForStrain(MainServlet.getSQLData(request), queryString);
+		objList.beforeFirst();
+		while ( objList.next() ) {
+			String date = dateFormat.format(objList.getDate());
+			String amount = SQLMaterial.autoFormatAmount(objList.getAmount(), SQLMaterial.MASS_TYPE);
+%><li onclick="addMaterialLink('<%= objList.getID() %>', '<%= objList.getCultureID() %>', '<%= date %> <%= amount %>')">#<%= objList.getID() %> <%= date %> <%= amount %></li><%
+		}
+	} else if ( queryType.equals("sep") ) {
+		Separation objList = SQLSeparation.findForStrain(MainServlet.getSQLData(request), queryString);
+		objList.beforeFirst();
+		while ( objList.next() ) {
+			String date = dateFormat.format(objList.getDate());
+			String label = objList.getTag(); if ( label == null ) { label = ""; } else { label = " " + label; }
+%><li onclick="addSepLink('<%= objList.getID() %>', '<%= date %><%= label %>')">#<%= objList.getID() %> <%= date %> <%= label %></li><%
+		}
+	} else if ( queryType.equals("assay") ) {
+		Assay objList = SQLAssay.assaysForTarget(MainServlet.getSQLData(request), queryString);
+		objList.beforeFirst();
+		while ( objList.next() ) {
+			
 		}
 	}
 %>
