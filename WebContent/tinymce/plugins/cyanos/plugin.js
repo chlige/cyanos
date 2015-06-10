@@ -12,6 +12,18 @@ tinymce.PluginManager.add('cyanos', function(editor, url) {
         }
     });
 
+    editor.addButton('addfile', {
+        text: 'Add File',
+        icon: false,
+        onclick: function() {
+            // Open window
+            editor.windowManager.open({
+                title: 'Add File',
+                url: 'link-file.jsp'
+            });
+        }
+    });
+
     // Adds a menu item to the tools menu
     editor.addMenuItem('cyanos', {
         text: 'Cyanos',

@@ -83,7 +83,7 @@ import edu.uic.orjala.cyanos.web.listener.CyanosRequestListener;
 
 public class DataFileServlet extends ServletObject {
 	
-	private static final int BUFFER_SIZE = 1024 * 1024; // 1 MB
+	static final int BUFFER_SIZE = 1024 * 1024; // 1 MB
 	public static final String ACTION_UPDATE_FILE = "updateFile";
 	public static final String ACTION_GET_FILES = "getfiles";
 	public static final String ACTION_GET_DIRS = "getdirs";
@@ -191,13 +191,13 @@ public class DataFileServlet extends ServletObject {
 					if ( (! outputFile.exists()) && outputFile.createNewFile() ) {
 						BufferedInputStream fileData = new BufferedInputStream(req.getInputStream());
 						FileOutputStream fileOut = new FileOutputStream(outputFile);
-						int d = fileData.read();
 						byte[] buffer = new byte[BUFFER_SIZE];
 						int count;
 						while ( (count = fileData.read(buffer)) > 0  ) {
 							fileOut.write(buffer, 0, count);
 						}
 /*						
+						int d = fileData.read();
 //						int count = 1;
 						while ( d != -1 ) {
 							fileOut.write(d);

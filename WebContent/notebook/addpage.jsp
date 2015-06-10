@@ -38,6 +38,24 @@ tinymce.init({
 
         menubar: false,
         toolbar_items_size: 'small',
+        file_picker_callback: function(callback, value, meta) {
+            // Provide file and text for the link dialog
+            if (meta.filetype == 'file') {
+                callback('mypage.html', {text: 'My text'});
+            }
+
+            // Provide image and alt text for the image dialog
+            if (meta.filetype == 'image') {
+     			tinyMCE.activeEditor.windowManager.open({
+       				title: "Select Image"
+    			});
+            }
+
+            // Provide alternative source and posted for the media dialog
+            if (meta.filetype == 'media') {
+                callback('movie.mp4', {source2: 'alt.ogg', poster: 'image.jpg'});
+            }
+        },
 
         style_formats: [
                 {title: 'Bold text', inline: 'b'},
