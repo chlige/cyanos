@@ -341,14 +341,14 @@
     <location>/error.jsp</location>
   </error-page>
   <env-entry>
-  	<env-entry-name>name</env-entry-name>
-  	<env-entry-type>java.lang.String</env-entry-type>
-  	<env-entry-value>Cyanos</env-entry-value>
+    <env-entry-name>name</env-entry-name>
+    <env-entry-type>java.lang.String</env-entry-type>
+    <env-entry-value>Cyanos</env-entry-value>
   </env-entry>
   <env-entry>
-  	<env-entry-name>filePath</env-entry-name>
-  	<env-entry-type>java.lang.String</env-entry-type>
-  	<env-entry-value>/tmp</env-entry-value>
+    <env-entry-name>filePath</env-entry-name>
+    <env-entry-type>java.lang.String</env-entry-type>
+    <env-entry-value>/tmp</env-entry-value>
   </env-entry>
   <resource-ref>
     <res-ref-name>jdbc/CyanosDB</res-ref-name>
@@ -510,4 +510,14 @@
     </description>
     <role-name>project</role-name>
   </security-role>
+  <servlet>
+    <description></description>
+    <display-name>NotebookServlet</display-name>
+    <servlet-name>NotebookServlet</servlet-name>
+    <servlet-class>edu.uic.orjala.cyanos.web.servlet.NotebookServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>NotebookServlet</servlet-name>
+    <url-pattern>/notebook/file/*</url-pattern>
+  </servlet-mapping>
 </web-app>
