@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -174,29 +175,30 @@ public class DataFileServlet extends ServletObject {
 		}
 		
 		String module = req.getPathInfo();
-		if ( module != null && module.startsWith("/manager") ) {
-			String[] details = module.split("/", 5);
-			
-			String requiredRole = getRole(details[2]);
-			try {
-				if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
+		if ( module != null ) { 
+			if ( module.startsWith("/manager") ) {
+				String[] details = module.split("/", 5);
 
-					AppConfig myConf = this.getAppConfig();
-					String path = myConf.getFilePath(details[2], details[3]);
+				String requiredRole = getRole(details[2]);
+				try {
+					if ( getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
 
-					SingleFile aFile = new SingleFile(path, details[4]);
+						AppConfig myConf = this.getAppConfig();
+						String path = myConf.getFilePath(details[2], details[3]);
 
-					File outputFile;
-					outputFile = aFile.getFileObject();
-					if ( (! outputFile.exists()) && outputFile.createNewFile() ) {
-						BufferedInputStream fileData = new BufferedInputStream(req.getInputStream());
-						FileOutputStream fileOut = new FileOutputStream(outputFile);
-						byte[] buffer = new byte[BUFFER_SIZE];
-						int count;
-						while ( (count = fileData.read(buffer)) > 0  ) {
-							fileOut.write(buffer, 0, count);
-						}
-/*						
+						SingleFile aFile = new SingleFile(path, details[4]);
+
+						File outputFile;
+						outputFile = aFile.getFileObject();
+						if ( (! outputFile.exists()) && outputFile.createNewFile() ) {
+							BufferedInputStream fileData = new BufferedInputStream(req.getInputStream());
+							FileOutputStream fileOut = new FileOutputStream(outputFile);
+							byte[] buffer = new byte[BUFFER_SIZE];
+							int count;
+							while ( (count = fileData.read(buffer)) > 0  ) {
+								fileOut.write(buffer, 0, count);
+							}
+							/*						
 						int d = fileData.read();
 //						int count = 1;
 						while ( d != -1 ) {
@@ -204,22 +206,27 @@ public class DataFileServlet extends ServletObject {
 							d = fileData.read();
 //							count++;
 						}
-*/
-						fileOut.close();
-						fileData.close();
-						res.setStatus(HttpServletResponse.SC_CREATED);
+							 */
+							fileOut.close();
+							fileData.close();
+							res.setStatus(HttpServletResponse.SC_CREATED);
+						} else {
+							res.setStatus(HttpServletResponse.SC_OK);
+						}
 					} else {
-						res.setStatus(HttpServletResponse.SC_OK);
+						res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 					}
-				} else {
-					res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				} catch (DataException e) {
+					e.printStackTrace();
+					res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				} catch (SQLException e) {
+					e.printStackTrace();
+					res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
-			} catch (DataException e) {
-				e.printStackTrace();
-				res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			} catch (SQLException e) {
-				e.printStackTrace();
-				res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			} else if ( module.startsWith("/upload") ) {
+				String filename = module.substring(8);
+				UUID uuid = UUID.randomUUID();
+				// Need to create temporary file and link to UUID.  
 			}
 		}
 	}

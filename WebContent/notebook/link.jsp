@@ -35,23 +35,23 @@ ul { list-style: none; padding: 0px; }
 <script type="text/javascript" src="<%= request.getContextPath() %>/tinymce/tinymce.js"></script>
 <script type="text/javascript">
 function addStrainLink(id, name) {
-	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/strain?id=" + id + "' class='notelink' cyanos:type='strain' cyanos:id='" + id + "'>" + id + " - " + name + "</a>");
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/strain?id=" + id + "' class='notelink' id='cyanos-link:strain:" + id + "'>Strain " + id + " - " + name + "</a>");
 }
 
 function addInocLink(id, strain, text) {
-	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/inoc?id=" + id + "' class='notelink' cyanos:type='inoc' cyanos:id='" + id + "'>" + strain + " Inoc: " + id + " " + text + "</a>");
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/inoc?id=" + id + "' class='notelink' title='Inoculation: " + id + "' id='cyanos-link:inoc:" + id + "'>" + "[Inoculation: " + id + "] " + strain + " " + text + "</a>");
 }
 
 function addHarvLink(id, strain, text) {
-	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/harvest?id=" + id + "' class='notelink' cyanos:type='harvest' cyanos:id='" + id + "'>" + strain + " Harvest: " + id + " " + text + "</a>");
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/harvest?id=" + id + "' class='notelink' id='cyanos-link:harvest:" + id + "'>" + strain + " Harvest: " + id + " " + text + "</a>");
 }
 
 function addMaterialLink(id, strain, text) {
-	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/material?id=" + id + "' class='notelink' cyanos:type='material' cyanos:id='" + id + "'>" + strain + " Material: " + id + " " + text + "</a>");
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/material?id=" + id + "' class='notelink' id='cyanos-link:material:" + id + "'>" + strain + " Material: " + id + " " + text + "</a>");
 }
 
 function addSepLink(id, text) {
-	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/separation?id=" + id + "' class='notelink' cyanos:type='separation' cyanos:id='" + id + "'> Separation: " + id + " " + text + "</a>");
+	top.tinymce.activeEditor.insertContent("<a href='<%= request.getContextPath() %>/separation?id=" + id + "' class='notelink' id='cyanos-link:separation:" + id + "'> Separation: " + id + " " + text + "</a>");
 }
 </script>
 </head>

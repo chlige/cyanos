@@ -21,6 +21,8 @@
 <% if ( request.getParameter("id") != null && request.getParameter("add") == null ) {  %>
 <script type="text/javascript" src="<%= request.getContextPath() %>/tinymce/tinymce.js"></script>
 <script type="text/javascript">
+var currentCallback;
+
 tinymce.init({
         selector: "textarea#content",
         content_css: "<%= request.getContextPath() %>/cyanos.css",
@@ -46,8 +48,12 @@ tinymce.init({
 
             // Provide image and alt text for the image dialog
             if (meta.filetype == 'image') {
+            	currentCallback = callback;
      			tinyMCE.activeEditor.windowManager.open({
-       				title: "Select Image"
+       				title: "Select Image",
+       				url: "link-file.jsp?type=image",
+       				width: 600,
+       				height: 400
     			});
             }
 
@@ -57,6 +63,7 @@ tinymce.init({
             }
         },
 
+        convert_urls: false,
         style_formats: [
                 {title: 'Bold text', inline: 'b'},
                 {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
