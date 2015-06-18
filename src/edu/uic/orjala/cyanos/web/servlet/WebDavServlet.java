@@ -616,9 +616,9 @@ public class WebDavServlet extends HttpServlet {
             		return;
         		}
         	} else {
- //       		resp.setHeader("WWW-Authenticate", String.format("Basic realm=\"%s\"", this.realm));
- //      		resp.setStatus(401);
- //       		return;
+        		resp.setHeader("WWW-Authenticate", String.format("Basic realm=\"%s\"", this.realm));
+        		resp.setStatus(401);
+        		return;
         	}
         }
         
