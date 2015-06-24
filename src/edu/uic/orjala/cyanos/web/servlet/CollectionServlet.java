@@ -477,7 +477,7 @@ public class CollectionServlet extends ServletObject {
 						req.setAttribute(ATTR_COLLECTION, aCol);
 						if ( req.getParameter(DataFileServlet.ACTION_SHOW_BROWSER) != null ) {
 							AppConfig myConf = this.getAppConfig();
-							String path = myConf.getFilePath(Strain.DATA_FILE_CLASS, Strain.PHOTO_DATA_TYPE);
+							String path = myConf.getFilePath(Collection.DATA_FILE_CLASS, Collection.PHOTO_DATA_TYPE);
 							req.setAttribute(DataFileServlet.ATTR_ROOT_DIR, path);
 							if ( req.getParameter("path") != null ) {
 								req.setAttribute(DataFileServlet.ATTR_CURRENT_DIR, new File(path, req.getParameter("path")));					

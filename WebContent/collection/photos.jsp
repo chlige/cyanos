@@ -25,7 +25,11 @@
 <% out.flush(); return; } %>
 <div style="width:90%; margin-left: 5%; margin-right: 5%" id="<%= CollectionServlet.PHOTO_DIV_ID %>">
 <% if ( collection.isAllowed(Role.WRITE) && request.getParameter("cancelBrowser") == null && request.getParameter("showBrowser") != null ) { %>
-<jsp:include page="photolink.jsp"/>
+<iframe style="width:100%; height:750px; border: 1px solid gray; background: white; overflow:hidden;" src="collection/photolink.jsp?id=<%= collection.getID() %>"></iframe>
+<form><input type="hidden" name="id" value="<%= collection.getID() %>">
+<input type="hidden" name="div" value="<%= CollectionServlet.PHOTO_DIV_ID %>">
+<p align="center"><button type="button" id="cancelPhotos" onClick="updateForm(this,'<%= CollectionServlet.PHOTO_DIV_ID %>')" NAME='cancelBrowser'>Close</button></p>
+</form>
 <% } else { %>
 <table class="species" style="width: 90%; margin-left:auto; margin-right:auto"><% int cols = 3;
 	ExternalFile photos = collection.getPhotos();

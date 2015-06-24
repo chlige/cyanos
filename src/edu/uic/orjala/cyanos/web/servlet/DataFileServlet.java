@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -145,6 +144,38 @@ public class DataFileServlet extends ServletObject {
 		}
 	}
 
+	
+	
+	@Override
+	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String module = req.getPathInfo();	
+		if ( module != null && ( module.startsWith("/get") || module.startsWith("/preview") ) ) {
+			AppConfig myConf = this.getAppConfig();
+
+			String[] details = module.split("/", 5);
+			String requiredRole = getRole(details[2]);
+			try { 
+				if ( ! getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.READ) ) { 
+					resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+					return;
+				}
+			} catch (DataException | SQLException e) {
+				throw new ServletException(e);
+			}
+
+			String path = myConf.getFilePath(details[2], details[3]);
+			
+			File aFile = new File(path, details[4]);
+			if ( ! aFile.exists() ) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+		}  
+		super.doHead(req, resp);
+	}
+
+
+
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.servlet.ServletObject#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
@@ -224,9 +255,7 @@ public class DataFileServlet extends ServletObject {
 					res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			} else if ( module.startsWith("/upload") ) {
-				String filename = module.substring(8);
-				UUID uuid = UUID.randomUUID();
-				// Need to create temporary file and link to UUID.  
+				this.putFile(req, res);
 			}
 		}
 	}
@@ -654,6 +683,65 @@ public class DataFileServlet extends ServletObject {
 			res.setContentType("text/plain");
 			res.resetBuffer();
 			e.printStackTrace();
+			out.println(e.getMessage());
+		}
+	}
+	
+	private void putFile(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		String module = req.getPathInfo();	
+		String[] details = module.split("/", 5);
+		PrintWriter out = res.getWriter();
+	
+		res.setContentType("text/plain");
+
+		try {
+			AppConfig myConf = this.getAppConfig();
+			
+			String path = myConf.getFilePath(details[2], details[3]);
+			String requiredRole = getRole(details[2]);
+			if ( ! getUser(req).isAllowed(requiredRole, User.NULL_PROJECT, Role.WRITE) ) { 
+				res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
+
+			File file = new File(path, details[4]);
+			boolean existing = file.exists();
+			
+			if ( existing && req.getParameter("overwrite") == null ) {
+				res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+				res.setHeader("Allow", "GET, HEAD, OPTIONS");
+				out.println("File exists.");
+			}
+			
+			InputStream fileIn = req.getInputStream();
+			OutputStream fileOut = new FileOutputStream(file);
+			
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int count;
+			while ( (count = fileIn.read(buffer)) > 0  ) {
+				fileOut.write(buffer, 0, count);
+			}
+
+			fileOut.flush();
+			fileOut.close();		
+			if ( existing ) {
+				res.setStatus(HttpServletResponse.SC_OK);
+				out.println("File written.");
+			} else {
+				res.setStatus(HttpServletResponse.SC_CREATED);
+				out.println("File created.");
+			}
+		} catch (FileNotFoundException ex ) {
+			ex.printStackTrace();
+			out.print("File Not Found: ");
+			out.println(details[4]);
+		} catch (IOException ex ) {
+			ex.printStackTrace();
+			out.println("IO Error:");
+			out.println(ex.getMessage());
+		} catch (SQLException | DataException e) {
+			e.printStackTrace();
+			out.println("Cyanos Error:");
 			out.println(e.getMessage());
 		}
 	}
