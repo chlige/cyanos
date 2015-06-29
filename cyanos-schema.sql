@@ -84,8 +84,8 @@ CREATE  TABLE IF NOT EXISTS `assay` (
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY USING BTREE (`assay_id`, `row`, `col`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 
@@ -112,8 +112,8 @@ CREATE  TABLE IF NOT EXISTS `assay_info` (
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY (`assay_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `target` ON `assay_info` (`target` ASC) ;
@@ -140,8 +140,8 @@ CREATE  TABLE IF NOT EXISTS `collection` (
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`collection_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 
@@ -153,7 +153,7 @@ DROP TABLE IF EXISTS `compound` ;
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `compound` (
   `compound_id` VARCHAR(32) NOT NULL ,
-  `date_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `date_created` DATETIME,
   `name` VARCHAR(128) NULL DEFAULT NULL ,
   `formula` VARCHAR(64) NULL DEFAULT NULL ,
   `smiles` VARCHAR(256) NULL DEFAULT NULL ,
@@ -169,8 +169,8 @@ CREATE  TABLE IF NOT EXISTS `compound` (
   `remote_host` VARCHAR(26) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`compound_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 COMMENT = 'Compound Information';
 
 SHOW WARNINGS;
@@ -194,7 +194,7 @@ CREATE  TABLE IF NOT EXISTS `cryo` (
   `notes` TEXT NULL DEFAULT NULL ,
   PRIMARY KEY (`cryo_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 CREATE INDEX `collection` ON `cryo` (`collection` ASC) ;
@@ -221,7 +221,7 @@ CREATE  TABLE IF NOT EXISTS `cryo_library` (
   `parent` VARCHAR(32) NULL DEFAULT NULL ,
   PRIMARY KEY (`collection`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 
@@ -232,7 +232,7 @@ DROP TABLE IF EXISTS `data` ;
 
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `data` (
-  `file` VARCHAR(200) NOT NULL DEFAULT '' ,
+  `file` VARCHAR(128) NOT NULL DEFAULT '' ,
   `type` VARCHAR(32) NULL DEFAULT NULL ,
   `description` TEXT NULL DEFAULT NULL ,
   `id` VARCHAR(32) NOT NULL DEFAULT '' ,
@@ -240,7 +240,7 @@ CREATE  TABLE IF NOT EXISTS `data` (
   `mime_type` VARCHAR(64) NULL DEFAULT NULL ,
   PRIMARY KEY (`file`, `tab`, `id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 
@@ -256,7 +256,7 @@ CREATE  TABLE IF NOT EXISTS `data_templates` (
   `template` LONGBLOB NULL DEFAULT NULL ,
   PRIMARY KEY (`name`, `data`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 
@@ -284,8 +284,8 @@ CREATE  TABLE IF NOT EXISTS `species` (
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY (`culture_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `removed` ON `species` (`remove_reason` ASC) ;
@@ -319,8 +319,8 @@ CREATE  TABLE IF NOT EXISTS `material` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 4642
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE UNIQUE INDEX `material_id_UNIQUE` ON `material` (`material_id` ASC) ;
@@ -355,8 +355,8 @@ CREATE  TABLE IF NOT EXISTS `harvest` (
   `remote_id` VARCHAR(36) NOT NULL ,
   PRIMARY KEY (`harvest_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 
@@ -385,8 +385,8 @@ CREATE  TABLE IF NOT EXISTS `extract_info` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 COMMENT = 'Extract Information';
 
 SHOW WARNINGS;
@@ -420,8 +420,8 @@ CREATE  TABLE IF NOT EXISTS `inoculation` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `parent` ON `inoculation` (`parent_id` ASC) ;
@@ -454,7 +454,7 @@ CREATE  TABLE IF NOT EXISTS `isolation` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 CREATE INDEX `isolation_collection_idx` ON `isolation` (`collection_id` ASC) ;
@@ -474,7 +474,7 @@ CREATE  TABLE IF NOT EXISTS `news` (
   `expires` DATETIME NULL DEFAULT NULL ,
   PRIMARY KEY (`date_added`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 
@@ -495,8 +495,8 @@ CREATE  TABLE IF NOT EXISTS `project` (
   `last_update_message` TEXT NULL ,
   PRIMARY KEY USING BTREE (`project_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 COMMENT = 'Project Code Information';
 
 SHOW WARNINGS;
@@ -520,7 +520,7 @@ CREATE  TABLE IF NOT EXISTS `queue` (
   `completed_by` VARCHAR(15) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`queue_name`, `queue_type`, `item_type`, `item_id`, `added`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 
@@ -537,7 +537,7 @@ CREATE  TABLE IF NOT EXISTS `roles` (
   `perm` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
   PRIMARY KEY (`username`, `role`, `project_id`) )
 ENGINE = MyISAM
-DEFAULT CHARACTER SET = utf8
+DEFAULT CHARACTER SET = utf16
 COMMENT = 'Tomcat role mapping';
 
 SHOW WARNINGS;
@@ -574,8 +574,8 @@ CREATE  TABLE IF NOT EXISTS `sample` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 6051
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `collection` ON `sample` (`collection` ASC) ;
@@ -608,7 +608,7 @@ CREATE  TABLE IF NOT EXISTS `sample_acct` (
   `amount_scale` INT NOT NULL DEFAULT '0' ,
   PRIMARY KEY USING BTREE (`acct_id`, `sample_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DEFAULT CHARACTER SET = utf16;
 
 SHOW WARNINGS;
 CREATE INDEX `sample_id` ON `sample_acct` (`sample_id` ASC) ;
@@ -637,7 +637,7 @@ CREATE  TABLE IF NOT EXISTS `sample_library` (
   `notes` TEXT NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`collection`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
+DEFAULT CHARACTER SET = utf16
 COMMENT = 'Sample Library infomation';
 
 SHOW WARNINGS;
@@ -664,7 +664,7 @@ CREATE  TABLE IF NOT EXISTS `separation` (
   `remote_id` VARCHAR(36) NOT NULL ,
   PRIMARY KEY USING BTREE (`separation_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
+DEFAULT CHARACTER SET = utf16
 COMMENT = 'Fractionation Infomation';
 
 SHOW WARNINGS;
@@ -692,8 +692,8 @@ CREATE  TABLE IF NOT EXISTS `separation_product` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 COMMENT = 'Fractionation Result Infomation';
 SHOW WARNINGS;
 
@@ -721,8 +721,8 @@ CREATE  TABLE IF NOT EXISTS `separation_source` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 COMMENT = 'Fractionation Source Infomation';
 
 SHOW WARNINGS;
@@ -741,7 +741,7 @@ CREATE  TABLE IF NOT EXISTS `users` (
   `style` TEXT NULL ,
   PRIMARY KEY (`username`) )
 ENGINE = MyISAM
-DEFAULT CHARACTER SET = utf8
+DEFAULT CHARACTER SET = utf16
 COMMENT = 'Cyanos Users';
 
 SHOW WARNINGS;
@@ -757,7 +757,7 @@ CREATE  TABLE IF NOT EXISTS `users_oauth` (
   `realm` VARCHAR(256) NOT NULL DEFAULT '',
   INDEX(`username`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
+DEFAULT CHARACTER SET = utf16
 COMMENT = 'Cyanos Users OAuth details';
 
 SHOW WARNINGS;
@@ -795,8 +795,8 @@ CREATE  TABLE IF NOT EXISTS `compound_peaks` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `peak_compound_id_idx` ON `compound_peaks` (`compound_id` ASC) ;
@@ -862,19 +862,20 @@ CREATE  TABLE IF NOT EXISTS `taxon_paths` (
   `parent` VARCHAR(64) NOT NULL ,
   `child` VARCHAR(64) NOT NULL ,
   `depth` INT(11) NULL DEFAULT '0' ,
-  CONSTRAINT `taxon_child`
-    FOREIGN KEY (`child` )
-    REFERENCES `taxon` (`name` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
+  PRIMARY KEY (`parent`,`child`),
   CONSTRAINT `taxon_parent`
     FOREIGN KEY (`parent` )
     REFERENCES `taxon` (`name` )
     ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `taxon_child`
+    FOREIGN KEY (`child` )
+    REFERENCES `taxon` (`name` )
+    ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci;
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
 CREATE INDEX `taxon_child_idx` ON `taxon_paths` (`child` ASC) ;
@@ -897,7 +898,7 @@ CREATE TABLE IF NOT EXISTS `compound_atoms` (
   PRIMARY KEY (`compound_id`,`atom_number`),
   CONSTRAINT `compound_atom` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf16;
 
 --
 -- Table structure for table `compound_bonds`
@@ -913,7 +914,7 @@ CREATE TABLE IF NOT EXISTS `compound_bonds` (
   PRIMARY KEY (`compound_id`,`bond_id`),
   CONSTRAINT `compound_bond` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf16;
 
 --
 -- Table structure for table `compound_bond_atoms`
@@ -932,7 +933,7 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
   	REFERENCES `compound_bonds` (`compound_id`, `bond_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `compound_graph` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf16;
 
 DROP VIEW IF EXISTS `compound_diatomic`;
 
@@ -1011,7 +1012,7 @@ CREATE TABLE `elements` (
 	`atomic_number` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`valence` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0'
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf16_general_ci'
 ENGINE=InnoDB;
 
 INSERT INTO `elements`(`element`,`atomic_number`,`valence`) VALUES('C','6','4'),('N','7','5'),('O','8','6');
@@ -1040,8 +1041,8 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   `endDate` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`job_id`))
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8
-COLLATE = utf8_general_ci
+DEFAULT CHARACTER SET = utf16
+COLLATE = utf16_general_ci
 
 -- -----------------------------------------------------
 -- function degreeSign
@@ -1053,7 +1054,7 @@ SHOW WARNINGS;
 DELIMITER $$
 
 CREATE FUNCTION `degreeSign`() RETURNS CHAR(1)
-RETURN CHAR(0xB0 USING utf8)$$
+RETURN CHAR(0xB0 USING utf16)$$
 
 DELIMITER ;
 SHOW WARNINGS;
@@ -1087,7 +1088,7 @@ SHOW WARNINGS;
 DELIMITER $$
 
 
-CREATE FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `lonDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DMS(c_value, prec))$$
 
 DELIMITER ;
@@ -1103,7 +1104,7 @@ SHOW WARNINGS;
 DELIMITER $$
 
 
-CREATE FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `lonDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( IF( c_value < 0, 'W ', 'E '), DM(c_value, prec))$$
 
 DELIMITER ;
@@ -1118,7 +1119,7 @@ SHOW WARNINGS;
 
 DELIMITER $$
 
-CREATE FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `lonD`(lon FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN IF ( lon < 0, CONCAT('W ', ABS(ROUND(lon,prec)), degreeSign()), CONCAT('E ', ROUND(lon,prec), degreeSign()))$$
 
 DELIMITER ;
@@ -1146,10 +1147,10 @@ SHOW WARNINGS;
 DROP function IF EXISTS `latDMS`;
 SHOW WARNINGS;
 
-USE `cyanos`$$
+DELIMITER $$
 
 
-CREATE FUNCTION `latDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `latDMS`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DMS(c_value, prec))$$
 
 DELIMITER ;
@@ -1165,7 +1166,7 @@ SHOW WARNINGS;
 DELIMITER $$
 
 
-CREATE FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `latDM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( IF ( c_value < 0, 'S ', 'N '), DM(c_value, prec))$$
 
 DELIMITER ;
@@ -1181,7 +1182,7 @@ SHOW WARNINGS;
 DELIMITER $$
 
 
-CREATE FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `latD`(lat FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN IF ( lat < 0, CONCAT('S ', ABS(ROUND(lat,prec)), degreeSign()), CONCAT('N ', ROUND(lat,prec), degreeSign()))$$
 
 DELIMITER ;
@@ -1234,7 +1235,7 @@ SHOW WARNINGS;
 
 DELIMITER $$
 
-CREATE FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `DMS`(c_value FLOAT) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
 	ABS(TRUNCATE((c_value * 60) % 60,0)), "\' ", 
 	ABS(ROUND((c_value * 3600) % 3600,0)), "\"")$$
@@ -1251,7 +1252,7 @@ SHOW WARNINGS;
 
 DELIMITER $$
 
-CREATE FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf8
+CREATE FUNCTION `DM`(c_value FLOAT, prec INT(10)) RETURNS varchar(32) CHARSET utf16
 RETURN CONCAT( ABS(TRUNCATE(c_value,0)), degreeSign(), ' ', 
 	ABS(ROUND((c_value * 60) % 60, ABS(ROUND(LOG10(1825 / prec))) )), "\'")$$
 
