@@ -428,12 +428,14 @@ function loadTable(anUrl, showCheck) {
   	console.log(anUrl);
   	console.log(showCheck);
 	if (xmlHttp != null) {
-  		xmlHttp.open("GET", myLoc.protocol + "//" + myLoc.hostname + ":" + myLoc.port + anUrl, false);
+  		xmlHttp.open("GET", myLoc.protocol + "//" + myLoc.hostname + ":" + myLoc.port + anUrl, true);
+ 		xmlHttp.onreadystatechange = function() {
+ 			if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 				var docDiv = document.getElementById("spreadsheet");
+				setDivContent(docDiv, xmlHttp);
+ 			}
+ 		}
  		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-			var docDiv = document.getElementById("spreadsheet");
-			setDivContent(docDiv, xmlHttp);
-		}
   	} 
 }
 
@@ -468,12 +470,14 @@ function showSpreadSheet(anUrl, worksheet, length, showCheck, header) {
   	console.log(anUrl);
   	console.log(showCheck);
 	if (xmlHttp != null) {
-  		xmlHttp.open("GET", myLoc.href, false);
+  		xmlHttp.open("GET", myLoc.href, true);
+ 		xmlHttp.onreadystatechange = function() {
+ 			if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 				var docDiv = document.getElementById("spreadsheet");
+ 				setDivContent(docDiv, xmlHttp);
+ 			}
+ 		}
  		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-			var docDiv = document.getElementById("spreadsheet");
-			setDivContent(docDiv, xmlHttp);
-		}
   	} 
 }
 
@@ -493,14 +497,16 @@ function loadContent(tag, div) {
   	}
   
  	if (xmlHttp != null) {
- 		xmlHttp.open("GET", myLoc.toString() + prefix + escape(tag), false);
+ 		xmlHttp.open("GET", myLoc.toString() + prefix + escape(tag), true);
+ 		xmlHttp.onreadystatechange = function() {
+ 	 		if (this.readyState == 4 && this.status == 200) {
+ 				var docDiv = document.getElementById(div.id);
+ 				docDiv.className = "showSection";
+ 				unsetLoading(docDiv);
+ 				setDivContent(docDiv, this);
+ 			} 
+ 		}
  		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-			var docDiv = document.getElementById(div.id);
-			docDiv.className = "showSection";
-			unsetLoading(docDiv);
-			setDivContent(docDiv, xmlHttp);
-		} 
   	} 
 }
 
@@ -516,16 +522,19 @@ function loadQuery(query, divID) {
   	
  	if (xmlHttp != null) {
  		if ( myLoc.search && myLoc.search.length > 0 ) 
-	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, false);
+	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, true);
 		else 
- 			xmlHttp.open("GET", myLoc.toString() + "?" + query, false);
+ 			xmlHttp.open("GET", myLoc.toString() + "?" + query, true);
+ 		xmlHttp.onreadystatechange = function() {
+ 	 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 				var docDiv = document.getElementById(divID);
+ 				docDiv.className = "showSection";
+ 				unsetLoading(docDiv);
+ 				setDivContent(docDiv, xmlHttp);
+ 			} 
+ 		}
+ 		
  		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-			var docDiv = document.getElementById(divID);
-			docDiv.className = "showSection";
-			unsetLoading(docDiv);
-			setDivContent(docDiv, xmlHttp);
-		} 
   	} 
 }
 
@@ -541,15 +550,18 @@ function loadAJAXDiv(query, divID) {
   	
  	if (xmlHttp != null) {
  		if ( myLoc.search && myLoc.search.length > 0 ) 
-	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, false);
+	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, true);
 		else 
- 			xmlHttp.open("GET", myLoc.toString() + "?" + query, false);
+ 			xmlHttp.open("GET", myLoc.toString() + "?" + query, true);
+ 		xmlHttp.onreadystatechange = function() {
+ 	 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 				var docDiv = document.getElementById(divID);
+ 				unsetLoading(docDiv);
+ 				setDivContent(docDiv, xmlHttp);
+ 			} 
+ 		}
  		xmlHttp.send(null);
- 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-			var docDiv = document.getElementById(divID);
-			unsetLoading(docDiv);
-			setDivContent(docDiv, xmlHttp);
-		} 
+ 		
   	} 
 }
 
