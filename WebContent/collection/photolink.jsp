@@ -22,82 +22,103 @@
 <html>
 <head>
 <cyanos:header title="Collection photos"/>
+<style>
+div#dropoverlay {
+	width:100%; height: 100%; margin: 0px; 
+	visibility: hidden;
+	background-color: gray; opacity: 0; 
+	position:absolute; z-index:100; color: white; 
+	font-size: 16pt; font-weight:bold; line-height:600px;
+}
+
+div#dropoverlay > span {
+	display:inline-block; vertical-align:middle;
+}
+
+div.folders ul {
+	list-style: none; padding:0px; margin-top:10px; margin-left:10px;
+}
+
+</style>
 <script>
-var fileQueue = new Array();
+	var fileQueue = new Array();
 
-function dragEnter(e) {
-	e.stopPropagation();
-	e.preventDefault();
-	var preview = document.getElementById("fileList");
-	preview.className = "filesdragging";
-}
-
-function dragEnd(e) {
-	e.stopPropagation();
-	e.preventDefault();
-	var preview = document.getElementById("fileList");
-	preview.className = "files";
-}
-
-function stopEvent(e) {
-	e.stopPropagation();
-	e.preventDefault();
-}
-
-function handleDrop(e) {
-	e.stopPropagation();
-	e.preventDefault();
-
-	var data = e.dataTransfer;
-	var files = data.files;
-
-	var preview = document.getElementById("fileList");
-
-	preview.className = "files";
-
-	for (var i = 0; i < files.length; i++) {
-		fileQueue.push(files[i]);
+	function dragEnter(e) {
+		var preview = document.getElementById("dropoverlay");
+		preview.style.opacity = 0.6;
+		preview.style.visibility = "visible";
+		e.preventDefault();
 	}
 
-	processQueue();
-}
+	function dragStart(e) {
+		var preview = document.getElementById("dropoverlay");
+		preview.style.opacity = 0.3;
+		preview.style.visibility = "visible";
+		e.preventDefault();
+	}
 
-function processQueue() {
-	if (fileQueue.length > 0) {
-		var file = fileQueue.shift();
-		var http = new XMLHttpRequest();
-		http.open("HEAD", "../file/get" + filePath + file.name, true);
-		http.onreadystatechange = function() {
-			if (this.readyState == 4) {
-				if (this.status == 404) {
-					uploadFile(file, file.name);
-				} else if (this.status == 200) {
-					alert("File already exists!");
+	function dragEnd(e) {
+		var preview = document.getElementById("dropoverlay");
+		e.preventDefault();
+		preview.style.opacity = 0;
+		preview.style.visibility = "hidden";
+	}
+
+	function stopEvent(e) {
+		e.preventDefault();
+	}
+
+	function handleDrop(e) {
+		e.preventDefault();
+
+		var data = e.dataTransfer;
+		var files = data.files;
+
+		var overlay = document.getElementById("dropoverlay");
+		preview.style.opacity = 0;
+
+		var preview = document.getElementById("fileList");
+		preview.className = "files";
+
+		for (var i = 0; i < files.length; i++) {
+			fileQueue.push(files[i]);
+		}
+
+		processQueue();
+	}
+
+	function processQueue() {
+		if (fileQueue.length > 0) {
+			var file = fileQueue.shift();
+			var http = new XMLHttpRequest();
+			http.open("HEAD", "../file/get" + filePath + file.name, true);
+			http.onreadystatechange = function() {
+				if (this.readyState == 4) {
+					if (this.status == 404) {
+						uploadFile(file, file.name);
+					} else if (this.status == 200) {
+						alert("File already exists!");
+					}
 				}
-			}
-		};
-		http.send();
+			};
+			http.send();
+		}
 	}
-}
 
-function humanFileSize(bytes, si) {
-    var thresh = si ? 1000 : 1024;
-    if(Math.abs(bytes) < thresh) {
-        return bytes + ' B';
-    }
-    var units = si
-        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-    var u = -1;
-    do {
-        bytes /= thresh;
-        ++u;
-    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-    return bytes.toFixed(1)+' '+units[u];
-}
-
-
-
+	function humanFileSize(bytes, si) {
+		var thresh = si ? 1000 : 1024;
+		if (Math.abs(bytes) < thresh) {
+			return bytes + ' B';
+		}
+		var units = si ? [ 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ] : [
+				'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB' ];
+		var u = -1;
+		do {
+			bytes /= thresh;
+			++u;
+		} while (Math.abs(bytes) >= thresh && u < units.length - 1);
+		return bytes.toFixed(1) + ' ' + units[u];
+	}
 
 	function uploadFile(file, filename) {
 		var fullPath = filePath + file.name;
@@ -107,7 +128,7 @@ function humanFileSize(bytes, si) {
 		var index = 0;
 		var rowIndex = -1;
 
-		for (var i = 0; rows.length; i++) {
+		for (var i = 0; i < rows.length; i++) {
 			var cell = rows[i].cells[rows[i].cells.length - 1];
 			var elems = cell.getElementsByTagName("input");
 
@@ -116,12 +137,13 @@ function humanFileSize(bytes, si) {
 				if (elemName = "path") {
 					if (elems[i].value > fullPath)
 						rowIndex = i;
-						break;
+					break;
 				}
 			}
-			if ( rowIndex != -1 ) break;
+			if (rowIndex != -1)
+				break;
 		}
-		
+
 		var row = rows[rows.length - 1];
 		var elems = row.getElementsByTagName("input");
 
@@ -147,7 +169,8 @@ function humanFileSize(bytes, si) {
 					cell.innerHTML = "";
 					cell.appendChild(img);
 					cell.appendChild(document.createElement("br"));
-					cell.appendChild(document.createTextNode(file.name + " (" + humanFileSize(file.size, false) + ")"));
+					cell.appendChild(document.createTextNode(file.name + " ("
+							+ humanFileSize(file.size, false) + ")"));
 
 					cell = row.insertCell(-1);
 					var input = document.createElement("input");
@@ -218,19 +241,28 @@ var filePath = "/<%= dataFileClass %>/<%= Collection.PHOTO_DATA_TYPE%>/<%= path 
 </script>
 <div align="center">
 <div style="border: 1px solid gray; background-color: #ddd; text-align:left; margin:5px; margin-bottom: 0px; padding: 5px 0px; width: 98%;"><b style="margin-left: 5px">File Path:</b> 
-<% if ( path.length() > 1 ) { String[] paths = path.split("/"); %>
+<% if ( path.length() > 1 ) { String[] paths = path.split("/"); String thisPath = "";%>
 <a href="?id=<%= colId %>">ROOT</a>
-<% for ( int i = 1; i < paths.length - 1; i++ ) { %>/ <a href=""><%= paths[i] %></a>
+<% for ( int i = 1; i < paths.length - 1; i++ ) { thisPath = thisPath.concat("/").concat(paths[i]); %>/ <a href="?id=<%= colId %>&path=<%= thisPath %>"><%= paths[i] %></a>
 <% } %>/ <%= paths[paths.length - 1] %>
 <% } else { %>
 ROOT
 <% } %></div> 
-<div style="">
+<div style="height:600px">
 <% 	File[] kids = directory.listFiles();
 if ( kids != null ) { %>
-<div style="width:98%; height:120px; display: block; overflow:auto; border: 1px solid gray;">
-<table style="border: 0px; width: 95%;">
-<tr><% Arrays.sort(kids, DataFileServlet.directoryFirstCompare());
+<div class="folders" style="width:18%; height:600px; margin-left:1%; display: block; overflow:auto; border: 1px solid gray; float:left; position:absolute; text-align:left;">
+<ul>
+<% int count = 1;
+if ( path.length() > 1 ) { String[] paths = path.split("/"); String thisPath = ""; count = paths.length; %>
+<li><a href="?id=<%= colId %>">ROOT</a><ul>
+<% for ( int i = 1; i < paths.length - 1; i++ ) { thisPath = thisPath.concat("/").concat(paths[i]); %>
+<li><a href="?id=<%= colId %>&path=<%= thisPath %>"><%= paths[i] %></a><ul>
+<% } %><li><%= paths[paths.length - 1] %>
+<% } else { %>
+<li>ROOT</li>
+<% } %><ul>
+<% Arrays.sort(kids, DataFileServlet.directoryFirstCompare());
 	
 	ExternalFile myFiles = source.getDataFilesForType(Collection.PHOTO_DATA_TYPE);					
 
@@ -244,20 +276,20 @@ if ( kids != null ) { %>
 	}
 	
 	int i = 0;
-	int cell = 1;
 	
 	while ( i < kids.length ) {
 		if ( kids[i].isDirectory() ) {
 			String dirName = kids[i].getName();
-%><td><img src="../images/folder.png" height="32px" valign="middle"> <a href="?id=<%= source.getID() %>&path=<%= path.concat(dirName) %>"><%= dirName %></a></td><% 
-		cell++; 
-		if ( cell > 5 ) {
-			cell = 1;
-%></tr><tr><%		
-		} 
-	} else { break; } i++; } %>
-</tr></table></div>
-<div style="width:98%; height:500px; display: block; overflow:auto; border: 1px solid gray;">
+%><li><img src="../images/folder.png" height="24px" valign="middle"> <a href="?id=<%= source.getID() %>&path=<%= path.concat(dirName) %>"><%= dirName %></a></li><% 
+		} else { break; } i++; } %>
+</ul>
+<% for ( int c = 0; c < count; c++) { %>
+</li></ul>
+<% } %>
+</div>
+<div id="filedrop" style="width:80%; margin-left:19%; height:600px; display: block; overflow:auto; border: 1px solid gray; float:right;position:absolute;">
+<div id="dropoverlay">
+<span>Drop files to upload</span></div>
 <table id="fileList" class="files">
 <% 	
 	boolean update = request.getParameter("updateFiles") != null;
@@ -307,12 +339,14 @@ if ( kids != null ) { %>
 		}
 		
 		if ( show ) {
-%><tr valign="middle"><td><img src="<%= previewURL.concat(thisPath) %>"><br>
+%><tr valign="middle"><td style="width:270px; text-align:center; padding:5px 0px;"><img src="<%= previewURL.concat(thisPath) %>"><br>
 <%= fileName %> (<%= DataFileServlet.humanReadableSize(kids[i].length()) %>)</td>
-<td><input type="checkbox" name="selFile" value="<%= i %>" <%= (isLinked ? "checked" : "") %> 
-	onclick="this.form.elements['<%= i%>_desc'].disabled = (! this.checked);">
+<td style="width:10px">
 <input type="hidden" name="<%= i %>_path" value="<%= thisPath %>">
-Description: <input type="text" style="width:95%" name="<%= i %>_desc" value="<c:out value="<%= myDesc %>"/>" <%= ( isLinked ? "" : "disabled") %>>
+<input type="checkbox" name="selFile" value="<%= i %>" <%= (isLinked ? "checked" : "") %> 
+	onclick="this.form.elements['<%= i%>_desc'].disabled = (! this.checked);"></td>
+<td>Description: <br/>
+<input type="text" style="width:90%" name="<%= i %>_desc" value="<c:out value="<%= myDesc %>"/>" <%= ( isLinked ? "" : "disabled") %>>
 </td></tr>
 <% } i++; } %>
 </table></div><% } %>
@@ -325,11 +359,14 @@ Description: <input type="text" style="width:95%" name="<%= i %>_desc" value="<c
 </form>
 <script type="text/javascript">
 <!--
-var fileDrop = document.getElementById("fileList");
+var fileDrop = document.getElementById("filedrop");
+fileDrop.addEventListener("drag", stopEvent, false);
+fileDrop.addEventListener("dragstart", dragStart, false);
 fileDrop.addEventListener("dragenter", dragEnter, false);
 fileDrop.addEventListener("dragover", stopEvent, false);
 fileDrop.addEventListener("drop", handleDrop, false);
 fileDrop.addEventListener("dragleave", dragEnd, false);
+
 //-->
 </script>
 <% } } %>
