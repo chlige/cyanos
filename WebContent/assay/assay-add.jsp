@@ -10,14 +10,10 @@
 	java.util.Date" %>
 <% 	String contextPath = request.getContextPath();
 User userObj = AssayServlet.getUser(request);  %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="cyanos.js"></script>
-<script language="JAVASCRIPT" src="cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="cyanos.css"/>
-<title>Cyanos Database - New Assay</title>
+<cyanos:header title="New Assay"/>
 </head>
 <body>
 <cyanos:menu helpModule="assay"/>

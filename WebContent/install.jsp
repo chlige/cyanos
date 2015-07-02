@@ -10,7 +10,7 @@
 	java.security.GeneralSecurityException,
 	java.util.Map,
 	java.security.KeyPair" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <%  String contextPath = request.getContextPath(); 
@@ -71,7 +71,7 @@
 		pageNo--;
 	
 %>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="<%= contextPath %>/new.css"/>
 <script type="text/javascript" src="<%= contextPath %>/cyanos.js"></script>
 <title>Cyanos Database - Application Setup</title>

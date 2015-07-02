@@ -9,13 +9,10 @@
 	edu.uic.orjala.cyanos.web.BaseForm,
 	java.util.List,java.util.ListIterator,
 	java.math.BigDecimal" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="../cyanos.js"></script>
-<link rel="stylesheet" type="text/css" href="../cyanos.css"/>
-<title>Assay Protocols</title>
+<cyanos:header title="Assay Protocols"/>
 </head>
 <body>
 <cyanos:menu helpModule="assay"/>

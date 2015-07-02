@@ -3,7 +3,7 @@
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Compound,edu.uic.orjala.cyanos.web.servlet.CompoundServlet,java.text.SimpleDateFormat" %>
 <% 	Compound myObject = (Compound) request.getAttribute(CompoundServlet.COMPOUND_OBJ); %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <cyanos:header title="Cyanos - Compound">

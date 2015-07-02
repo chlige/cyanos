@@ -7,7 +7,7 @@
 	edu.uic.orjala.cyanos.User, edu.uic.orjala.cyanos.Role,
 	edu.uic.orjala.cyanos.sql.SQLCryoCollection, java.util.List, java.util.ArrayList" %>
 <%	String contextPath = request.getContextPath(); 
-%><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+%><!DOCTYPE html>
 <html>
 <head>
 <cyanos:header title="Cyanos - Remove Preservation Records"/>

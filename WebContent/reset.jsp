@@ -1,6 +1,6 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject, edu.uic.orjala.cyanos.sql.SQLMutableUser, edu.uic.orjala.cyanos.DataException"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html><head><title>Login Page</title>
 <meta name="viewport" content="width=device-width">
 <link REL="stylesheet" TYPE="text/css" href="<%= request.getContextPath() %>/cyanos.css"/>

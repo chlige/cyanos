@@ -4,7 +4,7 @@
     pageEncoding="UTF-8"%>
 <%@ page isErrorPage="true" %>
 <%@ page import="java.io.PrintWriter" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <cyanos:header title="Cyanos Database Error"/>
 </head>

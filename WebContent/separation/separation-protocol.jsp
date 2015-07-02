@@ -4,7 +4,7 @@
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.Separation,
 	edu.uic.orjala.cyanos.CyanosObject,edu.uic.orjala.cyanos.web.servlet.SeparationServlet,edu.uic.orjala.cyanos.web.BaseForm,java.util.List,java.util.ListIterator" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <cyanos:header title="Separation Protocols"/>

@@ -3,7 +3,7 @@
 <%@ page import="edu.uic.orjala.cyanos.Material,edu.uic.orjala.cyanos.web.servlet.MaterialServlet,java.text.SimpleDateFormat" %>
 <%@ taglib prefix="cyanos" tagdir="/WEB-INF/tags" %>
 <% 	Material materialObj = (Material) request.getAttribute("material"); %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <cyanos:header title="Cyanos - Materials"/>

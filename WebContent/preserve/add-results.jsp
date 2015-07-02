@@ -5,14 +5,10 @@
 	java.text.SimpleDateFormat" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
-<%	String contextPath = request.getContextPath(); %><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<%	String contextPath = request.getContextPath(); %><!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos.js"></script>
-<script language="JAVASCRIPT" src="<%= contextPath %>/cyanos-date.js"></script>
-<link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
-<title>Cyanos - Add Preservations</title>
+<cyanos:header title="Add Preservations"/>
 </head>
 <body onLoad="addRow(document.getElementById('addPreservation'),0)">
 <cyanos:menu/>

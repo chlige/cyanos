@@ -4,7 +4,7 @@
 	edu.uic.orjala.cyanos.SampleCollection,
 	edu.uic.orjala.cyanos.web.servlet.SampleServlet,
 	java.text.SimpleDateFormat, java.util.List" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html style="min-height:100%">
 <head>
 <cyanos:header title="Add new sample collection"/>
