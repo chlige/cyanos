@@ -462,7 +462,7 @@ public class StrainServlet extends ServletObject {
 					//						out.println(strainForm.photoForm(thisStrain, 3));
 				} else if ( divTag.equals(COMPOUND_DIV_ID) ) {
 					req.setAttribute(CompoundServlet.COMPOUND_RESULTS, SQLCompound.compoundsForStrain(getSQLData(req), thisStrain));
-					this.forwardRequest(req, res, "/compund/compound-list.jsp");
+					this.forwardRequest(req, res, "/compound/compound-list.jsp");
 				} else if ( divTag.equals(DIV_VALID_GENUS) ) {
 					this.validateGenus(req, res);
 				}
