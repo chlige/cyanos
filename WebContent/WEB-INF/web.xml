@@ -389,6 +389,8 @@
       <url-pattern>/updateUser.jsp</url-pattern>
       <url-pattern>/oauth.jsp</url-pattern>
       <url-pattern>/report/*</url-pattern>
+      <url-pattern>/notebook.jsp</url-pattern>
+      <url-pattern>/notebook/*</url-pattern>      
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
@@ -411,7 +413,7 @@
       <url-pattern>/inoc/*</url-pattern>
       <url-pattern>/harvest/*</url-pattern>
       <url-pattern>/harvest</url-pattern>
-      <url-pattern>/strain.report</url-pattern>
+      <url-pattern>/strain*</url-pattern>
       <url-pattern>/remove.strain</url-pattern>
       <url-pattern>/upload/isolation</url-pattern>
       <url-pattern>/upload/collection</url-pattern>
