@@ -64,32 +64,6 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
 -- -----------------------------------------------------
--- Table `assay`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `assay` ;
-
-SHOW WARNINGS;
-CREATE  TABLE IF NOT EXISTS `assay` (
-  `assay_id` VARCHAR(32) NOT NULL ,
-  `culture_id` VARCHAR(32) NOT NULL ,
-  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
-  `sample_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
-  `name` VARCHAR(128) NOT NULL DEFAULT '' ,
-  `row` INT(10) NOT NULL DEFAULT '0' ,
-  `col` INT(10) NOT NULL DEFAULT '0' ,
-  `sign` INT(1) NOT NULL DEFAULT '0' ,
-  `activity` DECIMAL(30,15) NULL DEFAULT NULL ,
-  `std_dev` DECIMAL(30,15) NULL DEFAULT NULL ,
-  `concentration` DECIMAL(30,15) NOT NULL DEFAULT '0' ,
-  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
-  PRIMARY KEY USING BTREE (`assay_id`, `row`, `col`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
-
-SHOW WARNINGS;
-
--- -----------------------------------------------------
 -- Table `assay_info`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `assay_info` ;
@@ -106,17 +80,39 @@ CREATE  TABLE IF NOT EXISTS `assay_info` (
   `unit` VARCHAR(16) NULL DEFAULT '' ,
   `active_level` DECIMAL(30,15) NULL DEFAULT NULL ,
   `active_op` ENUM('eq','ne','gt','ge','lt','le') NOT NULL DEFAULT 'ge' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16  NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY (`assay_id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `target` ON `assay_info` (`target` ASC) ;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `assay`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `assay` ;
+
+SHOW WARNINGS;
+CREATE  TABLE IF NOT EXISTS `assay` (
+  `assay_id` VARCHAR(32) NOT NULL ,
+  `culture_id` VARCHAR(32) NOT NULL ,
+  `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
+  `sample_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
+  `name` VARCHAR(128) CHARACTER SET utf16 NOT NULL DEFAULT '' ,
+  `row` INT(10) NOT NULL DEFAULT '0' ,
+  `col` INT(10) NOT NULL DEFAULT '0' ,
+  `sign` INT(1) NOT NULL DEFAULT '0' ,
+  `activity` DECIMAL(30,15) NULL DEFAULT NULL ,
+  `std_dev` DECIMAL(30,15) NULL DEFAULT NULL ,
+  `concentration` DECIMAL(30,15) NOT NULL DEFAULT '0' ,
+  `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
+  PRIMARY KEY USING BTREE (`assay_id`, `row`, `col`) )
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -133,15 +129,13 @@ CREATE  TABLE IF NOT EXISTS `collection` (
   `latitude` DECIMAL(7,5) NULL DEFAULT NULL ,
   `longitude` DECIMAL(8,5) NULL DEFAULT NULL ,
   `geo_precision` INT(10) UNSIGNED NULL DEFAULT '182' ,
-  `collector` VARCHAR(256) NOT NULL DEFAULT 'UNKNOWN' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `collector` VARCHAR(256) CHARACTER SET utf16 NOT NULL DEFAULT 'UNKNOWN' ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`collection_id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -154,12 +148,12 @@ SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `compound` (
   `compound_id` VARCHAR(32) NOT NULL ,
   `date_created` DATETIME,
-  `name` VARCHAR(128) NULL DEFAULT NULL ,
+  `name` VARCHAR(128) CHARACTER SET utf16 NULL DEFAULT NULL ,
   `formula` VARCHAR(64) NULL DEFAULT NULL ,
   `smiles` VARCHAR(256) NULL DEFAULT NULL ,
   `average_wt` DECIMAL(10,4) NOT NULL DEFAULT 0.0,
   `isotopic_wt` DECIMAL(11,5) NOT NULL DEFAULT 0.0,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `cml_data` LONGTEXT NULL DEFAULT NULL ,
   `mdl_data` LONGTEXT NULL DEFAULT NULL ,
   `inchi_string` TEXT NULL DEFAULT NULL ,
@@ -169,8 +163,6 @@ CREATE  TABLE IF NOT EXISTS `compound` (
   `remote_host` VARCHAR(26) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`compound_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
 COMMENT = 'Compound Information';
 
 SHOW WARNINGS;
@@ -191,10 +183,9 @@ CREATE  TABLE IF NOT EXISTS `cryo` (
   `culture_id` VARCHAR(32) NOT NULL ,
   `thaw_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
   `removed` DATE NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   PRIMARY KEY (`cryo_id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `collection` ON `cryo` (`collection` ASC) ;
@@ -213,15 +204,15 @@ SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `cryo_library` (
   `collection` VARCHAR(32) NOT NULL ,
   `format` VARCHAR(32) NULL DEFAULT NULL ,
-  `name` VARCHAR(64) NOT NULL DEFAULT 'NONAME' ,
+  `name` VARCHAR(64) CHARACTER SET utf16 NOT NULL DEFAULT 'NONAME' ,
   `length` INT(10) UNSIGNED NULL DEFAULT NULL ,
   `width` INT(10) UNSIGNED NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `date` DATE NULL DEFAULT '1970-01-01' ,
   `parent` VARCHAR(32) NULL DEFAULT NULL ,
   PRIMARY KEY (`collection`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
 
@@ -234,13 +225,13 @@ SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `data` (
   `file` VARCHAR(128) NOT NULL DEFAULT '' ,
   `type` VARCHAR(32) NULL DEFAULT NULL ,
-  `description` TEXT NULL DEFAULT NULL ,
+  `description` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `tab` VARCHAR(16) NOT NULL DEFAULT 'species' ,
   `mime_type` VARCHAR(64) NULL DEFAULT NULL ,
   PRIMARY KEY (`file`, `tab`, `id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
 
@@ -256,7 +247,7 @@ CREATE  TABLE IF NOT EXISTS `data_templates` (
   `template` LONGBLOB NULL DEFAULT NULL ,
   PRIMARY KEY (`name`, `data`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+DEFAULT CHARACTER SET = utf8;
 
 SHOW WARNINGS;
 
@@ -271,10 +262,10 @@ CREATE  TABLE IF NOT EXISTS `species` (
   `culture_id` VARCHAR(32) NOT NULL ,
   `collection_id` VARCHAR(32) NULL DEFAULT NULL ,
   `isolation_id` VARCHAR(32) NULL DEFAULT NULL ,
-  `name` VARCHAR(256) NULL DEFAULT 'NONAME' ,
+  `name` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT 'NONAME' ,
   `genus` VARCHAR(45) NULL DEFAULT NULL ,
   `media_name` VARCHAR(256) NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
   `culture_status` VARCHAR(64) NULL DEFAULT 'good' ,
   `removed` DATE NULL DEFAULT NULL ,
@@ -284,7 +275,7 @@ CREATE  TABLE IF NOT EXISTS `species` (
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   PRIMARY KEY (`culture_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
+DEFAULT CHARACTER SET = utf8
 COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
@@ -300,10 +291,10 @@ DROP TABLE IF EXISTS `material` ;
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `material` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `label` VARCHAR(45) NULL DEFAULT NULL ,
+  `label` VARCHAR(45) CHARACTER SET utf16 NULL DEFAULT NULL ,
   `culture_id` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
   `date` DATE NOT NULL DEFAULT '1900-01-01' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `amount_value` INT(11) NOT NULL DEFAULT '0' COMMENT 'Initial amount of material in grams' ,
   `amount_scale` INT(11) NOT NULL DEFAULT '0' ,
@@ -319,7 +310,7 @@ CREATE  TABLE IF NOT EXISTS `material` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 4642
-DEFAULT CHARACTER SET = utf16
+DEFAULT CHARACTER SET = utf8
 COLLATE = utf16_general_ci;
 
 SHOW WARNINGS;
@@ -347,16 +338,14 @@ CREATE  TABLE IF NOT EXISTS `harvest` (
   `prep_date` DATE NULL DEFAULT NULL ,
   `media_volume_value` INT(11) NULL DEFAULT NULL ,
   `media_volume_scale` INT(11) NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `collection_id` VARCHAR(32) NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   `remote_id` VARCHAR(36) NOT NULL ,
   PRIMARY KEY (`harvest_id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -369,9 +358,9 @@ SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `extract_info` (
   `material_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
   `harvest_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' ,
-  `solvent` VARCHAR(256) NULL DEFAULT NULL ,
-  `type` VARCHAR(128) NULL DEFAULT NULL ,
-  `method` VARCHAR(256) NULL DEFAULT NULL ,
+  `solvent` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT NULL ,
+  `type` VARCHAR(128) CHARACTER SET utf16 NULL DEFAULT NULL ,
+  `method` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY (`material_id`) ,
   CONSTRAINT `ext_material`
@@ -385,8 +374,6 @@ CREATE  TABLE IF NOT EXISTS `extract_info` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
 COMMENT = 'Extract Information';
 
 SHOW WARNINGS;
@@ -405,10 +392,10 @@ CREATE  TABLE IF NOT EXISTS `inoculation` (
   `culture_id` VARCHAR(32) NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
   `parent_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
-  `media` VARCHAR(256) NULL DEFAULT '' ,
+  `media` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT '' ,
   `volume_value` INT(11) NOT NULL DEFAULT '0' ,
   `volume_scale` INT(11) NOT NULL DEFAULT '0' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `fate` ENUM('stock','cryo','harvest','dead') NULL DEFAULT NULL ,
   `harvest_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL ,
   `removed` DATE NULL DEFAULT NULL ,
@@ -419,9 +406,7 @@ CREATE  TABLE IF NOT EXISTS `inoculation` (
     REFERENCES `species` (`culture_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `parent` ON `inoculation` (`parent_id` ASC) ;
@@ -441,10 +426,10 @@ CREATE  TABLE IF NOT EXISTS `isolation` (
   `isolation_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `collection_id` VARCHAR(32) NOT NULL DEFAULT '' ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
-  `type` VARCHAR(64) NOT NULL DEFAULT 'plate' ,
-  `media` VARCHAR(256) NOT NULL DEFAULT 'Z' ,
+  `type` VARCHAR(64) CHARACTER SET utf16 NOT NULL DEFAULT 'plate' ,
+  `media` VARCHAR(256) CHARACTER SET utf16 NOT NULL DEFAULT 'Z' ,
   `parent` VARCHAR(64) NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY USING BTREE (`isolation_id`) ,
@@ -453,8 +438,7 @@ CREATE  TABLE IF NOT EXISTS `isolation` (
     REFERENCES `collection` (`collection_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `isolation_collection_idx` ON `isolation` (`collection_id` ASC) ;
@@ -468,13 +452,12 @@ DROP TABLE IF EXISTS `news` ;
 
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `news` (
-  `subject` VARCHAR(512) NOT NULL DEFAULT '' ,
+  `subject` VARCHAR(512) CHARACTER SET utf16 NOT NULL DEFAULT '' ,
   `date_added` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  `content` TEXT NULL DEFAULT NULL ,
+  `content` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `expires` DATETIME NULL DEFAULT NULL ,
   PRIMARY KEY (`date_added`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -486,8 +469,8 @@ DROP TABLE IF EXISTS `project` ;
 SHOW WARNINGS;
 CREATE  TABLE IF NOT EXISTS `project` (
   `project_id` VARCHAR(32) NOT NULL DEFAULT '' ,
-  `name` VARCHAR(128) NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `name` VARCHAR(128) CHARACTER SET utf16 NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `url` VARCHAR(128) NULL DEFAULT NULL ,
   `master_key` TEXT NULL DEFAULT NULL ,
   `update_prefs` VARCHAR(128) NULL DEFAULT NULL ,
@@ -495,8 +478,6 @@ CREATE  TABLE IF NOT EXISTS `project` (
   `last_update_message` TEXT NULL ,
   PRIMARY KEY USING BTREE (`project_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
 COMMENT = 'Project Code Information';
 
 SHOW WARNINGS;
@@ -519,8 +500,7 @@ CREATE  TABLE IF NOT EXISTS `queue` (
   `added_by` VARCHAR(15) NULL DEFAULT 'UNKNOWN' ,
   `completed_by` VARCHAR(15) NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`queue_name`, `queue_type`, `item_type`, `item_id`, `added`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -537,7 +517,6 @@ CREATE  TABLE IF NOT EXISTS `roles` (
   `perm` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
   PRIMARY KEY (`username`, `role`, `project_id`) )
 ENGINE = MyISAM
-DEFAULT CHARACTER SET = utf16
 COMMENT = 'Tomcat role mapping';
 
 SHOW WARNINGS;
@@ -554,10 +533,10 @@ CREATE  TABLE IF NOT EXISTS `sample` (
   `collection` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
   `row` INT(10) NULL DEFAULT NULL ,
   `col` INT(10) NULL DEFAULT NULL ,
-  `name` TEXT NULL DEFAULT NULL ,
+  `name` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
   `culture_id` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `unit` VARCHAR(16) NULL DEFAULT NULL ,
   `concentration` FLOAT(11) NULL DEFAULT '0' ,
   `removed_date` DATE NULL DEFAULT NULL ,
@@ -572,10 +551,7 @@ CREATE  TABLE IF NOT EXISTS `sample` (
     REFERENCES `material` (`material_id` )
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
-ENGINE = InnoDB
-AUTO_INCREMENT = 6051
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `collection` ON `sample` (`collection` ASC) ;
@@ -603,12 +579,11 @@ CREATE  TABLE IF NOT EXISTS `sample_acct` (
   `void_date` DATE NULL DEFAULT NULL ,
   `void_user` VARCHAR(15) NULL DEFAULT NULL ,
   `amount` FLOAT NOT NULL DEFAULT '0' ,
-  `notes` VARCHAR(256) NULL DEFAULT '' ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT '' ,
   `amount_value` INT NOT NULL DEFAULT '0' ,
   `amount_scale` INT NOT NULL DEFAULT '0' ,
   PRIMARY KEY USING BTREE (`acct_id`, `sample_id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `sample_id` ON `sample_acct` (`sample_id` ASC) ;
@@ -631,13 +606,12 @@ CREATE  TABLE IF NOT EXISTS `sample_library` (
   `library` VARCHAR(32) NOT NULL DEFAULT 'UNASSIGNED' ,
   `collection` VARCHAR(32) NOT NULL ,
   `default_type` ENUM('extract','fraction','compound') NOT NULL DEFAULT 'fraction' ,
-  `name` VARCHAR(256) NOT NULL DEFAULT '' ,
+  `name` VARCHAR(256) CHARACTER SET utf16 NOT NULL DEFAULT '' ,
   `length` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
   `width` INT(10) UNSIGNED NOT NULL DEFAULT '0' ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   PRIMARY KEY USING BTREE (`collection`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
 COMMENT = 'Sample Library infomation';
 
 SHOW WARNINGS;
@@ -652,19 +626,18 @@ CREATE  TABLE IF NOT EXISTS `separation` (
   `separation_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `tag` VARCHAR(128) NULL DEFAULT NULL ,
   `date` DATE NOT NULL DEFAULT '1970-01-01' ,
-  `s_phase` VARCHAR(256) NULL DEFAULT '' ,
-  `m_phase` VARCHAR(256) NULL DEFAULT '' ,
-  `method` VARCHAR(256) NULL DEFAULT '' ,
+  `s_phase` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT '' ,
+  `m_phase` VARCHAR(256) CHARACTER SET utf16 NULL DEFAULT '' ,
+  `method` TEXT CHARACTER SET utf16 NULL DEFAULT '' ,
   `removed_date` DATE NULL DEFAULT NULL ,
   `removed_by` VARCHAR(15) NULL DEFAULT NULL ,
-  `notes` TEXT NULL DEFAULT NULL ,
+  `notes` TEXT CHARACTER SET utf16 NULL DEFAULT NULL ,
   `project_id` VARCHAR(32) NULL DEFAULT NULL ,
   `last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   `remote_host` VARCHAR(36) NULL DEFAULT NULL ,
   `remote_id` VARCHAR(36) NOT NULL ,
   PRIMARY KEY USING BTREE (`separation_id`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
 COMMENT = 'Fractionation Infomation';
 
 SHOW WARNINGS;
@@ -692,8 +665,6 @@ CREATE  TABLE IF NOT EXISTS `separation_product` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
 COMMENT = 'Fractionation Result Infomation';
 SHOW WARNINGS;
 
@@ -721,8 +692,6 @@ CREATE  TABLE IF NOT EXISTS `separation_source` (
     ON DELETE RESTRICT
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
 COMMENT = 'Fractionation Source Infomation';
 
 SHOW WARNINGS;
@@ -741,7 +710,6 @@ CREATE  TABLE IF NOT EXISTS `users` (
   `style` TEXT NULL ,
   PRIMARY KEY (`username`) )
 ENGINE = MyISAM
-DEFAULT CHARACTER SET = utf16
 COMMENT = 'Cyanos Users';
 
 SHOW WARNINGS;
@@ -757,7 +725,6 @@ CREATE  TABLE IF NOT EXISTS `users_oauth` (
   `realm` VARCHAR(256) NOT NULL DEFAULT '',
   INDEX(`username`) )
 ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
 COMMENT = 'Cyanos Users OAuth details';
 
 SHOW WARNINGS;
@@ -794,9 +761,7 @@ CREATE  TABLE IF NOT EXISTS `compound_peaks` (
     REFERENCES `compound` (`compound_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `peak_compound_id_idx` ON `compound_peaks` (`compound_id` ASC) ;
@@ -873,9 +838,7 @@ CREATE  TABLE IF NOT EXISTS `taxon_paths` (
     REFERENCES `taxon` (`name` )
     ON DELETE CASCADE
     ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci;
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 CREATE INDEX `taxon_child_idx` ON `taxon_paths` (`child` ASC) ;
@@ -898,7 +861,7 @@ CREATE TABLE IF NOT EXISTS `compound_atoms` (
   PRIMARY KEY (`compound_id`,`atom_number`),
   CONSTRAINT `compound_atom` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `compound_bonds`
@@ -914,7 +877,7 @@ CREATE TABLE IF NOT EXISTS `compound_bonds` (
   PRIMARY KEY (`compound_id`,`bond_id`),
   CONSTRAINT `compound_bond` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+) ENGINE=InnoDB;
 
 --
 -- Table structure for table `compound_bond_atoms`
@@ -933,7 +896,7 @@ CREATE TABLE IF NOT EXISTS `compound_bond_atoms` (
   	REFERENCES `compound_bonds` (`compound_id`, `bond_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `compound_graph` FOREIGN KEY (`compound_id`) REFERENCES `compound` (`compound_id`)
   	ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+) ENGINE=InnoDB;
 
 DROP VIEW IF EXISTS `compound_diatomic`;
 
@@ -1012,7 +975,6 @@ CREATE TABLE `elements` (
 	`atomic_number` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 	`valence` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0'
 )
-COLLATE='utf16_general_ci'
 ENGINE=InnoDB;
 
 INSERT INTO `elements`(`element`,`atomic_number`,`valence`) VALUES('C','6','4'),('N','7','5'),('O','8','6');
@@ -1033,16 +995,55 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   `job_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   `owner` VARCHAR(32) NULL DEFAULT NULL,
   `job_type` VARCHAR(45) NULL DEFAULT NULL,
-  `messages` LONGTEXT NULL DEFAULT NULL,
-  `output` LONGTEXT NULL DEFAULT NULL,
+  `messages` LONGTEXT CHARACTER SET utf16 NULL DEFAULT NULL,
+  `output` LONGTEXT CHARACTER SET utf16 NULL DEFAULT NULL,
   `output_type` VARCHAR(32) NULL DEFAULT NULL, 
   `progress` DECIMAL(6,5) NULL DEFAULT 0.00000,
   `startDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `endDate` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`job_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf16
-COLLATE = utf16_general_ci
+ENGINE = InnoDB;
+
+ CREATE TABLE `notebook` (
+  `notebook_id` varchar(50) NOT NULL,
+  `username` varchar(15) NOT NULL,
+  `title` varchar(128) NOT NULL DEFAULT '"Untitled notebook"',
+  `description` text,
+  `project_id` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`notebook_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `notebook_page` (
+  `notebook_id` varchar(50) NOT NULL,
+  `page` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `title` varchar(50) NOT NULL DEFAULT '"Untitled page"',
+  `content` longtext NOT NULL,
+  `date_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`notebook_id`,`page`),
+  CONSTRAINT `notebook_page` FOREIGN KEY (`notebook_id`) REFERENCES `notebook` (`notebook_id`)
+  	ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `notebook_page_history` (
+  `notebook_id` varchar(50) NOT NULL,
+  `page` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `version` smallint(5) unsigned NOT NULL DEFAULT '1',
+  `content` longtext NOT NULL,
+  `date_created` datetime NOT NULL,
+  PRIMARY KEY (`notebook_id`,`page`,`version`),
+  CONSTRAINT `notebook_version` FOREIGN KEY (`notebook_id`) REFERENCES `notebook` (`notebook_id`)
+  	ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `notebook_link` (
+  `notebook_id` varchar(50) NOT NULL,
+  `page` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `object_class` varchar(45) NOT NULL,
+  `object_id` varchar(45) DEFAULT NULL,
+  CONSTRAINT `notebook_link` FOREIGN KEY (`notebook_id`) REFERENCES `notebook` (`notebook_id`)
+  	ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 -- -----------------------------------------------------
 -- function degreeSign
@@ -1268,6 +1269,8 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 
-INSERT INTO `config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2');
+INSERT INTO `config` (`element`, `param`, `param_key`, `value`) VALUES ('database', 'version', 'protected', '2'),('config','hostUUID','',UUID());
+INSERT INTO `config` (`element`, `param`, `value`) VALUES ('config','hostUUID',UUID());
+
 
 COMMIT;

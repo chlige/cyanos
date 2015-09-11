@@ -7,12 +7,8 @@
 	edu.uic.orjala.cyanos.CyanosObject,
 	edu.uic.orjala.cyanos.BasicObject,
 	edu.uic.orjala.cyanos.User,
-	java.sql.PreparedStatement,
-	java.math.BigDecimal,
-	java.math.MathContext,
-	java.sql.Connection,
-	java.sql.ResultSet,
-	java.sql.Statement,
+	edu.uic.orjala.cyanos.sql.SQLNotebook,
+	edu.uic.orjala.cyanos.Notebook,
 	java.text.DateFormat" %>
 <!DOCTYPE html>
 <html>
@@ -32,21 +28,15 @@ table { margin-left: auto; margin-right:auto; }
 <h1>Add a Notebook</h1>
 <hr width="85%">
 <% if ( request.getParameter("add") != null ) { 
-	Connection conn = AppConfigListener.getDBConnection(); 
-	String sql = "INSERT INTO notebook(notebook_id,username,title,description) VALUES(?,?,?,?)";
-	PreparedStatement sth = conn.prepareStatement(sql);
-	sth.setString(1, request.getParameter("id"));
-	sth.setString(2, request.getRemoteUser());
-	sth.setString(3, request.getParameter("title"));
-	sth.setString(4, request.getParameter("desc"));
-	if ( sth.executeUpdate() == 1) {
+	Notebook notebook = SQLNotebook.createNotebook(MainServlet.getSQLData(request), request.getParameter("id"));
+	if ( notebook != null ) {	
+		notebook.setTitle(request.getParameter("title"));
+		notebook.setDescription(request.getParameter("desc"));
 %><p align="center">Added notebook <a href="../notebook.jsp?id=<%= request.getParameter("id") %>"><%= request.getParameter("id") %></a></p>
 <%		
 	} else {
 %><p align="center">Unable to add notebook!</p><%
 	}
-	sth.close();
-	conn.close();
 } else { %>
 <form method="post">
 <p align="center">

@@ -7,12 +7,10 @@
 	edu.uic.orjala.cyanos.CyanosObject,
 	edu.uic.orjala.cyanos.BasicObject,
 	edu.uic.orjala.cyanos.User,
-	java.sql.PreparedStatement,
-	java.math.BigDecimal,
-	java.math.MathContext,
-	java.sql.Connection,
-	java.sql.ResultSet,
-	java.sql.Statement,
+	edu.uic.orjala.cyanos.sql.SQLNotebook,
+	edu.uic.orjala.cyanos.Notebook,
+	edu.uic.orjala.cyanos.NotebookPage,
+	edu.uic.orjala.cyanos.Role,
 	java.text.DateFormat" %>
 <!DOCTYPE html>
 <html>
@@ -97,38 +95,26 @@ div#linkobj > iframe { margin:0px 5px; border: 1px solid gray; height:500px; wid
 </head>
 <body>
 <cyanos:menu/>
-<% Connection conn = AppConfigListener.getDBConnection();
-if ( request.getParameter("id") != null ) { 
+<% if ( request.getParameter("id") != null ) { 
 	String notebookid = request.getParameter("id");
-	String sql = "SELECT n.title,COUNT(p.page),COALESCE(MAX(p.page) + 1,1) FROM notebook n LEFT OUTER JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? AND n.notebook_id=?";
-	PreparedStatement sth = conn.prepareStatement(sql);
-	sth.setString(1, request.getRemoteUser());
-	sth.setString(2, notebookid);	
-	ResultSet results = sth.executeQuery();
-	results.first();
-%><h1>Notebook <%= results.getString(1) %> (<%= results.getInt(2) %> Pages)</h1>
+	Notebook notebook = SQLNotebook.loadNotebook(MainServlet.getSQLData(request), notebookid);
+	notebook.first();
+%><h1>Notebook (<%= notebook.getID() %>): <%= notebook.getTitle() %></h1>
 <h2>Add a page</h2>
 <hr width="85%">
+<% if ( notebook.isAllowed(Role.CREATE) ) { %>
 <% if ( request.getParameter("add") != null ) { 
-	results.close(); sth.close();
-	sql = "INSERT INTO notebook_page(notebook_id,page,title,content,date_created) VALUES(?,?,?,?,CURDATE())";
-	sth = conn.prepareStatement(sql);
-	sth.setString(1, request.getParameter("id"));
-	sth.setString(2, request.getParameter("page"));
-	sth.setString(3, request.getParameter("title"));
-	sth.setString(4, request.getParameter("content"));
-	if ( sth.executeUpdate() == 1) {
+	NotebookPage aPage = notebook.addPage(Integer.parseInt(request.getParameter("page")), request.getParameter("title"), request.getParameter("content"));
+	if ( aPage != null ) {
 %><p align="center">Added notebook page <a href="../notebook.jsp?id=<%= request.getParameter("id") %>&page=<%= request.getParameter("page") %>"><%= request.getParameter("page") %>: <%= request.getParameter("title") %></a></p>
 <%		
 	} else {
 %><p align="center">Unable to add notebook page!</p><%
 	}
-	sth.close();
-	conn.close();
 } else { %>
 <form method="post">
 <div style="width:80%; margin-left:auto; margin-right:auto; ">
-<p><label for="page">Page:</label><input type="number" name="page" value="<%= results.getInt(3) %>" min="1" step="1"><br>
+<p><label for="page">Page:</label><input type="number" name="page" value="<%= notebook.getPageCount() + 1 %>" min="1" step="1"><br>
 <label for="title">Title:</label><input type="text" name="title"></p>
 <div>
 <div id="linkobj">
@@ -144,8 +130,10 @@ if ( request.getParameter("id") != null ) {
 </div>
 </form>
 <% } } else { %>
+<p align="center">ERROR: Only the owner of the notebook can create a page.</p>	
+<% } } else { %>
 <p align="center">ERROR: notebook ID not specified!</p>
 <p align="center">Please select a <a href="../notebook.jsp">Notebook</a></p>
-<% }  %>
+<% } %>
 </body>
 </html>

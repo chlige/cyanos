@@ -4,16 +4,16 @@
     pageEncoding="UTF-8" %>
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.MainServlet,
 	edu.uic.orjala.cyanos.web.listener.AppConfigListener,
+	edu.uic.orjala.cyanos.sql.SQLData,
 	edu.uic.orjala.cyanos.CyanosObject,
 	edu.uic.orjala.cyanos.BasicObject,
 	edu.uic.orjala.cyanos.User,
-	java.sql.PreparedStatement,
-	java.math.BigDecimal,
-	java.math.MathContext,
-	java.sql.Connection,
-	java.sql.ResultSet,
-	java.sql.Statement,
-	java.text.DateFormat" %>
+	edu.uic.orjala.cyanos.Role,
+	edu.uic.orjala.cyanos.Notebook,
+	edu.uic.orjala.cyanos.sql.SQLNotebook,
+	edu.uic.orjala.cyanos.sql.SQLProject,
+	edu.uic.orjala.cyanos.NotebookPage,
+	java.text.DateFormat, java.util.List" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,80 +31,76 @@ table { margin-left: auto; margin-right:auto; }
 <body>
 <cyanos:menu helpModule="<%= MainServlet.HELP_MODULE %>"/>
 <div id="content">
-<% Connection conn = AppConfigListener.getDBConnection();  
-	if ( request.getParameter("id") != null ) { 
+<% SQLData data = MainServlet.getSQLData(request);
+if ( request.getParameter("id") != null ) { 
 		String notebookid = request.getParameter("id");
-		String sql = "SELECT n.title,n.description,COUNT(p.page),MIN(p.date_created),MAX(p.date_updated) FROM notebook n LEFT OUTER JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? AND n.notebook_id=?";
-		PreparedStatement sth = conn.prepareStatement(sql);
-		sth.setString(1, request.getRemoteUser());
-		sth.setString(2, notebookid);	
-		ResultSet results = sth.executeQuery();
-		results.first();
-%><h1>Notebook <%= results.getString(1) %></h1><%
+		Notebook notebook = SQLNotebook.loadNotebook(data, notebookid);
+		
+//		String sql = "SELECT n.title,n.description,COUNT(p.page),MIN(p.date_created),MAX(p.date_updated) FROM notebook n LEFT OUTER JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? AND n.notebook_id=?";
+		notebook.first();
+%><h1>Notebook <%= notebook.getID() %></h1><%
 		if ( request.getParameter("page") != null ) {
-			results.close(); sth.close();
-			sql = "SELECT p.page,p.title,p.date_created,p.date_updated,p.content FROM notebook n JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? AND n.notebook_id=? AND p.page=?";
-			sth = conn.prepareStatement(sql);
-			sth.setString(1, request.getRemoteUser());
-			sth.setString(2, notebookid);
-			sth.setString(3, request.getParameter("page"));
-			results = sth.executeQuery();
-			if ( results.first() ) { 
-%><h2>Page <%= results.getInt(1) %>: <%= results.getString(2) %></h2>
+			NotebookPage notebookpage = notebook.getPage(Integer.parseInt(request.getParameter("page")));
+			if ( notebookpage.first() ) { 
+%><h2>Page <%= notebookpage.getPage() %>: <%= notebookpage.getTitle() %></h2>
 <p align="center">
-Created: <%= MainServlet.DATE_FORMAT.format(results.getDate(3)) %><br>
-Last Updated: <%= MainServlet.DATE_FORMAT.format(results.getDate(4)) %></p>
-<div class="page"><%= results.getString(5) %></div>
+Created: <%= MainServlet.DATE_FORMAT.format(notebookpage.getCreationDate()) %><br>
+Last Updated: <%= MainServlet.DATE_FORMAT.format(notebookpage.getLastModifiedDate()) %></p>
+<div class="page"><%= notebookpage.getContent() %></div>
 <%			}
-			results.close(); sth.close();
 		} else {
 %><p align="center">
-<%= results.getInt(3) %> Pages<br>
-<% if ( results.getInt(3) > 0 ) { %>
-Created: <%= MainServlet.DATE_FORMAT.format(results.getDate(4)) %><br>
-Last Updated: <%= MainServlet.DATE_FORMAT.format(results.getDate(5)) %>
+<% int pageCount = notebook.getPageCount(); %>
+<%= pageCount %> Pages<br>
+<% if ( pageCount > 0 ) { %>
+Created: <%= MainServlet.DATE_FORMAT.format(notebook.getFirstUpdate()) %><br>
+Last Updated: <%= MainServlet.DATE_FORMAT.format(notebook.getRecentUpdate()) %>
 <% } %></p>
-<p align="center"><%= results.getString(2) %></p>
-<%	
-			results.close(); sth.close();
-			sql = "SELECT p.page,p.title,p.date_created,p.date_updated FROM notebook n JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? AND n.notebook_id=? ORDER BY p.page ASC";
-			sth = conn.prepareStatement(sql);
-			sth.setString(1, request.getRemoteUser());
-			sth.setString(2, notebookid);
-			results = sth.executeQuery();
-			if ( results.first() ) { 
-				results.beforeFirst();
+<p align="center"><%= notebook.getDescription() %></p>
+<%	NotebookPage pages = notebook.getPages();
+	if ( pages != null ) { 
 %><ul>
-<%				while ( results.next() ) {
-%><li><a href="notebook.jsp?id=<%= notebookid %>&page=<%= results.getInt(1) %>">Page <%= results.getInt(1) %>: <%= results.getString(2) %></a> Created: <%= MainServlet.DATE_FORMAT.format(results.getDate(3)) %> Last Updated: <%= MainServlet.DATE_FORMAT.format(results.getDate(4)) %></li>
+<%				while ( pages.next() ) {
+%><li><a href="notebook.jsp?id=<%= notebookid %>&page=<%= pages.getPage() %>">Page <%= pages.getPage() %>: <%= pages.getTitle() %></a> Last Updated: <%= MainServlet.DATE_FORMAT.format(pages.getLastModifiedDate()) %></li>
 <% } %></ul><%	
 			} else { %>
 <p align="center">No notebook pages</p>
 <% } %><p align="center"><a href="notebook/addpage.jsp?id=<%= notebookid %>">Add a new notebook page</a></p>
-<% 			results.close(); sth.close();
-		} 
+<% 		} 
 	} else { %>
 <h1>Notebooks</h1>
 <hr width="85%">
-<% 	String sql = "SELECT n.notebook_id,n.title,COUNT(p.page),MIN(p.date_created),MAX(p.date_updated) FROM notebook n LEFT OUTER JOIN notebook_page p ON(n.notebook_id = p.notebook_id) WHERE n.username=? GROUP BY n.notebook_id ORDER BY n.notebook_id";
-	PreparedStatement sth = conn.prepareStatement(sql);
-	sth.setString(1, request.getRemoteUser());
-	ResultSet results = sth.executeQuery();
-	if ( results.first() ) { 
-		results.beforeFirst();
+<h2>Your Notebooks</h2>
+<% 	
+	Notebook notebooks = SQLNotebook.myNotebooks(MainServlet.getSQLData(request));
+	if ( notebooks != null && notebooks.first() ) { 
 %><ul>
-<%		while ( results.next() ) {
-%><li><a href="notebook.jsp?id=<%= results.getString(1) %>"><%= results.getString(2) %></a> <%= results.getInt(3) %> page(s), 
-<% if ( results.getInt(3) > 0 ) {%><%= MainServlet.DATE_FORMAT.format(results.getDate(4)) %> - <%= MainServlet.DATE_FORMAT.format(results.getDate(5)) %><% } %>
+<%		while ( notebooks.next() ) {
+			int pageCount = notebooks.getPageCount();
+%><li><a href="notebook.jsp?id=<%= notebooks.getID() %>"><%= notebooks.getTitle() %> (ID: <%= notebooks.getID() %>)</a> <%= pageCount %> page(s), 
+<% if ( pageCount > 0 ) {%><%= MainServlet.DATE_FORMAT.format(notebooks.getFirstUpdate()) %> - <%= MainServlet.DATE_FORMAT.format(notebooks.getRecentUpdate()) %><% } %>
 </li>
 <% } %></ul><%	
 	} else { %>
 <p align="center">No notebooks</p>
 <% } %><p align="center"><a href="notebook/add.jsp">Add a new notebook</a></p>
-<% results.close(); sth.close();
-	} 
-	conn.close();
-	%>
+<% User user = MainServlet.getUser(request); 
+	List<String> projects = SQLProject.listProjects(data);
+	for ( String project : projects ) {
+		if ( user.isAllowed(User.PROJECT_MANAGER_ROLE, project, Role.READ) )  {
+%><h3><%= project %></h3><table style="border: 0px">
+<tr><th>Notebook</th><th>Owner</th><th>Pages</th><th>First Update</th><th>Last Update</th></tr>
+<%			notebooks = SQLNotebook.projectNotebooks(data, project);
+while ( notebooks.next() ) {
+	int pageCount = notebooks.getPageCount();
+%><tr><td><a href="notebook.jsp?id=<%= notebooks.getID() %>"><%= notebooks.getTitle() %> (ID: <%= notebooks.getID() %>)</a></td><td><%= notebooks.getUser().getUserName() %></td><td><%= pageCount %></td>
+<% if ( pageCount > 0 ) {%><td><%= MainServlet.DATE_FORMAT.format(notebooks.getFirstUpdate()) %></td><td><%= MainServlet.DATE_FORMAT.format(notebooks.getRecentUpdate()) %></td><% } else { %><td></td><td></td><% } %>
+</tr>
+<% } %></table><%
+		}
+	}
+%>
+<% } %>
 </div>
 </body>
 </html>

@@ -4,11 +4,14 @@
 package edu.uic.orjala.cyanos.sql;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.Notebook;
 import edu.uic.orjala.cyanos.NotebookObject;
+import edu.uic.orjala.cyanos.NotebookPage;
 import edu.uic.orjala.cyanos.Project;
 import edu.uic.orjala.cyanos.Role;
 import edu.uic.orjala.cyanos.User;
@@ -30,6 +33,10 @@ public class SQLNotebook extends SQLObject implements Notebook {
 //	private static final String SQL_INSERT_WITH_PROJECT = "INSERT INTO notebook(notebook_id,project_id) VALUES(?,?)";
 	private final static String SQL_LOAD = "SELECT notebook.* FROM notebook WHERE notebook_id=?";
 
+	private final static String SQL_GET_PAGE_COUNT = "SELECT COALESCE(COUNT(page),0) FROM notebook_page WHERE notebook=?";
+	private final static String SQL_GET_FIRST_DATE = "SELECT MIN(h.date_created), MIN(p.date_updated) FROM notebook_page p LEFT OUTER JOIN notebook_page_history h ON(h.notebook_id = p.notebook_id) WHERE p.notebook_id=?";
+	private final static String SQL_GET_LATEST_DATE = "SELECT MAX(p.date_updated) FROM notebook_page p WHERE p.notebook_id=?";
+	
 	/**
 	 * Retrieve notebooks for the specified user.
 	 * 
@@ -64,6 +71,25 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	}
 
 	/**
+	 * Retrieve notebooks for project.
+	 * 
+	 * @param data SQLData object
+	 * @return Notebook object containing the notebooks.
+	 * @throws DataException
+	 */
+	public static Notebook projectNotebooks(SQLData data, String projectID) throws DataException {
+		if ( data.isAllowedForProject(Role.READ, projectID)  ) {
+			SQLNotebook aNotebook = new SQLNotebook(data);
+			String[] columns = { PROJECT_COLUMN };
+			String[] values = { projectID };
+			String[] operators = {};
+			aNotebook.loadWhere(SQL_LOAD_TEMPLATE, columns, values, operators, ID_COLUMN, SQLObject.ASCENDING_SORT);
+			return aNotebook;
+		} 
+		return null;
+	}
+
+	/**
 	 * Creates a new notebook for the current user.
 	 * 
 	 * @param data SQLData object
@@ -73,21 +99,28 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 */
 	public static Notebook createNotebook(SQLData data, String anID) throws DataException {
 		SQLNotebook aNotebook = new SQLNotebook(data);
-		if ( aNotebook.isAllowedException(Role.CREATE) ) {
-			try {
-				PreparedStatement aSth = data.prepareStatement(SQL_INSERT_WITH_USER);
-				aSth.setString(1, anID);
-				aSth.setString(2, data.user.getUserID());
-				if ( aSth.executeUpdate() > 0 ) {
-					aNotebook.myID = anID;
-					aNotebook.fetchRecord();
-				} 
-				aSth.close();
-			} catch ( SQLException e ) {
-				throw new DataException(e);
-			}
+		try {
+			PreparedStatement aSth = data.prepareStatement(SQL_INSERT_WITH_USER);
+			aSth.setString(1, anID);
+			aSth.setString(2, data.user.getUserID());
+			if ( aSth.executeUpdate() > 0 ) {
+				aNotebook.myID = anID;
+				aNotebook.fetchRecord();
+			} 
+			aSth.close();
+		} catch ( SQLException e ) {
+			throw new DataException(e);
 		}
 		return aNotebook;
+	}
+	
+	public static Notebook loadNotebook(SQLData data, String anID) throws DataException {
+		SQLNotebook aNotebook = new SQLNotebook(data);
+		aNotebook.myID = anID;
+		aNotebook.fetchRecord();
+		if ( aNotebook.isAllowed(Role.READ) ) 
+			return aNotebook;	
+		return null;
 	}
 	
 	protected SQLNotebook(SQLData data) {
@@ -125,7 +158,7 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.Notebook#addPage(int, edu.uic.orjala.cyanos.NotebookObject)
 	 */
-	public void addPage(int page, NotebookObject anObject) throws DataException {
+	public void linkObject(int page, NotebookObject anObject) throws DataException {
 		anObject.setNotebook(this, page);
 	}
 
@@ -139,7 +172,7 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.Notebook#getName()
 	 */
-	public String getName() throws DataException {
+	public String getTitle() throws DataException {
 		return this.myData.getString(NAME_COLUMN);
 	}
 
@@ -174,7 +207,7 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.Notebook#setName(java.lang.String)
 	 */
-	public void setName(String aName) throws DataException {
+	public void setTitle(String aName) throws DataException {
 		this.myData.setString(NAME_COLUMN, aName);
 	}
 
@@ -189,5 +222,99 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	public void setProject(Project aProject) throws DataException {
 		this.setProjectID(aProject.getID());
 	}
+
+	@Override
+	public NotebookPage addPage(int page, String title, String content)	throws DataException {
+		if ( this.isAllowed(Role.CREATE) ) {
+			return SQLNotebookPage.addPage(this, page, title, content);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isAllowed(int permission) {
+		try {
+			if ( this.myData.getUser().getUserID().equals(this.getUserID()) ) {
+				return true;
+			}
+		} catch (DataException e) {
+			// THIS IS A PAIN!!! - NPManager will fix this.
+		}
+		// Other users can only read if they have project manager role.
+		return ( permission == Role.READ ? super.isAllowed(permission) : false );
+	}
+
+	@Override
+	public NotebookPage getPages() throws DataException {
+		if ( this.isAllowed(Role.READ) ) {
+			return SQLNotebookPage.loadAllPages(this);
+		}
+		return null;
+	}
+
+	@Override
+	public NotebookPage getPage(int page) throws DataException {
+		if ( this.isAllowed(Role.READ) ) {
+			return SQLNotebookPage.loadPage(this, page);
+		}
+		return null;
+	}
+
+	@Override
+	public int getPageCount() throws DataException {
+		int count = 0;
+		try {
+			PreparedStatement sth = this.myData.prepareStatement(SQL_GET_PAGE_COUNT, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			sth.setString(1, this.myID);
+			ResultSet results = sth.executeQuery();
+			if ( results.next() )
+				count = results.getInt(1);
+			results.close();
+			sth.close();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return count;
+	}
+
+	@Override
+	public Date getFirstUpdate() throws DataException {
+		Date date = null;
+		try {
+			PreparedStatement sth = this.myData.prepareStatement(SQL_GET_FIRST_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			sth.setString(1, this.myID);
+			ResultSet results = sth.executeQuery();
+			if ( results.next() ) {
+				date = results.getDate(2);
+				Date otherDate = results.getDate(1);
+				if ( otherDate != null && otherDate.before(date) ) { date = otherDate; }
+			}
+			results.close();
+			sth.close();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return date;
+	}
+
+	@Override
+	public Date getRecentUpdate() throws DataException {
+		Date date = null;
+		try {
+			PreparedStatement sth = this.myData.prepareStatement(SQL_GET_LATEST_DATE, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			sth.setString(1, this.myID);
+			ResultSet results = sth.executeQuery();
+			if ( results.next() ) {
+				date = results.getDate(1);
+			}
+			results.close();
+			sth.close();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return date;
+	}
+	
+	
 	
 }

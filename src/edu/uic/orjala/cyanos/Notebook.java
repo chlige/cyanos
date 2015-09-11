@@ -3,6 +3,8 @@
  */
 package edu.uic.orjala.cyanos;
 
+import java.util.Date;
+
 /**
  * @author George Chlipala
  *
@@ -33,12 +35,12 @@ public interface Notebook extends BasicObject {
 	User getUser() throws DataException;
 	
 	/**
-	 * Get the name of the Notebook.
+	 * Get the title of the Notebook.
 	 * 
-	 * @return Name as a String.
+	 * @return Title as a String.
 	 * @throws DataException
 	 */
-	String getName() throws DataException;
+	String getTitle() throws DataException;
 	
 	/**
 	 * Get a description of the Notebook.
@@ -49,12 +51,12 @@ public interface Notebook extends BasicObject {
 	String getDescription() throws DataException;
 	
 	/**
-	 * Set the name of the Notebook.
+	 * Set the title of the Notebook.
 	 * 
-	 * @param aName Name/Label for the notebook.
+	 * @param title Name/Label for the notebook.
 	 * @throws DataException
 	 */
-	void setName(String aName) throws DataException;
+	void setTitle(String title) throws DataException;
 	
 	/**
 	 * Set the description of the Notebook
@@ -71,7 +73,7 @@ public interface Notebook extends BasicObject {
 	 * @param anObject an object to associate with the notebook page.
 	 * @throws DataException
 	 */
-	void addPage(int page, NotebookObject anObject) throws DataException;
+	void linkObject(int page, NotebookObject anObject) throws DataException;
 	
 	/**
 	 * Get the project ID of the notebook.  Mainly for database authorization purposes.
@@ -96,5 +98,25 @@ public interface Notebook extends BasicObject {
 	 * @throws DataException
 	 */
 	void setProject(Project aProject) throws DataException;
+	
+	
+	/**
+	 * @param page Page number
+	 * @param title Title of page
+	 * @param content Page content
+	 * @return NotebookPage object for page created
+	 * @throws DataException
+	 */
+	NotebookPage addPage(int page, String title, String content) throws DataException;
+	
+	NotebookPage getPages() throws DataException;
+	
+	NotebookPage getPage(int page) throws DataException;
 
+	int getPageCount() throws DataException;
+	
+	Date getFirstUpdate() throws DataException;
+	
+	Date getRecentUpdate() throws DataException;
+	
 }
