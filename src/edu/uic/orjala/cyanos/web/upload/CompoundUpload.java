@@ -195,7 +195,19 @@ public class CompoundUpload extends Job {
 							if ( compound.first() && update ) {
 								compound.setManualRefresh();
 								
+								StringWriter mdlData = new StringWriter();
+								MDLWriter mdlWrite = new MDLWriter(mdlData);
+								mdlWrite.writeMolecule(molecule);
+								
+								String mdlString = mdlData.toString();
+								
+								compound.setMDLData(mdlString);
+								
 								compound.setSmilesString(smileGen.createSMILES(molecule));									
+								String inchiString = InchiGenerator.convertMOL(mdlString);
+								compound.setInChiString(inchiString);
+								compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
+																
 								
 						// For CDK v1.0.4
 							    hAdder.addExplicitHydrogensToSatisfyValency(molecule);
@@ -218,18 +230,6 @@ public class CompoundUpload extends Job {
 							    aCompound.setMonoisotopicMass(MolecularFormulaManipulator.getMajorIsotopeMass(aFormula));
 						 */
 								
-								StringWriter mdlData = new StringWriter();
-								MDLWriter mdlWrite = new MDLWriter(mdlData);
-								mdlWrite.writeMolecule(molecule);
-								
-								String mdlString = mdlData.toString();
-								
-								compound.setMDLData(mdlString);
-								
-								String inchiString = InchiGenerator.convertMOL(mdlString);
-								compound.setInChiString(inchiString);
-								compound.setInChiKey(InchiGenerator.getInChiKey(inchiString));
-																
 								if (setName) {
 									String name = (String)molecule.getProperty(nameProp);
 									if ( name != null ) {
