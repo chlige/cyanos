@@ -6,6 +6,11 @@
 <link rel="stylesheet" type="text/css" href="<%= contextPath %>/cyanos.css"/>
 <script type="text/javascript" src="<%= contextPath %>/cyanos.js"></script>
 <script type="text/javascript" src="<%= contextPath %>/cyanos-date.js"></script>
+<script type="text/javascript">
+<!--
+setContextPath("<%= contextPath %>");
+//-->
+</script>
 <title>${title}</title>
 <meta name="viewport" content="width=device-width">
 <jsp:doBody/>

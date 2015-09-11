@@ -40,22 +40,16 @@
 </DIV>
 
 <% } else { %>
-<p align="CENTER"><font size="+3" >Compound Search</font>
-<hr width='85%'/></p>
-<center>
+<h2 style="text-align:center">Compound Search</h2>
+<hr width='85%'/>
 <form name="compoundquery">
-<table border=0>
-<tr><td>Query:</td><td>
-<input type="text" name="query" VALUE="<%= request.getParameter("query") != null ? request.getParameter("query") : "" %>"></td>
-<td>
-<button type='SUBMIT'>Search</button>
-</td></tr>
-</table>
+<p style="text-align:center">Query: <input type="text" name="query" VALUE="<%= request.getParameter("query") != null ? request.getParameter("query") : "" %>">
+<button type='SUBMIT'>Search</button></p>
 </form>
+<p align="center"><a href="?query">List all compounds</a></p>
 <% if ( request.getParameter("query") != null ) { %>
 <p align="center"><a href="?query=<%= request.getParameter("query") %>&export=sdf">Export Results as SDFile</a></p>
 <% } %>
-</center>
 <jsp:include page="/compound/compound-list.jsp" />
 <% } %>
 </div>

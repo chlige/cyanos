@@ -1,4 +1,9 @@
+var contextPath = undefined;
 var closeLSdiv = true;
+
+function setContextPath(path) {
+	contextPath = path;
+}
 
 function setLoc(label) {
 	document.plate.location.value = label;
@@ -22,39 +27,42 @@ function closeSmallWindow() {
 }
 
 function selectDate(date_field) {
-	var contextPath = "/cyanos/";
-	// if ( contextPath === undefined ) { var contextPath = ""; }
-	var request = contextPath + "cal?update_field=" + escape(date_field.form.name + "." + date_field.name);
+	var request = createURL("/cal?update_field=" + escape(date_field.form.name + "." + date_field.name));
 	calWin = window.open(request, "calendar", "height=200,width=350");  
 	calWin.updateField = date_field;
 }
 
+function createURL(url) {
+	if ( contextPath === undefined ) return url;
+	return contextPath + url;
+}
+
 function dataForm(table, id) {
-	var request = "/cyanos/file?id=" + id + "&class=" + table;
+	var request = createURL("/file?id=" + id + "&class=" + table);
 	fileWin = window.open(request, "file", "height=500,width=400,scrollbars=yes");
 	fileWin.opener = window;
 }
 
 function dataFormType(table, id, dataType) {
-	var request = "/cyanos/file?id=" + id + "&class=" + table + "&type=" + dataType;
+	var request = createURL("/file?id=" + id + "&class=" + table + "&type=" + dataType);
 	fileWin = window.open(request, "file", "height=500,width=400,scrollbars=yes");
 	fileWin.opener = window;
 }
 
 function queueForm(table, id) {
-	var request = "/cyanos/queue/add?id=" + id + "&class=" + table;
+	var request = createURL("/queue/add?id=" + id + "&class=" + table);
 	fileWin = window.open(request, "queue", "height=500,width=400,scrollbars=yes");
 	fileWin.opener = window;
 }
 
 function subscribeQueue(type, name, user) {
-	var request = "/cyanos/queue/add?addAction=1&queue_type=user&class=queue&id=" + type + "/" + name + "&queue=" + user;
+	var request = createURL("/queue/add?addAction=1&queue_type=user&class=queue&id=" + type + "/" + name + "&queue=" + user);
 	fileWin = window.open(request, "queue", "height=500,width=400");
 	fileWin.opener = window;
 }
 	
 function compoundForm(id) {
-	var request = "/cyanos/compound/link?sample_id=" + id;
+	var request = createURL("/compound/link?sample_id=" + id);
 	fileWin = window.open(request, "compound", "height=500,width=600");
 	fileWin.opener = window;
 }
@@ -86,12 +94,12 @@ function debug() {
 }
 
 function showCompound(cmpdID, width, height) {
-	var request = "/cyanos/compound?graphic=png&id="+ cmpdID + "&width=" + width + "&height=" + height;
+	var request = createURL("/compound?graphic=png&id="+ cmpdID + "&width=" + width + "&height=" + height);
 	window.open(request, "compound", "height=" + height + ",width=" + width);
 }
 
 function exportCompound(cmpdID, type) {
-	var request = "/cyanos/compound/export/"+ cmpdID + type;
+	var request = createURL("/compound/export/"+ cmpdID + type);
 	window.open(request, "compound", "height=350,width=250");
 }
 

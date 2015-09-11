@@ -4,16 +4,18 @@
 	edu.uic.orjala.cyanos.web.servlet.InocServlet,
 	edu.uic.orjala.cyanos.web.servlet.StrainServlet,
 	edu.uic.orjala.cyanos.web.BaseForm,
+	edu.uic.orjala.cyanos.User,
+	edu.uic.orjala.cyanos.Role,
 	java.text.SimpleDateFormat" %>
 <%	String contextPath = request.getContextPath();
 	Inoc queryResults = (Inoc)request.getAttribute(InocServlet.SEARCHRESULTS_ATTR); 
+	User user = StrainServlet.getUser(request);
 	if ( request.getRemoteUser() != null ) { %>
 <form method="post" action="inoc">
 <input type="hidden" name="strain" value="<%= request.getParameter("id") %>">
-<p align="center"><button name="form" value="add">Add Inoculation(s)</button></p>
+<p align="center"><input type="checkbox" name="allInocs" <%= request.getParameter("allInocs") != null ? "checked" : ""%> onClick="updateForm(this,'<%= request.getParameter("div") %>')"> Show dead & harvested inoculations.</p>
 <%		if ( queryResults != null && queryResults.first() ) { 
 	queryResults.beforeFirst(); SimpleDateFormat dateFormat = (SimpleDateFormat) session.getAttribute("dateFormatter");  %>
-<p align="center"><input type="checkbox" name="allInocs" <%= request.getParameter("allInocs") != null ? "checked" : ""%> onClick="updateForm(this,'<%= request.getParameter("div") %>')"> Show dead & harvested inoculations.</p>
 <table  class="dashboard">
 <tr><th class="header" width='100'>Inoculation</th><th class="header" width='200'>Date</th><th class="header" width='100'>Media</th><th class="header" width='100'>Volume</th><th class="header" width="100">Notes</th><th class="header" width="50">Fate</th></tr>
 <% while ( queryResults.next() ) { if ( ! queryResults.isAllowed(Role.READ) ) continue; %>
@@ -36,5 +38,8 @@ if ( harvestID != null ) { %><a href="harvest?id=<%= harvestID %>">Harvested</a>
 <% } else { %>
 <p align='center'><b>No Results</b></p>
 <% } %> 
+<% if ( user.couldPerform(User.CULTURE_ROLE, Role.CREATE) ) { %>
+<p align="center"><button name="form" value="add">Add Inoculation(s)</button></p>
+<% } %>
 </form>
 <% } %>

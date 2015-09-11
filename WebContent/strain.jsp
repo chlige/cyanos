@@ -88,14 +88,13 @@ if ( status != null && status.equals(Strain.FIELD_HARVEST_STATUS) ) { %>
 <jsp:param value="Compounds" name="loadingDivTitle"/>
 </jsp:include>
 
-<% } } else { %>
-<p align="CENTER"><font size="+3" >Strain Search</font>
-<hr width='85%'/></p>
-<center>
+<% } } else { 
+	 String queryValue = request.getParameter(StrainServlet.FIELD_QUERY); if ( queryValue == null ) { queryValue = ""; }%>
+<h2 style="text-align:center">Strain Search</h2>
+<hr width='85%'/>
 <form name="sepquery">
-<table border=0>
+<table style="border: 0px; margin-left:auto; margin-right:auto;">
 <tr><td>Query:</td><td>
-<% String queryValue = request.getParameter(StrainServlet.FIELD_QUERY); if ( queryValue == null ) { queryValue = ""; }%>
 <input id="query" type="text" name="<%= StrainServlet.FIELD_QUERY %>" VALUE="<%= queryValue %>" >
 <!-- autocomplete='off' onKeyUp="livesearch(this, 'query', 'div_query')" style='padding-bottom: 0px' -->
 <div id="div_query" class='livesearch'></div></td>
@@ -104,7 +103,7 @@ if ( status != null && status.equals(Strain.FIELD_HARVEST_STATUS) ) { %>
 </td></tr>
 </table>
 </form>
-</center>
+<p align="center"><a href="?query">List all strains</a></p>
 <jsp:include page="/strain/strain-list.jsp">
 <jsp:param value="<%= StrainServlet.SEARCH_DIV_ID %>" name="div"/>
 </jsp:include>

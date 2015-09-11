@@ -78,9 +78,8 @@ if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { %>	addNASALa
 <cyanos:div divID="<%= CollectionServlet.PHOTO_DIV_ID %>" title="Photos"/>
 
 <% } else { %>
-<p align="CENTER"><font size="+3" >Collection Search</font>
-<hr width='85%'/></p>
-<center>
+<h2 style="text-align:center">Collection Search</h2>
+<hr width='85%'/>
 <form name="collectionquery">
 <% String field = request.getParameter("field"); %>
 <p align="center">
@@ -93,7 +92,7 @@ if ( myConfig.getMapParameter(AppConfig.MAP_NASA_LAYER) != null ) { %>	addNASALa
 <input type="text" name="query" value="<c:out value="<%= query %>"/>">
 <button type='SUBMIT'>Search</button></p>
 </form>
-</center>
+<p align="center"><a href="?query">List all collections</a></p>
 <% if ( request.getAttribute(CollectionServlet.SEARCHRESULTS_ATTR) != null ) { %>
 <p align="center">Export Collection [<a href="collection.csv?field=<%= field %>&query=<%= query %>">CSV</a>]
 <% if ( myConfig.canMap() && request.getAttribute(CollectionServlet.ATTR_MAP_BOUNDS) != null ) { %>
