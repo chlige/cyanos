@@ -16,8 +16,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -123,6 +125,8 @@ public class SQLProject extends SQLObject implements Project {
 	private static final String SQL_LOAD = "SELECT project.* FROM project WHERE project_id=?";
 	private static final String SQL_LOAD_ALL = "SELECT project.* FROM project ORDER BY %s %s";
 	private static final String SQL_ADD_OWNER = "INSERT INTO roles(perm,username,project_id,role) VALUES(?,?,?,?)";
+
+	private static final String SQL_LIST_ALL = "SELECT project_id FROM project ORDER BY project_id ASC";
 	
 	public static final String SQL_UPDATABLE_PROJECTS = "SELECT project_id,url,master_key,update_prefs,last_update_sent FROM project WHERE url IS NOT NULL";
 	public static final String SQL_SET_UPDATE = "UPDATE project SET last_update_sent = ? WHERE project_id = ?";
@@ -152,6 +156,17 @@ public class SQLProject extends SQLObject implements Project {
 		String sqlString = String.format(SQL_LOAD_ALL, column, sortDirection);
 		myCols.myData.loadUsingSQL(sqlString);
 		return myCols;
+	}
+	
+	public static List<String> listProjects(SQLData data) throws SQLException, DataException {
+		List<String> projects = new ArrayList<String>();
+		PreparedStatement sth = data.prepareStatement(SQL_LIST_ALL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		ResultSet results = sth.executeQuery();
+		while ( results.next() ) {
+			projects.add(results.getString(1));
+		}
+		results.close(); sth.close();
+		return projects;
 	}
 
 	/**
