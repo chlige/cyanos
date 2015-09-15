@@ -73,14 +73,15 @@ Last Updated: <%= MainServlet.DATE_FORMAT.format(notebook.getRecentUpdate()) %>
 <h2>Your Notebooks</h2>
 <% 	
 	Notebook notebooks = SQLNotebook.myNotebooks(MainServlet.getSQLData(request));
-	if ( notebooks != null && notebooks.first() ) { 
-%><ul>
+	if ( notebooks != null ) { 
+%><table style="border: 0px; width: 70%" class="species">
+<tr><th>Notebook</th><th>Pages</th><th>First Update</th><th>Last Update</th></tr>
 <%		while ( notebooks.next() ) {
 			int pageCount = notebooks.getPageCount();
-%><li><a href="notebook.jsp?id=<%= notebooks.getID() %>"><%= notebooks.getTitle() %> (ID: <%= notebooks.getID() %>)</a> <%= pageCount %> page(s), 
-<% if ( pageCount > 0 ) {%><%= MainServlet.DATE_FORMAT.format(notebooks.getFirstUpdate()) %> - <%= MainServlet.DATE_FORMAT.format(notebooks.getRecentUpdate()) %><% } %>
-</li>
-<% } %></ul><%	
+%><tr><td><a href="notebook.jsp?id=<%= notebooks.getID() %>"><%= notebooks.getTitle() %> (ID: <%= notebooks.getID() %>)</a></td><td><%= pageCount %></td>
+<% if ( pageCount > 0 ) {%><td><%= MainServlet.DATE_FORMAT.format(notebooks.getFirstUpdate()) %></td><td><%= MainServlet.DATE_FORMAT.format(notebooks.getRecentUpdate()) %></td><% } else { %><td></td><td></td><% } %>
+</tr>
+<% } %></table><%	
 	} else { %>
 <p align="center">No notebooks</p>
 <% } %><p align="center"><a href="notebook/add.jsp">Add a new notebook</a></p>
@@ -88,7 +89,7 @@ Last Updated: <%= MainServlet.DATE_FORMAT.format(notebook.getRecentUpdate()) %>
 	List<String> projects = SQLProject.listProjects(data);
 	for ( String project : projects ) {
 		if ( user.isAllowed(User.PROJECT_MANAGER_ROLE, project, Role.READ) )  {
-%><h3><%= project %></h3><table style="border: 0px">
+%><h2>Project: <%= project %></h2><table style="border: 0px; width: 70%" class="species">
 <tr><th>Notebook</th><th>Owner</th><th>Pages</th><th>First Update</th><th>Last Update</th></tr>
 <%			notebooks = SQLNotebook.projectNotebooks(data, project);
 while ( notebooks.next() ) {

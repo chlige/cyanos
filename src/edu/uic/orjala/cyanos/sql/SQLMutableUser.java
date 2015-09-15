@@ -507,6 +507,7 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		resetPassword(request, userID, email, "A password reset has been requested for your user account.");
 	}
 
+/*
 	private static void resetPassword(String urlBase, String userID, String email, String message) throws SQLException, NamingException, MessagingException, DataException {
 		PreparedStatement psth = null;
 		Connection dbc = AppConfigListener.getDBConnection();
@@ -570,7 +571,7 @@ public class SQLMutableUser extends SQLObject implements MutableUser {
 		psth.close();
 		dbc.close();
 	}
-
+*/
 	
 	private final static String SQL_CHECK_TOKEN = "SELECT username FROM users WHERE username=? AND password=MD5(?)";
 
