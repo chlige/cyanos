@@ -369,7 +369,7 @@ public class ProjectUpdateServlet extends ServletObject {
 	 * @throws DataException
 	 * @throws GeneralSecurityException
 	 */
-	private PublicKey getPublicKey(Project project, String hostID) throws DataException, GeneralSecurityException {
+	private static PublicKey getPublicKey(Project project, String hostID) throws DataException, GeneralSecurityException {
 		String keyString = project.getKeyForHost(hostID);
 		return SQLProject.parsePublicKey(keyString);
 	}
