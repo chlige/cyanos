@@ -23,17 +23,19 @@ import edu.uic.orjala.cyanos.User;
 public class SQLNotebook extends SQLObject implements Notebook {
 
 	public static final String ID_COLUMN = "notebook_id";
-	public static final String NAME_COLUMN = "name";
+	public static final String TITLE_COLUMN = "title";
 	public static final String DESC_COLUMN = "description";
 	public static final String USER_COLUMN = "username";
 	public static final String PROJECT_COLUMN = "project_id";
 	
-	private static final String SQL_LOAD_TEMPLATE = "SELECT notebook.* FROM notebook WHERE %s ORDER BY %s %s";
+//	private static final String SQL_LOAD_TEMPLATE = "SELECT notebook.* FROM notebook WHERE %s ORDER BY %s %s";
 	private static final String SQL_INSERT_WITH_USER = "INSERT INTO notebook(notebook_id,username) VALUES(?,?)";
 //	private static final String SQL_INSERT_WITH_PROJECT = "INSERT INTO notebook(notebook_id,project_id) VALUES(?,?)";
 	private final static String SQL_LOAD = "SELECT notebook.* FROM notebook WHERE notebook_id=?";
+	private final static String SQL_LOAD_USER = "SELECT notebook.* FROM notebook WHERE username=?";
+	private final static String SQL_LOAD_FOR_PROJECT = "SELECT notebook.* FROM notebook WHERE project_id=?";
 
-	private final static String SQL_GET_PAGE_COUNT = "SELECT COALESCE(COUNT(page),0) FROM notebook_page WHERE notebook=?";
+	private final static String SQL_GET_PAGE_COUNT = "SELECT COALESCE(COUNT(page),0) FROM notebook_page WHERE notebook_id=?";
 	private final static String SQL_GET_FIRST_DATE = "SELECT MIN(h.date_created), MIN(p.date_updated) FROM notebook_page p LEFT OUTER JOIN notebook_page_history h ON(h.notebook_id = p.notebook_id) WHERE p.notebook_id=?";
 	private final static String SQL_GET_LATEST_DATE = "SELECT MAX(p.date_updated) FROM notebook_page p WHERE p.notebook_id=?";
 	
@@ -45,12 +47,11 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 * @return Notebook object containing the notebooks.
 	 * @throws DataException
 	 */
-	public static Notebook notebooksForUser(SQLData data, User aUser) throws DataException {
+	public static Notebook notebooksForUser(SQLData data, User aUser) throws DataException, SQLException {
 		SQLNotebook aNotebook = new SQLNotebook(data);
-		String[] columns = { USER_COLUMN };
-		String[] values = { aUser.getUserID() };
-		String[] operators = {};
-		aNotebook.loadWhere(SQL_LOAD_TEMPLATE, columns, values, operators, ID_COLUMN, SQLObject.ASCENDING_SORT);
+		PreparedStatement sth = aNotebook.prepareStatement(SQL_LOAD_USER);
+		sth.setString(1, aUser.getUserID());
+		aNotebook.loadUsingPreparedStatement(sth);
 		return aNotebook;
 	}
 	
@@ -60,14 +61,10 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 * @param data SQLData object
 	 * @return Notebook object containing the notebooks.
 	 * @throws DataException
+	 * @throws SQLException 
 	 */
-	public static Notebook myNotebooks(SQLData data) throws DataException {
-		SQLNotebook aNotebook = new SQLNotebook(data);
-		String[] columns = { USER_COLUMN };
-		String[] values = { data.getUser().getUserID() };
-		String[] operators = {};
-		aNotebook.loadWhere(SQL_LOAD_TEMPLATE, columns, values, operators, ID_COLUMN, SQLObject.ASCENDING_SORT);
-		return aNotebook;
+	public static Notebook myNotebooks(SQLData data) throws DataException, SQLException {
+		return SQLNotebook.notebooksForUser(data, data.getUser());
 	}
 
 	/**
@@ -76,14 +73,14 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 * @param data SQLData object
 	 * @return Notebook object containing the notebooks.
 	 * @throws DataException
+	 * @throws SQLException 
 	 */
-	public static Notebook projectNotebooks(SQLData data, String projectID) throws DataException {
+	public static Notebook projectNotebooks(SQLData data, String projectID) throws DataException, SQLException {
 		if ( data.isAllowedForProject(Role.READ, projectID)  ) {
 			SQLNotebook aNotebook = new SQLNotebook(data);
-			String[] columns = { PROJECT_COLUMN };
-			String[] values = { projectID };
-			String[] operators = {};
-			aNotebook.loadWhere(SQL_LOAD_TEMPLATE, columns, values, operators, ID_COLUMN, SQLObject.ASCENDING_SORT);
+			PreparedStatement sth = aNotebook.prepareStatement(SQL_LOAD_FOR_PROJECT);
+			sth.setString(1, projectID);
+			aNotebook.loadUsingPreparedStatement(sth);
 			return aNotebook;
 		} 
 		return null;
@@ -173,7 +170,7 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 * @see edu.uic.orjala.cyanos.Notebook#getName()
 	 */
 	public String getTitle() throws DataException {
-		return this.myData.getString(NAME_COLUMN);
+		return this.myData.getString(TITLE_COLUMN);
 	}
 
 	/* (non-Javadoc)
@@ -208,7 +205,7 @@ public class SQLNotebook extends SQLObject implements Notebook {
 	 * @see edu.uic.orjala.cyanos.Notebook#setName(java.lang.String)
 	 */
 	public void setTitle(String aName) throws DataException {
-		this.myData.setString(NAME_COLUMN, aName);
+		this.myData.setString(TITLE_COLUMN, aName);
 	}
 
 	public void setProjectID(String projectID) throws DataException {
