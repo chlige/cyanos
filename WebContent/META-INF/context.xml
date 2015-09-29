@@ -83,6 +83,8 @@
 <Environment name="filePath" override="false" type="java.lang.String" value="/tmp/"/>
 
 <!-- DO NOT MODIFY OR DELETE THE FOLLOWING RESOURCE DEFINITION -->
+<!-- <Valve className="edu.uic.orjala.cyanos.web.TicketAuthenticatorValve"/>  -->
+
 <Realm className="org.apache.catalina.realm.DataSourceRealm" 
     	dataSourceName="jdbc/CyanosDB"
         digest="SHA" localDataSource="true" 

@@ -1,4 +1,4 @@
- <%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject"%>
+ <%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject,edu.uic.orjala.cyanos.web.TicketAuthenticatorValve"%>
  <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %><%	if (request.getHeader("REFERER") != null && session != null && session.getAttribute("url") == null ) {
 		String url = new String(request.getHeader("REFERER"));
@@ -29,6 +29,8 @@
 <input type='text' name='j_username'  autocorrect="off" autocapitalize="none" size="20"><br/>
 <label for="j_password">Password:</label>
 <input type='password' name='j_password' size='20'><br/>
+<input type="checkbox" name="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">
+<label for="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">Remember me.</label><br>
 <button type='submit'>Login</button>
 </form></div>
 <div id="loginNote" style="visibility: hidden">
