@@ -1,9 +1,10 @@
 <%@ page import="edu.uic.orjala.cyanos.web.servlet.ServletObject"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="npm" tagdir="/WEB-INF/tags" %>
 <!DOCTYPE html>
-<html><head><title>Login Page</title>
+<html><head>
+<npm:header title="Login Page"/>
 <meta name="viewport" content="width=device-width">
-<link REL="stylesheet" TYPE="text/css" href="<%= request.getContextPath() %>/cyanos.css"/>
 <script type="text/javascript">
 	function showLogin() {
 		var cover = document.getElementById("loginCover");  
