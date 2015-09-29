@@ -1004,7 +1004,9 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   PRIMARY KEY (`job_id`))
 ENGINE = InnoDB;
 
- CREATE TABLE `notebook` (
+DROP TABLE IF EXISTS `notebook`;
+
+CREATE TABLE IF NOT EXISTS `notebook` (
   `notebook_id` varchar(50) NOT NULL,
   `username` varchar(15) NOT NULL,
   `title` varchar(128) NOT NULL DEFAULT '"Untitled notebook"',
@@ -1013,7 +1015,9 @@ ENGINE = InnoDB;
   PRIMARY KEY (`notebook_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `notebook_page` (
+DROP TABLE IF EXISTS `notebook_page`;
+
+CREATE TABLE IF NOT EXISTS `notebook_page` (
   `notebook_id` varchar(50) NOT NULL,
   `page` smallint(5) unsigned NOT NULL DEFAULT '0',
   `title` varchar(50) NOT NULL DEFAULT '"Untitled page"',
@@ -1024,7 +1028,9 @@ CREATE TABLE `notebook_page` (
   	ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `notebook_page_history` (
+DROP TABLE IF EXISTS `notebook_page_history`;
+
+CREATE TABLE IF NOT EXISTS  `notebook_page_history` (
   `notebook_id` varchar(50) NOT NULL,
   `page` smallint(5) unsigned NOT NULL DEFAULT '0',
   `version` smallint(5) unsigned NOT NULL DEFAULT '1',
@@ -1035,7 +1041,9 @@ CREATE TABLE `notebook_page_history` (
   	ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `notebook_link` (
+DROP TABLE IF EXISTS `notebook_link`;
+
+CREATE TABLE IF NOT EXISTS  `notebook_link` (
   `notebook_id` varchar(50) NOT NULL,
   `page` smallint(5) unsigned NOT NULL DEFAULT '0',
   `object_class` varchar(45) NOT NULL,
