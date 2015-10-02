@@ -6,24 +6,34 @@ package edu.uic.orjala.cyanos.web;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import javax.naming.Context;
+import javax.naming.NamingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import org.apache.catalina.Session;
 import org.apache.catalina.authenticator.Constants;
@@ -49,12 +59,23 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 	public static final String SESSION_REMEMBER_ME = "j_rememberMe";
 	
 	private static final String SQL_LOAD_KEY = "SELECT value FROM config WHERE element=? AND param_key=?";
-
+	private final static String SQL_GET_TOMCAT_ROLES = "SELECT DISTINCT role FROM roles WHERE username=?";
+	
 	protected String signatureHash = "SHA1";
 	protected String dataSourceName = null;
 	protected String paramPrivateKey = "update_key";
 	protected String paramPublicKey = "update_cert";
 	protected String configElement = "parameter";
+	protected int tokenSize = 256 / 8;
+	protected String keyAlgorithm = "DSA";
+	
+	protected String publicKey = null;
+	protected String privateKey = null;
+	
+	protected KeyPair keyPair;
+	
+	protected static KeyFactory keyFactory;
+
 	
 	class Ticket {
 		private String id;
@@ -67,7 +88,7 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 			this.id = id;
 			this.issued = new Date();
 			this.expires = new Date(this.issued.getTime() + duration);		
-			byte[] tokenExtra = new byte[ProjectUpdateServlet.TOKEN_SIZE];
+			byte[] tokenExtra = new byte[tokenSize];
 			Random random = new Random();
 			random.nextBytes(tokenExtra);	
 			this.padding = Base64.encodeBase64String(tokenExtra);
@@ -146,6 +167,43 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 		this.signatureHash = signatureHash;
 	}
 	
+	/**
+	 * @return the tokenSize
+	 */
+	public int getTokenSize() {
+		return tokenSize;
+	}
+	/**
+	 * @param tokenSize the tokenSize to set
+	 */
+	public void setTokenSize(int tokenSize) {
+		this.tokenSize = tokenSize;
+	}
+	/**
+	 * @return the keyAlgorithm
+	 */
+	public String getKeyAlgorithm() {
+		return keyAlgorithm;
+	}
+	/**
+	 * @param keyAlgorithm the keyAlgorithm to set
+	 */
+	public void setKeyAlgorithm(String keyAlgorithm) {
+		this.keyAlgorithm = keyAlgorithm;
+	}
+	/**
+	 * @param publicKey the publicKey to set
+	 */
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
+	/**
+	 * @param privateKey the privateKey to set
+	 */
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+	
 	private static String formatDate(Date date) {
 		if ( date != null )
 			return DATE_FORMAT.format(date);
@@ -163,11 +221,9 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 			Cookie ticketCookie = getCookie(req, COOKIE_TICKET);
 			if ( ticketCookie != null ) {
 				Ticket ticket = new Ticket(ticketCookie.getValue());
-				Connection dbc = AppConfigListener.getDBConnection();
 				authenticated = ticket.verify(keys.getPublic());
 				if ( authenticated ) {
-					GenericPrincipal principal = new GenericPrincipal(ticket.id, "", SQLUser.rolesForUser(dbc, ticket.id));
-					dbc.close();
+					GenericPrincipal principal = new GenericPrincipal(ticket.id, "", this.rolesForUser(ticket.id));
 					session.setNote(Constants.SESS_USERNAME_NOTE, ticket.id);
 					session.setNote(Constants.SESS_PASSWORD_NOTE, "");
 					req.setUserPrincipal(principal);
@@ -190,7 +246,7 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 					}
 				}
 			}
-		} catch (GeneralSecurityException | ParseException | SQLException e) {
+		} catch (GeneralSecurityException | NamingException | ParseException | SQLException e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
@@ -209,12 +265,11 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 	
 	// http://www.docjar.com/html/api/org/apache/catalina/realm/DataSourceRealm.java.html
 	
-	protected Connection open() {
-		try {
-			Context context = ContextBindings.getClassLoader();
-			context = (Context) context.lookup("comp/env");
-			DataSource datasource = (DataSource)context.lookup(dataSourceName);
-		}
+	protected Connection open() throws NamingException, SQLException {
+		Context context = ContextBindings.getClassLoader();
+		context = (Context) context.lookup("comp/env");
+		DataSource datasource = (DataSource)context.lookup(dataSourceName);
+		return datasource.getConnection();
 	}
 	
 	private static void addTicket(Cookie cookie, Request req, HttpServletResponse resp) {
@@ -224,17 +279,65 @@ public class TicketAuthenticatorValve extends FormAuthenticator {
 		resp.addCookie(cookie);
 	}
 	
-	/**
-	 * @return
-	 * @throws GeneralSecurityException
-	 */
-	private static KeyPair getKeypair(AppConfig config ) throws GeneralSecurityException {
-		String keyString = config.getUpdateKey();
-
-		if ( keyString != null ) {
-			String certString = config.getUpdateCert();
-			return SQLProject.decodeKeyPair(keyString, certString);
+	private List<String> rolesForUser(String userID) throws SQLException, NamingException {
+		Connection dbc = open();
+		PreparedStatement sth = dbc.prepareStatement(SQL_GET_TOMCAT_ROLES);
+		sth.setString(1, userID);
+		List<String> roles = new ArrayList<String>();
+		ResultSet results = sth.executeQuery();
+		while ( results.next() ) {
+			roles.add(results.getString(1));
 		}
-		return null;
+		results.close();
+		sth.close();
+		dbc.close();
+		return roles;
+	}
+
+	private KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
+		if ( keyFactory == null ) {
+			keyFactory = KeyFactory.getInstance(this.keyAlgorithm);
+		}
+		return keyFactory;
+	}
+	
+	private KeyPair getKeypair() throws NoSuchAlgorithmException, SQLException, NamingException, InvalidKeySpecException { 
+		if ( this.keyPair == null ) { 
+			X509EncodedKeySpec certSpec = new X509EncodedKeySpec(Base64.decodeBase64(this.getPublicKey()));
+			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(this.getPrivateKey()));
+			KeyFactory kf = this.getKeyFactory();
+			this.keyPair = new KeyPair(kf.generatePublic(certSpec), kf.generatePrivate(keySpec));
+		}
+		return this.keyPair;
+	}
+	
+	private String getKey(String keyparam) throws SQLException, NamingException {
+		String key = null;
+		Connection dbc = open();
+		PreparedStatement sth = dbc.prepareStatement(SQL_LOAD_KEY);
+		sth.setString(1, this.configElement);
+		sth.setString(2, keyparam);
+		ResultSet results = sth.executeQuery();
+		if ( results.first() ) {
+			key = results.getString(1);
+		}
+		results.close();
+		sth.close();
+		dbc.close();
+		return key;
+	}
+	
+	public String getPublicKey() throws SQLException, NamingException {
+		if ( this.publicKey == null ) {
+			this.publicKey = this.getKey(this.paramPublicKey);
+		}
+		return this.publicKey;
+	}
+
+	public String getPrivateKey() throws SQLException, NamingException {
+		if ( this.privateKey == null ) {
+			this.privateKey = this.getKey(paramPrivateKey);
+		}
+		return this.privateKey;
 	}
 }

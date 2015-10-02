@@ -41,10 +41,7 @@ public class SQLUser extends BasicUser {
 	private final static String SQL_GET_ROLES = "SELECT username,project_id,role,perm FROM roles WHERE username=?";
 	private final static String SQL_GET_OAUTH = "SELECT realm FROM users_oauth WHERE username=?";
 	private final static String USER_SQL = "SELECT username,fullname,email FROM users WHERE username=?";	
-	private final static String SQL_VALIDATE_PASSWORD = "SELECT username FROM users WHERE username=? AND password=SHA(?)";
-	
-	private final static String SQL_GET_TOMCAT_ROLES = "SELECT DISTINCT role FROM roles WHERE username=?";
-	
+	private final static String SQL_VALIDATE_PASSWORD = "SELECT username FROM users WHERE username=? AND password=SHA(?)";	
 
 	public SQLUser(Connection aDBC, String userID) throws DataException {
 		this.dbc = aDBC;
@@ -66,19 +63,6 @@ public class SQLUser extends BasicUser {
 		}
 	}
 	
-	public static List<String> rolesForUser(Connection dbc, String userID) throws SQLException {
-		PreparedStatement sth = dbc.prepareStatement(SQL_GET_TOMCAT_ROLES);
-		sth.setString(1, userID);
-		List<String> roles = new ArrayList<String>();
-		ResultSet results = sth.executeQuery();
-		while ( results.next() ) {
-			roles.add(results.getString(1));
-		}
-		results.close();
-		sth.close();
-		return roles;
-	}
-
 	@Override
 	public boolean checkPassword(String password) throws DataException {
 		try {
