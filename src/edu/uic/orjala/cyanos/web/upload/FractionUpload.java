@@ -129,7 +129,7 @@ public class FractionUpload extends UploadJob {
 				mySep.setNotes(txnNote);
 
 
-				while ( rowIter.hasNext() && this.working ) {
+				ROW_ITER: while ( rowIter.hasNext() && this.working ) {
 					Integer row = (Integer)rowIter.next();
 					if ( this.worksheet.gotoRow(row.intValue()) ) {
 						HtmlList currResults = new HtmlList();
@@ -139,30 +139,38 @@ public class FractionUpload extends UploadJob {
 
 						if ( frNumber.matches("^[sS].*") ) {
 							currResults.addItem(NOTICE_TAG + "Setting source information.");
-							String materialID = this.worksheet.getStringValue(materialIDCol);
-							Material aSource = SQLMaterial.load(myData, materialID);
+							String materialID = materialIDCol > -1 ? this.worksheet.getStringValue(materialIDCol) : "";
+							Material aSource;
+							if ( materialID.length() > 0 ) {
+								aSource = SQLMaterial.load(myData, materialID);
+							} else {
+								aSource = SQLMaterial.findByLabel(myData, this.worksheet.getStringValue(frLabelCol));
+								if ( aSource.first() && aSource.next() ) {
+									currResults.addItem(ERROR_TAG + "Ambiguous label for material.");
+									resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
+									this.myData.rollback(mySave);
+									this.working = false;
+									break ROW_ITER;
+								}
+									
+							}
 							if ( aSource.first() ) {
 								currResults.addItem(FOUND_TAG + "Material found.");
 								if ( mySep.addSource(aSource, SQLMaterial.parseAmount(amount, defaultUnit)) ) {
 									currResults.addItem(SUCCESS_TAG + "Connected source to separation record.");
-									/*
-									SampleAccount myAcct = aSource.getAccount();
-									if ( myAcct.addTransaction() ) {
-										myAcct.setDate(sepDate);
-										myAcct.setTransactionReference(mySep);
-										myAcct.withdrawAmount(amount, defaultUnit);
-										myAcct.setNotes(txnNote);
-										myAcct.updateTransaction();
-										currResults.addItem(SUCCESS_TAG + "Updated sample information.");
-									} else {
-										currResults.addItem(ERROR_TAG + "Failed to add transaction to source sample.");
-									}
-									*/
 								} else {
 									currResults.addItem(ERROR_TAG + "Failed to link source material.");
+									resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
+									this.myData.rollback(mySave);
+									this.working = false;
+									break ROW_ITER;
 								}
 							} else {
 								currResults.addItem(ERROR_TAG + "Failed to find source material.");
+								resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
+								this.myData.rollback(mySave);
+								this.working = false;
+								break ROW_ITER;
 							}
 						} else if ( frNumber.matches("^[nN].*") ) {
 							if ( mySep.getSources().first() ) {
@@ -234,6 +242,10 @@ public class FractionUpload extends UploadJob {
 	*/
 							} else {
 								currResults.addItem(ERROR_TAG + "Failed to create fraction material.");
+								resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
+								this.myData.rollback(mySave);
+								this.working = false;
+								break ROW_ITER;
 							}
 						}
 						resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));

@@ -82,6 +82,7 @@ public class SQLMaterial extends SQLObject implements Material {
 	private static final String SQL_LOAD_MATERIALS_FOR_COMPOUND = SQL_BASE + " JOIN  compound_peaks ON (compound_peaks.material_id = material.material_id) WHERE compound_peaks.compound_id=?";
 	
 	private static final String SQL_LOAD = SQL_BASE + " WHERE material_id=?";
+	private static final String SQL_LOAD_BY_LABEL = SQL_BASE + " WHERE label=?";
 	private static final String SQL_LOAD_CULTURE_ID = SQL_BASE + " WHERE culture_id=?";
 	private static final String SQL_LOAD_QUERY = SQL_BASE + " WHERE culture_id = ? OR remote_id = ?";
 	
@@ -192,6 +193,26 @@ public class SQLMaterial extends SQLObject implements Material {
 			PreparedStatement aSth = object.myData.prepareStatement(SQL_LOAD_QUERY);
 			aSth.setString(1, query);
 			aSth.setString(2, query);
+			object.loadUsingPreparedStatement(aSth);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return object;
+	}	
+
+	/**
+	 * Load materials by label.
+	 * 
+	 * @param data
+	 * @param label
+	 * @return
+	 * @throws DataException
+	 */
+	public static SQLMaterial findByLabel(SQLData data, String label) throws DataException {
+		SQLMaterial object = new SQLMaterial(data);
+		try {
+			PreparedStatement aSth = object.myData.prepareStatement(SQL_LOAD_BY_LABEL);
+			aSth.setString(1, label);
 			object.loadUsingPreparedStatement(aSth);
 		} catch (SQLException e) {
 			throw new DataException(e);

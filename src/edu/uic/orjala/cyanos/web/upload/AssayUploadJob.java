@@ -4,7 +4,6 @@
 package edu.uic.orjala.cyanos.web.upload;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ListIterator;
 
@@ -43,6 +42,7 @@ public class AssayUploadJob extends UploadJob {
 	public static final String ASSAY_PROTOCOL = "assayProtocol";
 	public static final String CONC = "conc";
 	public static final String CONC_UNIT = "concUnit";
+	public static final String MATERIAL_BY_LABEL = "materialLabel";
 
 	public static final String[] templateKeys = {STRAIN_ID, ASSAY_ID, LOCATION, AUTO_LOC, VALUE, 
 		STDEV, MATERIAL, SAMPLE, SAMPLE_AMT, NAME, 
@@ -98,9 +98,10 @@ public class AssayUploadJob extends UploadJob {
 			maxCol = ( nameCol > maxCol ? nameCol : maxCol );
 			maxCol = ( concCol > maxCol ? concCol : maxCol );
 			maxCol = ( stdevCol > maxCol ? stdevCol : maxCol );
-//			maxCol = (sampleAmtCol > maxCol ? sampleAmtCol : maxCol );
 			maxCol = ( materialCol > maxCol ? materialCol : maxCol );
 
+			boolean materialByLabel = this.template.containsKey(MATERIAL_BY_LABEL);
+			
 			boolean staticAssayID = false;
 
 			Assay myAssay = null;
@@ -181,7 +182,14 @@ public class AssayUploadJob extends UploadJob {
 								aSample = new SQLSample(this.myData, this.worksheet.getStringValue(sampleCol));
 								strainID = aSample.getCultureID();
 							} else if ( materialCol > -1 && this.worksheet.getStringValue(materialCol).length() > 0 ) {
-								material = SQLMaterial.load(this.myData, this.worksheet.getStringValue(materialCol));
+								if ( materialByLabel ) {
+									material = SQLMaterial.findByLabel(this.myData, this.worksheet.getStringValue(materialCol));
+									if ( material.first() && material.next() ) {
+										currResults.addItem(ERROR_TAG + "Ambiguous label for material.");
+									}
+								} else
+									material = SQLMaterial.load(this.myData, this.worksheet.getStringValue(materialCol));
+								
 								strainID = material.getCultureID();
 							} else {
 								strainID = this.worksheet.getStringValue(strainIDCol);
