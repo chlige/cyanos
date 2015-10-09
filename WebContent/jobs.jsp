@@ -4,6 +4,10 @@
 <%@ page import="edu.uic.orjala.cyanos.web.listener.CyanosSessionListener,
 	edu.uic.orjala.cyanos.web.JobManager,
 	edu.uic.orjala.cyanos.web.Job,
+	edu.uic.orjala.cyanos.User,
+	edu.uic.orjala.cyanos.MutableUser,
+	edu.uic.orjala.cyanos.Role,
+	edu.uic.orjala.cyanos.sql.SQLMutableUser,
 	edu.uic.orjala.cyanos.web.servlet.UploadServlet,
 	edu.uic.orjala.cyanos.web.servlet.CompoundServlet,
 	edu.uic.orjala.cyanos.xml.XMLCompound,
@@ -162,8 +166,24 @@ while ( line != null ) {
 <p align="center">Job not found</p>
 <% } 
 } else { 
-	Collection<Job> jobList;
-	if ( request.getParameter("history") != null ) {  %>
+	Collection<Job> jobList = null;
+	boolean isAdmin = UploadServlet.getUser(request).isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.READ);
+	if ( isAdmin && request.getParameter("users") != null ) { %>
+<h1>Jobs of Other Users</h1>
+<p align="center"><a href="jobs.jsp">View My Jobs</a></p>
+<ul>
+<% MutableUser userList = SQLMutableUser.users(UploadServlet.getSQLData(request)); 
+	while ( userList.next() ) {
+%><li><a href="?user=<%= userList.getUserID() %>"><%= userList.getUserName() %> (<%= userList.getUserID() %>)</a></li><% }
+%></ul><% 
+	} else if ( request.getParameter("user") != null ) {  
+		MutableUser user = SQLMutableUser.load(UploadServlet.getSQLData(request), request.getParameter("user"));
+		user.first();
+%><h1>Jobs of Other Users</h1>
+<h2><%= user.getUserName() %> (<%= user.getUserID() %>)</h2>
+<p align="center"><a href="jobs.jsp">View My Jobs</a></p>
+<%	jobList = Job.jobsForUser(UploadServlet.getSQLData(request), user.getUserID());
+	} else if ( request.getParameter("history") != null ) {  %>
 <h1>Previous Jobs</h1>
 <p align="center"><a href="jobs.jsp">View Active Jobs</a></p>
 <%  	jobList = Job.oldJobs(UploadServlet.getSQLData(request)); %>
@@ -171,8 +191,12 @@ while ( line != null ) {
 <h1>Active Jobs</h1>
 <p align="center"><a href="?history">View Previous Jobs</a></p>
 <% 		jobList = manager.getActiveJobs();
-}
-	if ( jobList.size() > 0  ) { 
+	}
+	if ( isAdmin ) {
+%><p align="center"><a href="?users">View jobs of other users</a></p><%	
+	}
+
+	if ( jobList != null && jobList.size() > 0  ) { 
 		for ( Job job : jobList ) { 
 %><div id="job-<%= job.getID()  %>" class="job"><h3>Job <%= job.getID() %>:<i><%= job.getType() %></i></h3>
 Started: <%= UploadServlet.DATETIME_FORMAT.format(job.getStartDate()) %><br>

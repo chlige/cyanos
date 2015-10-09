@@ -98,6 +98,45 @@ public class Job implements Runnable {
 		return jobList;
 	}
 	
+	public static List<Job> jobsForUser(SQLData data, String userID) throws DataException {
+		List<Job> jobList = new ArrayList<Job>();
+		try {
+			if ( data.getUser().isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.READ)  ) {
+				PreparedStatement sth = data.prepareStatement(SQL_OLD_JOBS);
+				sth.setString(1, userID );
+				ResultSet results = sth.executeQuery();
+				while ( results.next() ) {
+					jobList.add(new Job(data, results));
+				}
+				results.close();
+				sth.close();
+			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return jobList;
+	}
+	
+	public static List<Job> jobsForUser(SQLData data, String userID, String type) throws DataException {
+		List<Job> jobList = new ArrayList<Job>();
+		try {
+			if ( data.getUser().isAllowed(User.ADMIN_ROLE, User.GLOBAL_PROJECT, Role.READ)  ) {
+				PreparedStatement sth = data.prepareStatement(SQL_OLD_JOBS_TYPE);
+				sth.setString(1, userID);
+				sth.setString(2, type);
+				ResultSet results = sth.executeQuery();
+				while ( results.next() ) {
+					jobList.add(new Job(data, results));
+				}
+				results.close();
+				sth.close();
+			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return jobList;
+	}
+	
 	private final static String SQL_OLD_JOBS_TYPE = "SELECT job_id,owner,job_type,messages,output,progress,startDate,endDate,output_type FROM jobs WHERE owner=? AND job_type=? AND endDate IS NOT NULL";
 
 	public static List<Job> oldJobs(SQLData data, String type) throws DataException {
