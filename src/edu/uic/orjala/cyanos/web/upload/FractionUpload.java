@@ -137,6 +137,7 @@ public class FractionUpload extends UploadJob {
 						String frNumber = this.worksheet.getStringValue(frNoCol);
 						String amount = this.worksheet.getStringValue(amtCol);
 
+						try { 
 						if ( frNumber.matches("^[sS].*") ) {
 							currResults.addItem(NOTICE_TAG + "Setting source information.");
 							String materialID = materialIDCol > -1 ? this.worksheet.getStringValue(materialIDCol) : "";
@@ -203,7 +204,7 @@ public class FractionUpload extends UploadJob {
 							}
 						} else if ( frNumber.length() > 0 ) {
 							int frInt = Integer.parseInt(frNumber);
-							Material fraction = mySep.makeFraction(frInt);
+							Material fraction = useLabel ? mySep.makeFraction(frInt, this.worksheet.getStringValue(frLabelCol)) : mySep.makeFraction(frInt);
 							if ( fraction != null ) {
 								currResults.addItem(SUCCESS_TAG + "Created a new fraction.");
 								fraction.setManualRefresh();
@@ -212,9 +213,6 @@ public class FractionUpload extends UploadJob {
 									fraction.setNotes(this.worksheet.getValue(frNotesCol) + "\n" + frNote);
 								else 
 									fraction.setNotes(frNote);
-								if ( useLabel ) {
-									fraction.setLabel(this.worksheet.getStringValue(frLabelCol));
-								} 
 		//						fraction.setBaseUnit(defaultUnit);
 		/*						if ( destCol > -1 ) {
 									fraction.setCollectionID(this.worksheet.getStringValue(destCol));
@@ -247,6 +245,11 @@ public class FractionUpload extends UploadJob {
 								this.working = false;
 								break ROW_ITER;
 							}
+						}
+						} catch (Exception e) {
+							currResults.addItem(ERROR_TAG + e.getMessage());
+							this.myData.rollback(mySave);
+							this.working = false;
 						}
 						resultList.addItem(String.format("Row #:%d %s", row, currResults.toString()));
 					} else {

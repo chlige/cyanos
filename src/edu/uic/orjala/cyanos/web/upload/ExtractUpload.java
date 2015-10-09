@@ -5,6 +5,7 @@ package edu.uic.orjala.cyanos.web.upload;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -150,7 +151,10 @@ public class ExtractUpload extends UploadJob {
 			String bulkLoadNote = String.format(
 					"\nCreated via bulk load by user: %s\n %s", this.myData.getUser().getUserID(), myDate.toString());
 
+			this.myData.setAutoCommit(false);
+			
 			while (rowIter.hasNext() && this.working) {
+				Savepoint save = this.myData.setSavepoint();
 				Integer row = (Integer) rowIter.next();
 				if (this.worksheet.gotoRow(row.intValue())) {
 					int myLen = this.worksheet.rowSize();
@@ -197,7 +201,18 @@ public class ExtractUpload extends UploadJob {
 								}
 							}
 
-							Material extract = myHarv.createExtract();
+							String myLabel = "";
+							if (labelCol > -1 && labelCol < myLen) {
+								myLabel = this.worksheet.getStringValue(labelCol);
+							} else {
+								Inoc anInoc = myHarv.getInoculations();
+								if (anInoc.first()) {
+									myLabel = myHarv.getInoculations().getStrain().getID();
+								} else
+									myLabel = "ORPHAN";
+							}
+
+							Material extract = myHarv.createExtract(myLabel);
 							if (extract == null) {
 								currResults.addItem(ERROR_TAG + "Could not create an extract record.");
 								this.resultSheet.addCell("");
@@ -229,17 +244,6 @@ public class ExtractUpload extends UploadJob {
 								if (typeCol > -1 && typeCol < myLen)
 									extract.setExtractType(this.worksheet.getStringValue(typeCol));
 							}
-							String myLabel = "";
-							if (labelCol > -1 && labelCol < myLen) {
-								myLabel = this.worksheet.getStringValue(labelCol);
-							} else {
-								Inoc anInoc = myHarv.getInoculations();
-								if (anInoc.first()) {
-									myLabel = myHarv.getInoculations().getStrain().getID();
-								} else
-									myLabel = "ORPHAN";
-							}
-							extract.setLabel(myLabel);
 	/*
 							if (wksDest)
 								colID = this.worksheet.getStringValue(libCol);
@@ -284,12 +288,16 @@ public class ExtractUpload extends UploadJob {
 							this.resultSheet.addCell("");
 							this.resultSheet.addCell("ERROR: Could not load harvest record.");
 						}
+						this.myData.commit();
 					} catch (DataException e) {
 						currResults.addItem(ERROR_TAG + e.getMessage());
 						e.printStackTrace();
+						this.myData.rollback(save);
 					} catch (IndexOutOfBoundsException e) {
 						currResults.addItem(ERROR_TAG + "Column Index out of bounds. " + e.getMessage());
 						e.printStackTrace();
+					} finally {
+						this.myData.releaseSavepoint(save);
 					}
 					resultList.addItem(String.format("Row #:%d %s", row + 1, currResults.toString()));
 				}

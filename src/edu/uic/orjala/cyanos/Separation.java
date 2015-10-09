@@ -56,6 +56,10 @@ public interface Separation extends DataFileObject, NotebookObject, CompoundObje
 	
 	Material makeFraction(int frNumber) throws DataException;
 	
+	Material makeFraction(String label) throws DataException;
+	
+	Material makeFraction(int frNumber, String label) throws DataException;
+	
 	Material getCurrentFraction() throws DataException;
 	
 	int getCurrentFractionNumber() throws DataException;

@@ -105,6 +105,7 @@ public class SampleLibraryUpload extends UploadJob {
 				if ( this.worksheet.gotoRow(row.intValue()) ) {
 					HtmlList currResults = new HtmlList();
 					currResults.unordered();
+					savepoint = myData.setSavepoint();
 					try {
 						Material source = SQLMaterial.load(myData, this.worksheet.getStringValue(sourceIDCol));
 						if (source != null && source.first()) {
@@ -117,9 +118,7 @@ public class SampleLibraryUpload extends UploadJob {
 								dest.setDate(thisDate.getDate());
 							else 
 								dest.setDate(thisDate.toString());
-							BigDecimal conc = BigDecimal.ZERO;
-							if ( wksConc ) { conc = BaseForm.parseAmount(this.worksheet.getStringValue(loadConcCol));
-							} else { conc = staticConc; }
+							BigDecimal conc = (wksConc ? BaseForm.parseAmount(this.worksheet.getStringValue(loadConcCol), "mg/mL") : staticConc );
 							dest.setConcentration(conc);
 							if ( useCollectionCol ) { dest.setCollectionID(this.worksheet.getStringValue(destLibCol)); }
 							else { dest.setCollectionID(staticCol); }
@@ -139,6 +138,7 @@ public class SampleLibraryUpload extends UploadJob {
 									destAcct.setDate(thisDate.toString());
 								destAcct.setNotes("Initial Amount" + bulkLoadNote);
 								destAcct.updateTransaction();
+								myData.commit();
 								currResults.addItem(SUCCESS_TAG + "Amount deposited into destination.");
 //								srcAcct.setDate(thisDate);
 //								srcAcct.setNotes("To sample." + bulkLoadNote);
@@ -146,13 +146,17 @@ public class SampleLibraryUpload extends UploadJob {
 //								srcAcct.updateTransaction();
 							} else {
 								currResults.addItem(ERROR_TAG + "Could not create a transaction for the destination sample.");
+								myData.rollback(savepoint);
 							}
 						} else {
 							currResults.addItem(ERROR_TAG + "Could not load source information.");
 						}
 					} catch (DataException e) {
-						currResults.addItem("<FONT COLOR='red'><B>SQL FAILURE</B></FONT> " + e.getMessage());
+						myData.rollback(savepoint);
+						currResults.addItem(ERROR_TAG + e.getMessage());
 						e.printStackTrace();
+					} finally {
+						myData.releaseSavepoint(savepoint);
 					}
 					resultList.addItem(String.format("Row #:%d %s",row + 1, currResults.toString()));
 				}

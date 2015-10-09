@@ -317,4 +317,6 @@ public interface Harvest extends BasicObject, NotebookObject, RemoteObject {
 	 * @throws DataException
 	 */
 	Material createExtract() throws DataException;
+
+	Material createExtract(String label) throws DataException;
 }

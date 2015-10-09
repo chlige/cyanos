@@ -395,6 +395,7 @@ public class SQLSample extends SQLObject implements Sample {
 	}
 	
 	public void setConcentration(BigDecimal newValue) throws DataException {
+		if ( newValue == null ) { newValue = BigDecimal.ZERO; }
 		this.myData.setBigDecimal(CONCENTRATION_COLUMN, newValue);
 	}
 	

@@ -384,7 +384,7 @@ public class SQLSeparation extends SQLObject implements Separation {
 	public Material makeFraction() throws DataException {
 		Material mySource = this.getSources();
 		if ( mySource.first() ) {
-			Material newFrac = SQLMaterial.create(this.myData, mySource.getCultureID());
+			Material newFrac = SQLMaterial.createInProject(this.myData, mySource.getCultureID(), this.getProjectID());
 			this.addFraction(newFrac);
 			return newFrac;
 		}
@@ -394,7 +394,31 @@ public class SQLSeparation extends SQLObject implements Separation {
 	public Material makeFraction(int frNumber) throws DataException {
 		Material mySource = this.getSources();
 		if ( mySource.first() ) {
-			Material newFrac = SQLMaterial.create(this.myData, mySource.getCultureID());
+			Material newFrac = SQLMaterial.createInProject(this.myData, mySource.getCultureID(), this.getProjectID());
+			if ( newFrac.first() ) {
+				this.addFraction(frNumber, newFrac);
+				return newFrac;
+			} else {
+				return null;
+			}
+		} 
+		return null;
+	}
+	
+	public Material makeFraction(String label) throws DataException {
+		Material mySource = this.getSources();
+		if ( mySource.first() ) {
+			Material newFrac = SQLMaterial.createInProjectLabel(this.myData, mySource.getCultureID(), label, this.getProjectID());
+			this.addFraction(newFrac);
+			return newFrac;
+		}
+		return null;
+	}
+	
+	public Material makeFraction(int frNumber, String label) throws DataException {
+		Material mySource = this.getSources();
+		if ( mySource.first() ) {
+			Material newFrac = SQLMaterial.createInProjectLabel(this.myData, mySource.getCultureID(), label, this.getProjectID());
 			if ( newFrac.first() ) {
 				this.addFraction(frNumber, newFrac);
 				return newFrac;

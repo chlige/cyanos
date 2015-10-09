@@ -59,7 +59,9 @@ public class SQLMaterial extends SQLObject implements Material {
 	final static String SQL_BASE = sqlBase("material", ALL_COLUMNS);
 	
 	private final static String SQL_INSERT_MATERIAL = "INSERT INTO material(culture_id,date,remote_id) VALUES(?, CURRENT_DATE,UUID())";
+	private final static String SQL_INSERT_MATERIAL_LABEL = "INSERT INTO material(culture_id,date,label,remote_id) VALUES(?,CURRENT_DATE,?,UUID())";
 	private final static String SQL_INSERT_WITH_PROJECT = "INSERT INTO material(culture_id,date,project_id,remote_id) VALUES(?,CURRENT_DATE,?,UUID())";
+	private final static String SQL_INSERT_WITH_PROJECT_LABEL = "INSERT INTO material(culture_id,date,label,project_id,remote_id) VALUES(?,CURRENT_DATE,?,?,UUID())";
 
 	private final static String SQL_MAKE_EXTRACT = "INSERT INTO extract_info(material_id,harvest_id) VALUES(?,?)";
 	private final static String SQL_IS_EXTRACT = "SELECT * FROM extract_info WHERE material_id=?";
@@ -106,12 +108,39 @@ public class SQLMaterial extends SQLObject implements Material {
 		return object;
 	}
 	
+	public static SQLMaterial create(SQLData data, String strainID, String label) throws DataException {
+		SQLMaterial object = new SQLMaterial(data);
+		try {
+			PreparedStatement aSth = object.myData.prepareStatement(SQL_INSERT_MATERIAL_LABEL);
+			aSth.setString(1, strainID);
+			aSth.setString(2, label);
+			object.makeNewWithAutonumber(aSth);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return object;
+	}
+	
 	public static SQLMaterial createInProject(SQLData data, String strainID, String projectID) throws DataException {
 		SQLMaterial object = new SQLMaterial(data);
 		try {
 			PreparedStatement aSth = object.myData.prepareStatement(SQL_INSERT_WITH_PROJECT);
 			aSth.setString(1, strainID);
 			aSth.setString(2, projectID);
+			object.makeNewWithAutonumber(aSth);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		}
+		return object;
+	}
+	
+	public static SQLMaterial createInProjectLabel(SQLData data, String strainID, String label, String projectID) throws DataException {
+		SQLMaterial object = new SQLMaterial(data);
+		try {
+			PreparedStatement aSth = object.myData.prepareStatement(SQL_INSERT_WITH_PROJECT_LABEL);
+			aSth.setString(1, strainID);
+			aSth.setString(2, projectID);
+			aSth.setString(3, label);
 			object.makeNewWithAutonumber(aSth);
 		} catch (SQLException e) {
 			throw new DataException(e);

@@ -504,6 +504,17 @@ public class SQLHarvest extends SQLObject implements Harvest {
 		return null;
 	}
 
+	@Override
+	public Material createExtract(String label) throws DataException {
+		if ( this.myID != null ) {
+			SQLMaterial aSample = SQLMaterial.createInProject(this.myData, this.getStrainID(), label, this.getProjectID());
+			if ( aSample.makeExtract(this.myID) ) 
+				return aSample;
+		}
+		return null;
+	}
+
+
 //	public String getName() throws DataException {
 //		return this.myData.getString(NAME_COLUMN);
 //	}

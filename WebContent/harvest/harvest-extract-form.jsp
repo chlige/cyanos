@@ -70,9 +70,8 @@ protocolValues[<%= i %>] = ['<c:out value="<%= item.getExtractType() %>" default
 	String label = request.getParameter("label"); %>
 <p align="center">Creating new extract...
 <%	try {
-	Material extract = source.createExtract();
+	Material extract = source.createExtract(label);
 	extract.setManualRefresh();
-	extract.setLabel(label);
 	extract.setDate(dateString);
 	extract.setExtractType(extractType);
 	extract.setExtractSolvent(extractSolvent);
