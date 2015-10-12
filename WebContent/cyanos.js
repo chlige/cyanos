@@ -533,6 +533,8 @@ function loadQuery(query, divID) {
 	 		xmlHttp.open("GET", myLoc.toString() + "&" + query, true);
 		else 
  			xmlHttp.open("GET", myLoc.toString() + "?" + query, true);
+ 	
+ 		xmlHttp.responseType = "document";
  		xmlHttp.onreadystatechange = function() {
  	 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
  				var docDiv = document.getElementById(divID);
@@ -667,7 +669,14 @@ function loadLS(query, divID) {
 
 function setDivContent(div, xmlHttp) {
 	if ( document.getElementById("loginCover") == null ) {
-		div.innerHTML = xmlHttp.responseText;
+		
+		if ( xmlHttp.responseType === "document" ) {
+			div.innerHTML = "";
+			div.appendChild(xmlHttp.response.body.children[0]);			
+		} else {
+			div.innerHTML = xmlHttp.responseText;
+		}
+		
 		var cover = div.childNodes["loginCover"];
 		if ( cover != null ) {
 //			document.body.appendChild(cover); 
@@ -680,6 +689,11 @@ function setDivContent(div, xmlHttp) {
 			cover.style.height = window.screen.height; 
 			cover.style.visibility = "visible";
 			div.innerHTML = "";
+		} else {
+			var scripts = div.getElementsByTagName('script');
+			for ( var i = 0; i < scripts.length; i++ ) {
+				eval(scripts[i].innerHTML);
+			}
 		}
 	}
 }
