@@ -80,7 +80,7 @@ for ( int i = 0; i < sheets.size(); i++ ) { %>
 <% } else { 
 %><form method="post" enctype="multipart/form-data">
 <p align="center"><b>File to upload: </b>
-<input type="file" name="<%= UploadServlet.PARAM_FILE %>" size="25"/>
+<input type="file" name="<%= UploadServlet.PARAM_FILE %>" size="25" accept=".xlsx,.xml,.ods"/>
 <button type="submit">Upload</button></p>
 </form>
 <p align="center"><b>Upload Instructions</b></p>
