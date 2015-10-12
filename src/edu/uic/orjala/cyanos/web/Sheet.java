@@ -426,8 +426,8 @@ public class Sheet {
 	}
 	
 	public void setValue(int cellIndex, SheetValue value) {
-		if ( this.gotoCell(cellIndex) ) 
-			this.setValue(value);
+		if ( this.matrix[this.currRow].length > cellIndex ) 
+			this.matrix[this.currRow][cellIndex] = value;
 	}
 	
 	public void setValue(int cellIndex, String value) {
@@ -444,7 +444,7 @@ public class Sheet {
 	/* (non-Javadoc)
 	 * @see edu.uic.orjala.cyanos.web.Sheet#toText(java.lang.String)
 	 */
-	public String toText(String delin) {
+	public String toText(String delim) {
 		this.beforeFirstRow();
 		StringBuffer output = new StringBuffer();
 		while ( this.nextRow() ) {
@@ -453,13 +453,13 @@ public class Sheet {
 				SheetValue value = this.getValue();
 				if ( value != null ) {
 					String aCell = value.toString();
-					boolean quote = aCell.matches(delin);
+					boolean quote = aCell.contains(delim);
 					if (quote) output.append("\"");
 					output.append(aCell.replaceAll("[\n\r]", " "));
 					if (quote) output.append("\"");
 				} 
 				if ( this.currCol < this.colSize ) 
-					output.append(delin);
+					output.append(delim);
 			}
 			output.append("\n");
 		}
