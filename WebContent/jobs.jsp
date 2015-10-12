@@ -131,16 +131,20 @@ while ( line != null ) {
 	int offset = 0;
 	char sep = ',';
 	int lineLen = line.length();
-%><tr><% while ( offset > -1 ) { 
+%><tr><% while ( offset > -1 ) { %><td><%	
 	if ( line.startsWith("\"", offset) ) {
 		offset++;
-		sep = '"';
+		int end = line.indexOf('"', offset);
+		out.print(line.substring(offset,end));
+		offset = end + 1;
+		if ( end == lineLen ) { offset = -1; } else { offset = end + 2; }
+	} else {
+		int end = line.indexOf(sep, offset);
+		out.print(end >= offset ? line.substring(offset, end) : line.substring(offset));
+		if ( end == -1 ) { offset = -1; } else { offset = end + 1; }
 	}
-	int end = line.indexOf(sep, offset);
-%><td><%= ( end >= offset ? line.substring(offset, end) : line.substring(offset) ) %></td>
-<% 	if ( sep == '"' && end == (lineLen - 1) ) { offset = -1; } else if ( end == -1 ) { offset = -1; } else { offset = end + 1; }
-	sep = ',';
-} %></tr><% line = reader.readLine(); } %></table>
+%></td><% } %></tr><% line = reader.readLine(); } %></table>
+<p align="center"><a href="<%= request.getContextPath() %>/upload/results?jobid=<%= job.getID() %>">Export results</a></p>
 <% } else if ( job.getOutputType().equals("compound-xml") ) { 
 	try {
 	request.setAttribute(CompoundServlet.COMPOUND_RESULTS, XMLCompound.load(new StringReader(job.getOutput())));
@@ -148,7 +152,7 @@ while ( line != null ) {
 <% } catch (Exception e) {
 %>Error loading output: <%= e.getLocalizedMessage() %><%	
 }
-	} else { %><code><%= job.getOutput() %></code>
+	} else { %><code><%= job.getOutput() %></code><p align="center"><a href="<%= request.getContextPath() %>/upload/results?jobid=<%= job.getID() %>">Export results</a></p>
 <% }  %></div></div>
 <% } %>
 <div class="collapseSection" style="background:white;"><a name='job_messages' class='twist' onClick='loadDiv("messages")'>
