@@ -13,7 +13,7 @@ if ( dateValue == null ) {
 %><c:set var="dateValue" value="<%= dateValue %>"/><%
 } %>
 <input id="html5_${fieldName}" type="date" name="${fieldName}" value="${dateValue}" placeholder="YYYY-MM-DD">
-<input id="${fieldName}" type="text" class="dateField" name="${fieldName}" onload="checkDateType(this, false)" onClick="showDate('cal_' + this.name, this.name, ${showTime})"  style='padding-bottom: 0px' size="${showTime ? 15 : 10 }"  value="${dateValue}"/>
+<input id="${fieldName}" type="text" class="dateField" name="${fieldName}" onClick="showDate('cal_' + this.name, this.name, ${showTime})"  style='padding-bottom: 0px' size="${showTime ? 15 : 10 }"  value="${dateValue}"/>
 <%-- 
 <a onclick="showDate('cal_${fieldName}','${fieldName}', ${showTime})"><img align="MIDDLE" border="0" src="<%= request.getContextPath() %>/images/calendar.png"></a>
 --%>
