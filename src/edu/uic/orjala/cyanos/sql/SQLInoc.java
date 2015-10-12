@@ -10,9 +10,7 @@ package edu.uic.orjala.cyanos.sql;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -446,7 +444,7 @@ public class SQLInoc extends SQLObject implements Inoc {
 	}
 	
 	public void setDate(java.util.Date newDate) throws DataException  {
-		this.myData.setDate(DATE_COLUMN, (java.sql.Date)newDate);
+		this.myData.setDate(DATE_COLUMN, newDate);
 	}
 	
 	public void setDate(String newDate) throws DataException {

@@ -139,8 +139,8 @@ public class SQLMaterial extends SQLObject implements Material {
 		try {
 			PreparedStatement aSth = object.myData.prepareStatement(SQL_INSERT_WITH_PROJECT_LABEL);
 			aSth.setString(1, strainID);
-			aSth.setString(2, projectID);
-			aSth.setString(3, label);
+			aSth.setString(2, label);
+			aSth.setString(3, projectID);
 			object.makeNewWithAutonumber(aSth);
 		} catch (SQLException e) {
 			throw new DataException(e);

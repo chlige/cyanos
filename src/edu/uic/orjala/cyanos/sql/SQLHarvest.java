@@ -507,7 +507,7 @@ public class SQLHarvest extends SQLObject implements Harvest {
 	@Override
 	public Material createExtract(String label) throws DataException {
 		if ( this.myID != null ) {
-			SQLMaterial aSample = SQLMaterial.createInProject(this.myData, this.getStrainID(), label, this.getProjectID());
+			SQLMaterial aSample = SQLMaterial.createInProjectLabel(this.myData, this.getStrainID(), label, this.getProjectID());
 			if ( aSample.makeExtract(this.myID) ) 
 				return aSample;
 		}
