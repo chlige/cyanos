@@ -20,11 +20,11 @@
 <%
 	Harvest source = (Harvest) request.getAttribute(HarvestServlet.HARVEST_ATTR);
 	if ( source.isAllowed(Role.WRITE) ) { %>
-
 <form>
 <input type="hidden" name="id" value="<%= source.getID() %>">
 <input type="hidden" name="div" value="<%= div %>">
 <% if ( request.getParameter("showExtractForm") != null ) { %>
+<h4 style="text-align:center">Add a New Extract</h4>
 <table class="species" align="center">
 <tr><td>Label:</td><td><input type="text" name="label" value="<%= source.getStrainID() %>"></td></tr>
 <tr><td>Date:</td><td><cyanos:calendar-field fieldName="extractDate"/></td></tr>
