@@ -342,10 +342,10 @@ public class UploadServlet extends ServletObject {
 				
 		if ( "/results".equals(path) ) {
 			// If results request. Send the results of the job.
-			String results = (String)thisSession.getAttribute(RESULTS);
-			if ( results != null ) {
+			UploadJob job = getUploadJob(thisSession);
+			if ( job.getOutput() != null ) {
 				res.setContentType("text/plain");
-				out.println(results);
+				out.println(job.getOutput());
 				out.close();
 				return;
 			}

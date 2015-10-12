@@ -2,6 +2,7 @@ package edu.uic.orjala.cyanos.web.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -10,10 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.uic.orjala.cyanos.DataException;
 import edu.uic.orjala.cyanos.web.Job;
 import edu.uic.orjala.cyanos.web.JobManager;
 import edu.uic.orjala.cyanos.web.UploadForm;
 import edu.uic.orjala.cyanos.web.listener.CyanosSessionListener;
+import edu.uic.orjala.cyanos.web.upload.UploadJob;
 
 /**
  * Servlet implementation class UploadStatusServlet
@@ -35,10 +38,10 @@ public class UploadStatusServlet extends UploadServlet {
 
 
 		if ( req.getParameter("results") != null ) {
-			String results = (String)thisSession.getAttribute(RESULTS);
-			if ( results != null ) {
+			UploadJob job = getUploadJob(thisSession);
+			if ( job.getOutput() != null ) {
 				res.setContentType("text/plain");
-				out.println(results);
+				out.println(job.getOutput());
 				out.close();
 				return;
 			}
@@ -49,23 +52,30 @@ public class UploadStatusServlet extends UploadServlet {
 			res.setContentType("text/plain");
 			JobManager manager = CyanosSessionListener.getJobManager(req);
 			Job job = manager.getJob(req.getParameter("jobid"));
+			try { 
+				if ( job == null ) { job = Job.loadJob(getSQLData(req), req.getParameter("jobid")); }
+			} catch (DataException | SQLException e) {
+				throw new ServletException(e);
+			}
 			if ( job != null ) {
-				out.print(getStatus(job));
+				if ( req.getServletPath().equals("/upload/results") ) {
+					if ( job.getOutput() != null )
+						out.print(job.getOutput());
+				} else 
+					out.print(getStatus(job));
 			}
 			out.close();
 			return;
 		} else {
 			res.setContentType("text/plain");
-			Job job = null;
-			if ( req.getParameter("jobid") != null ) {
-				JobManager manager = CyanosSessionListener.getJobManager(thisSession);
-				job = manager.getJob(req.getParameter("jobid"));
-			} else {
-				job = UploadServlet.getUploadJob(thisSession);
-			}
+			Job job = UploadServlet.getUploadJob(thisSession);
 		
 			if ( job != null ) {
-				out.print(getStatus(job));				
+				if ( req.getServletPath().equals("/upload/results") ) {
+					if ( job.getOutput() != null )
+						out.println(job.getOutput());
+				} else 
+					out.print(getStatus(job));				
 			} else {
 				UploadForm myForm = (UploadForm) thisSession.getAttribute(UPLOAD_FORM);	
 				out.print(getStatus(myForm));
