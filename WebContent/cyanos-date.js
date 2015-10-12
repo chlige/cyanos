@@ -233,3 +233,9 @@ function checkCalendar(newInput, oldInput, div, showTime) {
 		newInput.parentNode.removeChild(newInput);
 	}	
 }
+
+function checkDateType(input, showTime) {
+	var newInput = document.getElementById("html5_" + input.id);
+	var div = document.getElementById("cal_" + input.id);
+	checkCalendar(newInput, input, div, showTime);
+}
