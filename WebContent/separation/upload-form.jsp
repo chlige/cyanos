@@ -6,7 +6,7 @@
 	edu.uic.orjala.cyanos.web.upload.FractionUpload" %>
 <table class="uploadForm">
 <tr><td>Date:</td><td><cyanos:calendar-field fieldName="<%= FractionUpload.DATE_KEY %>"/></td></tr>
-<tr><td>Material ID:</td><td><cyanos:sheet-columns fieldName="<%= FractionUpload.SAMPLE_ID_KEY %>"><option value="-1">Use Label Column</option></cyanos:sheet-columns></td></tr>
+<tr><td>Source Material ID(s):</td><td><cyanos:sheet-columns fieldName="<%= FractionUpload.SAMPLE_ID_KEY %>"><option value="-1">Use Label Column</option></cyanos:sheet-columns></td></tr>
 <tr><td>Fraction #:</td><td><cyanos:sheet-columns fieldName="<%= FractionUpload.FR_NUMBER_KEY %>"/></td></tr>
 <tr><td>Amount:</td><td><cyanos:sheet-columns fieldName="<%= FractionUpload.AMOUNT_KEY %>"/>
 Default unit: <input type="text" name="<%= FractionUpload.DEFAULT_UNIT_KEY %>" value="<c:out value="<%= request.getParameter(FractionUpload.DEFAULT_UNIT_KEY) %>" default="mg"/>"> </td></tr>
