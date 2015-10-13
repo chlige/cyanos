@@ -25,8 +25,8 @@
 <input type='text' name='j_username' autocorrect="off" autocapitalize="none" size="20"><br/>
 <label for="j_password">Password:</label>
 <input type='password' name='j_password' size='20'><br/>
-<input type="checkbox" name="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">
-<label for="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">Remember me.</label><br>
+<!-- <input type="checkbox" name="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">
+<label for="<%= TicketAuthenticatorValve.SESSION_REMEMBER_ME %>">Remember me.</label><br> -->
 <button type='submit'>Login</button>
 </form>
 <p><a href='<%= response.encodeURL("reset.jsp") %>'>Reset password</a></p></div>
