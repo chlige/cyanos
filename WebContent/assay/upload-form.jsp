@@ -22,6 +22,17 @@ function setAutoLoc(assay_box) {
 		assay_box.form.location.disabled = 0;
 	}
 }
+
+function checkEnabled(field, otherList) {
+	var disabled = (field.options[field.selectedIndex].value !== "-1");
+	
+	for ( var o in otherList) {
+		var item = field.form.elements.namedItem(otherList[o]);
+		if ( item ) {
+			item.disabled = disabled;
+		}
+	}
+}
 //]]>
 </script>
 <table class="uploadForm"><tr><td>Assay ID:</td><td>
@@ -36,14 +47,6 @@ function setAutoLoc(assay_box) {
 <option value="<%= assayID %>" <%= (assayID.equals(selectedID) ? "selected" : "") %>><%= assays.getName() %></option>
 <% } %>
 </select></td></tr>
-<tr><td>Strain ID:</td><td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.STRAIN_ID %>"/></td></tr>
-<tr><td>Location:</td><td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.LOCATION %>"/>
-<input type="checkbox" name='autoLoc' onClick='this.form.location.disabled=this.checked;' onLoad="setAutoLoc(document.upload.assayID)">
-Autolocation (along row: A1, A2, etc.) </td></tr>
-<tr><td>Activity value:</td>
-<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.VALUE %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
-<tr><td>STD. Deviation:</td>
-<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.STDEV %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
 <tr><td>Assay Protocol (for new assays):</td><td><select name="<%= AssayUploadJob.ASSAY_PROTOCOL %>"><option value="">NONE</option><% 		
 	String selected = request.getParameter(AssayUploadJob.ASSAY_PROTOCOL);
 	for ( String proto : SQLAssayTemplate.listProtocols(datasource) ) {
@@ -56,13 +59,24 @@ Autolocation (along row: A1, A2, etc.) </td></tr>
 		out.print("</option>");
 	}
  %></select></td></tr>
-<tr><td>Source Material:</td>
-<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.MATERIAL %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns>
-<input type="checkbox" name="<%= AssayUploadJob.MATERIAL_BY_LABEL %>" <%= request.getParameter(AssayUploadJob.MATERIAL_BY_LABEL) != null ? "checked" : "" %>/>Find material by label</td></tr>
-<tr><td>Source Sample:</td>
-<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.SAMPLE %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
+<tr><td>Location:</td><td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.LOCATION %>"/>
+<input type="checkbox" name='autoLoc' onClick='this.form.location.disabled=this.checked;' onLoad="setAutoLoc(document.upload.assayID)">
+Autolocation (along row: A1, A2, etc.) </td></tr>
 <tr><td>Label:</td>
 <td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.NAME %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
+<tr><th colspan=2 style="text-align:center;">Source</th></tr>
+<tr><td>Source Material:</td>
+<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.MATERIAL %>" onchange="checkEnabled(this, ['strainID'])" onload="checkEnabled(this, ['strainID'])"><option value="-1">NOT USED</option></cyanos:sheet-columns>
+<input type="checkbox" name="<%= AssayUploadJob.MATERIAL_BY_LABEL %>" <%= request.getParameter(AssayUploadJob.MATERIAL_BY_LABEL) != null ? "checked" : "" %>/>Find material by label</td></tr>
+<tr><td>Source Sample:</td>
+<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.SAMPLE %>" onchange="checkEnabled(this, ['strainID'])" onload="checkEnabled(this, ['strainID'])"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
+<tr><td>Strain ID:</td>
+<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.STRAIN_ID %>" onchange="checkEnabled(this, ['material','sample','materialLabel'])" onload="checkEnabled(this, ['material','sample','materialLabel'])"><option value="-1">NOT USED</option></cyanos:sheet-columns></td></tr>
+<tr><th colspan=2 style="text-align:center;">Data information</th></tr>
+<tr><td>Activity value:</td>
+<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.VALUE %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
+<tr><td>STD. Deviation:</td>
+<td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.STDEV %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns></td></tr>
 <tr><td>Concentration:</td>
 <td><cyanos:sheet-columns fieldName="<%= AssayUploadJob.CONC %>"><option value="-1">SKIP ITEM</option></cyanos:sheet-columns>
 <% String unit = request.getParameter(AssayUploadJob.CONC_UNIT); if ( unit == null ) unit = "ug/ml"; %>

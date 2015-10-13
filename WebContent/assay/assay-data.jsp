@@ -3,6 +3,8 @@
 	edu.uic.orjala.cyanos.web.servlet.AssayServlet,
 	edu.uic.orjala.cyanos.web.BaseForm,
 	edu.uic.orjala.cyanos.CyanosObject,
+	edu.uic.orjala.cyanos.Material,
+	edu.uic.orjala.cyanos.Sample,
 	java.text.SimpleDateFormat,
 	java.math.BigDecimal,
 	java.math.MathContext,
@@ -34,8 +36,8 @@
 <td><%= queryResults.getLocation() %></td>
 <td><%= dateFormat.format(queryResults.getDate()) %></td>
 <td><a href="<%= contextPath %>/strain?id=<%= queryResults.getStrainID() %>"><%= queryResults.getStrainID() %></a>
-<td><% String materialID = queryResults.getMaterialID(); if ( materialID != null && (! materialID.equals("0")) ) { %>
-<a href="<%= contextPath %>/material?id=<%= materialID %>"><%= materialID %></a>
+<td><% Material material = queryResults.getMaterial(); if ( material != null && material.first() ) { %>
+<a href="<%= contextPath %>/material?id=<%= material.getID() %>"><%= material.getLabel() %></a>
 <% } else { %>-<% } %></td>
 <td><% String sampleID = queryResults.getSampleID(); if ( sampleID != null && sampleID.length() > 0 ) { %>
 <a href="<%= contextPath %>/sample?id=<%= sampleID %>"><%= sampleID %></a>

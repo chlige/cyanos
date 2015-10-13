@@ -46,7 +46,7 @@ public class AssayUploadJob extends UploadJob {
 
 	public static final String[] templateKeys = {STRAIN_ID, ASSAY_ID, LOCATION, AUTO_LOC, VALUE, 
 		STDEV, MATERIAL, SAMPLE, SAMPLE_AMT, NAME, 
-		ASSAY_FROM_DB, ASSAY_PROTOCOL, CONC, CONC_UNIT};
+		ASSAY_FROM_DB, ASSAY_PROTOCOL, CONC, CONC_UNIT, MATERIAL_BY_LABEL};
 	
 	private static final String TITLE = "Assay Data Upload";
 
@@ -77,11 +77,11 @@ public class AssayUploadJob extends UploadJob {
 			/*
 			 *	"strainID", "assayID", "location", "value", "sample", "name", "header", "assayFromDB", "assayProtocol";
 			 */
-			int strainIDCol = Integer.parseInt((String)template.get(STRAIN_ID));
+			int strainIDCol = template.containsKey(STRAIN_ID) ? Integer.parseInt(template.get(STRAIN_ID)) : 0;
 			int assayIDCol = Integer.parseInt((String)this.template.get(ASSAY_ID));
 			int valueCol = Integer.parseInt((String)this.template.get(VALUE));
-			int materialCol = Integer.parseInt(this.template.get(MATERIAL));
-			int sampleCol = Integer.parseInt((String)this.template.get(SAMPLE));
+			int materialCol = template.containsKey(MATERIAL) ? Integer.parseInt(this.template.get(MATERIAL)) : 0;
+			int sampleCol = template.containsKey(SAMPLE) ? Integer.parseInt((String)this.template.get(SAMPLE)) : 0;
 //			int sampleAmtCol = Integer.parseInt(this.template.get(SAMPLE_AMT));
 			int nameCol = Integer.parseInt((String)this.template.get(NAME));
 			int concCol = Integer.parseInt((String)this.template.get(CONC));
@@ -138,7 +138,9 @@ public class AssayUploadJob extends UploadJob {
 					currResults.unordered();
 
 					if ( this.worksheet.rowSize() < maxCol ) {
-						currResults.addItem(SKIP_TAG + "Spreadsheet row seems to be incomplete.");
+						currResults.addItem(SKIP_TAG + "Spreadsheet row is incomplete.");
+						resultList.addItem(String.format("Row #:%d - %s (%s) %s", 
+								row, myAssay.getID(), myData.currentLocation(), currResults.toString()));
 						continue PARSE_ROW;
 					}
 					
@@ -159,6 +161,9 @@ public class AssayUploadJob extends UploadJob {
 										myAssay.setName(assayID);
 									} else {
 										currResults.addItem(ERROR_TAG + "Could not create a new assay.");
+										resultList.addItem(String.format("Row #:%d - %s %s", 
+												row, assayID, currResults.toString()));
+										continue PARSE_ROW;
 									}
 								} else {
 									currResults.addItem(FOUND_TAG + "Assay exists. Will NOT update assay information.");
@@ -186,11 +191,21 @@ public class AssayUploadJob extends UploadJob {
 									material = SQLMaterial.findByLabel(this.myData, this.worksheet.getStringValue(materialCol));
 									if ( material.first() && material.next() ) {
 										currResults.addItem(ERROR_TAG + "Ambiguous label for material.");
-									}
+										resultList.addItem(String.format("Row #:%d - %s (%s) %s", 
+												row, myAssay.getID(), myData.currentLocation(), currResults.toString()));
+										continue PARSE_ROW;
+									} 
 								} else
 									material = SQLMaterial.load(this.myData, this.worksheet.getStringValue(materialCol));
 								
-								strainID = material.getCultureID();
+								if ( material != null && material.first() ) {
+									strainID = material.getCultureID();
+								} else {
+									currResults.addItem(ERROR_TAG + "Unable to find specified material."); 
+									resultList.addItem(String.format("Row #:%d - %s (%s) %s", 
+											row, myAssay.getID(), myData.currentLocation(), currResults.toString()));
+									continue PARSE_ROW;
+								}
 							} else {
 								strainID = this.worksheet.getStringValue(strainIDCol);
 							}
