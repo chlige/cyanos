@@ -180,7 +180,7 @@ public class CompoundServlet extends ServletObject {
 					}
 			 } else if ( aCompound == null ) {
 				if ( req.getParameter("query") != null ) {
-					SQLCompound compoundList = SQLCompound.loadLike(getSQLData(req), req.getParameter("query"));
+					SQLCompound compoundList = SQLCompound.loadLike(getSQLData(req), req.getParameter("query"), SQLCompound.NAME_COLUMN, SQLCompound.ASCENDING_SORT);
 					if ( "sdf".equals(req.getParameter("export")) ) {
 						exportSDF(compoundList, res);
 						return;

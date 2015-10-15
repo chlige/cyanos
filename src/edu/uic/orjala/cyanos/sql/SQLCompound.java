@@ -425,6 +425,10 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 	}
 	
 	public static SQLCompound loadLike(SQLData data, String query) throws DataException {
+		return loadLike(data, query, NAME_COLUMN, ASCENDING_SORT);
+	}
+	
+	public static SQLCompound loadLike(SQLData data, String query, String sortCol, String sortDir) throws DataException {
 		try {
 			if ( query.contains("*") )
 				query = query.replace("*", "%");
@@ -432,7 +436,7 @@ public class SQLCompound extends SQLObject implements Compound, DataFileObject {
 				query = "%".concat(query).concat("%");
 			
 			SQLCompound newObj = new SQLCompound(data);
-			PreparedStatement aSth = data.prepareStatement(SQL_LOAD_LIKE);
+			PreparedStatement aSth = data.prepareStatement(SQL_LOAD_LIKE + " ORDER BY " + sortCol + " " + sortDir);
 			aSth.setString(1, query);
 			aSth.setString(2, query);
 			aSth.setString(3, query);
