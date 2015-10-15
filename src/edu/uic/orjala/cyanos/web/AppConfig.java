@@ -92,6 +92,7 @@ public abstract class AppConfig {
 	public static final String PARAM_GOOGLE_MAP_KEY = "google_map_key";
 	public static final String PARAM_UPDATE_KEY = "update_key";
 	public static final String PARAM_UPDATE_CERT = "update_cert";
+	static final String PARAM_LAB_NAME = "lab_name";
 	
 	private DataSource myDS = null;
 	protected Float version = -1.0f;
@@ -247,6 +248,14 @@ public abstract class AppConfig {
 	 */
 	public boolean canMap() {
 		return true;
+	}
+	
+	public String getLabName() {
+		return this.getParameter(PARAM_LAB_NAME);
+	}
+	
+	public void setLabName(String labName) {
+		this.setParameter(PARAM_LAB_NAME, labName);
 	}
 
 	protected void setParameter(String paramKey, String aValue) {
